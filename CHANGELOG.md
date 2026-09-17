@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/TundraSoft/ui/compare/v0.1.1...v0.1.2) (2026-09-17)
+
+
+### Documentation
+
+* keep the CDN examples pinned to the current release ([d33b8c0](https://github.com/TundraSoft/ui/commit/d33b8c0d1ed73ffe0573213c70d5e64d97c32d00))
+
 ## [0.1.1](https://github.com/TundraSoft/ui/compare/v0.1.0...v0.1.1) (2026-09-17)
 
 

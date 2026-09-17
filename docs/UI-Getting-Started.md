@@ -29,8 +29,8 @@ error pages that plug straight into `Application.initialize`.
 <!-- x-release-please-start-version -->
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.css">
-<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.2/dist/ui.css">
+<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.2/dist/ui.js" defer></script>
 ```
 
 <!-- x-release-please-end -->
@@ -70,7 +70,7 @@ Every component is its own export (`@tundralibs/ui/card`, `@tundralibs/ui/data-t
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.2/dist/ui.css">
   </head>
   <body>
     <div class="layout layout--stacked layout--boxed">
@@ -98,7 +98,7 @@ Every component is its own export (`@tundralibs/ui/card`, `@tundralibs/ui/data-t
         </div>
       </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.2/dist/ui.js" defer></script>
   </body>
 </html>
 ```
