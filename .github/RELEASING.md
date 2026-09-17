@@ -22,8 +22,9 @@ Releases are automatic; a maintainer merges a pull request.
 
 ## The first release
 
-The manifest starts at `0.0.0`. Make the first commit on `main` a `feat:` (for example `feat: initial release`, with the
-feature list in the body); release-please proposes `0.1.0`. The docs already quote `@0.1.0` CDN URLs as the example pin.
+The manifest starts at `0.0.0` and `initial-version` in the config pins the first cut to `0.1.0` (without it,
+release-please treats a repository with no release tag as a first release and proposes `1.0.0`). The first commit on
+`main` is `feat: initial release`; the docs already quote `@0.1.0` CDN URLs as the example pin.
 
 ## Manual fallback
 

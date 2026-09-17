@@ -140,7 +140,8 @@
       ".test-output/",
       "version.ts",
       "docs/reference/",
-      "docs/Reference.md"
+      "docs/Reference.md",
+      "CHANGELOG.md"
     ]
   },
   "lint": {
