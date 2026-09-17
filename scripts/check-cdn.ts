@@ -29,6 +29,12 @@ if (!onNpm) {
     if (!res.ok) {
       console.log(`FAIL ${asset.url}: HTTP ${res.status}`);
       failed = true;
+      if (require && res.status === 404) {
+        // jsDelivr caches a 404 for a while; a miss right after publish
+        // would otherwise stick for consumers. Purging is public.
+        const purge = asset.url.replace("https://cdn.jsdelivr.net/", "https://purge.jsdelivr.net/");
+        await fetch(purge).then((r) => console.log(`     purged (${r.status}) ${purge}`), () => {});
+      }
       continue;
     }
     const bytes = new Uint8Array(await res.arrayBuffer());
