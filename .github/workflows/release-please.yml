@@ -108,6 +108,8 @@ jobs:
         # version.ts points consumers at the CDN; make sure it answers with
         # the bytes we just hashed before the JSR package that carries those
         # URLs goes live.
+        env:
+          CDN_REQUIRE: "1"
         run: |
           for attempt in $(seq 1 20); do
             if deno run -A scripts/check-cdn.ts; then exit 0; fi
