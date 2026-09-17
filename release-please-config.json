@@ -54,6 +54,14 @@
         {
           "type": "generic",
           "path": "version.ts"
+        },
+        {
+          "type": "generic",
+          "path": "README.md"
+        },
+        {
+          "type": "generic",
+          "path": "docs/UI-Getting-Started.md"
         }
       ]
     }

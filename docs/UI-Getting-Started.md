@@ -26,10 +26,14 @@ error pages that plug straight into `Application.initialize`.
 
 ### Plain HTML (CDN)
 
+<!-- x-release-please-start-version -->
+
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.0/dist/ui.css">
-<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.0/dist/ui.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.css">
+<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.js" defer></script>
 ```
+
+<!-- x-release-please-end -->
 
 Pin the version. The package's `version.ts` carries the sha384 integrity hash of each file for the version it was built
 with, if you want to add `integrity="…" crossorigin="anonymous"` (a rAPId app gets that for free).
@@ -58,13 +62,15 @@ Every component is its own export (`@tundralibs/ui/card`, `@tundralibs/ui/data-t
 
 ## A first page
 
+<!-- x-release-please-start-version -->
+
 ```html
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.0/dist/ui.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.css">
   </head>
   <body>
     <div class="layout layout--stacked layout--boxed">
@@ -92,10 +98,12 @@ Every component is its own export (`@tundralibs/ui/card`, `@tundralibs/ui/data-t
         </div>
       </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.0/dist/ui.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1.1/dist/ui.js" defer></script>
   </body>
 </html>
 ```
+
+<!-- x-release-please-end -->
 
 The markup for every component is exactly what its template renders; the [catalogue](#see-everything) shows all of it.
 
