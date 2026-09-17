@@ -798,8 +798,11 @@ checks the sprite holds every name.
 
 ### CI and weekly health (`.github/workflows/`, 2026-09-16)
 
-- **`ci.yml`** on every push: `quality` (fmt check, lint, build, **version-manifest drift**, `deno task check`, JSR
-  `publish --dry-run`, `npm pack --dry-run` asserting `dist/ui.{css,js}` are in the tarball), `audit` (high+), and
+- **`ci.yml`** on every pull request and on pushes to `main` (**`main` is protected by a ruleset**, 2026-09-17: PR
+  required, the five CI job names below are required status checks, no force-push or deletion; there is no review-count
+  requirement since there is one maintainer, so land changes as a branch + PR and `gh pr merge --squash` once green — a
+  direct push to `main` is refused): `quality` (fmt check, lint, build, **version-manifest drift**, `deno task check`,
+  JSR `publish --dry-run`, `npm pack --dry-run` asserting `dist/ui.{css,js}` are in the tarball), `audit` (high+), and
   `browser` × {deno, node, bun} running the full `test` task with the runner's Chrome; screenshots upload on failure.
 - **`health.yml`** weekly (Mon 05:23 UTC) + manual, mirroring TundraLibs': `drift` (deno stable/canary, bun latest, node
   22/24/current — the full suite each), **`rapid-canary`** (`scripts/unpin.ts` rewrites the rAPId/compat pins in
