@@ -734,7 +734,12 @@ Puppeteer's own scroll-into-view can park a target under the sticky header (`cli
 **`examples/tests/browser.ts`** is the shared Puppeteer launcher for every suite: `CHROME_PATH` (macOS default; CI sets
 `/usr/bin/google-chrome`), `--no-sandbox` under `CI`, and **hermetic mode** (`HERMETIC=1`, on in CI) which blocks every
 host except loopback and `cdn.jsdelivr.net` via `--host-resolver-rules` so fonts/placeholder images can never flake a
-run; `isNetworkNoise()`/`isBlockedRequest()` drop the resulting console/request noise from the assertions.
+run; `isNetworkNoise()`/`isBlockedRequest()` drop the resulting console/request noise from the assertions. Under Node
+(tsx) esbuild's keep-names wraps nested functions in a `__name(fn, "fn")` helper that Puppeteer's serialised
+`page.evaluate` callbacks then call in the browser — the launcher installs a no-op `__name` on every new page
+(`evaluateOnNewDocument`), which is what made the layouts suite pass on Node in CI. `puppeteer-core` is pinned to 25.x:
+23.x pulled `extract-zip` (two unfixable high advisories that failed `deno audit`), and its `ClickOptions` renamed
+`clickCount` → `count`.
 
 ### Documentation (`docs/`, 2026-09-17)
 
@@ -769,6 +774,13 @@ checks the sprite holds every name.
   `scripts/check-cdn.ts`, then `deno publish` (JSR OIDC, 3 retries). The manifest starts at `0.0.0` so the first `feat:`
   commit proposes `0.1.0`; never hand-edit the version or the changelog again. `.github/RELEASING.md` lists the one-time
   setup (JSR repo link, npm trusted publishing, optional `RELEASE_PLEASE_TOKEN` PAT, create the wiki once).
+  Bootstrapping lessons (first run, 2026-09-17): a repo with no release tag is a "first release" and release-please
+  proposes **1.0.0** regardless of the manifest — `initial-version: "0.1.0"` in the config pins it; `CHANGELOG.md` is
+  excluded from `deno fmt` (release-please writes `*` bullets and inserts each release straight under the H1, so the
+  file is just `# Changelog` — an intro paragraph gets demoted under a second heading); and release-please only rewrites
+  its PR when the release notes change, so a hidden-type commit (`ci:`, `chore:`) that touches a file the PR also edits
+  leaves the PR behind main. Same-repo release PRs run CI through the push on the PR branch (the `RELEASE_PLEASE_TOKEN`
+  PAT); the `pull_request` event is skipped by the jobs' `if:`.
 - **Wiki** (`wiki-sync.yml` + `scripts/wiki-sync.ts`): `docs/` is the source of truth; every push to `main` touching it
   flattens `docs/*.md` + `docs/reference/*.md` into the `TundraSoft/ui.wiki` checkout (page name = file name, links
   between docs rewritten to page names, other repo links become GitHub blob URLs, generated `Home.md` + `_Sidebar.md`,

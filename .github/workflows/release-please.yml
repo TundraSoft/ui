@@ -10,9 +10,15 @@ on:
   push:
     branches:
       - main
-  # Manual escape hatch: (re-)publish the version already tagged at HEAD,
-  # e.g. after a publish step failed for a transient reason.
+  # Manual runs recompute the release PR. With `publish` ticked they also
+  # (re-)publish the version at HEAD — the escape hatch for a publish step
+  # that failed for a transient reason after the release was tagged.
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the version at HEAD to npm and JSR (it must already be tagged)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -48,7 +54,8 @@ jobs:
     needs: release-please
     if: |
       github.repository == 'TundraSoft/ui' &&
-      (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
+      (needs.release-please.outputs.release_created == 'true' ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish))
     runs-on: ubuntu-latest
     permissions:
       contents: read

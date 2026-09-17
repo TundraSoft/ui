@@ -28,5 +28,6 @@ release-please treats a repository with no release tag as a first release and pr
 
 ## Manual fallback
 
-`workflow_dispatch` on "Release Please" publishes whatever version is at `HEAD` (it must already be tagged and match the
-manifest). Locally, the same steps are `deno task build`, `npm publish --access public`, `deno publish`.
+A manual run of "Release Please" (`workflow_dispatch`) recomputes the release PR; tick **publish** to also (re-)publish
+the version at `HEAD` to npm and JSR — it must already be tagged and match the manifest. Locally, the same steps are
+`deno task build`, `npm publish --access public`, `deno publish`.
