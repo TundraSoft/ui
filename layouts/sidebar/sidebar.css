@@ -1,0 +1,51 @@
+/*
+ * Sidebar: header + side navigation + content (+ optional aside). The
+ * admin/app frame.
+ *
+ * mobile/tablet (< 992): the Sidebar component is an off-canvas drawer
+ * (sidebar.css) opened by the drawer toggle this layout renders in its
+ * header; Escape/backdrop close it · laptop: full sidebar, user-
+ * collapsible to an icon rail (collapse-sidebar.js) · wide: sidebar
+ * keeps its token width, content grows (or is capped when boxed).
+ */
+.layout--sidebar .layout__body > .sidebar {
+  width: var(--layout-sidebar-width);
+}
+
+.layout--sidebar-end .layout__body {
+  flex-direction: row-reverse;
+}
+
+.layout__aside {
+  flex: 0 0 var(--layout-aside-width);
+  padding: var(--layout-gutter);
+  padding-inline-start: 0;
+}
+
+@media screen and (max-width: 1199px) {
+  /* The aside joins the content column before it squeezes it. */
+  .layout--sidebar .layout__body {
+    flex-wrap: wrap;
+  }
+
+  .layout__aside {
+    flex: 1 1 100%;
+    padding-inline-start: var(--layout-gutter);
+    padding-top: 0;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  /* Sticky under the header so long pages keep their navigation. */
+  .layout--sidebar .layout__body > .sidebar {
+    position: sticky;
+    top: var(--scroll-padding-top);
+    align-self: flex-start;
+    height: calc(100vh - var(--scroll-padding-top));
+  }
+
+  .layout--static-header .layout__body > .sidebar {
+    top: 0;
+    height: 100vh;
+  }
+}

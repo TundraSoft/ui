@@ -1,0 +1,66 @@
+.collapsible {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.collapsible__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: none;
+  border-radius: inherit;
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+}
+
+.collapsible__trigger:hover {
+  background: var(--color-surface-alt);
+}
+
+.collapsible__trigger:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: -2px;
+}
+
+.collapsible__icon {
+  flex: 0 0 auto;
+  transition: transform var(--transition-fast);
+}
+
+.collapsible__trigger[aria-expanded="true"] .collapsible__icon {
+  transform: rotate(180deg);
+}
+
+.collapsible__panel {
+  padding: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.accordion > .collapsible {
+  border-radius: 0;
+}
+
+.accordion > .collapsible + .collapsible {
+  border-top: none;
+}
+
+.accordion > .collapsible:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+}
+
+.accordion > .collapsible:last-child {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* The heading is only a landmark around the trigger — no rhythm of its own. */
+.collapsible__heading {
+  margin: 0;
+}

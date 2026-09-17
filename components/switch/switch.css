@@ -1,0 +1,72 @@
+.switch {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  margin-top: 1px;
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 1px 2px rgb(var(--shadow-color) / 0.18);
+  transition: background var(--transition-fast);
+}
+
+.switch__thumb {
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 18px;
+  height: 18px;
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.switch__input:checked ~ .switch__track {
+  background: var(--color-primary);
+}
+
+.switch__input:checked ~ .switch__track .switch__thumb {
+  transform: translateX(16px);
+}
+
+.switch__input:focus-visible ~ .switch__track {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.switch__input:disabled ~ .switch__track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.switch__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.switch__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

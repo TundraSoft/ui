@@ -1,0 +1,56 @@
+name: Sync Docs to Wiki
+
+# docs/ in the repository is the source of truth (reviewed in PRs, the
+# reference generated from the sources and drift-checked in CI). The GitHub
+# wiki is a mirror for browsing: every push to main that touches the docs
+# flattens them into the wiki's namespace, rewrites the links, and pushes.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "scripts/wiki-sync.ts"
+      - ".github/workflows/wiki-sync.yml"
+  workflow_dispatch:
+
+jobs:
+  sync-wiki:
+    if: github.repository == 'TundraSoft/ui'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Checkout wiki
+        # The wiki is its own git repository. It must exist — create its
+        # first page once in the GitHub UI, after that this job owns it.
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.x
+
+      - name: Generate wiki pages
+        run: deno run -A scripts/wiki-sync.ts --out=wiki --repo=${{ github.repository }} --ref=${{ github.ref_name }}
+
+      - name: Commit and push
+        working-directory: wiki
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Sync documentation from ${{ github.sha }}"
+            git push
+          else
+            echo "No changes to sync"
+          fi

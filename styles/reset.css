@@ -1,0 +1,136 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+  /* Keep fragment targets (#tab-…) clear of a sticky navbar. */
+  scroll-padding-top: var(--scroll-padding-top);
+}
+
+/* Smooth scrolling only for in-page interaction — a fresh navigation to
+   a #fragment should land instantly, not animate 200px on load. */
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-canvas);
+}
+
+/* Component lists (every one carries a class) lose bullets AND the UA's
+   40px padding-inline-start — without the padding reset every menu,
+   dropdown and sidebar rail was indented and its icons shoved off-centre.
+   Bare prose lists keep their bullets and indent. */
+ul[class],
+ol[class] {
+  list-style: none;
+  padding: 0;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+hr {
+  border: none;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+dialog {
+  border: none;
+  padding: 0;
+  background: none;
+  color: inherit;
+  max-width: min(100%, calc(100vw - 2 * var(--space-4)));
+  max-height: min(100%, calc(100vh - 2 * var(--space-4)));
+  /* The global margin reset above wipes the UA's `dialog { margin: auto }`,
+     which is the only thing that centres a native <dialog> in both axes.
+     Put it back, or every modal opens pinned to the top-left corner. */
+  margin: auto;
+}
+
+dialog::backdrop {
+  background: var(--color-overlay);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* A loading indicator that does not move is no longer an indicator.
+     Keep spinners turning, just slowly. */
+  .spinner,
+  .btn--loading::after {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

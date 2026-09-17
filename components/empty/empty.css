@@ -1,0 +1,124 @@
+/*
+ * Three densities, one component. Every empty state names the thing that
+ * is missing and offers the action that fixes it — never a bare glyph.
+ */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-5);
+  border: var(--border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  text-align: center;
+}
+
+.empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-muted);
+}
+
+.empty__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.empty__text {
+  max-width: 34ch;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+
+.empty__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* Inline: sits inside a table or list region that came back empty. */
+.empty--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-style: dashed;
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  text-align: start;
+}
+
+.empty--inline .empty__icon {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  box-shadow: none;
+  color: var(--color-text-subtle);
+}
+
+.empty--inline .empty__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.empty--inline .empty__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.empty--inline .empty__text {
+  max-width: none;
+  font-size: var(--font-size-xs);
+}
+
+.empty--inline .empty__actions {
+  margin-top: 0;
+}
+
+/* Error flavour: carries the request id so support can find the trace. */
+.empty--error {
+  border-style: solid;
+  border-color: var(--color-danger-soft-text);
+  border-color: color-mix(in oklab, var(--color-danger) 25%, var(--color-border));
+  background: var(--color-danger-soft);
+  background: color-mix(in oklab, var(--color-danger) 3%, var(--color-surface));
+}
+
+.empty--error .empty__icon {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.empty__code {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Full-page: for a route that has nothing to show at all. */
+.empty--page {
+  min-height: 60vh;
+  justify-content: center;
+  border: none;
+  background: none;
+}
+
+.empty--page .empty__title {
+  font-size: var(--font-size-2xl);
+}

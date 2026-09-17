@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/TundraSoft/ui/wiki
+    about: Guides and the full reference, mirrored from docs/ on every push.
+  - name: rAPId issues
+    url: https://github.com/TundraSoft/TundraLibs/issues
+    about: Problems with the rAPId runtime itself (swaps, history, live) belong in the TundraLibs repository.

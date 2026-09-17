@@ -1,0 +1,128 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: var(--border-width) solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-inline-start: var(--space-4);
+}
+
+.navbar__link {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  padding-block: var(--space-2);
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.navbar__link--active {
+  color: var(--color-primary);
+}
+
+.navbar__spacer {
+  flex: 1 1 auto;
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-inline-start: auto;
+  /* Never shrink below the buttons; the brand (min-width: 0, ellipsis)
+     is what gives way on narrow screens. */
+  flex-shrink: 0;
+}
+
+.navbar__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-height-md);
+  min-height: var(--control-height-md);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  padding: var(--space-2);
+  color: var(--color-text);
+}
+
+.navbar__toggle:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+/* A drawer toggle for a Sidebar (see SidebarToggle) shows whenever the
+   sidebar is off-canvas, i.e. below the lg breakpoint. */
+.navbar__toggle--sidebar {
+  display: inline-flex;
+}
+
+@media screen and (min-width: 992px) {
+  .navbar__toggle--sidebar {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .navbar__nav {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-inline-start: 0;
+    background: var(--color-surface);
+    border-bottom: var(--border-width) solid var(--color-border);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  /* No JS means no way to toggle the collapsed menu open again, so only
+     collapse it once the toggle behavior is actually available. */
+  .js .navbar__nav {
+    display: none;
+  }
+
+  .js .navbar__nav.is-open {
+    display: flex;
+  }
+
+  .navbar__link {
+    padding-block: var(--space-3);
+  }
+
+  .navbar__toggle {
+    display: inline-flex;
+  }
+}

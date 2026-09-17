@@ -1,0 +1,222 @@
+/*
+ * Filtering is the server's job: the input carries data-action and the
+ * listbox is the data-target, so the option list is a swap fragment and
+ * there is no client-side index. combobox.js owns filtering, roving focus and picks.
+ */
+.combobox {
+  position: relative;
+}
+
+/* The list anchors to the field, not the root, so a hint below the field
+   stays in flow and the open list covers it (hidden, so nothing peeks). */
+.combobox__anchor {
+  position: relative;
+}
+
+.combobox--open > .form-field__help,
+.combobox[aria-expanded="true"] > .form-field__help {
+  visibility: hidden;
+}
+
+.combobox__field {
+  display: flex;
+  align-items: center;
+  height: var(--control-height-md);
+  padding-inline: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.combobox__field:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+/* Open: field and list read as one box — the focus ring becomes a shared
+   2px accent frame (border + 1px spread) instead of an outline around the
+   field alone, and the list picks up the same frame minus its top edge. */
+.combobox[aria-expanded="true"] .combobox__field,
+.combobox--open .combobox__field {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  border-color: var(--ring-color);
+  box-shadow: 0 0 0 1px var(--ring-color);
+}
+
+.combobox--open .combobox__field:focus-within {
+  outline: none;
+  border-color: var(--ring-color);
+}
+
+.combobox--open .combobox__list {
+  border-color: var(--ring-color);
+  box-shadow: 0 0 0 1px var(--ring-color), var(--shadow-lg);
+}
+
+.combobox__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding-inline-start: var(--space-2);
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.combobox__input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.combobox__caret {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.combobox__list {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  z-index: var(--z-dropdown);
+  border: var(--border-width) solid var(--color-primary);
+  border-top: none;
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.combobox__list[hidden] {
+  display: none;
+}
+
+.combobox__group {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.combobox__group:first-child {
+  border-top: none;
+}
+
+.combobox__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+/* aria-activedescendant drives the highlight; hover mirrors it. */
+.combobox__option:hover,
+.combobox__option[data-active] {
+  background: var(--color-surface-sunken);
+}
+
+.combobox__option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+}
+
+/* The matched substring. Marked, not just bolded — bold alone disappears
+   at small sizes on a soft background. */
+.combobox__match {
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-warning-soft);
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 22%, var(--color-surface));
+  border-radius: 2px;
+}
+
+.combobox__option-meta {
+  flex: 0 0 auto;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+}
+
+.combobox__check {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--color-text);
+}
+
+.combobox__empty {
+  padding: var(--space-4) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.combobox__hints {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-alt);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+}
+
+.combobox__count {
+  margin-inline-start: auto;
+  font-family: var(--font-family-mono);
+}
+
+/* Multi-select mutation: tokens live inside the field. */
+.combobox--multi .combobox__field {
+  height: auto;
+  min-height: var(--control-height-md);
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+}
+
+.combobox__token {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-1) 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-size: var(--font-size-sm);
+}
+
+.combobox__token-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin-block: -6px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-danger);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: 1px;
+  }
+}
+
+.combobox__option[aria-disabled="true"] {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}

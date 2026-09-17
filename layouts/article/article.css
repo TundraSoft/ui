@@ -1,0 +1,59 @@
+/*
+ * Article: header → a reading column (+ optional aside) → footer. Blogs,
+ * docs pages without side nav, long-form anything.
+ *
+ * mobile/tablet (< 992): single column; the aside moves BELOW the
+ * content · laptop+: aside beside the content · wide: the reading measure
+ * is capped at --layout-measure no matter how wide the screen — the
+ * thing most sites get wrong on 4K. `--wide` uses --layout-max-width
+ * instead (an index page with a card grid).
+ */
+.layout--article .layout__content {
+  display: grid;
+  grid-template-columns: minmax(0, var(--layout-measure));
+  justify-content: center;
+  gap: var(--space-8);
+}
+
+.layout--article-wide .layout__content {
+  grid-template-columns: minmax(0, var(--layout-max-width));
+}
+
+.layout__article {
+  min-width: 0;
+}
+
+.layout--article .layout__aside {
+  flex: none;
+  padding: 0;
+}
+
+@media screen and (min-width: 992px) {
+  .layout--article.layout--has-aside .layout__content {
+    grid-template-columns: minmax(0, var(--layout-measure)) var(--layout-aside-width);
+  }
+
+  .layout--article-wide.layout--has-aside .layout__content {
+    grid-template-columns: minmax(0, 1fr) var(--layout-aside-width);
+    max-width: var(--layout-max-width);
+    margin-inline: auto;
+  }
+
+  .layout--aside-start .layout__content {
+    direction: rtl;
+  }
+
+  .layout--aside-start .layout__content > * {
+    direction: ltr;
+  }
+
+  .layout--article .layout__aside {
+    position: sticky;
+    top: calc(var(--scroll-padding-top) + var(--space-4));
+    align-self: start;
+  }
+}
+
+.layout--article .layout__footer {
+  text-align: center;
+}

@@ -1,0 +1,61 @@
+/* Stat: a KPI tile — icon chip, label, big number, trend. Usually inside
+   a Card; renders as a bare fragment for lazy/live regions. */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stat__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+}
+
+.stat--primary .stat__icon {
+  background: var(--color-surface-sunken);
+  color: var(--color-accent, var(--color-primary));
+}
+
+.stat--success .stat__icon {
+  background: var(--color-success-soft);
+  color: var(--color-success-soft-text);
+}
+
+.stat--warning .stat__icon {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-soft-text);
+}
+
+.stat--danger .stat__icon {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}
+
+.stat--info .stat__icon {
+  background: var(--color-info-soft);
+  color: var(--color-info-soft-text);
+}
+
+.stat__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.stat__value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat__trend {
+  margin-top: var(--space-1);
+}

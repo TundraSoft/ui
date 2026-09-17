@@ -1,0 +1,198 @@
+/*
+ * Pairs with data-load: the server renders the skeleton fragment, the
+ * lazy GET swaps in the real one. Give every skeleton the same box as the
+ * content it stands in for, or the swap will jump.
+ */
+/* The shimmer is a translated pseudo-element, not an animated
+   background-position: transforms run on the compositor, background
+   animation repaints every frame for as long as the skeleton is on the
+   page — and a data-load placeholder may sit there a while. */
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--color-surface-alt), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-border-subtle) 45%, var(--color-surface)),
+    transparent
+  );
+  animation: skeleton-shimmer 1.3s linear infinite;
+}
+
+/* Width steps — the template picks one of these instead of emitting an
+   inline width (CSP). */
+.skeleton--w-xs {
+  width: 48px;
+}
+
+.skeleton--w-sm {
+  width: 72px;
+}
+
+.skeleton--w-md {
+  width: 104px;
+}
+
+.skeleton--w-lg {
+  width: 144px;
+}
+
+.skeleton--w-xl {
+  width: 200px;
+}
+
+.skeleton--w-half {
+  width: 50%;
+}
+
+.skeleton--w-full {
+  width: 100%;
+}
+
+.skeleton--text {
+  height: 10px;
+}
+
+.skeleton--title {
+  height: 12px;
+  width: 60%;
+}
+
+.skeleton--block {
+  height: 104px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+
+.skeleton--circle {
+  border-radius: var(--radius-full);
+  aspect-ratio: 1;
+}
+
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.skeleton-table {
+  border: var(--border-width) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.skeleton-table__head,
+.skeleton-table__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+}
+
+.skeleton-table__head {
+  background: var(--color-surface-alt);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.skeleton-table__head .skeleton {
+  background: var(--color-border);
+  height: 8px;
+}
+
+.skeleton-table__head .skeleton::after {
+  display: none;
+}
+
+.skeleton-table__row + .skeleton-table__row {
+  border-top: var(--border-width) solid var(--color-border-subtle);
+}
+
+.skeleton[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* reset.css already neutralises animation under reduced motion; this
+   keeps the bars from sitting mid-gradient when it does. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+}
+
+/* Busy regions (shared/js/busy.js): while a swap is in flight the target
+   wears a translucent veil with the same shimmer, and ignores pointer
+   events, so a double click can't fire a second request. Set only by the
+   script (`data-busy`); `aria-busy` rides along for assistive tech. */
+[data-busy] {
+  position: relative;
+  pointer-events: none;
+}
+
+[data-busy]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: var(--color-surface);
+  opacity: 0.55;
+}
+
+[data-busy]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--color-surface-alt), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-border-subtle) 45%, var(--color-surface)),
+    transparent
+  );
+  animation: skeleton-shimmer 1.3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-busy]::before {
+    display: none;
+  }
+}

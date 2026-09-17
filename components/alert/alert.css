@@ -1,0 +1,105 @@
+/*
+ * v2: a 2px inline-start rule instead of a full border. Status reads at a
+ * glance without a coloured box dominating the page.
+ */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border-inline-start: var(--border-width-thick) solid var(--color-border-strong);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.alert__icon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.alert__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.alert__title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.alert__text {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+/* Renders straight from RapidFormError.fields — one <li> per field. */
+.alert__list {
+  margin-top: var(--space-1);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--font-size-sm);
+}
+
+.alert__field {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.alert__field-name {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  opacity: 0.85;
+}
+
+.alert__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: -4px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid currentColor;
+    outline-offset: var(--ring-offset);
+  }
+}
+
+.alert--success {
+  background: var(--color-success-soft);
+  border-inline-start-color: var(--color-success);
+  color: var(--color-success-soft-text);
+}
+
+.alert--warning {
+  background: var(--color-warning-soft);
+  border-inline-start-color: var(--color-warning);
+  color: var(--color-warning-soft-text);
+}
+
+.alert--danger {
+  background: var(--color-danger-soft);
+  border-inline-start-color: var(--color-danger);
+  color: var(--color-danger-soft-text);
+}
+
+.alert--info {
+  background: var(--color-info-soft);
+  border-inline-start-color: var(--color-info);
+  color: var(--color-info-soft-text);
+}

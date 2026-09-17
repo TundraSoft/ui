@@ -1,0 +1,219 @@
+.input {
+  display: block;
+  width: 100%;
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  box-shadow: inset 0 1px 2px rgb(var(--shadow-color) / 0.04);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.input:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.input:disabled {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-border);
+  color: var(--color-disabled-text);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.input--invalid {
+  border-color: var(--color-danger);
+}
+
+.input--sm {
+  height: var(--control-height-sm);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.input--lg {
+  height: var(--control-height-lg);
+  padding-inline: var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+/* textarea is the one control without a fixed height */
+.input--multiline {
+  height: auto;
+  padding-block: var(--space-2);
+  line-height: var(--line-height-base);
+  resize: vertical;
+}
+
+/* Leading/trailing icon mutation. The icon is decorative — it must not be
+   the only carrier of meaning, and it never receives pointer events. */
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon__glyph {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  display: inline-flex;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.input-icon--end .input-icon__glyph {
+  inset-inline-start: auto;
+  inset-inline-end: var(--space-3);
+}
+
+.input-icon .input {
+  padding-inline-start: var(--space-8);
+}
+
+.input-icon--end .input {
+  padding-inline-start: var(--space-3);
+  padding-inline-end: var(--space-8);
+}
+
+/* Floating label mutation */
+
+.input-float {
+  position: relative;
+}
+
+.input-float .input {
+  height: var(--control-height-lg);
+  padding-top: var(--space-4);
+  padding-bottom: 0;
+}
+
+.input-float__label {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: top var(--transition-fast), font-size var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.input-float .input:focus ~ .input-float__label,
+.input-float .input:not(:placeholder-shown) ~ .input-float__label {
+  top: var(--space-3);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+}
+
+/* Prefix/suffix/dropdown-combo mutation. v2 draws one border around the
+   whole group instead of per-child borders, so the seams stay hairline. */
+
+.input-group {
+  display: flex;
+  align-items: stretch;
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 0 1px 2px rgb(var(--shadow-color) / 0.04);
+}
+
+/* No overflow clip on the group — a Select's floating list must escape it.
+   The rounded corners come from the first and last child instead. */
+.input-group > :first-child {
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+}
+
+.input-group > :last-child {
+  border-start-end-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+.input-group:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+/* Inside a group the controls lose their own frame — the group is the
+   frame. The outer corners come back from the first/last-child rules. */
+.input-group > .input,
+.input-group .select .select__native,
+.input-group .select .combobox__field {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.input-group > .input {
+  height: auto;
+}
+
+.input-group .select {
+  width: auto;
+}
+
+/* Inside an addon the select fills the addon's box (cancelling its padding). */
+.input-group__addon > .select {
+  margin-inline: calc(var(--space-3) * -1);
+}
+
+.input-group .select .combobox__input {
+  width: 5ch;
+  flex: 0 0 auto;
+  padding-inline-start: var(--space-3);
+}
+
+/* The list is as wide as its options, not the narrow field. */
+.input-group .select .combobox__list {
+  inset-inline-end: auto;
+  min-width: 12rem;
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-4));
+  border-top: var(--border-width) solid var(--ring-color);
+  border-radius: var(--radius-md);
+}
+
+.input-group > .input:focus-visible,
+.input-group .select .select__native:focus-visible,
+.input-group .select .combobox__field:focus-within {
+  outline: none;
+}
+
+.input-group__control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-group__addon {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding-inline: var(--space-3);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.input-group__addon:first-child {
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.input-group__addon:last-child {
+  border-inline-start: var(--border-width) solid var(--color-border);
+}

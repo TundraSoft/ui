@@ -1,0 +1,115 @@
+name: Release Please
+
+# Releases are pull requests. release-please reads conventional commits on
+# main, keeps one "chore(main): release x.y.z" PR open that bumps
+# deno.json, package.json and version.ts and prepends CHANGELOG.md; merging
+# it tags vX.Y.Z and creates the GitHub release, and the publish job in the
+# same run ships the version — npm first (jsDelivr serves the CDN bundle
+# from npm, and version.ts points at those URLs), then JSR.
+on:
+  push:
+    branches:
+      - main
+  # Manual escape hatch: (re-)publish the version already tagged at HEAD,
+  # e.g. after a publish step failed for a transient reason.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Maintain release PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          # A fine-grained PAT (contents + pull-requests: write) so the release
+          # PR triggers CI; the default token cannot. Falls back to
+          # GITHUB_TOKEN so the workflow works before the PAT exists.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish to npm and JSR
+    needs: release-please
+    if: |
+      github.repository == 'TundraSoft/ui' &&
+      (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance + JSR tokenless (OIDC) publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.x
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+
+      - name: Build the bundle
+        run: deno task build
+
+      - name: Version manifest must match this commit
+        # The release PR bumped the version lines in version.ts; the hashes
+        # are of the files just built. Any difference means the manifest
+        # consumers will import does not describe what is being published.
+        run: git diff --exit-code -- version.ts
+
+      - name: Versions must agree
+        run: |
+          d=$(deno eval "console.log(JSON.parse(await Deno.readTextFile('deno.json')).version)")
+          p=$(node -p "require('./package.json').version")
+          v=$(deno eval "import { VERSION } from './version.ts'; console.log(VERSION)")
+          echo "deno.json=$d package.json=$p version.ts=$v"
+          [ "$d" = "$p" ] && [ "$d" = "$v" ]
+
+      - name: Publish to npm (the CDN bundle)
+        # Trusted publishing (OIDC) needs no secret once the package is
+        # configured for it on npmjs.com; NPM_TOKEN is the fallback.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+      - name: Wait for jsDelivr
+        # version.ts points consumers at the CDN; make sure it answers with
+        # the bytes we just hashed before the JSR package that carries those
+        # URLs goes live.
+        run: |
+          for attempt in $(seq 1 20); do
+            if deno run -A scripts/check-cdn.ts; then exit 0; fi
+            echo "CDN not serving this version yet (attempt ${attempt}) — retrying in 30s"
+            sleep 30
+          done
+          echo "::warning::jsDelivr did not serve the new version within 10 minutes; publishing to JSR anyway"
+
+      - name: Publish to JSR (the templates)
+        run: |
+          for attempt in 1 2 3; do
+            if deno publish; then exit 0; fi
+            echo "deno publish attempt ${attempt} failed — retrying in 30s"
+            sleep 30
+          done
+          echo "::error::deno publish failed after 3 attempts"
+          exit 1

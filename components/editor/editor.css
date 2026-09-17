@@ -1,0 +1,145 @@
+/*
+ * Editor — a framed textarea with a toolbar. Markdown mode inserts
+ * syntax into the textarea; HTML mode edits a contenteditable surface
+ * mirrored into the (hidden) textarea. No JS: toolbar and surface are
+ * hidden and the textarea stands alone, which is exactly what submits.
+ */
+.editor {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.editor:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.editor--invalid {
+  border-color: var(--color-danger);
+}
+
+.editor--disabled {
+  background: var(--color-surface-alt);
+}
+
+.editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+}
+
+.editor__tool,
+.editor__view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding-inline: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.editor__tool:hover,
+.editor__view:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.editor__tool[aria-pressed="true"],
+.editor__view[aria-pressed="true"] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.editor__tool:focus-visible,
+.editor__view:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+.editor__tool:disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.editor__spacer {
+  flex: 1 1 auto;
+}
+
+.editor__views {
+  display: inline-flex;
+  gap: 2px;
+}
+
+/* The frame is the editor's; the controls inside lose theirs. */
+.editor .editor__source,
+.editor .editor__surface {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  resize: vertical;
+}
+
+.editor__surface {
+  min-height: 8rem;
+  padding: var(--space-3);
+  overflow: auto;
+}
+
+.editor__surface:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.editor__preview {
+  min-height: 8rem;
+  padding: var(--space-3);
+}
+
+.editor__preview[hidden] {
+  display: none;
+}
+
+/* Which control shows: without JS only the textarea; with JS the HTML
+   mode swaps the textarea for the surface (the textarea still submits). */
+html:not(.js) .editor__toolbar,
+html:not(.js) .editor__surface {
+  display: none;
+}
+
+.js .editor--html .editor__source,
+.js .editor[data-editor-view="preview"] .editor__source,
+.js .editor[data-editor-view="preview"] .editor__surface {
+  display: none;
+}
+
+.editor__preview-note {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.editor__preview-raw {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}

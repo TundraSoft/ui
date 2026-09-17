@@ -1,0 +1,107 @@
+/*
+ * Rail: a narrow icon rail plus content. Dense tools, consoles, editors.
+ *
+ * mobile (< 768): the rail becomes a bottom tab bar · tablet+: vertical
+ * rail on the inline-start edge · wide: rail keeps its token width,
+ * content is capped when boxed.
+ */
+.layout--rail .layout__body {
+  flex-direction: row;
+}
+
+.layout__rail {
+  flex: 0 0 var(--layout-rail-width);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding-block: var(--space-3);
+  background: var(--color-surface);
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.layout--rail .layout__header ~ .layout__body .layout__rail {
+  top: var(--scroll-padding-top);
+  height: calc(100vh - var(--scroll-padding-top));
+}
+
+.layout__rail-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-weight: var(--font-weight-bold);
+}
+
+.layout__rail-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-subtle);
+}
+
+.layout__rail-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface-sunken);
+}
+
+.layout__rail-link[aria-current="page"] {
+  background: var(--color-surface-sunken);
+  color: var(--color-primary);
+}
+
+.layout__rail-link:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.layout__rail-end {
+  margin-top: auto;
+}
+
+@media screen and (max-width: 767px) {
+  .layout--rail .layout__body {
+    flex-direction: column;
+  }
+
+  .layout__rail {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    top: auto;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: var(--space-2) var(--space-3);
+    border-inline-end: none;
+    border-top: var(--border-width) solid var(--color-border);
+    z-index: var(--z-sticky);
+  }
+
+  .layout__rail-brand,
+  .layout__rail-end {
+    display: none;
+  }
+
+  .layout__rail-link {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Room for the tab bar. */
+  .layout--rail .layout__content {
+    padding-bottom: calc(var(--layout-gutter) + 60px);
+  }
+}

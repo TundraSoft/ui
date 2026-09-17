@@ -1,0 +1,100 @@
+:root {
+  /* #c2410c, not the brighter #ea580c: the brand orange is used as text
+     (active tabs/links) and behind white text, and #ea580c is only 3.5:1
+     there. The bright one survives as --color-accent-inverse. */
+  --color-primary: #c2410c;
+  --color-primary-strong: #9a3412;
+  --color-primary-contrast: #ffffff;
+  --color-accent: #c2410c;
+  --color-accent-strong: #9a3412;
+  --color-accent-contrast: #ffffff;
+  --color-accent-inverse: #fdba74;
+  --color-secondary: #a16207;
+  --color-secondary-strong: #854d0e;
+  --color-secondary-contrast: #ffffff;
+
+  --color-canvas: #fff5ec;
+  --color-surface: #fffaf5;
+  --color-surface-alt: #fdecd8;
+  --color-surface-sunken: #fbe3cc;
+  --color-border-subtle: #f8e4d0;
+  --color-border: #f3d5b5;
+  --color-text: #431407;
+  --color-text-muted: #8a4f25;
+  --color-text-subtle: #8a4f25;
+  --color-border-control: #b98a63;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 2rem;
+
+  --shadow-color: 234 88 12;
+  --shadow-md: 0 10px 25px rgb(234 88 12 / 0.25);
+
+  --font-family-base: Georgia, "Times New Roman", serif;
+}
+
+/* Same rule as tokens/default.css: a theme's own unlayered overrides beat
+   the base's layered dark-mode block regardless of data-theme, so the
+   theme must carry its own dark values too — see CLAUDE.md. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #fb923c;
+    --color-primary-strong: #fdba74;
+    --color-primary-contrast: #1f1410;
+    --color-accent: #fb923c;
+    --color-accent-strong: #fdba74;
+    --color-accent-contrast: #1f1410;
+    --color-accent-inverse: #ea580c;
+    --color-secondary: #d2a480;
+    --color-secondary-strong: #e2bc9c;
+    --color-secondary-contrast: #1f1410;
+    --color-border-control: #8a6a52;
+
+    --color-canvas: #170e0a;
+    --color-surface: #1f1410;
+    --color-surface-alt: #2b1c14;
+    --color-surface-sunken: #2b1c14;
+    --color-surface-inverse: #fde8d7;
+    --color-border-subtle: #3a2519;
+    --color-border: #4a3021;
+    --color-border-strong: #6b4530;
+    --color-text: #fde8d7;
+    --color-text-muted: #d2a480;
+    --color-text-subtle: #d2a480;
+    --color-text-inverse: #1f1410;
+
+    --shadow-color: 0 0 0;
+    --shadow-md: 0 10px 25px rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-primary: #fb923c;
+  --color-primary-strong: #fdba74;
+  --color-primary-contrast: #1f1410;
+  --color-accent: #fb923c;
+  --color-accent-strong: #fdba74;
+  --color-accent-contrast: #1f1410;
+  --color-accent-inverse: #ea580c;
+  --color-secondary: #d2a480;
+  --color-secondary-strong: #e2bc9c;
+  --color-secondary-contrast: #1f1410;
+  --color-border-control: #8a6a52;
+
+  --color-canvas: #170e0a;
+  --color-surface: #1f1410;
+  --color-surface-alt: #2b1c14;
+  --color-surface-sunken: #2b1c14;
+  --color-surface-inverse: #fde8d7;
+  --color-border-subtle: #3a2519;
+  --color-border: #4a3021;
+  --color-border-strong: #6b4530;
+  --color-text: #fde8d7;
+  --color-text-muted: #d2a480;
+  --color-text-subtle: #d2a480;
+  --color-text-inverse: #1f1410;
+
+  --shadow-color: 0 0 0;
+  --shadow-md: 0 10px 25px rgb(0 0 0 / 0.5);
+}

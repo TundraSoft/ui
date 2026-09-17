@@ -1,0 +1,3 @@
+# Bun install config: same @jsr scope mapping as .npmrc.
+[install.scopes]
+"@jsr" = "https://npm.jsr.io"

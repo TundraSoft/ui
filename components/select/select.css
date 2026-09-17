@@ -1,0 +1,74 @@
+/*
+ * Select = the Combobox's field and list with a read-only input, backed
+ * by a native <select> that carries the name. Enhanced pages show the
+ * combobox UI and hide the native control (display: none still submits);
+ * no-JS pages show the native control and hide the UI.
+ */
+.select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.select__native {
+  appearance: none;
+  width: 100%;
+  height: var(--control-height-md);
+  padding-block: 0;
+  padding-inline: var(--space-3) calc(var(--space-3) * 2 + 15px);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+}
+
+.select__native:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.select__native:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.js .select__native {
+  display: none;
+}
+
+html:not(.js) .select__ui {
+  display: none;
+}
+
+/* Read-only text field: the whole field is a hand, the text caret is hidden. */
+.select__ui .combobox__field {
+  cursor: pointer;
+}
+
+.select__ui .combobox__input {
+  cursor: pointer;
+  caret-color: transparent;
+}
+
+.select__ui .combobox__input:disabled {
+  cursor: not-allowed;
+}
+
+.select--disabled .combobox__field {
+  background: var(--color-surface-alt);
+  color: var(--color-disabled-text);
+}
+
+.select--invalid .select__native,
+.select--invalid .combobox__field {
+  border-color: var(--color-danger);
+}
+
+/* Hidden list still lays out zero height; the hints bar is noise for a
+   plain select. */
+.select__ui .combobox__hints {
+  display: none;
+}

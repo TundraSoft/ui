@@ -1,0 +1,49 @@
+name: Feature Request
+description: Propose a component, layout, prop, token or integration
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where should this land? (pick the closest)
+      options:
+        - New component
+        - Existing component (new prop, variant or behaviour)
+        - Layout
+        - Templates or rAPId integration
+        - Charts
+        - Theming / tokens
+        - Icons
+        - Build / packaging / CDN
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What should it do?
+      description: Describe the behaviour, and the markup or template call you would expect to write.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why?
+      description: The use case, and what you do today instead.
+    validations:
+      required: true
+  - type: checkboxes
+    id: contract
+    attributes:
+      label: Fits the library's rules
+      description: The contract every component follows (see the Theming and rAPId guides).
+      options:
+        - label: Works as a self-contained fragment (no inline styles or scripts, tokens only for colour and size)
+        - label: Degrades without JavaScript, or is opt-in enhancement only
+        - label: Any server interaction goes through rAPId's `data-action` attributes, not custom fetch code
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

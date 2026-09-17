@@ -1,0 +1,55 @@
+/* ApexCharts 7 reads `--apx-*` design tokens from the cascade on every
+   render (theme.tokens, on by default). Mapping them onto the library's
+   tokens here is the whole theming story: a theme file changes
+   `--color-accent`, every chart follows; dark mode flips the same tokens
+   and chart.js re-renders. Series colours run through the status hues so
+   a multi-series chart reads like the rest of the UI. Override any of
+   these on `.chart` (or a theme's own selector) to retune charts alone. */
+:root {
+  --apx-accent: var(--color-accent, var(--color-primary));
+  --apx-fore: var(--color-text);
+  --apx-grid: var(--color-border);
+  --apx-surface: var(--color-surface);
+  --apx-bg: transparent;
+  --apx-series-1: var(--color-accent, var(--color-primary));
+  --apx-series-2: var(--color-info);
+  --apx-series-3: var(--color-success);
+  --apx-series-4: var(--color-warning);
+  --apx-series-5: var(--color-danger);
+  --apx-series-6: var(--color-secondary, var(--color-text-muted));
+}
+
+.chart {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  color: var(--color-text);
+}
+
+/* The engine's own tooltip/menu chrome, on our tokens. */
+.chart .apexcharts-tooltip,
+.chart .apexcharts-menu {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+}
+
+.chart .apexcharts-tooltip-title {
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.chart .apexcharts-xaxistooltip,
+.chart .apexcharts-yaxistooltip {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.chart .apexcharts-menu-item:hover {
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+}

@@ -1,0 +1,205 @@
+/*
+ * A file input is never echoed back into re-rendered markup — rAPId's
+ * keptValues() strips it — so .dropzone__file rows are server state, not
+ * a form re-fill. Render them from your own upload record.
+ */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dropzone__area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  text-align: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.dropzone__area:focus-within,
+.dropzone__area--over {
+  border-color: var(--color-accent, var(--color-primary));
+  background: var(--color-surface);
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 5%, var(--color-surface));
+}
+
+/* The real input covers the area so keyboard and click both work and no
+   JS is needed to open the picker. */
+.dropzone__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropzone__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.dropzone__area--over .dropzone__icon,
+.dropzone__area:focus-within .dropzone__icon {
+  color: var(--color-accent, var(--color-primary));
+}
+
+.dropzone__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.dropzone__browse {
+  color: var(--color-accent, var(--color-primary));
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.dropzone__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.dropzone__files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dropzone__file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.dropzone__file--error {
+  border-color: var(--color-danger-soft-text);
+  border-color: color-mix(in oklab, var(--color-danger) 25%, var(--color-border));
+  background: var(--color-danger-soft);
+  background: color-mix(in oklab, var(--color-danger) 3%, var(--color-surface));
+}
+
+.dropzone__file-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.dropzone__file--done .dropzone__file-icon {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.dropzone__file--error .dropzone__file-icon {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.dropzone__file-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dropzone__file-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.dropzone__file-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropzone__file-size {
+  margin-inline-start: auto;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.dropzone__file-error {
+  font-size: var(--font-size-2xs);
+  color: var(--color-danger);
+}
+
+/* A native <progress>, same as components/progress — the value lives in
+   the `value` attribute, so no inline width style is ever needed. */
+.dropzone__bar {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 4px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-border-subtle);
+  overflow: hidden;
+}
+
+.dropzone__bar::-webkit-progress-bar {
+  background: var(--color-border-subtle);
+}
+
+.dropzone__bar::-webkit-progress-value {
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.dropzone__bar::-moz-progress-bar {
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.dropzone__remove {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-danger);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: 2px;
+  }
+}

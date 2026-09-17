@@ -1,0 +1,250 @@
+/*
+ * Single-date mode is this same grid with the range modifiers unused.
+ * The grid is always server-rendered (the month is a query param), so
+ * month nav is an ordinary GET swap and works with JS off.
+ */
+.datepicker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* While open, the whole picker steps above its siblings — a later inline
+   picker (position: relative) would otherwise paint over this one's
+   floating panel. */
+.datepicker--open:not(.datepicker--inline) {
+  z-index: var(--z-popover);
+}
+
+/* The panel floats below the trigger like a popover, so opening it never
+   reflows a toolbar or form row. `.datepicker--inline` keeps it in flow
+   (docs, a settings page that always shows the calendar). */
+.datepicker--inline .datepicker__panel {
+  position: static;
+  /* A flex item with a z-index stacks like a positioned element even when
+     static — an inline panel must not outrank a sibling's floating one. */
+  z-index: auto;
+  margin-top: var(--space-3);
+}
+
+.datepicker--end .datepicker__panel {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.datepicker__trigger:disabled {
+  color: var(--color-disabled-text);
+  background: var(--color-surface-alt);
+  cursor: not-allowed;
+}
+
+.datepicker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.datepicker__trigger[aria-expanded="true"] {
+  border-color: var(--color-primary);
+}
+
+.datepicker__trigger-icon {
+  display: inline-flex;
+  color: var(--color-text-muted);
+}
+
+.datepicker__panel {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  z-index: var(--z-popover);
+  max-width: calc(100vw - 2 * var(--space-4));
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  width: max-content;
+}
+
+.datepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.datepicker__nav-group {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.datepicker__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: 1px;
+  }
+}
+
+.datepicker__month {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.datepicker__grid {
+  padding: var(--space-2) var(--space-3);
+}
+
+.datepicker__weekdays,
+.datepicker__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.datepicker__weekdays {
+  margin-bottom: var(--space-1);
+}
+
+.datepicker__weekday {
+  padding-block: 3px;
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+}
+
+.datepicker__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.datepicker__day:hover {
+  background: var(--color-surface-sunken);
+}
+
+.datepicker__day:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+/* Adjacent-month days are still clickable, so they keep readable
+   contrast — --color-text-subtle, not a near-invisible grey. */
+.datepicker__day--outside {
+  color: var(--color-text-subtle);
+}
+
+.datepicker__day--today {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent, var(--color-primary));
+}
+
+.datepicker__day--in-range {
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 8%, var(--color-surface));
+  border-radius: 0;
+}
+
+.datepicker__day--start,
+.datepicker__day--end {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.datepicker__day--start {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.datepicker__day--end {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* A one-day range is both ends at once: keep it fully rounded. */
+.datepicker__day--start.datepicker__day--end {
+  border-radius: var(--radius-sm);
+}
+
+.datepicker__day:disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.datepicker__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-alt);
+}
+
+.datepicker__preset {
+  height: 28px;
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+}
+
+.datepicker__apply {
+  margin-inline-start: auto;
+  height: 28px;
+  padding-inline: var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font: inherit;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}

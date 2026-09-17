@@ -1,0 +1,235 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-4);
+  border: var(--border-width) solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  box-shadow: var(--shadow-inset-top), var(--shadow-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), box-shadow var(--transition-fast);
+
+  &:hover {
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    background: var(--color-disabled);
+    border-color: transparent;
+    color: var(--color-disabled-text);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+/* v2: the default is ink. --secondary is retained for v1 compatibility but
+   --outline / --subtle / --ghost are the three you actually want. */
+.btn--secondary {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-secondary-contrast);
+
+  &:hover {
+    background: var(--color-secondary-strong, var(--color-secondary));
+    border-color: var(--color-secondary-strong, var(--color-secondary));
+  }
+}
+
+.btn--outline {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-border-strong);
+  }
+}
+
+.btn--subtle {
+  background: var(--color-surface-sunken);
+  border-color: transparent;
+  color: var(--color-text);
+  box-shadow: none;
+
+  &:hover {
+    background: var(--color-border);
+    border-color: transparent;
+  }
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-muted);
+  box-shadow: none;
+
+  &:hover {
+    background: var(--color-surface-sunken);
+    border-color: transparent;
+    color: var(--color-text);
+  }
+}
+
+.btn--accent {
+  background: var(--color-accent, var(--color-primary));
+  border-color: var(--color-accent, var(--color-primary));
+  color: var(--color-accent-contrast, var(--color-primary-contrast));
+
+  &:hover {
+    background: var(--color-accent-strong, var(--color-primary-strong));
+    border-color: var(--color-accent-strong, var(--color-primary-strong));
+  }
+}
+
+.btn--danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-danger-contrast);
+
+  &:hover {
+    filter: brightness(0.92);
+  }
+}
+
+.btn--sm {
+  height: var(--control-height-sm);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.btn--lg {
+  height: var(--control-height-lg);
+  padding-inline: var(--space-5);
+  font-size: var(--font-size-base);
+}
+
+.btn--icon {
+  width: var(--control-height-md);
+  padding-inline: 0;
+}
+
+.btn--sm.btn--icon {
+  width: var(--control-height-sm);
+}
+
+.btn--lg.btn--icon {
+  width: var(--control-height-lg);
+}
+
+.btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* Declared after every variant so it wins on color without !important;
+   the ring takes the variant's own text colour via --btn-loading-color. */
+.btn--loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    border: var(--border-width-thick) solid var(--btn-loading-color, var(--color-primary-contrast));
+    border-inline-end-color: transparent;
+    border-radius: var(--radius-full);
+    animation: btn-spin 600ms linear infinite;
+  }
+}
+
+.btn--outline,
+.btn--subtle,
+.btn--ghost {
+  --btn-loading-color: var(--color-text);
+}
+
+.btn--secondary {
+  --btn-loading-color: var(--color-secondary-contrast);
+}
+
+.btn--accent {
+  --btn-loading-color: var(--color-accent-contrast);
+}
+
+.btn--danger {
+  --btn-loading-color: var(--color-danger-contrast);
+}
+
+/* Split button: a primary action plus its own menu trigger. */
+.btn-group {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+
+  > .btn {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  > .btn:first-child {
+    border-start-start-radius: var(--radius-md);
+    border-end-start-radius: var(--radius-md);
+  }
+
+  > .btn:last-child {
+    border-start-end-radius: var(--radius-md);
+    border-end-end-radius: var(--radius-md);
+  }
+
+  > .btn + .btn {
+    margin-inline-start: calc(var(--border-width) * -1);
+  }
+
+  /* The focus ring must paint over the overlapping sibling border. */
+  > .btn:focus-visible,
+   > .dropdown > .btn:focus-visible {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* A Dropdown as the caret half of a split button: its wrapper sits in
+     the group, its trigger is the .btn. */
+  > .dropdown > .btn {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  > .dropdown:last-child > .btn {
+    border-start-end-radius: var(--radius-md);
+    border-end-end-radius: var(--radius-md);
+  }
+
+  > .btn + .dropdown {
+    margin-inline-start: calc(var(--border-width) * -1);
+  }
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

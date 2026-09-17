@@ -1,0 +1,114 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 16rem;
+  flex: 0 0 auto;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-inline-end: var(--border-width) solid var(--color-border);
+  overflow-y: auto;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  padding: 0 var(--space-2);
+}
+
+.sidebar__brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.sidebar__collapse-toggle {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.sidebar__collapse-toggle:hover {
+  background: var(--color-surface-alt);
+}
+
+.sidebar__collapse-toggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: -2px;
+}
+
+.sidebar__collapse-icon {
+  transition: transform var(--transition-base);
+}
+
+@media screen and (min-width: 992px) {
+  .sidebar {
+    transition: width var(--transition-base);
+  }
+
+  .sidebar--collapsed {
+    width: 4.5rem;
+  }
+
+  .sidebar--collapsed .sidebar__brand-label,
+  .sidebar--collapsed .menu__link-label,
+  .sidebar--collapsed .menu__caret,
+  .sidebar--collapsed .menu__sublist,
+  .sidebar--collapsed .sidebar__collapse-label {
+    display: none;
+  }
+
+  .sidebar--collapsed .menu__link {
+    justify-content: center;
+  }
+
+  .sidebar--collapsed .sidebar__collapse-icon {
+    transform: rotate(180deg);
+  }
+}
+
+@media screen and (max-width: 991px) {
+  /* No JS means no way to open it again once hidden off-screen, so only
+     the enhanced (JS-available) case gets the fixed drawer treatment —
+     otherwise the sidebar just stays in normal flow, always visible. */
+  .js .sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--z-overlay);
+    transform: translateX(-100%);
+    /* Off-screen must also be out of the tab order and the accessibility
+       tree: visibility flips after the slide-out finishes. */
+    visibility: hidden;
+    transition: transform var(--transition-base), visibility 0s var(--transition-base);
+    box-shadow: var(--shadow-xl);
+  }
+
+  [dir="rtl"] .js .sidebar {
+    transform: translateX(100%);
+  }
+
+  .js .sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform var(--transition-base);
+  }
+}

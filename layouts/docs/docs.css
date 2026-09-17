@@ -1,0 +1,92 @@
+/*
+ * Docs: nav · content · table of contents.
+ *
+ * mobile/tablet (< 992): the nav (a Sidebar component) is an off-canvas
+ * drawer; the TOC collapses into an "On this page" disclosure above the
+ * content · laptop (992–1199): nav + content, TOC still a disclosure ·
+ * wide (≥ 1200): three columns, TOC sticky, content measure capped.
+ */
+.layout--docs .layout__body > .sidebar {
+  width: var(--layout-sidebar-width);
+}
+
+.layout--docs .layout__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  max-width: calc(var(--layout-measure) + var(--layout-aside-width) + var(--space-8));
+}
+
+.layout__toc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.layout__toc-toggle:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.layout__toc-title {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  margin-bottom: var(--space-2);
+}
+
+@media screen and (max-width: 1199px) {
+  .layout__toc {
+    order: -1;
+  }
+
+  /* Collapsed until toggled (class-only toggle, so no [hidden]); without
+     JS the toggle is hidden and the list simply shows. */
+  .js .layout__toc-body {
+    display: none;
+    padding: var(--space-3) 0 0;
+  }
+
+  .js .layout__toc-body.is-open {
+    display: block;
+  }
+
+  .layout__toc-title {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .layout--docs .layout__body > .sidebar {
+    position: sticky;
+    top: var(--scroll-padding-top);
+    align-self: flex-start;
+    height: calc(100vh - var(--scroll-padding-top));
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .layout--docs .layout__content {
+    grid-template-columns: minmax(0, var(--layout-measure)) var(--layout-aside-width);
+  }
+
+  .layout__toc {
+    position: sticky;
+    top: calc(var(--scroll-padding-top) + var(--space-4));
+    align-self: start;
+  }
+
+  .layout__toc-toggle {
+    display: none;
+  }
+}

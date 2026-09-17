@@ -1,0 +1,67 @@
+/*
+ * Auth: a centred card (sign in, reset, lock screen), optionally with a
+ * narrative panel beside it (`--split`).
+ *
+ * mobile: card fills the width, narrative hidden · tablet: card centred ·
+ * laptop+ with --split: two columns, narrative on the inverse surface ·
+ * wide: both halves capped, centred.
+ */
+.layout--auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--layout-gutter);
+}
+
+.layout__auth-panel {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.layout__auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.layout__auth-narrative {
+  display: none;
+}
+
+@media screen and (min-width: 992px) {
+  .layout--auth-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .layout--auth-split .layout__auth-narrative {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-10) var(--space-8);
+    background: var(--color-surface-inverse);
+    color: var(--color-text-inverse);
+  }
+
+  .layout--auth-split .layout__auth-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-10) var(--space-8);
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .layout--auth-split .layout__auth-narrative > * {
+    max-width: 32rem;
+    margin-inline: auto;
+    width: 100%;
+  }
+}

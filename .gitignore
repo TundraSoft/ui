@@ -1,0 +1,9 @@
+node_modules
+_archive/
+dist/
+demo/
+.test-output/
+.DS_Store
+package-lock.json
+bun.lock
+.docs-api.json

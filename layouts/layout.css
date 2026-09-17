@@ -1,0 +1,88 @@
+/*
+ * Shared frame primitives every layout builds on. A layout is chrome plus
+ * slots — never content. Sizes come from the --layout-* tokens so a theme
+ * retunes the frame without touching this file.
+ *
+ * Bands: mobile < 768 · tablet 768–991 · laptop 992–1399 · wide ≥ 1400.
+ * Every layout has a defined behaviour in each band, and a test
+ * (examples/tests/test-layouts.ts) that proves it.
+ */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-canvas);
+}
+
+/* The header is the frame's sticky element — a Navbar inside it is
+   sticky only because the wrapper is. --static-header opts out. */
+.layout__header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+}
+
+.layout__header > .navbar {
+  flex: 1 1 auto;
+  /* Let the navbar shrink below its min-content when a drawer toggle
+     shares the row; its brand ellipsizes to make room. */
+  min-width: 0;
+  position: static;
+}
+
+.layout--static-header .layout__header {
+  position: static;
+}
+
+.layout__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.layout__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--layout-gutter);
+}
+
+.layout__footer {
+  padding: var(--space-6) var(--layout-gutter);
+  border-top: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Boxed: the content column is capped and centred; the chrome still
+   spans the viewport. Fluid (default) fills the width — for wide screens
+   the gutter grows with the viewport so text never touches the edge. */
+.layout--boxed .layout__content,
+.layout--boxed .layout__footer {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+}
+
+/* Off-canvas backdrop shared by drawer-style layouts (sidebar, docs). */
+.layout__backdrop {
+  display: none;
+}
+
+@media screen and (max-width: 991px) {
+  .js .sidebar.is-open ~ .layout__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-overlay) - 1);
+    background: var(--color-overlay);
+  }
+}
+
+/* Drawer toggle inside the header: visible only while the sidebar is
+   off-canvas (below lg). */
+.layout__drawer-toggle {
+  margin-inline-start: var(--space-3);
+}

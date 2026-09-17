@@ -1,0 +1,65 @@
+/*
+ * Split: master/detail. A list pane and a detail pane (mail, settings
+ * sections, file browsers).
+ *
+ * mobile (< 768): one pane at a time — the list by default,
+ * `.layout--show-detail` shows the detail (a route decision; the detail
+ * carries its own "back" link) · tablet: both panes, narrow list ·
+ * laptop+: both panes at token width · wide: detail capped when boxed.
+ */
+.layout--split .layout__body {
+  flex-direction: row;
+}
+
+.layout__pane {
+  flex: 0 0 var(--layout-pane-width);
+  min-width: 0;
+  border-inline-end: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+  overflow-y: auto;
+}
+
+.layout--split .layout__content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* Both panes scroll independently under a sticky header. */
+@media screen and (min-width: 768px) {
+  .layout--split .layout__body {
+    height: calc(100vh - var(--scroll-padding-top));
+    position: sticky;
+    top: var(--scroll-padding-top);
+  }
+
+  .layout--split.layout--static-header .layout__body,
+  .layout--split:not(:has(.layout__header)) .layout__body {
+    height: 100vh;
+    top: 0;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+  .layout__pane {
+    flex-basis: min(var(--layout-pane-width), 40%);
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .layout__pane {
+    flex: 1 1 100%;
+    border-inline-end: none;
+  }
+
+  .layout--split .layout__content {
+    display: none;
+  }
+
+  .layout--show-detail .layout__pane {
+    display: none;
+  }
+
+  .layout--show-detail .layout__content {
+    display: block;
+  }
+}

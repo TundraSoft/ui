@@ -1,0 +1,302 @@
+/*
+ * Base v2 tokens.
+ *
+ * Breakpoints are NOT tokens — custom properties cannot be read inside an
+ * `@media` condition, so every component hardcodes these same literal
+ * values in its own media queries. Keep this comment as the one source of
+ * truth for what they are: sm 576px, md 768px, lg 992px, xl 1200px,
+ * xxl 1400px.
+ *
+ * v2 changes primary from a hue to ink and adds a single accent. A theme
+ * that overrides only the v1 token set still works: everything new is
+ * consumed through a var() fallback chain (see MIGRATION.md).
+ */
+:root {
+  /* Brand */
+  --color-primary: #1a1917;
+  --color-primary-strong: #000000;
+  --color-primary-contrast: #fdfcfb;
+  --color-accent: #a8521f;
+  --color-accent-strong: #8e4419;
+  --color-accent-contrast: #fffdfb;
+  /* Accent for use ON --color-surface-inverse (ink toast, inverse cards).
+     The base accent is deliberately dark enough to pass as text on a light
+     surface, which makes it unreadable on a dark one — this is its pair. */
+  --color-accent-inverse: #e8a87c;
+  --color-secondary: #6e6a64;
+  --color-secondary-strong: #4a4742;
+  --color-secondary-contrast: #fdfcfb;
+
+  /* Status. --color-warning must clear 4.5:1 as text on surface. */
+  --color-success: #1f7a4d;
+  --color-success-contrast: #fffdfb;
+  --color-warning: #9a6200;
+  --color-warning-contrast: #fffdfb;
+  --color-danger: #b8342a;
+  --color-danger-contrast: #fffdfb;
+  --color-info: #1f6a84;
+  --color-info-contrast: #fffdfb;
+
+  --color-success-soft: #e4f2e9;
+  --color-success-soft-text: #14543a;
+  --color-warning-soft: #fbf0da;
+  --color-warning-soft-text: #6e4600;
+  --color-danger-soft: #fae7e4;
+  --color-danger-soft-text: #7d2620;
+  --color-info-soft: #e2eff4;
+  --color-info-soft-text: #114a5e;
+
+  /* Surfaces — v2 splits page ground (canvas) from card ground (surface) */
+  --color-canvas: #faf9f7;
+  --color-surface: #ffffff;
+  --color-surface-alt: #faf9f7;
+  --color-surface-sunken: #f4f2ef;
+  --color-surface-inverse: #1a1917;
+  --color-overlay: rgb(26 25 23 / 0.45);
+
+  --color-border-subtle: #f0ede9;
+  --color-border: #e6e3df;
+  --color-border-strong: #d3cfc9;
+  /* Form-control outline: the only boundary of an input, so it must
+     clear 3:1 against the surface (WCAG 1.4.11). Decorative borders
+     above stay soft. */
+  --color-border-control: #8a8580;
+
+  /* Media: a fixed-dark scrim with fixed-light text on top of images —
+     these deliberately do NOT flip in dark mode. */
+  --color-media-scrim: rgb(0 0 0 / 0.6);
+  --color-on-media: #ffffff;
+
+  /* Text. --color-text-subtle is the only legal colour for <=11px labels;
+     it is the lightest value that still clears 4.5:1 on surface. */
+  --color-text: #1a1917;
+  --color-text-muted: #6e6a64;
+  --color-text-subtle: #77726b;
+  --color-text-inverse: #fdfcfb;
+  --color-disabled: #f4f2ef;
+  --color-disabled-text: #6e6a64;
+
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+  --space-12: 5rem;
+  --space-16: 6rem;
+
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Two-layer, warm-tinted, negative-spread. A single flat rgba(0,0,0,…)
+     blur reads grey and muddy over warm neutrals. */
+  --shadow-color: 26 25 23;
+  --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.05);
+  --shadow-md: 0 1px 2px rgb(var(--shadow-color) / 0.04),
+    0 6px 16px -4px rgb(var(--shadow-color) / 0.1);
+  --shadow-lg: 0 2px 4px rgb(var(--shadow-color) / 0.04),
+    0 16px 32px -8px rgb(var(--shadow-color) / 0.14);
+  --shadow-xl: 0 4px 8px rgb(var(--shadow-color) / 0.05),
+    0 28px 64px -12px rgb(var(--shadow-color) / 0.22);
+  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.12);
+
+  --font-family-base: "Instrument Sans", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-family-display: var(--font-family-base);
+  --font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+
+  --font-size-2xs: 0.6875rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-lg: 1.0625rem;
+  --font-size-xl: 1.1875rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.5rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --letter-spacing-tight: -0.015em;
+  --letter-spacing-tighter: -0.025em;
+  --letter-spacing-caps: 0.07em;
+
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
+
+  --border-width: 1px;
+  --border-width-thick: 2px;
+
+  /* Fixed control heights: padding-derived heights never aligned an input
+     to a button. Everything that sits on a form row uses these. */
+  --control-height-sm: 30px;
+  --control-height-md: 36px;
+  --control-height-lg: 44px;
+
+  --ring-color: var(--color-accent, var(--color-primary));
+  --ring-width: 2px;
+  --ring-offset: 2px;
+
+  /* v1 names kept as aliases so no component CSS has to change at once. */
+  --focus-ring-color: var(--ring-color);
+  --focus-ring-width: var(--ring-width);
+  --focus-ring-offset: var(--ring-offset);
+
+  --container-max-width: 1200px;
+  /* Height of a sticky navbar; fragment navigation scrolls past it. */
+  --scroll-padding-top: 4.5rem;
+
+  /* Layout frames (layouts/*). A theme retunes the frame here, never in
+     the layout CSS. */
+  --layout-max-width: 1400px;
+  --layout-measure: 70ch;
+  --layout-focus-width: 40rem;
+  --layout-sidebar-width: 16rem;
+  --layout-rail-width: 4.5rem;
+  --layout-aside-width: 18rem;
+  --layout-pane-width: 22rem;
+  --layout-gutter: clamp(var(--space-4), 3vw, var(--space-8));
+
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 320ms ease;
+
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-overlay: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-toast: 1060;
+}
+
+/*
+ * Dark mode: system-preference-driven by default, an explicit
+ * `data-theme` on <html> (see shared/js/theme-toggle.js) always wins
+ * over it in either direction. The block is intentionally duplicated —
+ * that's the standard pattern for this, not a mistake to DRY up.
+ *
+ * Note --color-primary inverts to near-white: a primary button in dark
+ * mode is light-on-ink, not ink-on-ink. Accent lightens so it keeps
+ * 4.5:1 as text on the dark surface.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #f2efe9;
+    --color-primary-strong: #ffffff;
+    --color-primary-contrast: #14130f;
+    --color-accent: #e8a87c;
+    --color-accent-strong: #f0bd9b;
+    --color-accent-contrast: #1c1b17;
+    /* Inverse surface is light in dark mode, so this flips too. */
+    --color-accent-inverse: #a8521f;
+    --color-secondary: #8b857c;
+    --color-secondary-strong: #a9a29a;
+    --color-secondary-contrast: #14130f;
+    --color-border-control: #6b665f;
+
+    --color-canvas: #14130f;
+    --color-surface: #1c1b17;
+    --color-surface-alt: #232118;
+    --color-surface-sunken: #232118;
+    --color-surface-inverse: #f2efe9;
+    --color-overlay: rgb(0 0 0 / 0.6);
+
+    --color-border-subtle: #232118;
+    --color-border: #2a2823;
+    --color-border-strong: #3a3730;
+
+    --color-text: #f2efe9;
+    --color-text-muted: #a9a29a;
+    --color-text-subtle: #969088;
+    --color-text-inverse: #14130f;
+    --color-disabled: #232118;
+    --color-disabled-text: #969088;
+
+    /* Status hues lighten too: the light-mode values are tuned to pass as
+       text on a light surface, so they fail on a dark one. Their -contrast
+       pairs go dark, since these fills are now light. */
+    --color-success: #4eae76;
+    --color-success-contrast: #1c1b17;
+    --color-warning: #c99a3e;
+    --color-warning-contrast: #1c1b17;
+    --color-danger: #d1655a;
+    --color-danger-contrast: #1c1b17;
+    --color-info: #5aa2c4;
+    --color-info-contrast: #1c1b17;
+
+    --color-success-soft: #16321f;
+    --color-success-soft-text: #8fd4a8;
+    --color-warning-soft: #33260d;
+    --color-warning-soft-text: #e5bf78;
+    --color-danger-soft: #351a16;
+    --color-danger-soft-text: #f0a49b;
+    --color-info-soft: #122a33;
+    --color-info-soft-text: #8fc6d8;
+
+    --shadow-color: 0 0 0;
+    --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-primary: #f2efe9;
+  --color-primary-strong: #ffffff;
+  --color-primary-contrast: #14130f;
+  --color-accent: #e8a87c;
+  --color-accent-strong: #f0bd9b;
+  --color-accent-contrast: #1c1b17;
+  --color-accent-inverse: #a8521f;
+  --color-secondary: #8b857c;
+  --color-secondary-strong: #a9a29a;
+  --color-secondary-contrast: #14130f;
+  --color-border-control: #6b665f;
+
+  --color-canvas: #14130f;
+  --color-surface: #1c1b17;
+  --color-surface-alt: #232118;
+  --color-surface-sunken: #232118;
+  --color-surface-inverse: #f2efe9;
+  --color-overlay: rgb(0 0 0 / 0.6);
+
+  --color-border-subtle: #232118;
+  --color-border: #2a2823;
+  --color-border-strong: #3a3730;
+
+  --color-text: #f2efe9;
+  --color-text-muted: #a9a29a;
+  --color-text-subtle: #969088;
+  --color-text-inverse: #14130f;
+  --color-disabled: #232118;
+  --color-disabled-text: #969088;
+
+  --color-success: #4eae76;
+  --color-success-contrast: #1c1b17;
+  --color-warning: #c99a3e;
+  --color-warning-contrast: #1c1b17;
+  --color-danger: #d1655a;
+  --color-danger-contrast: #1c1b17;
+  --color-info: #5aa2c4;
+  --color-info-contrast: #1c1b17;
+
+  --color-success-soft: #16321f;
+  --color-success-soft-text: #8fd4a8;
+  --color-warning-soft: #33260d;
+  --color-warning-soft-text: #e5bf78;
+  --color-danger-soft: #351a16;
+  --color-danger-soft-text: #f0a49b;
+  --color-info-soft: #122a33;
+  --color-info-soft-text: #8fc6d8;
+
+  --shadow-color: 0 0 0;
+  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}

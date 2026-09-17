@@ -1,0 +1,21 @@
+/*
+ * Stacked: header → content → footer. The plainest frame — a marketing
+ * site, a settings page, anything without side navigation.
+ *
+ * mobile: navbar collapses to its own toggle (navbar.css) · tablet+:
+ * horizontal nav · wide: boxed caps the content column, fluid grows the
+ * gutter.
+ */
+.layout--stacked .layout__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Fluid on very wide screens: keep text runs readable by capping the
+   *inner* column even though the frame is full-width. */
+@media screen and (min-width: 1400px) {
+  .layout--stacked:not(.layout--boxed) .layout__content {
+    padding-inline: max(var(--layout-gutter), calc((100% - var(--layout-max-width)) / 2));
+  }
+}

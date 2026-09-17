@@ -1,0 +1,148 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text);
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: var(--font-size-4xl);
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+}
+
+/* Vertical rhythm for bare flow content — headings, paragraphs, lists,
+   quotes, code blocks and rules that carry no class: room below each, a
+   larger gap above a heading that follows content, none at the edges of a
+   container. Components put a class on every heading they own, so their
+   spacing stays theirs; `:where()` keeps the specificity at zero. */
+:where(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, hr):not([class]) {
+  margin-block: 0 var(--space-3);
+}
+
+:where(h1, h2, h3, h4):not([class]) {
+  margin-block: var(--space-6) var(--space-3);
+}
+
+:where(h1):not([class]) {
+  margin-block-end: var(--space-4);
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, hr):not([class]):first-child {
+  margin-block-start: 0;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, hr):not([class]):last-child {
+  margin-block-end: 0;
+}
+
+small,
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+
+/* <=11px text must use --color-text-subtle, never --color-text-muted's
+   lighter neighbours: this is the smallest size that still clears 4.5:1. */
+.text-2xs {
+  font-size: var(--font-size-2xs);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-subtle {
+  color: var(--color-text-subtle);
+}
+
+.text-mono {
+  font-family: var(--font-family-mono);
+}
+
+.text-caps {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.text-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+a:not([class]) {
+  color: var(--color-accent, var(--color-primary));
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    color: var(--color-accent-strong, var(--color-primary-strong));
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+}
+
+.link {
+  color: var(--color-accent, var(--color-primary));
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+}
+
+/* Weight utilities — so demos and themes never need an inline style. */
+.text-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.text-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-bold {
+  font-weight: var(--font-weight-bold);
+}

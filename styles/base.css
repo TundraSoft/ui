@@ -1,0 +1,85 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 0;
+  z-index: var(--z-toast);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 0 0 var(--radius-sm) 0;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Hidden by default; revealed only once shared/js/enhance.js has run —
+   see its own comment for why this is opt-in-only, not no-js/js paired. */
+.js-only {
+  display: none;
+}
+
+.js .js-only {
+  display: inline-flex;
+}
+
+/* Spacing utilities — the few steps a composed page needs between
+   stacked partials; anything more is a theme's own layout CSS. */
+.mt-1 {
+  margin-top: var(--space-1);
+}
+
+.mt-2 {
+  margin-top: var(--space-2);
+}
+
+.mt-3 {
+  margin-top: var(--space-3);
+}
+
+.mt-4 {
+  margin-top: var(--space-4);
+}
+
+/* Responsive visibility — hide a non-essential label on narrow screens
+   (e.g. the user's name next to their avatar in a navbar). */
+@media screen and (max-width: 575px) {
+  .hide-sm {
+    display: none !important;
+  }
+}
+
+/* Vertical rhythm for stacked partials inside a slot. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--sm {
+  gap: var(--space-3);
+}
+
+.stack--lg {
+  gap: var(--space-6);
+}

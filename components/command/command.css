@@ -1,0 +1,234 @@
+/*
+ * Command palette. Results come from the server on each keystroke: the
+ * input is data-action + data-target, the list is the swap target. No
+ * client-side index, so it scales with the catalogue, not the bundle.
+ */
+.command {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  justify-content: center;
+  padding: min(12vh, var(--space-8)) var(--space-4) var(--space-4);
+  background: var(--color-overlay);
+  /* Short viewports: the overlay scrolls instead of the sheet clipping. */
+  overflow-y: auto;
+}
+
+.command__search:focus-within {
+  box-shadow: inset 0 calc(var(--ring-width) * -1) 0 var(--ring-color);
+}
+
+.command__esc:focus-visible,
+.command__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+.command[hidden] {
+  display: none;
+}
+
+/* Embedded (docs/demo) variant: no overlay, sits in normal flow. */
+.command--inline {
+  position: static;
+  inset: auto;
+  padding: 0;
+  background: none;
+  display: block;
+}
+
+.command__sheet {
+  width: 100%;
+  max-width: 34rem;
+  align-self: flex-start;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+.command--inline .command__sheet {
+  max-width: none;
+}
+
+.command__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.command__search-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--color-text-subtle);
+}
+
+.command__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.command__input::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.command__list {
+  padding: var(--space-1);
+  max-height: min(22rem, 55vh);
+  overflow-y: auto;
+}
+
+.command__group {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.command__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.command__item:hover {
+  background: var(--color-surface-sunken);
+}
+
+.command__item[data-active] {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.command__item-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  opacity: 0.75;
+}
+
+.command__item-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+}
+
+.command__item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+}
+
+.command__match {
+  font-weight: var(--font-weight-semibold);
+}
+
+.command__item-meta {
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+}
+
+.command__item[data-active] .command__item-meta,
+.command__item[data-active] .command__item-badge {
+  color: var(--color-primary-contrast);
+  color: color-mix(in oklab, var(--color-primary-contrast) 70%, transparent);
+  background: transparent;
+}
+
+.command__kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+}
+
+.command__item[data-active] .command__kbd {
+  background: rgb(128 128 128 / 0.3);
+  background: color-mix(in oklab, var(--color-primary-contrast) 16%, transparent);
+  color: var(--color-primary-contrast);
+}
+
+.command__esc {
+  flex: 0 0 auto;
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+}
+
+.command__esc:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.command__empty {
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.command__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-alt);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-subtle);
+}
+
+.command__count {
+  margin-inline-start: auto;
+  font-family: var(--font-family-mono);
+}
+
+/* A field-shaped trigger for the palette (navbar search box). Icon-only
+   below sm; the label and ⌘K hint hide via .hide-sm in the template. */
+.command__trigger {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+@media screen and (min-width: 576px) {
+  .command__trigger {
+    min-width: 14rem;
+    justify-content: flex-start;
+  }
+
+  .command__trigger .command__kbd {
+    margin-inline-start: auto;
+  }
+}

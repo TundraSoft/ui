@@ -1,0 +1,29 @@
+/*
+ * Focus: one centred column and (almost) no chrome. Checkout, a wizard,
+ * an error page — anything where the only job is the task in front of
+ * the user.
+ *
+ * mobile: full width · tablet+: centred at --layout-focus-width
+ * (`--wide` uses --layout-measure) · wide: same, more air.
+ */
+.layout--focus .layout__header {
+  justify-content: center;
+  padding: var(--space-4) var(--layout-gutter);
+  background: transparent;
+}
+
+.layout--focus .layout__content {
+  width: 100%;
+  max-width: var(--layout-focus-width);
+  margin-inline: auto;
+  padding-block: var(--space-8);
+}
+
+.layout--focus-wide .layout__content {
+  max-width: var(--layout-measure);
+}
+
+.layout--focus .layout__footer {
+  border-top: none;
+  text-align: center;
+}

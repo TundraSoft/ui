@@ -1,0 +1,59 @@
+.wizard__steps {
+  display: flex;
+  list-style: none;
+  margin-bottom: var(--space-6);
+}
+
+.wizard__step {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.wizard__step:not(:last-child)::after {
+  content: "";
+  flex: 1 1 auto;
+  height: var(--border-width);
+  background: var(--color-border);
+  margin-inline: var(--space-2);
+}
+
+.wizard__step-index {
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  border: var(--border-width-thick) solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+}
+
+.wizard__step-label {
+  white-space: nowrap;
+}
+
+.wizard__step--active {
+  color: var(--color-text);
+}
+
+.wizard__step--active .wizard__step-index {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.wizard__step--done .wizard__step-index {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+@media screen and (max-width: 575px) {
+  .wizard__step-label {
+    display: none;
+  }
+}

@@ -1,0 +1,243 @@
+/*
+ * Portal — product/marketing theme. Cool bright palette, geometric sans,
+ * soft large radii. Unlayered, loaded after the base bundle.
+ *
+ * Its layout contribution is the split auth panel: a two-column shell
+ * with an ink narrative side and a form side. AuthLayout from the base
+ * handles the mechanics; this adds the treatment.
+ */
+:root {
+  --color-primary: #3b4fd8;
+  --color-primary-strong: #2f40b5;
+  --color-primary-contrast: #ffffff;
+  --color-accent: #3b4fd8;
+  --color-accent-strong: #2f40b5;
+  --color-accent-contrast: #ffffff;
+  --color-secondary: #5f6880;
+  --color-secondary-strong: #4d5670;
+  --color-secondary-contrast: #ffffff;
+  --color-border-control: #8891a8;
+
+  --color-canvas: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9fafd;
+  --color-surface-sunken: #e7ebf6;
+  --color-surface-inverse: #1b2140;
+  --color-overlay: rgb(27 33 64 / 0.5);
+
+  --color-border-subtle: #eef1f8;
+  --color-border: #dfe4ef;
+  --color-border-strong: #c7cee0;
+
+  --color-text: #141a2b;
+  --color-text-muted: #4d5670;
+  --color-text-subtle: #5f6880;
+  --color-text-inverse: #eef1fa;
+  --color-disabled: #eef1f8;
+  --color-disabled-text: #5f6880;
+
+  --color-success: #167a5b;
+  --color-success-soft: #dcf2ea;
+  --color-success-soft-text: #0f5340;
+  --color-warning: #9a6510;
+  --color-warning-soft: #fbefd9;
+  --color-warning-soft-text: #6b4509;
+  --color-danger: #b5303c;
+  --color-danger-soft: #fbe5e8;
+  --color-danger-soft-text: #7a1f28;
+  --color-info: #1f5f8f;
+  --color-info-soft: #e2edf7;
+  --color-info-soft-text: #14405f;
+
+  /* Softer geometry and a taller control, for a marketing surface. */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --control-height-sm: 34px;
+  --control-height-md: 42px;
+  --control-height-lg: 48px;
+
+  --font-family-base: "Space Grotesk", system-ui, sans-serif;
+
+  --shadow-color: 20 26 43;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #8b9bff;
+    --color-primary-strong: #a3b0ff;
+    --color-primary-contrast: #101528;
+    --color-accent: #8b9bff;
+    --color-accent-strong: #a3b0ff;
+    --color-accent-contrast: #101528;
+    --color-secondary: #a8b0c8;
+    --color-secondary-strong: #c3c9dc;
+    --color-secondary-contrast: #101528;
+    --color-disabled: #1a2137;
+    --color-disabled-text: #8f97b0;
+    --color-border-control: #5f6a8a;
+
+    /* Status hues were tuned for the light surface; re-tune for dark. */
+    --color-success: #4eae76;
+    --color-success-contrast: #101528;
+    --color-warning: #c99a3e;
+    --color-warning-contrast: #101528;
+    --color-danger: #d1655a;
+    --color-danger-contrast: #101528;
+    --color-info: #5aa2c4;
+    --color-info-contrast: #101528;
+
+    --color-canvas: #0d1120;
+    --color-surface: #141a2b;
+    --color-surface-alt: #1a2137;
+    --color-surface-sunken: #1a2137;
+    --color-surface-inverse: #eef1fa;
+
+    --color-border-subtle: #1a2137;
+    --color-border: #242c47;
+    --color-border-strong: #323b5c;
+
+    --color-text: #eef1fa;
+    --color-text-muted: #a8b0c8;
+    --color-text-subtle: #8f97b0;
+    --color-text-inverse: #101528;
+
+    --color-success-soft: #12312a;
+    --color-success-soft-text: #86cfb8;
+    --color-warning-soft: #2f2410;
+    --color-warning-soft-text: #dbb878;
+    --color-danger-soft: #33161c;
+    --color-danger-soft-text: #eaa0a8;
+    --color-info-soft: #13283d;
+    --color-info-soft-text: #9cc2e0;
+
+    --shadow-color: 0 0 0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-primary: #8b9bff;
+  --color-primary-strong: #a3b0ff;
+  --color-primary-contrast: #101528;
+  --color-accent: #8b9bff;
+  --color-accent-strong: #a3b0ff;
+  --color-accent-contrast: #101528;
+  --color-secondary: #a8b0c8;
+  --color-secondary-strong: #c3c9dc;
+  --color-secondary-contrast: #101528;
+  --color-disabled: #1a2137;
+  --color-disabled-text: #8f97b0;
+  --color-border-control: #5f6a8a;
+
+  --color-success: #4eae76;
+  --color-success-contrast: #101528;
+  --color-warning: #c99a3e;
+  --color-warning-contrast: #101528;
+  --color-danger: #d1655a;
+  --color-danger-contrast: #101528;
+  --color-info: #5aa2c4;
+  --color-info-contrast: #101528;
+
+  --color-canvas: #0d1120;
+  --color-surface: #141a2b;
+  --color-surface-alt: #1a2137;
+  --color-surface-sunken: #1a2137;
+  --color-surface-inverse: #eef1fa;
+
+  --color-border-subtle: #1a2137;
+  --color-border: #242c47;
+  --color-border-strong: #323b5c;
+
+  --color-text: #eef1fa;
+  --color-text-muted: #a8b0c8;
+  --color-text-subtle: #8f97b0;
+  --color-text-inverse: #101528;
+
+  --color-success-soft: #12312a;
+  --color-success-soft-text: #86cfb8;
+  --color-warning-soft: #2f2410;
+  --color-warning-soft-text: #dbb878;
+  --color-danger-soft: #33161c;
+  --color-danger-soft-text: #eaa0a8;
+  --color-info-soft: #13283d;
+  --color-info-soft-text: #9cc2e0;
+
+  --shadow-color: 0 0 0;
+}
+
+/* The primary CTA gets a coloured lift — a marketing affordance the base
+   deliberately does not ship. */
+.portal-cta {
+  box-shadow: 0 6px 16px -4px rgb(59 79 216 / 0.5);
+  box-shadow: 0 6px 16px -4px color-mix(in oklab, var(--color-primary) 50%, transparent);
+}
+
+/* Custom partial: the split auth shell. */
+.portal-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  min-height: 100vh;
+}
+
+.portal-split__narrative {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-10) var(--space-8);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+
+.portal-split__form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: var(--space-10) var(--space-8);
+  background: var(--color-canvas);
+}
+
+.portal-quote {
+  margin-top: auto;
+  padding: var(--space-5);
+  border: var(--border-width) solid rgb(238 241 250 / 0.12);
+  border: var(--border-width) solid color-mix(in oklab, var(--color-text-inverse) 12%, transparent);
+  border-radius: var(--radius-lg);
+  background: rgb(238 241 250 / 0.06);
+  background: color-mix(in oklab, var(--color-text-inverse) 6%, transparent);
+}
+
+.portal-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.portal-check__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: rgb(59 79 216 / 0.35);
+  background: color-mix(in oklab, var(--color-primary) 35%, transparent);
+  color: var(--color-primary-strong);
+  color: color-mix(in oklab, var(--color-primary) 45%, var(--color-text-inverse));
+}
+
+@media screen and (max-width: 991px) {
+  .portal-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portal-split__narrative {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .portal-split__form {
+    padding: var(--space-6) var(--space-5);
+  }
+}

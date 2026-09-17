@@ -1,0 +1,226 @@
+/*
+ * Console — dark-first operations theme.
+ *
+ * Unlayered on purpose: CSS outside any @layer beats everything inside
+ * one, so this file overrides the base with no !important and no
+ * specificity coordination. Load it AFTER the base bundle.
+ *
+ * Layout composition (mini icon rail + sticky topbar + dense grid) is
+ * this theme's own job; the base ships no fixed layouts.
+ */
+:root,
+:root[data-theme="dark"] {
+  --color-primary: #7ee0c0;
+  --color-primary-strong: #96e8cd;
+  --color-primary-contrast: #0f1115;
+  --color-accent: #7ee0c0;
+  --color-accent-strong: #96e8cd;
+  --color-accent-contrast: #0f1115;
+  --color-accent-inverse: #0f6b52;
+  --color-secondary: #8b93a1;
+  --color-secondary-strong: #a7aeba;
+  --color-secondary-contrast: #0f1115;
+  --color-border-control: #4d5566;
+
+  --color-canvas: #0f1115;
+  --color-surface: #16191f;
+  --color-surface-alt: #0f1115;
+  --color-surface-sunken: #1d2128;
+  --color-surface-inverse: #e6e9ef;
+  --color-overlay: rgb(4 6 9 / 0.7);
+
+  --color-border-subtle: #1d2128;
+  --color-border: #262b34;
+  --color-border-strong: #323844;
+
+  --color-text: #e6e9ef;
+  --color-text-muted: #a7aeba;
+  --color-text-subtle: #8b93a1;
+  --color-text-inverse: #0f1115;
+  --color-disabled: #1d2128;
+  --color-disabled-text: #6d7583;
+
+  /* Every status token is set here, not inherited: the base's light
+     values would otherwise leak in whenever the OS says "light" and no
+     data-theme is set, and the *-contrast pairs must be dark on these
+     light fills. */
+  --color-success: #4eae76;
+  --color-success-contrast: #0f1115;
+  --color-success-soft: #16302a;
+  --color-success-soft-text: #8fd4a8;
+  --color-warning: #c99a3e;
+  --color-warning-contrast: #0f1115;
+  --color-warning-soft: #33260d;
+  --color-warning-soft-text: #e5bf78;
+  --color-danger: #d1655a;
+  --color-danger-contrast: #0f1115;
+  --color-danger-soft: #351a16;
+  --color-danger-soft-text: #f0a49b;
+  --color-info: #5aa2c4;
+  --color-info-contrast: #0f1115;
+  --color-info-soft: #122a33;
+  --color-info-soft-text: #9fcde0;
+
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+
+  --shadow-color: 0 0 0;
+  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+/*
+ * Console is dark in both modes: an ops console on a wall display should
+ * not flip to a light palette because someone's OS says so. The light
+ * block is therefore a deliberate near-copy, not an oversight — and
+ * [data-theme="light"] still gets a real (if dim) light variant so the
+ * theme toggle is not a dead control.
+ */
+:root[data-theme="light"] {
+  --color-primary: #0f6b52;
+  --color-primary-strong: #0b573f;
+  --color-primary-contrast: #f4fbf8;
+  --color-accent: #0f6b52;
+  --color-accent-strong: #0b573f;
+  --color-accent-contrast: #f4fbf8;
+
+  --color-canvas: #eef1f5;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f8fa;
+  --color-surface-sunken: #eef1f5;
+  --color-surface-inverse: #16191f;
+
+  --color-border-subtle: #eef1f5;
+  --color-border: #dde2e9;
+  --color-border-strong: #c6cdd7;
+
+  --color-text: #16191f;
+  --color-text-muted: #565f6d;
+  --color-text-subtle: #6d7583;
+  --color-text-inverse: #f6f8fa;
+  --color-disabled: #eef1f5;
+  --color-disabled-text: #6d7583;
+  --color-secondary: #565f6d;
+  --color-secondary-strong: #3f4753;
+  --color-secondary-contrast: #ffffff;
+  --color-accent-inverse: #7ee0c0;
+  --color-border-control: #8b95a6;
+  --color-overlay: rgb(22 25 31 / 0.5);
+
+  /* Light-tuned status set (the dark block's values fail on white). */
+  --color-success: #1f7a4d;
+  --color-success-contrast: #f4fbf8;
+  --color-success-soft: #e4f2e9;
+  --color-success-soft-text: #14543a;
+  --color-warning: #9a6200;
+  --color-warning-contrast: #ffffff;
+  --color-warning-soft: #fbf0da;
+  --color-warning-soft-text: #6e4600;
+  --color-danger: #b8342a;
+  --color-danger-contrast: #ffffff;
+  --color-danger-soft: #fae7e4;
+  --color-danger-soft-text: #7d2620;
+  --color-info: #1f6a84;
+  --color-info-contrast: #ffffff;
+  --color-info-soft: #e2eff4;
+  --color-info-soft-text: #114a5e;
+
+  --shadow-color: 22 25 31;
+}
+
+/* Custom partials: the icon rail and stat tiles are the theme's, not the
+   base's. Both sit outside @layer, same as the token block above. */
+.console-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+  width: 60px;
+  padding-block: var(--space-3);
+  background: var(--color-surface);
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.console-rail__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-weight: var(--font-weight-bold);
+}
+
+.console-rail__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-subtle);
+}
+
+.console-rail__link:hover {
+  color: var(--color-text);
+}
+
+.console-rail__link[aria-current="page"] {
+  background: var(--color-border);
+  color: var(--color-primary);
+}
+
+.console-rail__spacer {
+  margin-top: auto;
+}
+
+.console-stat {
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.console-stat__label {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-caps);
+  color: var(--color-text-subtle);
+}
+
+.console-stat__value {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.console-stat__unit {
+  margin-inline-start: 3px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-subtle);
+}
+
+.console-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 24px;
+  margin-top: var(--space-2);
+}
+
+.console-spark__bar {
+  flex: 1;
+  border-radius: 1px;
+  background: var(--color-border);
+}
+
+.console-spark__bar--peak {
+  background: var(--color-primary);
+}

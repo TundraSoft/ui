@@ -1,0 +1,53 @@
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: var(--radius-sm);
+}
+
+.dropdown__trigger:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.dropdown__panel {
+  position: absolute;
+  top: 100%;
+  inset-inline-start: 0;
+  margin-top: var(--space-1);
+  /* max-content, not shrink-to-fit: an absolutely positioned panel
+     otherwise sizes against its (possibly tiny) trigger wrapper — a
+     split-button caret — and wraps every label. */
+  width: max-content;
+  min-width: 10rem;
+  max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  padding: var(--space-2);
+}
+
+.dropdown__panel--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+/* dropdown.js switches a panel to fixed positioning (top/left set from
+   the trigger's rect via CSSOM, not an inline attribute) when the
+   dropdown sits inside a scroll container that would otherwise clip it —
+   a row-actions menu in a table body, for instance. */
+.dropdown__panel--fixed {
+  position: fixed;
+  inset-inline: auto;
+  margin-top: 0;
+}

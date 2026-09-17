@@ -1,0 +1,252 @@
+/*
+ * Dense sibling of .table: 34px rows, sticky header, selection column,
+ * optional pinned first column. Renders as a bare fragment — the sticky
+ * offsets are relative to .data-table__scroll, not the viewport, so a
+ * swapped-in fragment behaves the same as a server-rendered one.
+ */
+.data-table {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  /* No overflow:hidden — it clipped row-action dropdowns. Corners are
+     rounded on the first/last child instead. */
+}
+
+.data-table > :first-child {
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.data-table > :last-child {
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+.data-table__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.data-table__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Shown only when the selection is non-empty; server-rendered or toggled
+   by shared/js/v2-behaviors.js. */
+.data-table__bulk {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+}
+
+.data-table__bulk[hidden] {
+  display: none;
+}
+
+.data-table__bulk-count {
+  font-weight: var(--font-weight-medium);
+}
+
+.data-table__bulk-sep {
+  width: var(--border-width);
+  height: 16px;
+  background: var(--color-text-muted);
+  background: color-mix(in oklab, var(--color-text-inverse) 20%, transparent);
+}
+
+.data-table__bulk .btn {
+  height: 26px;
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-xs);
+  background: transparent;
+  border-color: var(--color-text-muted);
+  border-color: color-mix(in oklab, var(--color-text-inverse) 22%, transparent);
+  color: var(--color-text-inverse);
+  box-shadow: none;
+}
+
+.data-table__bulk .btn:hover {
+  background: rgb(128 128 128 / 0.25);
+  background: color-mix(in oklab, var(--color-text-inverse) 10%, transparent);
+}
+
+.data-table__bulk .btn--danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-danger-contrast);
+}
+
+.data-table__scroll {
+  position: relative;
+  overflow: auto;
+  max-height: var(--data-table-max-height, none);
+}
+
+/* Height steps — the template picks one instead of emitting an inline
+   custom property (CSP). Themes retune by overriding the variable. */
+.data-table__scroll--sm {
+  --data-table-max-height: 240px;
+}
+
+.data-table__scroll--md {
+  --data-table-max-height: 400px;
+}
+
+.data-table__scroll--lg {
+  --data-table-max-height: 600px;
+}
+
+.data-table__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-sm);
+}
+
+.data-table__table th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 34px;
+  padding-inline: var(--space-4);
+  text-align: start;
+  white-space: nowrap;
+  background: var(--color-surface-alt);
+  border-bottom: var(--border-width) solid var(--color-border);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.data-table__table td {
+  height: 34px;
+  padding-inline: var(--space-4);
+  white-space: nowrap;
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface);
+}
+
+.data-table__table tbody tr:hover td {
+  background: var(--color-surface-alt);
+}
+
+/* Selected rows get a tint derived from the accent so it reads as
+   "acted on" rather than just "hovered". */
+.data-table__row--selected td {
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 5%, var(--color-surface));
+}
+
+.data-table__select {
+  width: 38px;
+  padding-inline: 0 0;
+  padding-inline-start: var(--space-4);
+}
+
+/* Pin the identifying column so a wide table stays readable. */
+.data-table__cell--pinned {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  border-inline-end: var(--border-width) solid var(--color-border-subtle);
+}
+
+th.data-table__cell--pinned {
+  z-index: 4;
+}
+
+.data-table__mono {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.data-table__num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Native checkboxes at a usable size; the cell padding makes the target. */
+.data-table__select input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-accent, var(--color-primary));
+  cursor: pointer;
+}
+
+.data-table__select input:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.data-table__actions {
+  width: 40px;
+  text-align: center;
+}
+
+.data-table__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-alt);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Sort links (rAPId swaps, see data-table.ts) and the empty slot — moved
+   here from the retired `table` component. */
+.data-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+th[aria-sort] .data-table__sort {
+  color: var(--color-text);
+}
+
+.data-table__sort:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.data-table__empty {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* An `Empty` dropped into the slot sits centred, not hugging the left. */
+.data-table__empty > .empty {
+  justify-content: center;
+  margin-inline: auto;
+}

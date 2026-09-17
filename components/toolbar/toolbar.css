@@ -1,0 +1,58 @@
+/* Toolbar: a wrapping row of controls above a list/table — search,
+   filters, an action. `.toolbar__end` pushes its group to the far edge. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.toolbar__end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-inline-start: auto;
+}
+
+/* Controls in a toolbar size to content, not to the row. */
+.toolbar .input-icon {
+  flex: 1 1 12rem;
+  max-width: 20rem;
+}
+
+.toolbar .select {
+  width: auto;
+  min-width: 11rem;
+}
+
+.toolbar .datepicker {
+  width: auto;
+}
+
+.toolbar .datepicker__trigger {
+  width: auto;
+  min-width: 15rem;
+}
+
+/* Inside a DataTable's own toolbar slot there is already a row. */
+.data-table__toolbar > .toolbar {
+  display: contents;
+}
+
+@media screen and (max-width: 575px) {
+  .toolbar .input-icon,
+  .toolbar .datepicker__trigger,
+  .toolbar .select {
+    flex-basis: 100%;
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .toolbar__end {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+}
