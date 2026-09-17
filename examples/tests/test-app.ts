@@ -440,9 +440,9 @@ for (
   ok(err.page && await stillSamePage(page), "forms: invalid submit caused a navigation");
 
   // Fix it: success state swaps in.
-  await page.click("#name", { clickCount: 3 });
+  await page.click("#name", { count: 3 });
   await page.type("#name", "Ada Lovelace");
-  await page.click("#email", { clickCount: 3 });
+  await page.click("#email", { count: 3 });
   await page.type("#email", "ada@example.com");
   await click(page, '#signup button[type="submit"]');
   await waitForSwaps(page, 2, "forms valid submit");

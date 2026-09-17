@@ -4,7 +4,7 @@
  * app's e2e test all use this list, so "every supported chart" is a
  * single place to keep in step with `chartTypes` in components/chart.
  */
-import { type Html, html } from "@tundralibs/rapid/ui";
+import type { Html } from "@tundralibs/rapid/ui";
 import { Card } from "../../components/card/card.ts";
 import { Chart, type ChartProps, type ChartType, chartTypes } from "../../components/chart/chart.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";

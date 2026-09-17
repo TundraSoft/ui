@@ -16,13 +16,30 @@ const env = getEnv();
 export const CHROME_PATH: string = env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 export const HERMETIC: boolean = env.HERMETIC === "1" || env.HERMETIC === "true";
 
-export function launch(): Promise<Browser> {
+/**
+ * Under Node the suites run through tsx, whose esbuild transform keeps
+ * function names by wrapping every nested function in a `__name(fn, "fn")`
+ * helper. Puppeteer serialises `page.evaluate` callbacks with `toString()`,
+ * so those helper calls reach the browser without the helper — every
+ * page gets a no-op `__name` before any script runs. Deno and Bun never
+ * emit it; the shim is inert there.
+ */
+const NAME_SHIM = "globalThis.__name = globalThis.__name || ((fn) => fn);";
+
+export async function launch(): Promise<Browser> {
   const args = ["--disable-gpu"];
   if (env.CI) args.push("--no-sandbox", "--disable-dev-shm-usage");
   if (HERMETIC) {
     args.push("--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE localhost, EXCLUDE cdn.jsdelivr.net");
   }
-  return puppeteer.launch({ headless: true, executablePath: CHROME_PATH, args });
+  const browser = await puppeteer.launch({ headless: true, executablePath: CHROME_PATH, args });
+  const newPage = browser.newPage.bind(browser);
+  browser.newPage = async () => {
+    const page = await newPage();
+    await page.evaluateOnNewDocument(NAME_SHIM);
+    return page;
+  };
+  return browser;
 }
 
 /** A console error that is only the hermetic block at work, not a page bug. */
