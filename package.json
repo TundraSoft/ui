@@ -1,6 +1,6 @@
 {
   "name": "@tundralibs/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HTML + CSS + JS component and layout library; first-class UI layer for rAPId. The npm package carries the compiled dist/ bundle (served by jsDelivr); the TypeScript templates are published to JSR.",
   "license": "MIT",
   "type": "module",
