@@ -322,7 +322,7 @@ FCP/DCL/load, CSS/JS coverage, running animations). What changed, and the rules 
   render-blocking script on all ten admin pages: dashboard FCP ~1.4s → ~120ms; other pages make zero external requests);
   `chart.js` retries on `load` so a deferred library still initialises; skeleton shimmer is a translated `::after`
   (compositor), not an animated `background-position`; `CardMedia` defaults to `loading="lazy" decoding="async"`
-  (`loading: "eager"` for a hero). Bundle: ~19 KB gz CSS, ~13.5 KB gz JS.
+  (`loading: "eager"` for a hero). Bundle (minified since 0.1.1): ~14.6 KB gz CSS, ~11.3 KB gz JS.
 - **Known, deliberately not fixed**: toasts render under an open `<dialog>` (top layer beats any z-index — needs the
   Popover API, not 2022-baseline); `theme-toggle.js` runs after first paint so a stored dark preference flashes light
   for a frame (the CSP-clean fix is a server-set `data-theme` from a cookie, which is a rAPId app's job); RTL is
@@ -658,6 +658,13 @@ The rules that make that true (2026-09-15):
   `html\`…\``tagged templates — that is expected; it only adds whitespace
   between block-level tags, never inside an interpolation.`version.ts`
   is excluded from fmt (generated).
+- **The bundle ships minified** (`scripts/minify.ts`, esbuild's `transform` — the last step of `build-css.ts` and
+  `build-js.ts`, since 0.1.1): sources stay readable, `dist/ui.{css,js}` carry only a `/*! … */` license banner. esbuild
+  keeps the `color-mix()` fallback declarations, the `@layer` statement and every IIFE (verified before adopting it).
+  The banner deliberately has **no version in it**: `version.ts` hashes the built bytes and the release PR bumps the
+  version without rebuilding, so the bytes must not depend on it. `esbuild.stop()` is called so Deno exits. esbuild is
+  pinned **exactly** (not a caret range): 0.25.0 and 0.25.12 minify media queries differently, and the three runtimes
+  must produce the same bytes for the manifest's hashes to hold.
 
 ### Package: `@tundralibs/ui` (2026-09-16)
 

@@ -2,10 +2,12 @@
  * Concatenates every behaviour script into dist/ui.js: shared/js/*.js
  * first (sorted), then components/<name>/<name>.js for every component
  * that has one (sorted). Each file is an IIFE, so order only matters for
- * the shared helpers loading before anything that relies on them.
+ * the shared helpers loading before anything that relies on them. The
+ * concatenation is minified (scripts/minify.ts) before it is written.
  * Runtime-agnostic via @tundralibs/compat.
  */
 import { ensureDir, pathExists, readDir, readTextFile, writeTextFile } from "@tundralibs/compat/file";
+import { minify } from "./minify.ts";
 
 const outDir = "dist";
 const outFile = `${outDir}/ui.js`;
@@ -33,5 +35,5 @@ const chunks = await Promise.all(
 );
 
 await ensureDir(outDir);
-await writeTextFile(outFile, chunks.join("\n"));
+await writeTextFile(outFile, await minify(chunks.join("\n"), "js"));
 console.log(`Built ${outFile} (${files.length} files)`);

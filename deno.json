@@ -75,7 +75,8 @@
     "postcss-nesting": "npm:postcss-nesting@^13.0.0",
     "puppeteer-core": "npm:puppeteer-core@^25.11.0",
     "@tundralibs/rapid": "jsr:@tundralibs/rapid@0.2.0",
-    "@tundralibs/compat/path": "jsr:@tundralibs/compat@^2.7.2/path"
+    "@tundralibs/compat/path": "jsr:@tundralibs/compat@^2.7.2/path",
+    "esbuild": "npm:esbuild@0.25.12"
   },
   "publish": {
     "include": [
