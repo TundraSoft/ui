@@ -1,13 +1,12 @@
 name: CI
 
-# Runs on every branch push. The pull_request trigger exists for FORK
-# PRs only (their push events fire in the fork); same-repo PRs are
-# satisfied by the push run on the head commit, and the per-job `if`
-# skips the duplicate pull_request run.
+# Runs on every pull request (same-repo and fork) and on pushes to main.
+# main is protected: its ruleset requires these five jobs to pass on a PR
+# before it can merge, so the job names below are load-bearing.
 on:
   push:
     branches:
-      - "**"
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -29,7 +28,6 @@ env:
 jobs:
   quality:
     name: Format, lint, type-check, publish dry-run
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -75,7 +73,6 @@ jobs:
 
   audit:
     name: Dependency audit (high+)
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -93,7 +90,6 @@ jobs:
 
   browser:
     name: Browser suites (${{ matrix.name }})
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
