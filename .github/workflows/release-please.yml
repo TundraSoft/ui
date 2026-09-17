@@ -98,10 +98,9 @@ jobs:
           [ "$d" = "$p" ] && [ "$d" = "$v" ]
 
       - name: Publish to npm (the CDN bundle)
-        # Trusted publishing (OIDC) needs no secret once the package is
-        # configured for it on npmjs.com; NPM_TOKEN is the fallback.
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # Trusted publishing: the package on npmjs.com trusts this workflow
+        # in this repository, and npm exchanges the job's OIDC token for a
+        # publish credential. No secret is involved.
         run: npm publish --provenance --access public
 
       - name: Wait for jsDelivr
