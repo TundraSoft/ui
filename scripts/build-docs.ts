@@ -122,7 +122,7 @@ function propsTable(props: Prop[]): string {
 const usageSource = await readTextFile("examples/docs/usage.ts");
 const snippets: Record<string, string[]> = (() => {
   const out: Record<string, string[]> = {};
-  const keys = [...usageSource.matchAll(/^  "((?:components|layouts)\/[a-z-]+)": \[/gm)].map((m) => ({
+  const keys = [...usageSource.matchAll(/^ {2}"((?:components|layouts)\/[a-z-]+)": \[/gm)].map((m) => ({
     key: m[1]!,
     at: m.index!,
   }));
