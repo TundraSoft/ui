@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/TundraSoft/ui/compare/v0.2.0...v0.3.0) (2026-09-18)
+
+
+### Features
+
+* **deps:** require rAPId ^0.4.0 ([#9](https://github.com/TundraSoft/ui/issues/9)) ([5f32a84](https://github.com/TundraSoft/ui/commit/5f32a8428515977abb73aaaa2c3a788bf912340f))
+
 ## [0.2.0](https://github.com/TundraSoft/ui/compare/v0.1.2...v0.2.0) (2026-09-18)
 
 
