@@ -1,13 +1,16 @@
 # Components
 
 A tour of every component by group, with the props you reach for first and the behaviour that comes with it. Each
-heading links to the generated reference page with the complete prop table, CSS hooks and `data-*` attributes. All
+heading links to the generated reference page with the complete prop table, CSS hooks, `data-*` attributes, and a
+**Usage** section: one or two real call sites, each with the HTML it renders — the markup a plain page writes. All
 snippets are TypeScript against `@tundralibs/rapid/ui`'s `html`; the markup they produce is what a plain HTML page
 writes by hand.
 
 Common to every component: `attrs` spreads extra attributes onto the root (a caller's `class` is merged, not dropped);
 `id`s are stable and derived from what you pass (never counters), so `aria-controls`, `data-toggle` and history push
-survive a swap; nothing emits an inline style.
+survive a swap; nothing emits an inline style. For whole pages built from these — a sign-in page, a dashboard, an
+invoices table with bulk actions, an upload with progress — in both rAPId and plain HTML, see
+[Recipes](./UI-Recipes.md).
 
 ---
 
@@ -163,7 +166,10 @@ Dropzone({
 ```
 
 A native `<input type=file>` covers the area. Upload rows are server state (`progress` is a native `<progress>`;
-`removeHref` renders a POST form that swaps the row out).
+`removeHref` renders a POST form that swaps the row out). Put the dropzone in a `Form` with `data-action` /
+`data-target="#<dropzone id>"` / `data-swap="outer"` and the upload is a swap: dropzone.js renders a pending row per
+picked file on submit, fills its bar from rAPId's `rapid:progress`, and the reply (the `Dropzone` again, with your rows)
+replaces them. See the [upload recipe](./UI-Recipes.md#5-attachments-with-upload-progress).
 
 ### [Editor](./reference/components-editor.md)
 
@@ -237,16 +243,19 @@ DataTable<Invoice>({
   ],
   rows,
   rowKey: (r) => r.id,
-  bulkActions: html`${Button({ label: "Archive", size: "sm" })}${
-    Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })
-  }`,
+  bulkAction: "/invoices/bulk",
+  bulkActions: html`${
+    Button({ label: "Archive", size: "sm", type: "submit", attrs: { name: "op", value: "archive" } })
+  }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
   rowActions: (r) =>
-    Dropdown({
+    RowActions({
       id: `row-${r.id}`,
-      align: "end",
-      trigger: kebabIcon,
-      triggerClass: "btn btn--ghost btn--sm btn--icon",
-      content: Menu({ items }),
+      label: `Actions for ${r.id}`,
+      items: [
+        { label: "View", href: `/invoices/${r.id}` },
+        { label: "Duplicate", attrs: { "data-action": `/invoices/${r.id}/duplicate`, "data-method": "post" } },
+        { label: "Delete", danger: true, attrs: { "data-action": `/invoices/${r.id}/delete`, "data-method": "post" } },
+      ],
     }),
   toolbar: Input({ type: "search", size: "sm", placeholder: "Filter" }),
   footer: Pagination({ page: 2, totalPages: 8, buildHref: (p) => `/invoices?page=${p}`, target: "#invoices" }),
@@ -259,6 +268,20 @@ row actions, height caps, `empty` (any `Html`, e.g. an `Empty`) or `emptyMessage
 table and push history — make them point at the page route
 ([why](./UI-Rapid.md#a-pushable-regions-url-is-the-page-route)). Add `data-filter-scope` around it and
 `[data-table-search]` / `[data-table-filter]` controls for client-side filtering with no backend.
+
+**The bulk bar overlays the header row** while rows are selected (sticky, inside the scroll box, the select-all cell
+kept above it), so starting or clearing a selection never moves the rows. The trade-off is deliberate: while a selection
+exists the header band _is_ the action bar, so sort links are covered until it is cleared (Clear, or untick select-all);
+a selection made before a sort, page or back/forward swap is restored afterwards. The selection column is sticky at the
+start, a pinned column sits right after it.
+
+**Bulk actions post the selection.** With `bulkAction` set, the bulk bar and the rows sit in a `<form method="post">`
+that is a rAPId swap replacing the table (`outer` into `#<id>`); the toolbar and footer stay outside it, so a search box
+never submits it. Make each bulk button a submit that names its operation (`type: "submit"`,
+`attrs: { name: "op", value: "archive" }`) — the runtime posts the submitter too, so the handler receives `op` plus one
+`selected` entry per checked row, and answers with the re-rendered table (or a redirect without JavaScript, PRG). A
+selection survives sort and page swaps and back/forward: the script remembers it per table id and re-applies it after a
+GET swap; a POST reply renders whatever `selected` the server passes (usually nothing).
 
 ### [Pagination](./reference/components-pagination.md)
 

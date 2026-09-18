@@ -2,7 +2,6 @@
   "version": "5",
   "specifiers": {
     "jsr:@libs/xml@8": "8.0.0",
-    "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/collections@^1.1.3": "1.3.0",
     "jsr:@std/datetime@~0.225.7": "0.225.7",
     "jsr:@std/encoding@1.0.11": "1.0.11",
@@ -12,29 +11,22 @@
     "jsr:@std/jsonc@^1.0.2": "1.0.2",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
     "jsr:@std/path@^1.1.6": "1.1.6",
-    "jsr:@std/testing@^1.0.20": "1.0.20",
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "jsr:@std/xml@~0.1.3": "0.1.3",
     "jsr:@std/yaml@^1.2.0": "1.2.0",
     "jsr:@tundralibs/ambient@~0.2.8": "0.2.8",
-    "jsr:@tundralibs/cacher@^1.1.0": "1.1.0",
-    "jsr:@tundralibs/compat@2.7.2": "2.7.2",
     "jsr:@tundralibs/compat@^2.7.1": "2.7.2",
     "jsr:@tundralibs/compat@^2.7.2": "2.7.2",
     "jsr:@tundralibs/cronus@^1.0.5": "1.0.5",
     "jsr:@tundralibs/crypt@^1.4.0": "1.4.0",
     "jsr:@tundralibs/doctor@^1.5.2": "1.5.2",
-    "jsr:@tundralibs/drivers@^1.2.0": "1.2.1",
     "jsr:@tundralibs/guardian@^1.3.2": "1.3.2",
     "jsr:@tundralibs/id@^1.1.3": "1.1.3",
     "jsr:@tundralibs/metro-man@^1.0.7": "1.0.7",
-    "jsr:@tundralibs/oql@^1.1.3": "1.1.3",
-    "jsr:@tundralibs/pact@0.8": "0.8.0",
     "jsr:@tundralibs/radrouter@^1.3.1": "1.3.1",
-    "jsr:@tundralibs/rapid@*": "0.2.0",
+    "jsr:@tundralibs/rapid@0.2": "0.2.1",
     "jsr:@tundralibs/rapid@0.2.0": "0.2.0",
     "jsr:@tundralibs/restler@^1.1.7": "1.2.0",
-    "jsr:@tundralibs/restler@^1.2.0": "1.2.0",
     "jsr:@tundralibs/rpc@^1.2.1": "1.2.1",
     "jsr:@tundralibs/slogger@^1.2.3": "1.2.3",
     "jsr:@tundralibs/tracer@~0.6.3": "0.6.3",
@@ -59,9 +51,6 @@
       "dependencies": [
         "jsr:@std/xml"
       ]
-    },
-    "@std/assert@1.0.19": {
-      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e"
     },
     "@std/collections@1.3.0": {
       "integrity": "eb36b43d784477ea0b476483ac034a14bdd182aff921c812ecf662a1fcef9498"
@@ -96,13 +85,6 @@
         "jsr:@std/internal"
       ]
     },
-    "@std/testing@1.0.20": {
-      "integrity": "21380ed438672762e4ec549cbf4fe41c5b68f5598773a30b64abe7375513e721",
-      "dependencies": [
-        "jsr:@std/assert",
-        "jsr:@std/internal"
-      ]
-    },
     "@std/toml@1.0.11": {
       "integrity": "e084988b872ca4bad6aedfb7350f6eeed0e8ba88e9ee5e1590621c5b5bb8f715",
       "dependencies": [
@@ -118,20 +100,11 @@
     "@tundralibs/ambient@0.2.8": {
       "integrity": "732cc7820352f3fc2ce61e5872a601a7158350744f6e31fb164d80cbc014a5e6"
     },
-    "@tundralibs/cacher@1.1.0": {
-      "integrity": "7462caa4d9af2df0649abea3ca11c8eacb6ef96130ebbc8810b935412c0bea39",
-      "dependencies": [
-        "jsr:@tundralibs/compat@^2.7.2",
-        "jsr:@tundralibs/drivers",
-        "jsr:@tundralibs/utils@^1.3.0"
-      ]
-    },
     "@tundralibs/compat@2.7.2": {
       "integrity": "ba7703495effc74e0a3f1320414ae73dac464fe786675598c2de52c102b98912",
       "dependencies": [
         "jsr:@std/media-types",
         "jsr:@std/path",
-        "jsr:@std/testing",
         "npm:ws"
       ]
     },
@@ -156,15 +129,6 @@
         "jsr:@tundralibs/utils@^1.3.0"
       ]
     },
-    "@tundralibs/drivers@1.2.1": {
-      "integrity": "b245285ec873a09a01ba98a567f178984916d484aa5f4a056347602683aebf28",
-      "dependencies": [
-        "jsr:@tundralibs/compat@^2.7.2",
-        "jsr:@tundralibs/id",
-        "jsr:@tundralibs/oql",
-        "jsr:@tundralibs/utils@^1.3.0"
-      ]
-    },
     "@tundralibs/guardian@1.3.2": {
       "integrity": "f5e990fd46158a2cf3b83e79a1ac903bf747cdf0918c2a23039c1d6a6cb33398",
       "dependencies": [
@@ -185,24 +149,6 @@
         "jsr:@tundralibs/utils@^1.2.1"
       ]
     },
-    "@tundralibs/oql@1.1.3": {
-      "integrity": "a87891d39baaa5871966f0b6be85eb5252353e23c51f76f0250fce74ed340009",
-      "dependencies": [
-        "jsr:@tundralibs/utils@^1.3.0"
-      ]
-    },
-    "@tundralibs/pact@0.8.0": {
-      "integrity": "98ee466c629360f2d55775ee51ab6dd8bc9432205aea86592bc9cf5bcc42ac8d",
-      "dependencies": [
-        "jsr:@std/encoding",
-        "jsr:@tundralibs/cacher",
-        "jsr:@tundralibs/crypt",
-        "jsr:@tundralibs/guardian",
-        "jsr:@tundralibs/id",
-        "jsr:@tundralibs/restler@^1.2.0",
-        "jsr:@tundralibs/utils@^1.3.0"
-      ]
-    },
     "@tundralibs/radrouter@1.3.1": {
       "integrity": "bee838c8946005675247813313e19c2246ad9a9f1c287878040412945f3d1ad3",
       "dependencies": [
@@ -220,7 +166,23 @@
         "jsr:@tundralibs/doctor",
         "jsr:@tundralibs/id",
         "jsr:@tundralibs/metro-man",
-        "jsr:@tundralibs/pact",
+        "jsr:@tundralibs/radrouter",
+        "jsr:@tundralibs/rpc",
+        "jsr:@tundralibs/slogger",
+        "jsr:@tundralibs/tracer",
+        "jsr:@tundralibs/utils@^1.3.0"
+      ]
+    },
+    "@tundralibs/rapid@0.2.1": {
+      "integrity": "a38ace08a559f9cf691ed9ab22d221c99b99599503d880db48f4853040f2ce35",
+      "dependencies": [
+        "jsr:@tundralibs/ambient",
+        "jsr:@tundralibs/compat@^2.7.2",
+        "jsr:@tundralibs/cronus",
+        "jsr:@tundralibs/crypt",
+        "jsr:@tundralibs/doctor",
+        "jsr:@tundralibs/id",
+        "jsr:@tundralibs/metro-man",
         "jsr:@tundralibs/radrouter",
         "jsr:@tundralibs/rpc",
         "jsr:@tundralibs/slogger",
@@ -258,7 +220,7 @@
       "dependencies": [
         "jsr:@tundralibs/ambient",
         "jsr:@tundralibs/guardian",
-        "jsr:@tundralibs/restler@^1.1.7",
+        "jsr:@tundralibs/restler",
         "jsr:@tundralibs/utils@^1.3.0"
       ]
     },
@@ -1288,7 +1250,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@tundralibs/compat@^2.7.2",
-      "jsr:@tundralibs/rapid@0.2.0",
+      "jsr:@tundralibs/rapid@0.2",
       "npm:esbuild@0.25.12",
       "npm:postcss-import@^16.1.0",
       "npm:postcss-mixins@11",

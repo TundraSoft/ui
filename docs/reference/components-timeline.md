@@ -31,6 +31,61 @@ Timeline(props: TimelineProps): Html
 | `id` | `string` |  |  |
 | `items` | `TimelineItem[]` | yes |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### An invoice's history
+
+```ts
+Timeline({
+  items: [
+    { title: "Sent", meta: "1 Sep", status: "done" },
+    { title: "Reminder sent", meta: "15 Sep", status: "done" },
+    { title: "Payment due", meta: "1 Oct", status: "current" },
+  ],
+})
+```
+
+```html
+<ol class="timeline">
+  <li class="timeline__item timeline__item--done">
+    <span class="timeline__rail">
+      <span class="timeline__marker">
+        <svg width="12" height="12" width="2" …>…</svg>
+      </span>
+      <span class="timeline__line"></span>
+    </span>
+    <span class="timeline__body">
+      <span class="timeline__title">Sent</span>
+      <span class="timeline__meta">1 Sep</span>
+    </span>
+  </li>
+  <li class="timeline__item timeline__item--done">
+    <span class="timeline__rail">
+      <span class="timeline__marker">
+        <svg width="12" height="12" width="2" …>…</svg>
+      </span>
+      <span class="timeline__line"></span>
+    </span>
+    <span class="timeline__body">
+      <span class="timeline__title">Reminder sent</span>
+      <span class="timeline__meta">15 Sep</span>
+    </span>
+  </li>
+  <li class="timeline__item timeline__item--current">
+    <span class="timeline__rail">
+      <span class="timeline__marker"></span>
+      <span class="timeline__line"></span>
+    </span>
+    <span class="timeline__body">
+      <span class="timeline__title">Payment due</span>
+      <span class="timeline__meta">1 Oct</span>
+    </span>
+  </li>
+</ol>
+```
+
 ## CSS hooks
 
 Classes defined by `components/timeline/timeline.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

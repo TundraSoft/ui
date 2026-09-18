@@ -56,6 +56,85 @@ Command(props: CommandProps): Html
 type CommandListProps = Pick
 ```
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A ⌘K palette
+
+`⌘K` or any `[data-command-open="#palette"]` opens it; `action` makes the results server-side.
+
+```ts
+html`${
+  Button({ label: "Search", variant: "outline", size: "sm", attrs: { "data-command-open": "#palette" } })
+}${
+  Command({
+    id: "palette",
+    action: "/fragments/commands",
+    placeholder: "Jump to…",
+    items: [
+      { label: "New invoice", group: "Actions", icon: "plus", shortcut: "N" },
+      { label: "Contoso Ltd", group: "Clients", badge: "CL", href: "/clients/contoso" },
+    ],
+  })
+}`
+```
+
+```html
+<button type="button" class="btn btn--outline btn--sm" data-command-open="#palette">Search</button>
+<div class="command" id="palette" data-command hidden>
+  <div class="command__sheet" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="command__search">
+      <span class="command__search-icon">
+        <svg width="17" height="17" width="2" …>…</svg>
+      </span>
+      <input class="command__input" type="text" role="combobox" autocomplete="off" aria-label="Run a command" aria-controls="palette-list" aria-expanded="true" value="" placeholder="Jump to…" data-command-action="/fragments/commands" data-command-target="#palette-list">
+      <button type="button" class="command__kbd command__esc" data-command-dismiss>esc</button>
+    </div>
+    <div class="command__list" id="palette-list" role="listbox">
+      <div class="command__group" role="presentation">Actions</div>
+      <button type="button" class="command__item" id="palette-item-0" role="option">
+        <span class="command__item-icon">
+          <svg width="16" height="16" width="2" …>…</svg>
+        </span>
+        <span class="command__item-label">New invoice</span>
+        <span class="command__kbd">N</span>
+      </button>
+      <div class="command__group" role="presentation">Clients</div>
+      <a class="command__item" id="palette-item-1" href="/clients/contoso" role="option">
+        <span class="command__item-badge">CL</span>
+        <span class="command__item-label">Contoso Ltd</span>
+      </a>
+    </div>
+    <div class="command__footer">
+      <span>&uarr;&darr; move</span>
+      <span>&crarr; run</span>
+      <span class="command__count">2 results</span>
+    </div>
+  </div>
+</div>
+```
+
+### The fragment the route returns
+
+```ts
+CommandList({
+  id: "palette",
+  query: "con",
+  items: [{ label: "Contoso Ltd", badge: "CL", href: "/clients/contoso" }],
+})
+```
+
+```html
+<a class="command__item" id="palette-item-0" href="/clients/contoso" role="option">
+  <span class="command__item-badge">CL</span>
+  <span class="command__item-label">
+    <strong class="command__match">Con</strong>
+    toso Ltd
+  </span>
+</a>
+```
+
 ## CSS hooks
 
 Classes defined by `components/command/command.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

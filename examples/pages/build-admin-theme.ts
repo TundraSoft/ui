@@ -21,7 +21,7 @@ import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { Badge } from "../../components/badge/badge.ts";
 import { Avatar, AvatarGroup } from "../../components/avatar/avatar.ts";
 import { Chart, ChartScript } from "../../components/chart/chart.ts";
-import { DataTable } from "../../components/data-table/data-table.ts";
+import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
 import { Input, InputGroup, InputIcon } from "../../components/input/input.ts";
 import { Select } from "../../components/select/select.ts";
@@ -84,15 +84,21 @@ function statusBadge(status: string): Html {
   return Badge({ label: status, variant, dot: variant !== "neutral" });
 }
 
+/** A bulk-bar button: a submit whose `op` tells the server what to do with `selected`. */
+function bulkButton(label: string, op: string, variant?: "danger"): Html {
+  return Button({ label, size: "sm", variant, type: "submit", attrs: { name: "op", value: op } });
+}
+
 /** Ids derive from the row key — a counter would drift across renders (§4). */
 function rowKebab(key: string): Html {
-  return Dropdown({
+  return RowActions({
     id: `row-${key}`,
-    align: "end",
-    trigger: html`${Icon("kebab", { size: 16 })}<span class="sr-only">Row actions</span>`,
-    content: Menu({
-      items: [{ label: "Edit", href: "#" }, { label: "Duplicate", href: "#" }, { label: "Remove", href: "#" }],
-    }),
+    label: `Actions for ${key}`,
+    items: [{ label: "Edit", href: "#" }, { label: "Duplicate", href: "#" }, {
+      label: "Remove",
+      href: "#",
+      danger: true,
+    }],
   });
 }
 
@@ -456,9 +462,10 @@ function ordersTable(opts: { id: string; filterable: boolean; selectable: boolea
         })
       }</div>`
       : undefined,
+    bulkAction: opts.selectable ? "?bulk" : undefined,
     bulkActions: opts.selectable
-      ? html`${Button({ label: "Mark paid", size: "sm" })}${Button({ label: "Export", size: "sm" })}${
-        Button({ label: "Refund", size: "sm", variant: "danger" })
+      ? html`${bulkButton("Mark paid", "paid")}${bulkButton("Export", "export")}${
+        bulkButton("Refund", "refund", "danger")
       }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`
       : undefined,
     footer: html`${opts.filterable ? filterEmpty("orders") : ""}<span>Showing ${orderRows.length} of 1,093</span>${
@@ -713,7 +720,8 @@ const profileContent = Card({
               ],
               rows: sessions,
               rowKey: (r) => r.id,
-              bulkActions: html`${Button({ label: "Sign out", size: "sm", variant: "danger" })}${
+              bulkAction: "?bulk",
+              bulkActions: html`${bulkButton("Sign out", "signout", "danger")}${
                 Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })
               }`,
               footer: html`<span>Sign out of everything else from here.</span>`,
@@ -924,8 +932,9 @@ const teamTable = DataTable<Member>({
       }],
     })
   }${Button({ label: "Add member", size: "sm", iconStart: Icon("plus", { size: 14 }) })}</div>`,
-  bulkActions: html`${Button({ label: "Change role", size: "sm" })}${Button({ label: "Export CSV", size: "sm" })}${
-    Button({ label: "Deactivate", size: "sm", variant: "danger" })
+  bulkAction: "?bulk",
+  bulkActions: html`${bulkButton("Change role", "role")}${bulkButton("Export CSV", "export")}${
+    bulkButton("Deactivate", "deactivate", "danger")
   }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
   footer: html`${filterEmpty("team members")}<span>${teamMembers.length} members</span>${
     Pagination({ page: 1, totalPages: 1, buildHref: (p) => `?page=${p}` })
@@ -1563,7 +1572,7 @@ const settingsContent = html`${
               ],
               rows: billingRows,
               rowKey: (r) => r.id,
-              rowActions: () => Button({ label: "PDF", size: "sm", variant: "ghost" }),
+              rowActions: () => Button({ label: "PDF", size: "sm", variant: "ghost", href: "invoice.html" }),
             })
           }<br>${
             FormActions({

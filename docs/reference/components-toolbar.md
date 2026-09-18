@@ -26,6 +26,66 @@ A wrapping row of controls above a list or table.
 | `end` | `Html` |  | Controls pushed to the end (a primary action, a date range). |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Search and filters, with the primary action at the end
+
+```ts
+Toolbar({
+  start: html`${
+    Input({ type: "search", size: "sm", placeholder: "Search invoices", attrs: { "data-table-search": "" } })
+  }${
+    Select({
+      placeholder: "All statuses",
+      options: [{ value: "open", label: "Open" }, { value: "paid", label: "Paid" }],
+    })
+  }`,
+  end: Button({ label: "New invoice", size: "sm" }),
+})
+```
+
+```html
+<div class="toolbar">
+  <input type="search" class="input input--sm" data-table-search="" placeholder="Search invoices">
+  <div class="select" data-select>
+    <select class="select__native" id="select-native">
+      <option value="" disabled selected>All statuses</option>
+      <option value="open">Open</option>
+      <option value="paid">Paid</option>
+    </select>
+    <div class="combobox select__ui" data-combobox data-select-ui>
+      <div class="combobox__anchor">
+        <div class="combobox__field">
+          <input type="hidden" value="" data-combobox-value>
+          <input class="combobox__input" id="select" type="text" role="combobox" readonly autocomplete="off" value="" placeholder="All statuses" aria-expanded="false" aria-controls="select-list" aria-autocomplete="none">
+          <span class="combobox__caret">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
+        </div>
+        <div class="combobox__list" id="select-list" role="listbox" hidden>
+          <div class="combobox__option" role="option" id="select-opt-0" aria-selected="false" data-value="open">
+            <span class="combobox__option-label">Open</span>
+          </div>
+          <div class="combobox__option" role="option" id="select-opt-1" aria-selected="false" data-value="paid">
+            <span class="combobox__option-label">Paid</span>
+          </div>
+          <div class="combobox__hints">
+            <span>&uarr;&darr; navigate</span>
+            <span>&crarr; select</span>
+            <span class="combobox__count">2 matches</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toolbar__end">
+    <button type="button" class="btn btn--sm">New invoice</button>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/toolbar/toolbar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

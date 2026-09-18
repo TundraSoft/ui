@@ -27,6 +27,51 @@ Form(props: FormProps): Html
 | `content` | `Html` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A form that swaps itself on submit
+
+The `id` is the swap target; `error` (rAPId's `RapidFormError`) renders the banner. Field errors go on each `FormField`.
+
+```ts
+Form({
+  id: "profile",
+  action: "/profile",
+  attrs: { "data-action": "/profile", "data-target": "#profile", "data-swap": "outer" },
+  content: html`${
+    FormGrid({
+      fields: [
+        FormField({
+          id: "name",
+          label: "Name",
+          required: true,
+          control: (a) => Input({ id: a.id, name: "name", value: "Ada Lovelace" }),
+        }),
+      ],
+    })
+  }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+})
+```
+
+```html
+<form class="form" data-action="/profile" data-target="#profile" data-swap="outer" id="profile" action="/profile" method="post">
+  <div class="form-grid">
+    <div class="form-field">
+      <label class="form-field__label" for="name">
+        Name
+        <span class="form-field__required" aria-hidden="true">*</span>
+      </label>
+      <input type="text" class="input" id="name" name="name" value="Ada Lovelace">
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn">Save</button>
+  </div>
+</form>
+```
+
 ## CSS hooks
 
 Classes defined by `components/form/form.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

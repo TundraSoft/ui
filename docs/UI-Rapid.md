@@ -19,6 +19,7 @@ keep back/forward, reloads and no-JS submissions honest.
 - A pushable region's URL is the **page route itself**: the handler returns the region on a swap and the whole page on a
   navigation.
 - Forms render straight from `RapidFormError`; the same route serves a swap (JS) and a redirect (no JS).
+- Worked, end-to-end examples of all of this — with the same pages as plain HTML — are in [Recipes](./UI-Recipes.md).
 
 ---
 
@@ -131,6 +132,7 @@ Your handler sees `ctx.isSwap`. These components use it:
 | any element with `data-load`                                                       | fetched on mount                                                                                                 | the region's content (render a `Skeleton*` as the placeholder) |
 | a button with `data-action` + `data-target="#toast-region"` + `data-swap="append"` | —                                                                                                                | a `Toast(...)`                                                 |
 | `Editor({ previewAction })`                                                        | POST `text` via `rapid.swap`                                                                                     | the rendered HTML fragment                                     |
+| a `Form` with a `Dropzone` inside (`data-action`, `data-target="#<dropzone id>"`)  | a multipart post; `rapid:progress` fills the pending rows dropzone.js renders                                    | the `Dropzone` again, with the server's rows                   |
 | `Form({ attrs: { "data-action", "data-target", "data-swap" } })`                   | the form posts as a swap                                                                                         | the form (with `error`) or the success state                   |
 
 Without the runtime the same markup degrades: combobox and command filter their rendered options client-side, the date
@@ -162,7 +164,19 @@ state never leaks into another's URLs. Every region that pushes needs a stable `
 `busy.js` marks the target of any swap `aria-busy="true"` + `data-busy` the moment the click or submit fires; the
 skeleton stylesheet paints a shimmer veil over it and blocks pointer events until `rapid:swapped` or `rapid:error` (15 s
 safety timeout). `data-load` regions are left alone — render `SkeletonTable()` / `SkeletonCard()` as their initial
-content, since only the server knows the shape that is coming.
+content, since only the server knows the shape that is coming. Newer rAPId runtimes set `aria-busy` on the target
+themselves and refuse a second non-GET while one is in flight; the veil works the same either way.
+
+### Uploads and progress
+
+A form that holds a file input posts real `multipart/form-data`. rAPId streams it over `XMLHttpRequest` and emits
+`rapid:progress` (`{ url, loaded, total }`, `total` is `0` when unknown) on the target while the bytes leave the
+browser. `Dropzone` uses it: on submit, dropzone.js renders one pending row per picked file (same markup as a
+server-rendered `DropzoneFile`, indeterminate bar), fills the bars from the events, and leaves the rows pending until
+the reply lands — bytes reach 100% before the server has parsed anything. Your route answers with the `Dropzone`
+re-rendered from your own store (a file input is never echoed back), and `rapid:error` marks the pending rows failed.
+Declare `uploads: { allowedExtensions: [".pdf", ".png"] }` on the application — rAPId refuses every upload until you do.
+See the [upload recipe](./UI-Recipes.md#5-attachments-with-upload-progress).
 
 ---
 

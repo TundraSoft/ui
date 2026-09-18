@@ -39,6 +39,44 @@ value is never misrepresented.
 | `scale` | `string[]` |  | Tick labels under the track; implies the stepped treatment. The live output shows the matching label as the thumb moves. |
 | `disabled` | `boolean` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Worker count with a live value
+
+```ts
+Slider({
+  id: "workers",
+  name: "workers",
+  label: "Concurrency",
+  min: 1,
+  max: 32,
+  value: 8,
+  unit: "workers",
+  unitOne: "worker",
+})
+```
+
+```html
+<div class="slider" data-slider data-slider-unit="workers" data-slider-unit-one="worker">
+  <div class="slider__head">
+    <label class="slider__label" for="workers">Concurrency</label>
+    <output class="slider__value" for="workers" data-slider-output>8 workers</output>
+  </div>
+  <div class="slider__control">
+    <input class="slider__input" id="workers" name="workers" type="range" min="1" max="32" step="1" value="8">
+    <span class="slider__track"></span>
+    <span class="slider__fill"></span>
+    <span class="slider__thumb"></span>
+  </div>
+  <div class="slider__scale">
+    <span>1</span>
+    <span>32</span>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/slider/slider.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

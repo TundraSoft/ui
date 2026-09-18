@@ -40,6 +40,69 @@ Accordion(props: AccordionProps): Html
 | `items` | `Array` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A details section
+
+```ts
+Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 30, 2% late fee.</p>` })
+```
+
+```html
+<div class="collapsible">
+  <h3 class="collapsible__heading">
+    <button type="button" class="collapsible__trigger" data-toggle="#terms-panel" aria-expanded="false" aria-controls="terms-panel">
+      Terms and conditions
+      <span class="collapsible__icon">&#9660;</span>
+    </button>
+  </h3>
+  <div class="collapsible__panel" id="terms-panel" data-toggle-panel hidden>
+    <p>Net 30, 2% late fee.</p>
+  </div>
+</div>
+```
+
+### An FAQ accordion
+
+```ts
+Accordion({
+  id: "faq",
+  items: [
+    { title: "How do refunds work?", content: html`<p>Within 14 days, in full.</p>`, defaultOpen: true },
+    { title: "Can I change plans?", content: html`<p>Any time; the difference is prorated.</p>` },
+  ],
+})
+```
+
+```html
+<div class="accordion" id="faq" data-accordion-group="">
+  <div class="collapsible">
+    <h3 class="collapsible__heading">
+      <button type="button" class="collapsible__trigger" data-toggle="#faq-0-panel" aria-expanded="true" aria-controls="faq-0-panel">
+        How do refunds work?
+        <span class="collapsible__icon">&#9660;</span>
+      </button>
+    </h3>
+    <div class="collapsible__panel" id="faq-0-panel" data-toggle-panel>
+      <p>Within 14 days, in full.</p>
+    </div>
+  </div>
+  <div class="collapsible">
+    <h3 class="collapsible__heading">
+      <button type="button" class="collapsible__trigger" data-toggle="#faq-1-panel" aria-expanded="false" aria-controls="faq-1-panel">
+        Can I change plans?
+        <span class="collapsible__icon">&#9660;</span>
+      </button>
+    </h3>
+    <div class="collapsible__panel" id="faq-1-panel" data-toggle-panel hidden>
+      <p>Any time; the difference is prorated.</p>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/collapsible/collapsible.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

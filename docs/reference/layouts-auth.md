@@ -29,6 +29,57 @@ Centred auth card, optionally split with a narrative panel.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A sign-in page
+
+```ts
+AuthLayout({
+  brand: "Acme",
+  split: true,
+  narrative: html`
+    <h2>Welcome back</h2>
+    <p>Invoices, payments and reports in one place.</p>
+  `,
+  content: Form({
+    id: "signin",
+    action: "/signin",
+    content: html`${
+      FormField({
+        id: "email",
+        label: "Email",
+        control: (a) => Input({ id: a.id, name: "email", type: "email" }),
+      })
+    }${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}`,
+  }),
+})
+```
+
+```html
+<div class="layout layout--auth layout--auth-split">
+  <section class="layout__auth-narrative">
+    <h2>Welcome back</h2>
+    <p>Invoices, payments and reports in one place.</p>
+  </section>
+  <main class="layout__auth-form" id="main-content">
+    <div class="layout__auth-panel">
+      <div class="layout__auth-brand">Acme</div>
+      <form class="form" id="signin" action="/signin" method="post">
+        <div class="form-field">
+          <label class="form-field__label" for="email">Email</label>
+          <input type="email" class="input" id="email" name="email">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--block">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/auth/auth.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

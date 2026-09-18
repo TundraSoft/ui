@@ -46,6 +46,60 @@ Builds an Alert straight from rAPId's `RapidFormError` shape (§6).
 | `dismissible` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A status message
+
+```ts
+Alert({ variant: "success", title: "Invoice sent", body: "Contoso Ltd will get it within a minute." })
+```
+
+```html
+<div class="alert alert--success" role="alert">
+  <span class="alert__icon">
+    <svg width="17" height="17" width="2" …>…</svg>
+  </span>
+  <div class="alert__body">
+    <div class="alert__title">Invoice sent</div>
+    <div class="alert__text">Contoso Ltd will get it within a minute.</div>
+  </div>
+</div>
+```
+
+### The banner a failed form shows
+
+`FormErrorAlert` takes rAPId's `RapidFormError` directly; `Form({ error })` renders it for you.
+
+```ts
+FormErrorAlert({
+  message: "Check the highlighted fields.",
+  fields: { email: "Enter a valid address.", password: "At least 12 characters." },
+})
+```
+
+```html
+<div class="alert alert--danger" role="alert">
+  <span class="alert__icon">
+    <svg width="17" height="17" width="2" …>…</svg>
+  </span>
+  <div class="alert__body">
+    <div class="alert__title">Check the highlighted fields.</div>
+    <ul class="alert__list">
+      <li class="alert__field">
+        <span class="alert__field-name">email</span>
+        Enter a valid address.
+      </li>
+      <li class="alert__field">
+        <span class="alert__field-name">password</span>
+        At least 12 characters.
+      </li>
+    </ul>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/alert/alert.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

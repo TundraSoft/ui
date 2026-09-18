@@ -35,6 +35,76 @@ Header + side navigation + content. The app frame.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### The admin frame
+
+The layout renders the drawer toggle for phones; the sidebar's `id` must equal `sidebarId`.
+
+```ts
+SidebarLayout({
+  sidebarId: "nav",
+  header: Navbar({
+    brand: "Acme",
+    actions: Button({ label: "Dark", size: "sm", variant: "outline", attrs: { "data-theme-toggle": "" } }),
+  }),
+  sidebar: Sidebar({
+    id: "nav",
+    collapsible: true,
+    items: [{ label: "Dashboard", href: "/", active: true }, { label: "Invoices", href: "/invoices" }],
+  }),
+  content: html`${PageHeader({ title: "Dashboard" })}<p>…</p>`,
+})
+```
+
+```html
+<div class="layout layout--sidebar">
+  <header class="layout__header">
+    <button type="button" class="navbar__toggle navbar__toggle--sidebar js-only layout__drawer-toggle" data-toggle="#nav" data-toggle-class="" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">&#9776;</button>
+    <nav class="navbar">
+      <div class="navbar__brand">Acme</div>
+      <div class="navbar__spacer"></div>
+      <div class="navbar__actions">
+        <button type="button" class="btn btn--outline btn--sm" data-theme-toggle="">Dark</button>
+      </div>
+    </nav>
+  </header>
+  <div class="layout__body">
+    <aside class="sidebar" id="nav">
+      <nav class="sidebar__nav" aria-label="Main">
+        <ul class="menu__list">
+          <li>
+            <a class="menu__link menu__link--active" href="/" aria-current="page">
+              <span class="menu__link-label">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="menu__link" href="/invoices">
+              <span class="menu__link-label">Invoices</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <button type="button" class="sidebar__collapse-toggle js-only" data-collapse="#nav" aria-expanded="true" aria-label="Collapse sidebar">
+        <span class="sidebar__collapse-icon">&#8249;</span>
+        <span class="sidebar__collapse-label">Collapse</span>
+      </button>
+    </aside>
+    <div class="layout__backdrop" data-toggle-close="#nav"></div>
+    <main class="layout__content" id="main-content">
+      <div class="page-header">
+        <div class="page-header__heading">
+          <h1 class="page-header__title">Dashboard</h1>
+        </div>
+      </div>
+      <p>…</p>
+    </main>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

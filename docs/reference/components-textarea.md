@@ -32,6 +32,20 @@ Textarea(props: TextareaProps): Html
 | `extraClass` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A note
+
+```ts
+Textarea({ id: "note", name: "note", rows: 4, placeholder: "Anything the customer should know…" })
+```
+
+```html
+<textarea class="input textarea" id="note" name="note" placeholder="Anything the customer should know…" rows="4"></textarea>
+```
+
 ## CSS hooks
 
 Classes defined by `components/textarea/textarea.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

@@ -20,6 +20,30 @@ Progress(props: { value: number; max?: number; attrs?: Attrs }): Html
 Spinner(props = …: { label?: string; attrs?: Attrs }): Html
 ```
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Storage used
+
+```ts
+Progress({ value: 7.2, max: 10, attrs: { "aria-label": "Storage used, 7.2 of 10 GB" } })
+```
+
+```html
+<progress class="progress" value="7.2" max="10" aria-label="Storage used, 7.2 of 10 GB"></progress>
+```
+
+### Something is loading
+
+```ts
+Spinner({ label: "Loading invoices" })
+```
+
+```html
+<span class="spinner" role="status" aria-label="Loading invoices"></span>
+```
+
 ## CSS hooks
 
 Classes defined by `components/progress/progress.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

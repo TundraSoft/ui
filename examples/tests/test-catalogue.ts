@@ -17,7 +17,7 @@
  *    (actions); and the theme switcher — each theme's computed body
  *    background, light and dark (forms).
  */
-import { ensureDir, readDir, readTextFile, realPath } from "@tundralibs/compat/file";
+import { ensureDir, readDir, readTextFile, realPath, writeTextFile } from "@tundralibs/compat/file";
 import { exit } from "@tundralibs/compat/runtime";
 import type { Page } from "puppeteer-core";
 import { catalogue, catalogueGroups } from "../shared/catalogue.ts";
@@ -300,6 +300,49 @@ for (const group of catalogueGroups) {
     const progressVal = await page.$eval("progress.dropzone__bar", (el) => (el as HTMLProgressElement).value);
     check(progressVal === 40, `forms: dropzone bar is a native <progress> (${progressVal})`);
 
+    // Upload progress: on submit of the upload form, dropzone.js renders a
+    // pending row per picked file, fills it from rAPId's rapid:progress
+    // (simulated here — the static page has no runtime) and marks it
+    // failed on rapid:error. The submit itself is vetoed by the test.
+    const samplePath = `${outDir}/sample-upload.txt`;
+    await writeTextFile(samplePath, "hello, dropzone\n");
+    const picker = await page.$("#cat-dz-1 input[type=file]");
+    await picker!.uploadFile(samplePath);
+    await page.evaluate(() => {
+      document.addEventListener("submit", (e) => e.preventDefault());
+      (document.querySelector("#cat-dz-form") as HTMLFormElement).requestSubmit();
+    });
+    await pause();
+    const pending = await page.evaluate(() => {
+      const row = document.querySelector("#cat-dz-1 .dropzone__file--pending");
+      return {
+        name: row?.querySelector(".dropzone__file-name")?.textContent,
+        indeterminate: row?.querySelector("progress")?.hasAttribute("value") === false,
+      };
+    });
+    check(
+      pending.name === "sample-upload.txt" && pending.indeterminate,
+      `forms: submit renders a pending upload row (${JSON.stringify(pending)})`,
+    );
+    const progressed = await page.evaluate(() => {
+      const form = document.querySelector("#cat-dz-form")!;
+      const url = form.getAttribute("data-action");
+      form.dispatchEvent(new CustomEvent("rapid:progress", { bubbles: true, detail: { url, loaded: 30, total: 120 } }));
+      return (document.querySelector("#cat-dz-1 .dropzone__file--pending progress") as HTMLProgressElement).value;
+    });
+    check(progressed === 25, `forms: rapid:progress fills the pending row's bar (${progressed})`);
+    const failed = await page.evaluate(() => {
+      const form = document.querySelector("#cat-dz-form")!;
+      const url = form.getAttribute("data-action");
+      form.dispatchEvent(new CustomEvent("rapid:error", { bubbles: true, detail: { url, status: 500, body: "" } }));
+      const row = document.querySelector("#cat-dz-1 .dropzone__file--error");
+      return { error: row?.querySelector(".dropzone__file-error")?.textContent, bar: !!row?.querySelector("progress") };
+    });
+    check(
+      failed.error === "Upload failed" && !failed.bar,
+      `forms: rapid:error marks the row (${JSON.stringify(failed)})`,
+    );
+
     // one-time code
     const carrierHidden = await page.$eval(
       "#otp-sms-value",
@@ -408,6 +451,157 @@ for (const group of catalogueGroups) {
     const stickyTop = await page.$eval("#invoices th", (el) => getComputedStyle(el).position);
     check(stickyTop === "sticky", "data: data-table header is sticky");
     check(await page.$("#projects .pagination [aria-current=page]"), "data: projects table carries its pagination");
+
+    // Every action in a data table does something. Bulk buttons submit the
+    // selection through the table's own form (bulkAction); the toolbar
+    // search filters the rows; a row kebab opens the row's action strip.
+    // visible outside the scroll box.
+    const bulk = await page.evaluate(() => {
+      const form = document.querySelector("#invoices form.data-table__form");
+      const buttons = [...document.querySelectorAll("#invoices [data-bulk-bar] button")] as HTMLButtonElement[];
+      return {
+        form: form?.getAttribute("data-action") ?? null,
+        target: form?.getAttribute("data-target"),
+        inForm: buttons.every((b) => b.closest("form") === form),
+        submits: buttons.filter((b) => b.type === "submit").map((b) => `${b.name}=${b.value}`),
+        rowsInForm: !!document.querySelector("#invoices form [data-select-row][name=selected]"),
+        toolbarInForm: !!document.querySelector("#invoices form .data-table__toolbar"),
+      };
+    });
+    check(bulk.form && bulk.target === "#invoices", `data: invoices bulk form has data-action/target (${bulk.form})`);
+    check(bulk.inForm && bulk.rowsInForm, "data: bulk buttons and row checkboxes share the bulk form");
+    check(
+      bulk.submits.join(",") === "op=assign,op=delete",
+      `data: bulk buttons are submits naming their op (${bulk.submits})`,
+    );
+    check(!bulk.toolbarInForm, "data: the toolbar stays outside the bulk form (Enter in a search box must not submit)");
+
+    // The bulk bar is an overlay of the header row, not a row above it:
+    // selecting must not move the rows, and select-all stays reachable.
+    const rowTop = () => page.$eval("#invoices tbody tr", (el) => el.getBoundingClientRect().top);
+    const before = await rowTop();
+    await page.click("#invoices [data-select-row]");
+    await pause();
+    const overlay = await page.evaluate(() => {
+      const bar = document.querySelector("#invoices [data-bulk-bar]")!.getBoundingClientRect();
+      const head = document.querySelector("#invoices thead th")!.getBoundingClientRect();
+      const all = document.querySelector("#invoices [data-select-all]") as HTMLElement;
+      const ar = all.getBoundingClientRect();
+      const hit = document.elementFromPoint(ar.left + ar.width / 2, ar.top + ar.height / 2);
+      const br = bar.left + bar.width - 20;
+      const barHit = document.elementFromPoint(br, bar.top + bar.height / 2);
+      return {
+        rowTop: document.querySelector("#invoices tbody tr")!.getBoundingClientRect().top,
+        sameBand: Math.abs(bar.top - head.top) < 1 && Math.abs(bar.height - head.height) < 1,
+        selectAllUsable: hit === all,
+        barOnTop: !!barHit && !!barHit.closest("[data-bulk-bar]"),
+        stickySelect: getComputedStyle(document.querySelector("#invoices td.data-table__select")!).position,
+      };
+    });
+    check(overlay.rowTop === before, `data: selecting a row moved the rows (${before} → ${overlay.rowTop})`);
+    check(
+      overlay.sameBand && overlay.barOnTop,
+      `data: bulk bar should overlay the header row (${JSON.stringify(overlay)})`,
+    );
+    check(overlay.selectAllUsable, "data: select-all checkbox is covered by the bulk bar");
+    check(overlay.stickySelect === "sticky", `data: selection column should be sticky (${overlay.stickySelect})`);
+    await page.click("#invoices [data-bulk-clear]");
+    await pause();
+    for (const [table, expect] of [["#cat-dt-1", "op=archive"]] as const) {
+      const ops = await page.$$eval(
+        `${table} form.data-table__form [data-bulk-bar] button[type=submit]`,
+        (els) => els.map((b) => `${(b as HTMLButtonElement).name}=${(b as HTMLButtonElement).value}`).join(","),
+      );
+      check(ops === expect, `data: ${table} bulk button submits ${expect} (${ops})`);
+    }
+
+    const visibleRows = (table: string) =>
+      page.$$eval(`${table} tbody tr`, (rows) => rows.filter((r) => !(r as HTMLElement).hidden).length);
+    for (
+      const [table, query, expected] of [["#cat-dt-1", "Contoso", 1], ["#cat-dt-plain", "zzz", 0], [
+        "#projects",
+        "Project 1",
+        1,
+      ]] as const
+    ) {
+      const all = await visibleRows(table);
+      await page.type(`${table} .data-table__toolbar [data-table-search]`, query);
+      await pause();
+      const left = await visibleRows(table);
+      check(
+        all > left && left === expected,
+        `data: ${table} toolbar search filters rows (${all} → ${left}, expected ${expected})`,
+      );
+      await page.$eval(`${table} .data-table__toolbar [data-table-search]`, (el) => {
+        (el as HTMLInputElement).value = "";
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+
+    // Row action strip (RowActions): opens in the row without moving
+    // anything, one at a time, Escape closes and refocuses the kebab.
+    await page.evaluate(() => document.querySelector("#invoices")?.scrollIntoView({ block: "center" }));
+    await pause();
+    // Relative to the table, not the viewport: focusing the strip scrolls the page.
+    const row3 = () =>
+      page.$eval(
+        "#invoices tbody tr:nth-child(3)",
+        (r) => r.getBoundingClientRect().top - r.closest(".data-table")!.getBoundingClientRect().top,
+      );
+    const row3Before = await row3();
+    await page.click('#invoices [data-row-actions="#inv-row-INV-2047-strip"]');
+    // Let the slide-in finish (its centre is still clipped mid-animation).
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector("#inv-row-INV-2047-strip") as HTMLElement | null;
+        return !!el && !el.hidden && el.getAnimations().length === 0;
+      },
+      { timeout: 2000 },
+    ).catch(() => check(false, "data: row strip slide-in never finished"));
+    const strip = await page.evaluate(() => {
+      const el = document.querySelector("#inv-row-INV-2047-strip") as HTMLElement;
+      const r = el.getBoundingClientRect();
+      const row = el.closest("tr")!.getBoundingClientRect();
+      const box = el.closest(".data-table__scroll")!.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return {
+        open: !el.hidden,
+        inRow: Math.abs(r.top - row.top) < 1 && r.height <= row.height && Math.abs(r.right - row.right) < 1,
+        inBox: r.left >= box.left - 1 && r.right <= box.right + 1,
+        visible: !!hit && el.contains(hit),
+        focusInside: !!document.activeElement?.closest("#inv-row-INV-2047-strip"),
+      };
+    });
+    check(
+      strip.open && strip.inRow && strip.inBox && strip.visible,
+      `data: row strip geometry (${JSON.stringify(strip)})`,
+    );
+    check(strip.focusInside, "data: opening a row strip should move focus into it");
+    check((await row3()) === row3Before, "data: opening a row strip moved the rows");
+    await page.click('#invoices [data-row-actions="#inv-row-INV-2045-strip"]');
+    // The previous strip slides out first; wait for it to be hidden, not for a timer.
+    const settled = (n: number) =>
+      page.waitForFunction(
+        (n) => document.querySelectorAll("#invoices .data-table__row-actions:not([hidden])").length === n,
+        { timeout: 2000 },
+        n,
+      ).then(() => true, () => false);
+    check(await settled(1), "data: the first row strip did not slide out when a second opened");
+    const openStrips = await page.$$eval(
+      "#invoices .data-table__row-actions:not([hidden])",
+      (s) => s.map((e) => e.id),
+    );
+    check(openStrips.join() === "inv-row-INV-2045-strip", `data: only one row strip open at a time (${openStrips})`);
+    await page.keyboard.press("Escape");
+    check(await settled(0), "data: Escape did not slide the row strip out");
+    const afterEsc = await page.evaluate(() => ({
+      open: document.querySelectorAll("#invoices .data-table__row-actions:not([hidden])").length,
+      focus: document.activeElement?.getAttribute("data-row-actions"),
+    }));
+    check(
+      afterEsc.open === 0 && afterEsc.focus === "#inv-row-INV-2045-strip",
+      `data: Escape closes the strip and refocuses the kebab (${JSON.stringify(afterEsc)})`,
+    );
   }
 
   if (group.id === "navigation") {

@@ -60,6 +60,59 @@ ChoiceGroup(props: ChoiceGroupProps): Html
 | `inline` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Checkboxes in a row
+
+```ts
+ChoiceGroup({
+  inline: true,
+  items: [
+    Checkbox({ name: "notify", value: "email", label: "Email", checked: true }),
+    Checkbox({ name: "notify", value: "sms", label: "SMS" }),
+  ],
+})
+```
+
+```html
+<div class="choice-group choice-group--inline">
+  <label class="choice">
+    <input type="checkbox" class="choice__input" name="notify" value="email" checked="">
+    <span class="choice__label">Email</span>
+  </label>
+  <label class="choice">
+    <input type="checkbox" class="choice__input" name="notify" value="sms">
+    <span class="choice__label">SMS</span>
+  </label>
+</div>
+```
+
+### A radio set
+
+```ts
+ChoiceGroup({
+  items: [
+    Radio({ name: "plan", value: "monthly", label: "Monthly", checked: true }),
+    Radio({ name: "plan", value: "yearly", label: "Yearly — two months free" }),
+  ],
+})
+```
+
+```html
+<div class="choice-group">
+  <label class="choice">
+    <input type="radio" class="choice__input" name="plan" value="monthly" checked="">
+    <span class="choice__label">Monthly</span>
+  </label>
+  <label class="choice">
+    <input type="radio" class="choice__input" name="plan" value="yearly">
+    <span class="choice__label">Yearly — two months free</span>
+  </label>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/choice/choice.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

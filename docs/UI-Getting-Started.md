@@ -105,7 +105,8 @@ Every component is its own export (`@tundralibs/ui/card`, `@tundralibs/ui/data-t
 
 <!-- x-release-please-end -->
 
-The markup for every component is exactly what its template renders; the [catalogue](#see-everything) shows all of it.
+The markup for every component is exactly what its template renders; the [catalogue](#see-everything) shows all of it,
+and [Recipes](./UI-Recipes.md) walks through complete pages in both flavours.
 
 ---
 
@@ -210,6 +211,8 @@ The same tooling runs on Node (`npm run …`) and Bun (`bun run bun:…`).
 
 ## Next
 
+- [Recipes](./UI-Recipes.md) — real pages, each as a rAPId route and as plain HTML: shell, sign-in, dashboard, invoices,
+  uploads, search, notifications.
 - [Components](./UI-Components.md) — a tour by group, with usage.
 - [Layouts](./UI-Layouts.md) — the page frames and how they respond.
 - [rAPId integration](./UI-Rapid.md) — the shell, swaps, forms, history.

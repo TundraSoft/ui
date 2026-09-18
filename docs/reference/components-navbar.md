@@ -34,6 +34,39 @@ Navbar(props: NavbarProps): Html
 | `actions` | `string | Html` |  | Extra content pinned to the end, e.g. a user menu or theme switch. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### The top bar of a marketing or docs site
+
+```ts
+Navbar({
+  brand: "Acme",
+  links: [{ href: "/", label: "Home", active: true }, { href: "/docs", label: "Docs" }, {
+    href: "/pricing",
+    label: "Pricing",
+  }],
+  actions: Button({ label: "Sign in", size: "sm", href: "/signin" }),
+})
+```
+
+```html
+<nav class="navbar">
+  <div class="navbar__brand">Acme</div>
+  <button type="button" class="navbar__toggle js-only" data-toggle="#navbar-nav" aria-expanded="false" aria-controls="navbar-nav" aria-label="Toggle navigation">&#9776;</button>
+  <div class="navbar__nav" id="navbar-nav">
+    <a class="navbar__link navbar__link--active" href="/">Home</a>
+    <a class="navbar__link" href="/docs">Docs</a>
+    <a class="navbar__link" href="/pricing">Pricing</a>
+  </div>
+  <div class="navbar__spacer"></div>
+  <div class="navbar__actions">
+    <a class="btn btn--sm" href="/signin">Sign in</a>
+  </div>
+</nav>
+```
+
 ## CSS hooks
 
 Classes defined by `components/navbar/navbar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

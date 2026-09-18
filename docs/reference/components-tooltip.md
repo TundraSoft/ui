@@ -27,6 +27,36 @@ CSS-only (hover/focus) — no JS, so it degrades to "just the trigger" cleanly.
 | `content` | `string | Html` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A hint on an icon button
+
+CSS-only. Point the trigger's `aria-describedby` at the tooltip's id.
+
+```ts
+Tooltip({
+  id: "archive-tip",
+  trigger: Button({
+    iconOnly: true,
+    variant: "ghost",
+    iconStart: Icon("folder", { size: 16 }),
+    attrs: { "aria-label": "Archive", "aria-describedby": "archive-tip" },
+  }),
+  content: "Archive this invoice",
+})
+```
+
+```html
+<span class="tooltip">
+  <button type="button" class="btn btn--ghost btn--icon" aria-label="Archive" aria-describedby="archive-tip">
+    <svg width="16" height="16" width="2" …>…</svg>
+  </button>
+  <span class="tooltip__content" role="tooltip" id="archive-tip">Archive this invoice</span>
+</span>
+```
+
 ## CSS hooks
 
 Classes defined by `components/tooltip/tooltip.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

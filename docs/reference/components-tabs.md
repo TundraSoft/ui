@@ -33,6 +33,39 @@ Tabs(props: TabsProps): Html
 | `active` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Settings sections
+
+A `#tab-<id>` link deep-links to a tab, so a sidebar can point at `settings#tab-billing`.
+
+```ts
+Tabs({
+  id: "settings",
+  items: [
+    { id: "general", label: "General", content: html`<p>Company name, timezone.</p>` },
+    { id: "billing", label: "Billing", content: html`<p>Plan and invoices.</p>` },
+  ],
+})
+```
+
+```html
+<div class="tabs" id="settings">
+  <div class="tabs__list" role="tablist">
+    <button type="button" class="tabs__tab" role="tab" id="tab-general" aria-selected="true" tabindex="0" aria-controls="panel-general">General</button>
+    <button type="button" class="tabs__tab" role="tab" id="tab-billing" aria-selected="false" tabindex="-1" aria-controls="panel-billing">Billing</button>
+  </div>
+  <div class="tabs__panel" role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0">
+    <p>Company name, timezone.</p>
+  </div>
+  <div class="tabs__panel" role="tabpanel" id="panel-billing" aria-labelledby="tab-billing" tabindex="0" hidden>
+    <p>Plan and invoices.</p>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/tabs/tabs.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

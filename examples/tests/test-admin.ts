@@ -394,6 +394,27 @@ for (const name of pages) {
     await page.click(`${scope} [data-bulk-clear]`);
     await pause();
     if ((await isHidden(`${scope} [data-bulk-bar]`)) !== true) fail("bulk-bar", "clear did not hide the bulk bar");
+    // Bulk buttons are submits inside the table's own form, one `op` each;
+    // the toolbar (search, status filter, date range) stays outside it.
+    const bulkForm = await page.evaluate((scope) => {
+      const form = document.querySelector(`${scope} form.data-table__form`);
+      const buttons = [
+        ...document.querySelectorAll(`${scope} [data-bulk-bar] button[type=submit]`),
+      ] as HTMLButtonElement[];
+      return {
+        action: form?.getAttribute("data-action"),
+        ops: buttons.map((b) => b.value).join(","),
+        inForm: buttons.every((b) => b.closest("form") === form),
+        toolbarOutside: !form?.querySelector(".data-table__toolbar"),
+        rowsInside: !!form?.querySelector("[data-select-row][name=selected]"),
+      };
+    }, scope);
+    if (!/^(paid,export,refund|role,export,deactivate)$/.test(bulkForm.ops) || !bulkForm.inForm || !bulkForm.action) {
+      fail("bulk-bar", `bulk buttons are not submits of the table form (${JSON.stringify(bulkForm)})`);
+    }
+    if (!bulkForm.toolbarOutside || !bulkForm.rowsInside) {
+      fail("bulk-bar", `bulk form must wrap the rows and not the toolbar (${JSON.stringify(bulkForm)})`);
+    }
 
     // Segmented status filter drives filter.js (radio, not select).
     await page.click('label[for="team-status-2"]'); // Away
@@ -461,23 +482,28 @@ for (const name of pages) {
     if (!inkAction) fail("toast", "ink toast with Undo action not rendered");
 
     // Row-action menu on the LAST row must not be clipped by the scroll body.
-    const kebabs = await page.$$("#team-table .dropdown__trigger");
+    // The last row's action strip opens inside the row, fully visible in the scroll box.
+    const kebabs = await page.$$("#team-table [data-row-actions]");
     await kebabs[kebabs.length - 1].click();
-    await pause();
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector("#team-table .data-table__row-actions:not([hidden])") as HTMLElement | null;
+        return !!el && el.getAnimations().length === 0;
+      },
+      { timeout: 2000 },
+    ).catch(() => fail("row-actions", "last-row strip never opened"));
     const clip = await page.evaluate(() => {
-      const panel = document.querySelector("#team-table .dropdown__panel.is-open")!;
+      const strip = document.querySelector("#team-table .data-table__row-actions:not([hidden])")!;
       const scroll = document.querySelector("#team-table .data-table__scroll")!;
-      const p = panel.getBoundingClientRect();
+      const p = strip.getBoundingClientRect();
       const s = scroll.getBoundingClientRect();
-      const at = document.elementFromPoint(p.left + 10, p.bottom - 6);
-      return { fixed: getComputedStyle(panel).position, overflows: p.bottom > s.bottom, visible: panel.contains(at) };
+      const at = document.elementFromPoint(p.right - 10, p.top + p.height / 2);
+      return {
+        inBox: p.left >= s.left - 1 && p.right <= s.right + 1 && p.bottom <= s.bottom + 1,
+        visible: strip.contains(at),
+      };
     });
-    if (!clip.visible) {
-      fail(
-        "dropdown-clip",
-        `last-row menu is clipped (position=${clip.fixed}, overflows scroll body=${clip.overflows})`,
-      );
-    }
+    if (!clip.visible || !clip.inBox) fail("row-actions", `last-row strip is clipped (${JSON.stringify(clip)})`);
     await page.screenshot({ path: `${outDir}/${name}-row-menu.png` });
     await page.keyboard.press("Escape");
     await pause();
@@ -757,6 +783,12 @@ for (const name of pages) {
   }
 
   if (name === "settings") {
+    // A row action that "downloads" is a link to somewhere real, not a dead button.
+    const pdf = await page.$eval(
+      "#billing-history tbody tr .data-table__actions a",
+      (a) => a.getAttribute("href"),
+    ).catch(() => null);
+    if (pdf !== "invoice.html") fail("data-table", `billing PDF action is not a link (${pdf})`);
     const before = await page.$$eval(
       "#workspace-recipients ~ * .combobox__token, [data-combobox] .combobox__token",
       (els) => els.length,

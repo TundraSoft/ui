@@ -32,6 +32,83 @@ Nav · content · table of contents.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Documentation with side navigation and an on-this-page list
+
+```ts
+DocsLayout({
+  header: Navbar({ brand: "Acme Docs" }),
+  navId: "docs-nav",
+  nav: Sidebar({
+    id: "docs-nav",
+    items: [{ label: "Getting started", href: "/docs", active: true }, { label: "API", href: "/docs/api" }],
+  }),
+  content: html`
+    <h1>Getting started</h1>
+    <p>…</p>
+  `,
+  toc: Menu({ items: [{ label: "Install", href: "#install" }, { label: "First page", href: "#first-page" }] }),
+})
+```
+
+```html
+<div class="layout layout--docs">
+  <header class="layout__header">
+    <button type="button" class="navbar__toggle navbar__toggle--sidebar js-only layout__drawer-toggle" data-toggle="#docs-nav" data-toggle-class="" aria-expanded="false" aria-controls="docs-nav" aria-label="Open navigation">&#9776;</button>
+    <nav class="navbar">
+      <div class="navbar__brand">Acme Docs</div>
+      <div class="navbar__spacer"></div>
+    </nav>
+  </header>
+  <div class="layout__body">
+    <aside class="sidebar" id="docs-nav">
+      <nav class="sidebar__nav" aria-label="Main">
+        <ul class="menu__list">
+          <li>
+            <a class="menu__link menu__link--active" href="/docs" aria-current="page">
+              <span class="menu__link-label">Getting started</span>
+            </a>
+          </li>
+          <li>
+            <a class="menu__link" href="/docs/api">
+              <span class="menu__link-label">API</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+    <div class="layout__backdrop" data-toggle-close="#docs-nav"></div>
+    <main class="layout__content" id="main-content">
+      <article class="layout__article">
+        <h1>Getting started</h1>
+        <p>…</p>
+      </article>
+      <nav class="layout__toc" aria-label="On this page">
+        <button type="button" class="layout__toc-toggle js-only" data-toggle="#main-content-toc" data-toggle-class aria-expanded="false" aria-controls="main-content-toc">On this page</button>
+        <p class="layout__toc-title">On this page</p>
+        <div class="layout__toc-body" id="main-content-toc">
+          <ul class="menu__list">
+            <li>
+              <a class="menu__link" href="#install">
+                <span class="menu__link-label">Install</span>
+              </a>
+            </li>
+            <li>
+              <a class="menu__link" href="#first-page">
+                <span class="menu__link-label">First page</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </main>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/docs/docs.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

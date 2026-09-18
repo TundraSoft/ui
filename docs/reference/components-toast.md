@@ -51,6 +51,55 @@ The fixed-position container a page renders once; toasts get appended into it.
 | `autoDismissMs` | `number` |  | Auto-remove after this many ms (see toast.js). |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A success toast with an action
+
+Return this from a route the trigger appends into `#toast-region` (`data-target="#toast-region" data-swap="append"`).
+
+```ts
+Toast({
+  variant: "success",
+  body: "Reminder sent to Contoso Ltd",
+  action: {
+    label: "Undo",
+    attrs: {
+      "data-action": "/invoices/INV-2047/remind/undo",
+      "data-method": "post",
+      "data-target": "#toast-region",
+      "data-swap": "append",
+    },
+  },
+  dismissible: true,
+  autoDismissMs: 6000,
+})
+```
+
+```html
+<div class="toast toast--success" data-dismissible="" data-toast-autodismiss="6000">
+  <span class="toast__icon">
+    <svg width="13" height="13" width="2" …>…</svg>
+  </span>
+  <div class="toast__body">Reminder sent to Contoso Ltd</div>
+  <button type="button" class="toast__action" data-action="/invoices/INV-2047/remind/undo" data-method="post" data-target="#toast-region" data-swap="append">Undo</button>
+  <button type="button" class="toast__close" data-dismiss aria-label="Dismiss">
+    <svg width="15" height="15" width="2" …>…</svg>
+  </button>
+</div>
+```
+
+### The region the shell renders once
+
+```ts
+ToastRegion()
+```
+
+```html
+<div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/toast/toast.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

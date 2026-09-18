@@ -59,6 +59,84 @@ Combobox(props: ComboboxProps): Html
 type ComboboxListProps = Pick
 ```
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Pick a reviewer, filtered by the server
+
+Each keystroke fetches `action?q=…` and swaps the reply into `#reviewer-list`; without `action` the rendered options are filtered on the client.
+
+```ts
+Combobox({
+  id: "reviewer",
+  name: "reviewer",
+  label: "Reviewer",
+  placeholder: "Type a name…",
+  action: "/fragments/reviewers",
+  options: [{ value: "ada", label: "Ada Lovelace", meta: "Finance" }, {
+    value: "grace",
+    label: "Grace Hopper",
+    meta: "Ops",
+  }],
+})
+```
+
+```html
+<div class="combobox" data-combobox>
+  <label class="form-field__label" for="reviewer">Reviewer</label>
+  <div class="combobox__anchor">
+    <div class="combobox__field">
+      <input type="hidden" name="reviewer" value="" data-combobox-value>
+      <input class="combobox__input" id="reviewer" type="text" role="combobox" autocomplete="off" value="" placeholder="Type a name…" aria-expanded="false" aria-controls="reviewer-list" aria-autocomplete="list" data-combobox-action="/fragments/reviewers" data-combobox-target="#reviewer-list">
+      <span class="combobox__caret">
+        <svg width="15" height="15" width="2" …>…</svg>
+      </span>
+    </div>
+    <div class="combobox__list" id="reviewer-list" role="listbox" hidden>
+      <div class="combobox__option" role="option" id="reviewer-opt-0" aria-selected="false" data-value="ada">
+        <span class="combobox__option-label">Ada Lovelace</span>
+        <span class="combobox__option-meta">Finance</span>
+      </div>
+      <div class="combobox__option" role="option" id="reviewer-opt-1" aria-selected="false" data-value="grace">
+        <span class="combobox__option-label">Grace Hopper</span>
+        <span class="combobox__option-meta">Ops</span>
+      </div>
+      <div class="combobox__hints">
+        <span>&uarr;&darr; navigate</span>
+        <span>&crarr; select</span>
+        <span class="combobox__count">2 matches</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### The fragment the route returns
+
+```ts
+ComboboxList({
+  id: "reviewer",
+  query: "gr",
+  options: [{ value: "grace", label: "Grace Hopper", meta: "Ops" }],
+})
+```
+
+```html
+<div class="combobox__option" role="option" id="reviewer-opt-0" aria-selected="false" data-value="grace">
+  <span class="combobox__option-label">
+    <span class="combobox__match">Gr</span>
+    ace Hopper
+  </span>
+  <span class="combobox__option-meta">Ops</span>
+</div>
+<div class="combobox__hints">
+  <span>&uarr;&darr; navigate</span>
+  <span>&crarr; select</span>
+  <span class="combobox__count">1 match</span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/combobox/combobox.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
