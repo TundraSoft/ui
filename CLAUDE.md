@@ -407,16 +407,33 @@ below), in `deno.json` and `package.json` with all three lockfiles regenerated. 
 minimum-dependency-age policy blocked the 20-minute-old release, locally and in CI alike, so `deno.json` sets
 `minimumDependencyAge: { age: "P1D", exclude: [jsr/npm @tundralibs/rapid and compat] }` — the window stays for
 third-party packages, our own first-party packages are exempt (the CLI flag `--minimum-dependency-age 0` is the one-off
-escape). rAPId's `main` (unreleased then) adds `rapid:progress` (`{ url, loaded, total }`, emitted on the swap target
-while a multipart body streams over `XMLHttpRequest`; `total` is `0` when unknown), `rapid:request`, its own `aria-busy`
-on the target and a one-request-per-target guard. `dropzone.js` handles it now: on `submit` of a `form[data-action]`
-holding a dropzone with picked files it renders a `.dropzone__file--pending` row per file (same classes as
-`DropzoneFile`, indeterminate `<progress>`), keyed by the form's `data-action` URL; `rapid:progress` with that `url`
-fills the bars; `rapid:swapped` drops the memory (the reply replaced the rows); `rapid:error` marks them `--error` with
-"Upload failed". The catalogue's `#cat-dz-1` sits in `#cat-dz-form` posting to `routes.upload` (`/fragments/upload` in
-the app — `ctx.payload.files` is `{ name, path, type, size }` per file — answering with the `Dropzone` re-rendered; the
-app declares `uploads.allowedExtensions`, because rAPId refuses every upload until told otherwise). `test-catalogue.ts`
-drives the client side with dispatched events; `test-app.ts` does a real upload (`uploadFile` + submit → done row).
+escape). The user then asked for "rAPId ≥ the version specified": `package.json` carries
+`npm:@jsr/tundralibs__rapid@>=0.4.0` (npm ranges are free-form), but `deno.json` has to stay `^0.4.0` — Deno's `jsr:`
+specifier grammar accepts only `^`, `~`, an exact version or `*`, and rejects `>=0.4.0`, `>=0.4`, `>=0.4.0 <2` and
+`0.4.0 - 9` as "Invalid specifier version requirement" (verified with `deno info`). `*` would parse but means any
+version, not a floor. The user then chose the caret in `package.json` too, and asked instead for the pin to _follow_
+rAPId automatically. **`.github/workflows/rapid-bump.yml`** (daily 06:17 UTC + manual): `scripts/bump-rapid.ts` compares
+the `deno.json` pin with JSR's `latest` and, when newer, rewrites both manifests to `^X.Y.Z`; the job regenerates the
+lock, runs `deno task test` (the whole thing, Chrome and all) against it, and only when that passes commits to
+`deps/rapid-<version>`, opens a `feat(deps): require rAPId ^X.Y.Z` PR with auto-merge (the repo allows auto-merge; the
+PAT makes CI run on it; release-please then releases). A failing suite means **no bump**: the run fails, screenshots
+upload, and a `ci-health` issue ("rAPId X breaks the suite — pin not bumped", deduplicated) is opened or commented.
+**`examples/tests/test-contract.ts`** (`deno task test:contract`, first in `test`): rAPId exports its client scripts as
+source strings (`UI_RUNTIME`, `UI_HISTORY`, `UI_LIVE`), so the 24 hooks this library depends on —
+`dataset.action/target/swap/method`, `data-load`, the `<body data-*>` config names, `rapid:swapped/error/progress`,
+`FormData(form, submitter)`, `window.rapid`/`refresh`, `outer`/`append`, `dataset.push`, `CSS.escape`, `popstate`,
+`rapid:push/live`, `livePath` — are asserted to still exist, each naming the file that uses it; a rename fails there in
+seconds, not as a browser timeout. The weekly canary in `health.yml` stays as a second net. rAPId's `main` (unreleased
+then) adds `rapid:progress` (`{ url, loaded, total }`, emitted on the swap target while a multipart body streams over
+`XMLHttpRequest`; `total` is `0` when unknown), `rapid:request`, its own `aria-busy` on the target and a
+one-request-per-target guard. `dropzone.js` handles it now: on `submit` of a `form[data-action]` holding a dropzone with
+picked files it renders a `.dropzone__file--pending` row per file (same classes as `DropzoneFile`, indeterminate
+`<progress>`), keyed by the form's `data-action` URL; `rapid:progress` with that `url` fills the bars; `rapid:swapped`
+drops the memory (the reply replaced the rows); `rapid:error` marks them `--error` with "Upload failed". The catalogue's
+`#cat-dz-1` sits in `#cat-dz-form` posting to `routes.upload` (`/fragments/upload` in the app — `ctx.payload.files` is
+`{ name, path, type, size }` per file — answering with the `Dropzone` re-rendered; the app declares
+`uploads.allowedExtensions`, because rAPId refuses every upload until told otherwise). `test-catalogue.ts` drives the
+client side with dispatched events; `test-app.ts` does a real upload (`uploadFile` + submit → done row).
 `docs/UI-Recipes.md` is the worked-examples guide (2026-09-18): seven real pages, each as a rAPId route/template and as
 the plain HTML it renders — its TypeScript lives in `examples/docs/recipes.ts` (covered by `deno task check`; run it to
 render every recipe's HTML), and the guide's HTML blocks are that render, trimmed — keep the two in step when a

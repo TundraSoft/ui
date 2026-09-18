@@ -31,3 +31,11 @@ release-please treats a repository with no release tag as a first release and pr
 A manual run of "Release Please" (`workflow_dispatch`) recomputes the release PR; tick **publish** to also (re-)publish
 the version at `HEAD` to npm and JSR — it must already be tagged and match the manifest. Locally, the same steps are
 `deno task build`, `npm publish --access public`, `deno publish`.
+
+## Keeping up with rAPId
+
+`.github/workflows/rapid-bump.yml` runs daily: when JSR has a newer `@tundralibs/rapid` than `deno.json` pins, it bumps
+both manifests, runs the full suite against it and opens a `feat(deps)` PR with auto-merge enabled (the repository
+setting "Allow auto-merge" must stay on, and `RELEASE_PLEASE_TOKEN` is what makes CI run on that PR). If the suite
+fails, nothing is bumped and a `ci-health` issue is filed. Run it by hand from the Actions tab after fixing such an
+issue.

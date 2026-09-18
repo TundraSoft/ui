@@ -1,0 +1,111 @@
+# Daily: if JSR has a newer @tundralibs/rapid than deno.json pins, bump both
+# manifests, regenerate the lock, run the FULL suite against it, and only
+# when everything passes open a `feat(deps)` PR (auto-merge on; branch
+# protection makes CI the gate; release-please then releases). A release
+# that fails the suite is reported as an issue and the pin stays where it
+# is. Polling once a day is deliberate — no cross-repo events to wire.
+name: rAPId bump
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: rapid-bump
+  cancel-in-progress: false
+
+env:
+  CHROME_PATH: /usr/bin/google-chrome
+  HERMETIC: "1"
+
+jobs:
+  bump:
+    name: Bump rAPId to the latest release if the suite passes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          # The PAT so the PR this job pushes triggers CI; the default
+          # token cannot. Falls back to GITHUB_TOKEN (PR opens, CI does not run).
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.x
+
+      - name: Compare the pin with JSR
+        id: bump
+        run: deno run -A scripts/bump-rapid.ts
+
+      - name: Nothing newer
+        if: steps.bump.outputs.bumped != 'true'
+        run: echo "rAPId ${{ steps.bump.outputs.version }} is already the pin."
+
+      - name: Regenerate the lock and format
+        if: steps.bump.outputs.bumped == 'true'
+        run: |
+          deno fmt deno.json package.json
+          deno task check
+          git --no-pager diff --stat
+
+      - name: Build and full suite against ${{ steps.bump.outputs.version }}
+        if: steps.bump.outputs.bumped == 'true'
+        id: suite
+        run: deno task test
+
+      - name: Upload screenshots on failure
+        if: failure() && steps.bump.outputs.bumped == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rapid-bump-${{ steps.bump.outputs.version }}
+          path: .test-output/
+          if-no-files-found: ignore
+
+      - name: Open the PR (auto-merge)
+        if: success() && steps.bump.outputs.bumped == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          PREVIOUS: ${{ steps.bump.outputs.previous }}
+        run: |
+          set -euo pipefail
+          BRANCH="deps/rapid-${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add deno.json deno.lock package.json
+          git commit -m "feat(deps): require rAPId ^${VERSION}" -m "Bumped from ^${PREVIOUS} by the daily rapid-bump workflow after the full suite passed against ${VERSION}." -m "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          git push --force -u origin "$BRANCH"
+          if gh pr view "$BRANCH" --json number --jq .number >/dev/null 2>&1; then
+            echo "PR for $BRANCH already open"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "feat(deps): require rAPId ^${VERSION}" \
+              --body "Automated: \`@tundralibs/rapid\` ^${PREVIOUS} → ^${VERSION}. The full suite (build, contract, catalogue, layouts, all-pages, admin, app) passed against ${VERSION} in [this run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}). CI on this PR is the gate; it auto-merges when green and release-please cuts the release."
+          fi
+          gh pr merge "$BRANCH" --auto --squash || echo "auto-merge could not be enabled; merge by hand once green"
+
+      - name: Report a release that breaks the suite
+        if: failure() && steps.bump.outputs.bumped == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          TITLE="rAPId ${VERSION} breaks the suite — pin not bumped"
+          URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          EXISTING=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "Still failing against ${VERSION}: ${URL}"
+          else
+            gh issue create --title "$TITLE" --label ci-health --body "The daily rapid-bump workflow found \`@tundralibs/rapid\` ${VERSION} on JSR, but the suite failed against it, so the pin was left alone. See the run (screenshots attached as an artifact): ${URL}
+
+Fix the library (or wait for a rAPId fix), then re-run the workflow manually." || gh issue create --title "$TITLE" --body "The daily rapid-bump workflow found \`@tundralibs/rapid\` ${VERSION} on JSR, but the suite failed against it, so the pin was left alone. See the run: ${URL}"
+  fi
