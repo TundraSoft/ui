@@ -104,8 +104,15 @@ jobs:
           EXISTING=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body "Still failing against ${VERSION}: ${URL}"
-          else
-            gh issue create --title "$TITLE" --label ci-health --body "The daily rapid-bump workflow found \`@tundralibs/rapid\` ${VERSION} on JSR, but the suite failed against it, so the pin was left alone. See the run (screenshots attached as an artifact): ${URL}
+            exit 0
+          fi
+          cat > /tmp/issue-body.md <<EOF
+          The daily rapid-bump workflow found \`@tundralibs/rapid\` ${VERSION} on JSR, but the suite failed against it, so the pin was left alone.
 
-Fix the library (or wait for a rAPId fix), then re-run the workflow manually." || gh issue create --title "$TITLE" --body "The daily rapid-bump workflow found \`@tundralibs/rapid\` ${VERSION} on JSR, but the suite failed against it, so the pin was left alone. See the run: ${URL}"
-  fi
+          Run (screenshots attached as an artifact): ${URL}
+
+          Fix the library, or wait for a rAPId fix, then re-run the workflow from the Actions tab.
+          EOF
+          LABEL=()
+          if gh label list --json name --jq '.[].name' | grep -qx ci-health; then LABEL=(--label ci-health); fi
+          gh issue create --title "$TITLE" "${LABEL[@]}" --body-file /tmp/issue-body.md
