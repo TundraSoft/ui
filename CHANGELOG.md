@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/TundraSoft/ui/compare/v0.1.2...v0.2.0) (2026-09-18)
+
+
+### Features
+
+* data-table bulk forms and row strips, upload progress, recipes docs ([#7](https://github.com/TundraSoft/ui/issues/7)) ([35a97e8](https://github.com/TundraSoft/ui/commit/35a97e83e463ba98ec08e5709beea9b5aeb96a30))
+
 ## [0.1.2](https://github.com/TundraSoft/ui/compare/v0.1.1...v0.1.2) (2026-09-17)
 
 
