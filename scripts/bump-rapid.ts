@@ -6,6 +6,13 @@
  * suite and opens the PR only when everything passes — a release that
  * breaks the suite is reported, never bumped to.
  *
+ * It also refreshes `minimumDependencyAge.exclude` in deno.json with every
+ * package of the @tundralibs JSR scope (jsr and npm-bridge names): Deno's
+ * 24-hour minimum-dependency-age policy would otherwise block a fresh
+ * first-party release — rAPId's own, or any first-party package a new
+ * rAPId depends on — locally and in CI alike. The window stays in force
+ * for everything third-party.
+ *
  * Prints `bumped`, `previous` and `version` lines, and appends the same
  * as outputs to `$GITHUB_OUTPUT` when set. `--dry-run` only reports.
  * Runtime-agnostic via @tundralibs/compat (no Deno.*, process.* here).
@@ -52,26 +59,48 @@ async function output(lines: Record<string, string>) {
   await writeTextFile(file, existing + Object.entries(lines).map(([k, v]) => `${k}=${v}\n`).join(""));
 }
 
+/** Every package in the @tundralibs scope on JSR — the first-party set the age policy exempts. */
+async function scopePackages(): Promise<string[]> {
+  const res = await fetch("https://api.jsr.io/scopes/tundralibs/packages?limit=100");
+  if (!res.ok) throw new Error(`JSR answered ${res.status} for the @tundralibs scope`);
+  const body = (await res.json()) as { items?: { name: string }[] } | { name: string }[];
+  const items = Array.isArray(body) ? body : body.items ?? [];
+  return items.map((p) => p.name);
+}
+
+/** Rewrite deno.json's `minimumDependencyAge.exclude` to the full first-party set. */
+async function syncExclusions(manifest: string): Promise<string> {
+  const names = new Set([...(await scopePackages()), "rapid", "compat"]);
+  const entries = [...names].sort().flatMap((n) => [`jsr:@tundralibs/${n}`, `npm:@jsr/tundralibs__${n}`]);
+  const parsed = JSON.parse(manifest) as { minimumDependencyAge?: { age?: string; exclude?: string[] } };
+  const policy = parsed.minimumDependencyAge ?? { age: "P1D" };
+  const same = JSON.stringify(policy.exclude ?? []) === JSON.stringify(entries);
+  if (same) return manifest;
+  parsed.minimumDependencyAge = { age: policy.age ?? "P1D", exclude: entries };
+  console.log(`minimumDependencyAge.exclude: ${entries.length} entries (${names.size} first-party packages)`);
+  return JSON.stringify(parsed, null, 2) + "\n";
+}
+
 if (!newer(latest!, current!)) {
+  if (!dryRun) await writeTextFile("deno.json", await syncExclusions(denoJson));
   await output({ bumped: "false", previous: current!, version: latest! });
   exit(0);
 }
 
 if (!dryRun) {
-  const nextDeno = denoJson.replace(
+  const synced = await syncExclusions(denoJson);
+  const nextDeno = synced.replace(
     /"jsr:@tundralibs\/rapid@\^?[0-9]+\.[0-9]+\.[0-9]+(\/[^"]*)?"/g,
     (_m, sub: string | undefined) => `"jsr:@tundralibs/rapid@^${latest}${sub ?? ""}"`,
   );
   await writeTextFile("deno.json", nextDeno);
   const packageJson = await readTextFile("package.json");
-  const nextPackage = packageJson.replace(
-    /"npm:@jsr\/tundralibs__rapid@\^?[0-9]+\.[0-9]+\.[0-9]+"/,
-    `"npm:@jsr/tundralibs__rapid@^${latest}"`,
-  );
-  if (nextPackage === packageJson) {
+  const dep = /"npm:@jsr\/tundralibs__rapid@\^?[0-9]+\.[0-9]+\.[0-9]+"/;
+  if (!dep.test(packageJson)) {
     console.error("package.json has no npm:@jsr/tundralibs__rapid@<version> dependency");
     exit(1);
   }
-  await writeTextFile("package.json", nextPackage);
+  // Idempotent: a manifest already at `latest` is left as it is.
+  await writeTextFile("package.json", packageJson.replace(dep, `"npm:@jsr/tundralibs__rapid@^${latest}"`));
 }
 await output({ bumped: "true", previous: current!, version: latest! });

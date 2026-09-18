@@ -65,7 +65,7 @@
     "./wizard": "./components/wizard/wizard.ts"
   },
   "imports": {
-    "@tundralibs/rapid/ui": "jsr:@tundralibs/rapid@^0.4.0/ui",
+    "@tundralibs/rapid/ui": "jsr:@tundralibs/rapid@^0.5.0/ui",
     "@tundralibs/compat/file": "jsr:@tundralibs/compat@^2.7.2/file",
     "@tundralibs/compat/runtime": "jsr:@tundralibs/compat@^2.7.2/runtime",
     "@tundralibs/compat/webserver": "jsr:@tundralibs/compat@^2.7.2/webserver",
@@ -74,7 +74,7 @@
     "postcss-mixins": "npm:postcss-mixins@^11.0.0",
     "postcss-nesting": "npm:postcss-nesting@^13.0.0",
     "puppeteer-core": "npm:puppeteer-core@^25.11.0",
-    "@tundralibs/rapid": "jsr:@tundralibs/rapid@^0.4.0",
+    "@tundralibs/rapid": "jsr:@tundralibs/rapid@^0.5.0",
     "@tundralibs/compat/path": "jsr:@tundralibs/compat@^2.7.2/path",
     "esbuild": "npm:esbuild@0.25.12"
   },
@@ -159,10 +159,48 @@
   "minimumDependencyAge": {
     "age": "P1D",
     "exclude": [
+      "jsr:@tundralibs/ambient",
+      "npm:@jsr/tundralibs__ambient",
+      "jsr:@tundralibs/cacher",
+      "npm:@jsr/tundralibs__cacher",
+      "jsr:@tundralibs/compat",
+      "npm:@jsr/tundralibs__compat",
+      "jsr:@tundralibs/cronus",
+      "npm:@jsr/tundralibs__cronus",
+      "jsr:@tundralibs/crypt",
+      "npm:@jsr/tundralibs__crypt",
+      "jsr:@tundralibs/doctor",
+      "npm:@jsr/tundralibs__doctor",
+      "jsr:@tundralibs/drivers",
+      "npm:@jsr/tundralibs__drivers",
+      "jsr:@tundralibs/guardian",
+      "npm:@jsr/tundralibs__guardian",
+      "jsr:@tundralibs/id",
+      "npm:@jsr/tundralibs__id",
+      "jsr:@tundralibs/metro-man",
+      "npm:@jsr/tundralibs__metro-man",
+      "jsr:@tundralibs/norm",
+      "npm:@jsr/tundralibs__norm",
+      "jsr:@tundralibs/oql",
+      "npm:@jsr/tundralibs__oql",
+      "jsr:@tundralibs/pact",
+      "npm:@jsr/tundralibs__pact",
+      "jsr:@tundralibs/radrouter",
+      "npm:@jsr/tundralibs__radrouter",
       "jsr:@tundralibs/rapid",
       "npm:@jsr/tundralibs__rapid",
-      "jsr:@tundralibs/compat",
-      "npm:@jsr/tundralibs__compat"
+      "jsr:@tundralibs/restler",
+      "npm:@jsr/tundralibs__restler",
+      "jsr:@tundralibs/rpc",
+      "npm:@jsr/tundralibs__rpc",
+      "jsr:@tundralibs/slogger",
+      "npm:@jsr/tundralibs__slogger",
+      "jsr:@tundralibs/tracer",
+      "npm:@jsr/tundralibs__tracer",
+      "jsr:@tundralibs/ui",
+      "npm:@jsr/tundralibs__ui",
+      "jsr:@tundralibs/utils",
+      "npm:@jsr/tundralibs__utils"
     ]
   }
 }

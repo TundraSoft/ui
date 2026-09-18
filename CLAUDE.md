@@ -423,9 +423,17 @@ source strings (`UI_RUNTIME`, `UI_HISTORY`, `UI_LIVE`), so the 24 hooks this lib
 `dataset.action/target/swap/method`, `data-load`, the `<body data-*>` config names, `rapid:swapped/error/progress`,
 `FormData(form, submitter)`, `window.rapid`/`refresh`, `outer`/`append`, `dataset.push`, `CSS.escape`, `popstate`,
 `rapid:push/live`, `livePath` — are asserted to still exist, each naming the file that uses it; a rename fails there in
-seconds, not as a browser timeout. The weekly canary in `health.yml` stays as a second net. rAPId's `main` (unreleased
-then) adds `rapid:progress` (`{ url, loaded, total }`, emitted on the swap target while a multipart body streams over
-`XMLHttpRequest`; `total` is `0` when unknown), `rapid:request`, its own `aria-busy` on the target and a
+seconds, not as a browser timeout. The weekly canary in `health.yml` stays as a second net. First real exercise
+(2026-09-19, rAPId 0.5.0): the workflow correctly refused to bump — not because 0.5.0 broke anything, but because it
+depends on `@tundralibs/ambient` 0.2.9, published the same day, and the age-policy exemption only named rapid and
+compat; transitive first-party packages were blocked (issue #13). The rule is now scope-wide: `bump-rapid.ts` fetches
+the @tundralibs package list from `api.jsr.io` on every run and rewrites `minimumDependencyAge.exclude` (jsr +
+npm-bridge names, sorted) so a new first-party dependency of a future rAPId can never block a bump; the exclude entries
+do apply transitively and to package.json-derived npm deps (verified in scratch projects). Lesson from the debugging:
+deno.json has THREE `exclude` arrays (`publish`, `fmt`, `minimumDependencyAge`) — edit it by parsing the JSON, never
+with a regex on `"exclude"`; a regex replaced `publish.exclude` twice before the real cause showed. rAPId's `main`
+(unreleased then) adds `rapid:progress` (`{ url, loaded, total }`, emitted on the swap target while a multipart body
+streams over `XMLHttpRequest`; `total` is `0` when unknown), `rapid:request`, its own `aria-busy` on the target and a
 one-request-per-target guard. `dropzone.js` handles it now: on `submit` of a `form[data-action]` holding a dropzone with
 picked files it renders a `.dropzone__file--pending` row per file (same classes as `DropzoneFile`, indeterminate
 `<progress>`), keyed by the form's `data-action` URL; `rapid:progress` with that `url` fills the bars; `rapid:swapped`
