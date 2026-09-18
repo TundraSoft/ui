@@ -164,12 +164,12 @@ state never leaks into another's URLs. Every region that pushes needs a stable `
 `busy.js` marks the target of any swap `aria-busy="true"` + `data-busy` the moment the click or submit fires; the
 skeleton stylesheet paints a shimmer veil over it and blocks pointer events until `rapid:swapped` or `rapid:error` (15 s
 safety timeout). `data-load` regions are left alone — render `SkeletonTable()` / `SkeletonCard()` as their initial
-content, since only the server knows the shape that is coming. Newer rAPId runtimes set `aria-busy` on the target
-themselves and refuse a second non-GET while one is in flight; the veil works the same either way.
+content, since only the server knows the shape that is coming. rAPId 0.4+ also sets `aria-busy` on the target itself and
+refuses a second non-GET while one is in flight; the veil works the same either way.
 
 ### Uploads and progress
 
-A form that holds a file input posts real `multipart/form-data`. rAPId streams it over `XMLHttpRequest` and emits
+A form that holds a file input posts real `multipart/form-data`. rAPId 0.4+ streams it over `XMLHttpRequest` and emits
 `rapid:progress` (`{ url, loaded, total }`, `total` is `0` when unknown) on the target while the bytes leave the
 browser. `Dropzone` uses it: on submit, dropzone.js renders one pending row per picked file (same markup as a
 server-rendered `DropzoneFile`, indeterminate bar), fills the bars from the events, and leaves the rows pending until
