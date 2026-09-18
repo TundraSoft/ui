@@ -10,7 +10,7 @@ swap/live/history runtime with zero glue code.
 This file is the spec for rAPId's UI contract — what a component _must_, _must not_, and _may_ do to work seamlessly
 with rAPId. Tooling (bundler, CSS pipeline, package manager, test runner, publish target) is deliberately **not**
 specified here; that gets configured separately. Treat every claim below as verified against rAPId's actual source
-(`packages/rapid/ui/*.ts` and `packages/rapid/docs/Rapid-UI.md` in the TundraLibs monorepo) as of rAPId 0.2.0 —
+(`packages/rapid/ui/*.ts` and `packages/rapid/docs/Rapid-UI.md` in the TundraLibs monorepo) as of rAPId 0.4.0 —
 re-verify against that source before relying on anything here if rAPId has moved on since.
 
 ## The one rule that makes everything else possible
@@ -402,25 +402,29 @@ gallery, the admin invoice line items and the catalogue all use it. Nothing name
 
 **rAPId is a caret range, and upload progress is handled ahead of its release (2026-09-18).** `deno.json` imports
 `jsr:@tundralibs/rapid@^0.2.0` (was an exact `0.2.0`; `package.json` already had `^0.2.0`), so the lock resolves the
-newest 0.2.x — 0.2.1 at the time. rAPId's `main` (unreleased then) adds `rapid:progress` (`{ url, loaded, total }`,
-emitted on the swap target while a multipart body streams over `XMLHttpRequest`; `total` is `0` when unknown),
-`rapid:request`, its own `aria-busy` on the target and a one-request-per-target guard. `dropzone.js` handles it now: on
-`submit` of a `form[data-action]` holding a dropzone with picked files it renders a `.dropzone__file--pending` row per
-file (same classes as `DropzoneFile`, indeterminate `<progress>`), keyed by the form's `data-action` URL;
-`rapid:progress` with that `url` fills the bars; `rapid:swapped` drops the memory (the reply replaced the rows);
-`rapid:error` marks them `--error` with "Upload failed". The catalogue's `#cat-dz-1` sits in `#cat-dz-form` posting to
-`routes.upload` (`/fragments/upload` in the app — `ctx.payload.files` is `{ name, path, type, size }` per file —
-answering with the `Dropzone` re-rendered; the app declares `uploads.allowedExtensions`, because rAPId refuses every
-upload until told otherwise). `test-catalogue.ts` drives the client side with dispatched events; `test-app.ts` does a
-real upload (`uploadFile` + submit → done row). `docs/UI-Recipes.md` is the worked-examples guide (2026-09-18): seven
-real pages, each as a rAPId route/template and as the plain HTML it renders — its TypeScript lives in
-`examples/docs/recipes.ts` (covered by `deno task check`; run it to render every recipe's HTML), and the guide's HTML
-blocks are that render, trimmed — keep the two in step when a component's markup changes. The generated reference pages
-gained a **Usage** section the same day: `examples/docs/usage.ts` holds one to three real call sites per component and
-layout (`render: () => Html`), `scripts/build-docs.ts` cuts each snippet from that file's own text
-(`Function.toString()` would give Deno's re-emitted JavaScript) and prints the render through
-`examples/docs/pretty-html.ts`; the generator throws when a module has no entry, so a new component fails
-`deno task docs` (and the CI drift check) until it has a usage example.
+newest 0.2.x — 0.2.1 at the time. Bumped to `^0.4.0` the same day (0.4.0 is the release that carries the runtime changes
+below), in `deno.json` and `package.json` with all three lockfiles regenerated. Deno's default 24-hour
+minimum-dependency-age policy blocked the 20-minute-old release, locally and in CI alike, so `deno.json` sets
+`minimumDependencyAge: { age: "P1D", exclude: [jsr/npm @tundralibs/rapid and compat] }` — the window stays for
+third-party packages, our own first-party packages are exempt (the CLI flag `--minimum-dependency-age 0` is the one-off
+escape). rAPId's `main` (unreleased then) adds `rapid:progress` (`{ url, loaded, total }`, emitted on the swap target
+while a multipart body streams over `XMLHttpRequest`; `total` is `0` when unknown), `rapid:request`, its own `aria-busy`
+on the target and a one-request-per-target guard. `dropzone.js` handles it now: on `submit` of a `form[data-action]`
+holding a dropzone with picked files it renders a `.dropzone__file--pending` row per file (same classes as
+`DropzoneFile`, indeterminate `<progress>`), keyed by the form's `data-action` URL; `rapid:progress` with that `url`
+fills the bars; `rapid:swapped` drops the memory (the reply replaced the rows); `rapid:error` marks them `--error` with
+"Upload failed". The catalogue's `#cat-dz-1` sits in `#cat-dz-form` posting to `routes.upload` (`/fragments/upload` in
+the app — `ctx.payload.files` is `{ name, path, type, size }` per file — answering with the `Dropzone` re-rendered; the
+app declares `uploads.allowedExtensions`, because rAPId refuses every upload until told otherwise). `test-catalogue.ts`
+drives the client side with dispatched events; `test-app.ts` does a real upload (`uploadFile` + submit → done row).
+`docs/UI-Recipes.md` is the worked-examples guide (2026-09-18): seven real pages, each as a rAPId route/template and as
+the plain HTML it renders — its TypeScript lives in `examples/docs/recipes.ts` (covered by `deno task check`; run it to
+render every recipe's HTML), and the guide's HTML blocks are that render, trimmed — keep the two in step when a
+component's markup changes. The generated reference pages gained a **Usage** section the same day:
+`examples/docs/usage.ts` holds one to three real call sites per component and layout (`render: () => Html`),
+`scripts/build-docs.ts` cuts each snippet from that file's own text (`Function.toString()` would give Deno's re-emitted
+JavaScript) and prints the render through `examples/docs/pretty-html.ts`; the generator throws when a module has no
+entry, so a new component fails `deno task docs` (and the CI drift check) until it has a usage example.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
@@ -761,7 +765,7 @@ One package, two registries, one artifact:
 
 ### Example app (`examples/app/`, 2026-09-16)
 
-`createApp({ port, hostname, assets, quiet })` (`app.ts`) boots a real rAPId `Application` (`^0.2.0`, see below) wearing
+`createApp({ port, hostname, assets, quiet })` (`app.ts`) boots a real rAPId `Application` (`^0.4.0`, see below) wearing
 the library: `ui.core` from `createCoreTemplate`, `ui.errorTemplates` from `templates/errors.ts`, `prefer: "html"`,
 `history: true`, and `server.static` for the self-hosted `/ui` mount (`UI_ASSETS=cdn` switches to the CDN path — only
 meaningful once a version is on npm). `serve.ts` runs it (`deno task app`, `npm run app`, `bun run bun:app`; `PORT`
