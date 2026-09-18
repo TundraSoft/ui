@@ -45,6 +45,55 @@ Convenience trigger; any element with data-popover-trigger works.
 | `open` | `boolean` |  |  |
 | `className` | `string` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A profile card on a name
+
+```ts
+Popover({
+  id: "ada-card",
+  trigger: PopoverTrigger({ controls: "ada-card", label: "Ada Lovelace" }),
+  content: html`
+    <div class="popover__header"><span class="popover__title">Ada Lovelace</span></div>
+    <p>Finance · joined 2024</p>
+  `,
+})
+```
+
+```html
+<div class="popover" data-popover>
+  <button type="button" class="btn btn--outline btn--sm" aria-expanded="false" aria-controls="ada-card" data-popover-trigger>Ada Lovelace</button>
+  <div class="popover__panel" id="ada-card" role="dialog" hidden="">
+    <span class="popover__arrow"></span>
+    <div class="popover__header">
+      <span class="popover__title">Ada Lovelace</span>
+    </div>
+    <p>Finance · joined 2024</p>
+  </div>
+</div>
+```
+
+### Loaded on first open
+
+```ts
+Popover({
+  id: "ada-card",
+  trigger: PopoverTrigger({ controls: "ada-card", label: "Ada Lovelace" }),
+  loadFrom: "/fragments/people/ada",
+})
+```
+
+```html
+<div class="popover" data-popover>
+  <button type="button" class="btn btn--outline btn--sm" aria-expanded="false" aria-controls="ada-card" data-popover-trigger>Ada Lovelace</button>
+  <div class="popover__panel" id="ada-card" role="dialog" hidden="" data-action="/fragments/people/ada" data-load="">
+    <span class="popover__arrow"></span>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/popover/popover.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

@@ -31,6 +31,62 @@ Master/detail two-pane frame; one pane at a time on phones.
 | `stickyHeader` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### An inbox: list beside detail
+
+`mobileView` decides which pane a phone shows — make it a route decision (`/inbox` → pane, `/inbox/:id:` → detail).
+
+```ts
+SplitLayout({
+  header: Navbar({ brand: "Acme" }),
+  pane: Menu({
+    items: [{ label: "Contoso Ltd — INV-2047", href: "/inbox/INV-2047", active: true }, {
+      label: "Northwind — INV-2048",
+      href: "/inbox/INV-2048",
+    }],
+  }),
+  content: html`
+    <h1>INV-2047</h1>
+    <p>…</p>
+  `,
+  mobileView: "detail",
+})
+```
+
+```html
+<div class="layout layout--split layout--show-detail">
+  <header class="layout__header">
+    <nav class="navbar">
+      <div class="navbar__brand">Acme</div>
+      <div class="navbar__spacer"></div>
+    </nav>
+  </header>
+  <div class="layout__body">
+    <section class="layout__pane" id="pane">
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link menu__link--active" href="/inbox/INV-2047" aria-current="page">
+            <span class="menu__link-label">Contoso Ltd — INV-2047</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/inbox/INV-2048">
+            <span class="menu__link-label">Northwind — INV-2048</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+    <main class="layout__content" id="main-content">
+      <h1>INV-2047</h1>
+      <p>…</p>
+    </main>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/split/split.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

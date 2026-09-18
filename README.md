@@ -57,6 +57,8 @@ validated forms, toasts) speaks rAPId's `data-*` swap contract and needs no clie
 Also browsable on the [wiki](https://github.com/TundraSoft/ui/wiki), synced from `docs/` on every push.
 
 - [Getting started](docs/UI-Getting-Started.md) — install (CDN, self-host, JSR), a first page, how the bundle is built.
+- [Recipes](docs/UI-Recipes.md) — real pages as rAPId routes and as plain HTML: app shell, sign-in, dashboard, invoices
+  with bulk actions, uploads with progress, search, notifications.
 - [Components](docs/UI-Components.md) — a tour of every component with usage.
 - [Layouts](docs/UI-Layouts.md) — the eight page frames and how they respond.
 - [rAPId integration](docs/UI-Rapid.md) — the shell, swaps, forms, history, the example app.

@@ -13,6 +13,9 @@
  * are what ship).
  */
 import { ensureDir, pathExists, readTextFile, writeTextFile } from "@tundralibs/compat/file";
+import { render } from "@tundralibs/rapid/ui";
+import { usage } from "../examples/docs/usage.ts";
+import { prettyHtml } from "../examples/docs/pretty-html.ts";
 
 type TsType = { repr?: string; kind?: string; value?: unknown };
 type JsDoc = { doc?: string };
@@ -109,6 +112,67 @@ function propsTable(props: Prop[]): string {
 }
 
 /** CSS class hooks: every class selector the stylesheet defines. */
+/**
+ * The examples' own source, in file order: `Function.toString()` would
+ * hand back Deno's re-emitted JavaScript (types and formatting gone), so
+ * the snippets are cut from examples/docs/usage.ts as written — every
+ * `render: () =>` arrow body, found by bracket balance, strings and
+ * template literals respected.
+ */
+const usageSource = await readTextFile("examples/docs/usage.ts");
+const snippets: Record<string, string[]> = (() => {
+  const out: Record<string, string[]> = {};
+  const keys = [...usageSource.matchAll(/^  "((?:components|layouts)\/[a-z-]+)": \[/gm)].map((m) => ({
+    key: m[1]!,
+    at: m.index!,
+  }));
+  const marker = "render: () =>";
+  let from = 0;
+  while (true) {
+    const at = usageSource.indexOf(marker, from);
+    if (at < 0) break;
+    const key = keys.filter((k) => k.at < at).pop()?.key ?? "";
+    let i = at + marker.length;
+    while (/\s/.test(usageSource[i]!)) i++;
+    const begin = i;
+    // Walk to the end of the expression: the first `,` or `}` at depth 0.
+    const stack: string[] = []; // open brackets and quote kinds
+    while (i < usageSource.length) {
+      const ch = usageSource[i]!;
+      const top = stack[stack.length - 1];
+      if (top === '"' || top === "'") {
+        if (ch === "\\") i++;
+        else if (ch === top) stack.pop();
+      } else if (top === "`") {
+        if (ch === "\\") i++;
+        else if (ch === "`") stack.pop();
+        else if (ch === "$" && usageSource[i + 1] === "{") {
+          stack.push("{");
+          i++;
+        }
+      } else {
+        if (ch === '"' || ch === "'" || ch === "`") stack.push(ch);
+        else if (ch === "(" || ch === "[" || ch === "{") stack.push(ch);
+        else if (ch === ")" || ch === "]" || ch === "}") {
+          if (!stack.length) break; // the closing brace of the example object
+          stack.pop();
+        } else if (ch === "," && !stack.length) break;
+      }
+      i++;
+    }
+    (out[key] ??= []).push(dedentBody(usageSource.slice(begin, i).trim()));
+    from = i;
+  }
+  return out;
+})();
+
+function dedentBody(src: string): string {
+  if (src.startsWith("{") && src.endsWith("}")) src = src.slice(1, -1).replace(/^\n|\n\s*$/g, "");
+  const lines = src.split("\n");
+  const rest = lines.slice(1).filter((l) => l.trim());
+  const n = rest.length ? Math.min(...rest.map((l) => l.match(/^\s*/)![0].length)) : 0;
+  return [lines[0]!.trim(), ...lines.slice(1).map((l) => l.slice(n))].join("\n");
+}
 async function cssHooks(path: string): Promise<string[]> {
   if (!(await pathExists(path))) return [];
   const css = await readTextFile(path);
@@ -234,6 +298,34 @@ for (const m of modules) {
       );
     }
     L.push("");
+  }
+  if (m.group === "components" || m.group === "layouts") {
+    // Usage: each example is real code (examples/docs/usage.ts) — the
+    // snippet shown is that function's own source, the HTML its render.
+    const examples = usage[`${m.group}/${m.id}`];
+    if (!examples?.length) {
+      throw new Error(`${m.group}/${m.id} has no usage examples — add them to examples/docs/usage.ts`);
+    }
+    L.push(
+      "## Usage",
+      "",
+      "Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.",
+      "",
+    );
+    for (const [i, ex] of examples.entries()) {
+      L.push(`### ${ex.title}`, "");
+      if (ex.note) L.push(ex.note, "");
+      L.push(
+        "```ts",
+        snippets[`${m.group}/${m.id}`]?.[i] ?? "",
+        "```",
+        "",
+        "```html",
+        prettyHtml(render(ex.render())),
+        "```",
+        "",
+      );
+    }
   }
   if (m.css) {
     const hooks = await cssHooks(m.css);

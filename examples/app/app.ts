@@ -40,6 +40,7 @@ import { Otp } from "../../components/otp/otp.ts";
 import { ComboboxList } from "../../components/combobox/combobox.ts";
 import { CommandList } from "../../components/command/command.ts";
 import { DatePicker } from "../../components/datepicker/datepicker.ts";
+import { Dropzone, type DropzoneFile } from "../../components/dropzone/dropzone.ts";
 import { Icon } from "../../shared/icons.ts";
 import { APEXCHARTS } from "../../components/chart/chart.ts";
 import { layoutIndex, type LayoutName, layoutNames, layoutSamples } from "../shared/layout-samples.ts";
@@ -48,6 +49,7 @@ import {
   commandItems,
   type DemoRoutes,
   type Dir,
+  type InvoiceEdits,
   invoicesTable,
   matches,
   periodPicker,
@@ -152,6 +154,7 @@ type GroupData = {
   group: CatalogueGroup;
   projects: ProjectsState;
   invoices: { key: string; dir: Dir };
+  invoiceEdits: InvoiceEdits;
   period: PeriodState;
   fragment: "projects" | "invoices" | "period" | false;
 };
@@ -164,7 +167,9 @@ const appRoutes = (period: PeriodState): DemoRoutes => {
     projectsSort: (key, d) => `/components/data?psort=${key}&pdir=${d}&page=1`,
     projectsPage: (p) => `/components/data?page=${p}`,
     invoiceSort: (key, d) => `/components/data?sort=${key}&dir=${d}`,
+    invoiceBulk: (sort) => `/components/data/invoices?sort=${sort.key}&dir=${sort.dir}`,
     preview: "/fragments/preview",
+    upload: "/fragments/upload",
     month: (y, m) => `/components/forms?month=${y}-${String(m + 1).padStart(2, "0")}${range}`,
     day: (iso) => `/components/forms?day=${iso}${range}`,
     preset: (name) => `/components/forms?preset=${name}`,
@@ -173,10 +178,15 @@ const appRoutes = (period: PeriodState): DemoRoutes => {
 const GroupPage = template<GroupData>((data) => {
   const routes = appRoutes(data.period);
   if (data.fragment === "projects") return projectsTable(routes, data.projects);
-  if (data.fragment === "invoices") return invoicesTable(routes, data.invoices);
+  if (data.fragment === "invoices") return invoicesTable(routes, data.invoices, data.invoiceEdits);
   if (data.fragment === "period") return DatePicker(periodPicker(routes, data.period));
   const group = catalogueGroups.find((g) => g.id === data.group)!;
-  const entries = catalogue(routes, { projects: data.projects, invoices: data.invoices, period: data.period })
+  const entries = catalogue(routes, {
+    projects: data.projects,
+    invoices: data.invoices,
+    invoiceEdits: data.invoiceEdits,
+    period: data.period,
+  })
     .filter((e) => e.group === data.group);
   return html`${PageHeader({ title: group.title, subtitle: group.blurb })}${catalogueHtml(entries)}`;
 }, "GroupPage");
@@ -202,7 +212,7 @@ const ComponentsIndex = Static(
 );
 
 /** Parse the server-driven state (and which region a swap wants) from the URL. */
-function groupData(group: CatalogueGroup, url: string, isSwap: boolean): GroupData {
+function groupData(group: CatalogueGroup, url: string, isSwap: boolean, invoiceEdits: InvoiceEdits = {}): GroupData {
   const q = new URL(url).searchParams;
   const projects: ProjectsState = {
     page: int(q.get("page"), 2),
@@ -243,7 +253,7 @@ function groupData(group: CatalogueGroup, url: string, isSwap: boolean): GroupDa
     else if (q.has("psort") || q.has("page")) fragment = "projects";
     else if (q.has("sort")) fragment = "invoices";
   }
-  return { group, projects, invoices, period, fragment };
+  return { group, projects, invoices, invoiceEdits, period, fragment };
 }
 
 /* Forms — the union rAPId's formState() produces, rendered straight. */
@@ -582,6 +592,8 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
 
   const app = await Application.initialize({
     name: "ui-example",
+    // rAPId refuses every upload until extensions are declared (fail-safe).
+    uploads: { allowedExtensions: [".txt", ".png", ".jpg", ".pdf"] },
     server: {
       port: options.port ?? 8010,
       hostname: options.hostname ?? "127.0.0.1",
@@ -629,14 +641,37 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
     { template: { render: ComponentsIndex, title: "Components" }, layout: shell("components") },
     () => ({ content: {} }),
   );
+  // What the invoices bulk form has done: per process, so every boot starts clean.
+  const invoiceEdits: Required<InvoiceEdits> = { deleted: [], assigned: [] };
   for (const group of catalogueGroups) {
     app.get(`/components/${group.id}`, {
       template: { render: GroupPage, title: group.title },
       layout: shell("components"),
     }, (ctx) => ({
-      content: groupData(group.id, ctx.url, ctx.isSwap),
+      content: groupData(group.id, ctx.url, ctx.isSwap, invoiceEdits),
     }));
   }
+  // The invoices bulk form: `op` names the button that submitted, `selected`
+  // is one entry per checked row (rAPId's runtime posts the submitter too).
+  // A swap gets the re-rendered table back; without JavaScript it is a
+  // redirect to the page (PRG), sort carried in the URL.
+  app.post(
+    "/components/data/invoices",
+    { template: { render: GroupPage, prefer: "html" as const }, layout: shell("components") },
+    async (ctx) => {
+      const body = ((await ctx.payload) ?? {}) as Record<string, string | string[]>;
+      const raw = body.selected;
+      const keys = Array.isArray(raw) ? raw : typeof raw === "string" && raw ? [raw] : [];
+      const list = body.op === "delete" ? invoiceEdits.deleted : body.op === "assign" ? invoiceEdits.assigned : null;
+      if (list) { for (const key of keys) if (!list.includes(key)) list.push(key); }
+      const data = groupData("data", ctx.url, true, invoiceEdits);
+      if (!ctx.isSwap) {
+        const q = new URL(ctx.url).search;
+        return { content: data, redirect: `/components/data${q}` };
+      }
+      return { content: { ...data, fragment: "invoices" as const } };
+    },
+  );
 
   app.get("/forms", { template: { render: FormsPage, title: "Forms" }, layout: shell("forms") }, (ctx) => {
     const q = new URL(ctx.url).searchParams;
@@ -670,6 +705,20 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
   app.get("/fragments/stats", { template: StatsFragment }, () => ({ content: {} }));
   app.get("/fragments/toast", { template: ToastFragment }, () => ({ content: { n: ++toasts } }));
   app.get("/fragments/profile", { template: ProfileFragment }, () => ({ content: {} }));
+  // The dropzone's upload form: a multipart post the runtime streams over
+  // XMLHttpRequest (rapid:progress fills the pending rows); the reply is
+  // the re-rendered Dropzone with the server's own rows for what landed.
+  app.post("/fragments/upload", { template: UploadFragment }, async (ctx) => {
+    const body = ((await ctx.payload) ?? {}) as Record<string, unknown>;
+    const raw = body.files;
+    const list = (Array.isArray(raw) ? raw : raw ? [raw] : []) as { name?: string; size?: number }[];
+    const files: DropzoneFile[] = list.map((f) => ({
+      name: String(f.name ?? "file"),
+      kind: String(f.name ?? "").split(".").pop()?.slice(0, 4).toLowerCase(),
+      size: formatSize(Number(f.size ?? 0)),
+    }));
+    return { content: { files } };
+  });
   app.post("/fragments/preview", { template: PreviewFragment }, async (ctx) => {
     const body = ((await ctx.payload) ?? {}) as Record<string, string>;
     return { content: { text: String(body.text ?? "") } };
@@ -689,3 +738,15 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
 }
 
 const layoutHrefs = { index: "/layouts", page: (name: LayoutName) => `/layouts/${name}` };
+
+const formatSize = (bytes: number): string =>
+  bytes < 1024
+    ? `${bytes} B`
+    : bytes < 1024 * 1024
+    ? `${Math.round(bytes / 1024)} KB`
+    : `${(bytes / 1048576).toFixed(1)} MB`;
+
+const UploadFragment = template<{ files: DropzoneFile[] }>(
+  (d) => Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB", files: d.files }),
+  "UploadFragment",
+);

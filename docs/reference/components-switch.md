@@ -29,6 +29,34 @@ Switch(props: SwitchProps): Html
 | `hint` | `string | Html` |  | Secondary line under the label explaining the consequence. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A setting with its consequence
+
+```ts
+Switch({
+  name: "two_factor",
+  label: "Two-factor authentication",
+  hint: "Required for admins from 1 Oct.",
+  checked: true,
+})
+```
+
+```html
+<label class="switch">
+  <input type="checkbox" class="switch__input" name="two_factor" checked="">
+  <span class="switch__track">
+    <span class="switch__thumb"></span>
+  </span>
+  <span class="switch__text">
+    <span class="switch__label">Two-factor authentication</span>
+    <span class="switch__hint">Required for admins from 1 Oct.</span>
+  </span>
+</label>
+```
+
 ## CSS hooks
 
 Classes defined by `components/switch/switch.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

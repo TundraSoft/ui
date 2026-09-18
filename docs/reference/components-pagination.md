@@ -30,6 +30,49 @@ Pagination(props: PaginationProps): Html
 | `linkAttrs` | `Attrs` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Pages of a table, swapped in place
+
+`target` makes every link a rAPId swap of that region with history push; leave it out for plain links.
+
+```ts
+Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, target: "#invoices" })
+```
+
+```html
+<nav aria-label="Pagination">
+  <ul class="pagination">
+    <li>
+      <a class="pagination__link" href="/invoices?page=2" aria-label="Previous page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8249;</a>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=1" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=2" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=3" aria-current="page" aria-label="Page 3" data-action="/invoices?page=3" data-target="#invoices" data-swap="outer" data-push="">3</a>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=4" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
+    </li>
+    <li>
+      <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=12" aria-label="Page 12" data-action="/invoices?page=12" data-target="#invoices" data-swap="outer" data-push="">12</a>
+    </li>
+    <li>
+      <a class="pagination__link" href="/invoices?page=4" aria-label="Next page" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
+    </li>
+  </ul>
+</nav>
+```
+
 ## CSS hooks
 
 Classes defined by `components/pagination/pagination.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

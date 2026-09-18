@@ -29,6 +29,48 @@ One centred column, no distractions.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A checkout with no distractions
+
+```ts
+FocusLayout({
+  header: html`<a class="navbar__brand" href="/">Acme</a>`,
+  content: Wizard({
+    id: "checkout",
+    steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }],
+    content: html`<p>…</p>`,
+  }),
+})
+```
+
+```html
+<div class="layout layout--focus layout--static-header">
+  <header class="layout__header">
+    <a class="navbar__brand" href="/">Acme</a>
+  </header>
+  <main class="layout__content" id="main-content">
+    <div class="wizard" id="checkout">
+      <ol class="wizard__steps">
+        <li class="wizard__step wizard__step--done">
+          <span class="wizard__step-index">&#10003;</span>
+          <span class="wizard__step-label">Cart</span>
+        </li>
+        <li class="wizard__step wizard__step--active">
+          <span class="wizard__step-index">2</span>
+          <span class="wizard__step-label">Payment</span>
+        </li>
+      </ol>
+      <div class="wizard__content">
+        <p>…</p>
+      </div>
+    </div>
+  </main>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/focus/focus.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

@@ -8,8 +8,12 @@
  * Inside a scroll container (a table body, a card with overflow) an
  * absolutely-positioned panel gets clipped, so the panel is switched to
  * fixed positioning at the trigger's viewport rect (set through the
- * CSSOM, which strict CSP allows — unlike a style *attribute*). Any
- * scroll or resize closes it rather than trying to track the trigger.
+ * CSSOM, which strict CSP allows — unlike a style *attribute*). A scroll
+ * or resize re-places it while the trigger is still inside its container's
+ * box, and closes it once the trigger scrolls out of view. (Closing on any
+ * scroll made a keyboard user lose the menu: `html:focus-within` scrolls
+ * smoothly, so the scroll from tabbing to the trigger is still running
+ * when Enter opens it.)
  */
 (() => {
   const openPanels = () => document.querySelectorAll(".dropdown__panel.is-open");
@@ -70,9 +74,21 @@
     if (closed) event.preventDefault();
   });
 
-  const closeFixed = () => {
-    document.querySelectorAll(".dropdown__panel--fixed.is-open").forEach((panel) => close(panel, triggerFor(panel)));
+  // Still inside its container's box (the viewport does not matter: a
+  // panel that follows an off-screen trigger is off-screen too, and the
+  // page may be mid-scroll towards a trigger that was just focused).
+  const inView = (trigger) => {
+    const clip = trigger.closest(CLIPPERS)?.getBoundingClientRect();
+    const r = trigger.getBoundingClientRect();
+    return !clip || (r.bottom > clip.top && r.top < clip.bottom && r.right > clip.left && r.left < clip.right);
   };
-  addEventListener("scroll", closeFixed, { capture: true, passive: true });
-  addEventListener("resize", closeFixed, { passive: true });
+  const followFixed = () => {
+    document.querySelectorAll(".dropdown__panel--fixed.is-open").forEach((panel) => {
+      const trigger = triggerFor(panel);
+      if (trigger && inView(trigger)) place(panel, trigger);
+      else close(panel, trigger);
+    });
+  };
+  addEventListener("scroll", followFixed, { capture: true, passive: true });
+  addEventListener("resize", followFixed, { passive: true });
 })();

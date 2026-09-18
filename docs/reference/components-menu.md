@@ -36,6 +36,62 @@ Menu(props: MenuProps): Html
 | `id` | `string` |  | Base for the sublist ids (`<id>-sub-<index path>`). Deterministic — a module-level counter would drift across server renders and break `data-toggle`/`aria-controls` after a swap (§4). Defaults to "menu"; set it when a page has more than one Menu with submenus. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A navigation menu with a section
+
+Give it an `id` when a page has more than one menu with submenus — sublist ids derive from it.
+
+```ts
+Menu({
+  id: "settings-nav",
+  items: [
+    { label: "General", href: "/settings", active: true },
+    { label: "Billing", href: "/settings/billing" },
+    {
+      label: "Team",
+      expanded: true,
+      children: [{ label: "Members", href: "/settings/team" }, { label: "Roles", href: "/settings/roles" }],
+    },
+  ],
+})
+```
+
+```html
+<ul class="menu__list">
+  <li>
+    <a class="menu__link menu__link--active" href="/settings" aria-current="page">
+      <span class="menu__link-label">General</span>
+    </a>
+  </li>
+  <li>
+    <a class="menu__link" href="/settings/billing">
+      <span class="menu__link-label">Billing</span>
+    </a>
+  </li>
+  <li>
+    <button type="button" class="menu__link" data-toggle="#settings-nav-sub-2" aria-expanded="true" aria-controls="settings-nav-sub-2">
+      <span class="menu__link-label">Team</span>
+      <span class="menu__caret">&#8250;</span>
+    </button>
+    <ul class="menu__sublist is-open" id="settings-nav-sub-2">
+      <li>
+        <a class="menu__link" href="/settings/team">
+          <span class="menu__link-label">Members</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu__link" href="/settings/roles">
+          <span class="menu__link-label">Roles</span>
+        </a>
+      </li>
+    </ul>
+  </li>
+</ul>
+```
+
 ## CSS hooks
 
 Classes defined by `components/menu/menu.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

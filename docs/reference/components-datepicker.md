@@ -59,6 +59,203 @@ DatePicker(props: DatePickerProps): Html
 type DatePickerPanelProps = DatePickerProps
 ```
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A due date
+
+Without `buildMonthHref`/`buildDayHref` the picker runs on the client; the hidden input carries the ISO value under `name`. `Input({ type: "date" })` renders this.
+
+```ts
+DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18" })
+```
+
+```html
+<div class="datepicker" id="due" data-datepicker data-datepicker-min="2026-09-18">
+  <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="due-panel" data-datepicker-trigger>
+    <span class="datepicker__trigger-icon">
+      <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
+    </span>
+    <span data-datepicker-label>15 Oct 2026</span>
+  </button>
+  <input type="hidden" name="due" value="2026-10-15" data-datepicker-start>
+  <div class="datepicker__panel" id="due-panel" role="group" aria-label="Calendar" hidden>
+    <div class="datepicker__header">
+      <span class="datepicker__nav-group">
+        <button type="button" class="datepicker__nav" aria-label="Previous year" data-nav="prev-year" data-month="2025-9">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+        <button type="button" class="datepicker__nav" aria-label="Previous month" data-nav="prev" data-month="2026-8">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+      </span>
+      <span class="datepicker__month" aria-live="polite">October 2026</span>
+      <span class="datepicker__nav-group">
+        <button type="button" class="datepicker__nav" aria-label="Next month" data-nav="next" data-month="2026-10">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+        <button type="button" class="datepicker__nav" aria-label="Next year" data-nav="next-year" data-month="2027-9">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+      </span>
+    </div>
+    <div class="datepicker__grid">
+      <div class="datepicker__weekdays" aria-hidden="true">
+        <span class="datepicker__weekday">M</span>
+        <span class="datepicker__weekday">T</span>
+        <span class="datepicker__weekday">W</span>
+        <span class="datepicker__weekday">T</span>
+        <span class="datepicker__weekday">F</span>
+        <span class="datepicker__weekday">S</span>
+        <span class="datepicker__weekday">S</span>
+      </div>
+      <div class="datepicker__days">
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-09-28" aria-label="28 September 2026">28</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-09-29" aria-label="29 September 2026">29</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-09-30" aria-label="30 September 2026">30</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-01" aria-label="1 October 2026">1</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-02" aria-label="2 October 2026">2</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-03" aria-label="3 October 2026">3</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-04" aria-label="4 October 2026">4</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-05" aria-label="5 October 2026">5</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-06" aria-label="6 October 2026">6</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-07" aria-label="7 October 2026">7</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-08" aria-label="8 October 2026">8</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-09" aria-label="9 October 2026">9</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-10" aria-label="10 October 2026">10</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-11" aria-label="11 October 2026">11</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-12" aria-label="12 October 2026">12</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-13" aria-label="13 October 2026">13</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-14" aria-label="14 October 2026">14</button>
+        <button type="button" class="datepicker__day datepicker__day--start" data-day="2026-10-15" aria-label="15 October 2026" aria-pressed="true">15</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-16" aria-label="16 October 2026">16</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-17" aria-label="17 October 2026">17</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-18" aria-label="18 October 2026">18</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-19" aria-label="19 October 2026">19</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-20" aria-label="20 October 2026">20</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-21" aria-label="21 October 2026">21</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-22" aria-label="22 October 2026">22</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-23" aria-label="23 October 2026">23</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-24" aria-label="24 October 2026">24</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-25" aria-label="25 October 2026">25</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-26" aria-label="26 October 2026">26</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-27" aria-label="27 October 2026">27</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-28" aria-label="28 October 2026">28</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-29" aria-label="29 October 2026">29</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-30" aria-label="30 October 2026">30</button>
+        <button type="button" class="datepicker__day" data-day="2026-10-31" aria-label="31 October 2026">31</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-11-01" aria-label="1 November 2026">1</button>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### A reporting range with presets
+
+```ts
+DatePicker({
+  id: "period",
+  name: "period",
+  range: true,
+  start: "2026-09-01",
+  end: "2026-09-30",
+  align: "end",
+  presets: [{ label: "Last 7 days", href: "/reports?preset=7d" }, {
+    label: "This quarter",
+    href: "/reports?preset=q",
+  }],
+})
+```
+
+```html
+<div class="datepicker datepicker--end" id="period" data-datepicker data-datepicker-range="">
+  <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="period-panel" data-datepicker-trigger>
+    <span class="datepicker__trigger-icon">
+      <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
+    </span>
+    <span data-datepicker-label>1 Sep 2026 – 30 Sep 2026</span>
+  </button>
+  <input type="hidden" name="period" value="2026-09-01" data-datepicker-start>
+  <input type="hidden" name="period_end" value="2026-09-30" data-datepicker-end>
+  <div class="datepicker__panel" id="period-panel" role="group" aria-label="Calendar" hidden>
+    <div class="datepicker__header">
+      <span class="datepicker__nav-group">
+        <button type="button" class="datepicker__nav" aria-label="Previous year" data-nav="prev-year" data-month="2025-8">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+        <button type="button" class="datepicker__nav" aria-label="Previous month" data-nav="prev" data-month="2026-7">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+      </span>
+      <span class="datepicker__month" aria-live="polite">September 2026</span>
+      <span class="datepicker__nav-group">
+        <button type="button" class="datepicker__nav" aria-label="Next month" data-nav="next" data-month="2026-9">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+        <button type="button" class="datepicker__nav" aria-label="Next year" data-nav="next-year" data-month="2027-8">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </button>
+      </span>
+    </div>
+    <div class="datepicker__grid">
+      <div class="datepicker__weekdays" aria-hidden="true">
+        <span class="datepicker__weekday">M</span>
+        <span class="datepicker__weekday">T</span>
+        <span class="datepicker__weekday">W</span>
+        <span class="datepicker__weekday">T</span>
+        <span class="datepicker__weekday">F</span>
+        <span class="datepicker__weekday">S</span>
+        <span class="datepicker__weekday">S</span>
+      </div>
+      <div class="datepicker__days">
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-08-31" aria-label="31 August 2026">31</button>
+        <button type="button" class="datepicker__day datepicker__day--start" data-day="2026-09-01" aria-label="1 September 2026" aria-pressed="true">1</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-02" aria-label="2 September 2026">2</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-03" aria-label="3 September 2026">3</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-04" aria-label="4 September 2026">4</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-05" aria-label="5 September 2026">5</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-06" aria-label="6 September 2026">6</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-07" aria-label="7 September 2026">7</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-08" aria-label="8 September 2026">8</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-09" aria-label="9 September 2026">9</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-10" aria-label="10 September 2026">10</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-11" aria-label="11 September 2026">11</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-12" aria-label="12 September 2026">12</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-13" aria-label="13 September 2026">13</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-14" aria-label="14 September 2026">14</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-15" aria-label="15 September 2026">15</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-16" aria-label="16 September 2026">16</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-17" aria-label="17 September 2026">17</button>
+        <button type="button" class="datepicker__day datepicker__day--today datepicker__day--in-range" data-day="2026-09-18" aria-label="18 September 2026" aria-current="date">18</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-19" aria-label="19 September 2026">19</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-20" aria-label="20 September 2026">20</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-21" aria-label="21 September 2026">21</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-22" aria-label="22 September 2026">22</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-23" aria-label="23 September 2026">23</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-24" aria-label="24 September 2026">24</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-25" aria-label="25 September 2026">25</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-26" aria-label="26 September 2026">26</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-27" aria-label="27 September 2026">27</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-28" aria-label="28 September 2026">28</button>
+        <button type="button" class="datepicker__day datepicker__day--in-range" data-day="2026-09-29" aria-label="29 September 2026">29</button>
+        <button type="button" class="datepicker__day datepicker__day--end" data-day="2026-09-30" aria-label="30 September 2026" aria-pressed="true">30</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-10-01" aria-label="1 October 2026">1</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-10-02" aria-label="2 October 2026">2</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-10-03" aria-label="3 October 2026">3</button>
+        <button type="button" class="datepicker__day datepicker__day--outside" data-day="2026-10-04" aria-label="4 October 2026">4</button>
+      </div>
+    </div>
+    <div class="datepicker__footer">
+      <a class="datepicker__preset" href="/reports?preset=7d" data-action="/reports?preset=7d" data-target="#period" data-swap="outer" data-push>Last 7 days</a>
+      <a class="datepicker__preset" href="/reports?preset=q" data-action="/reports?preset=q" data-target="#period" data-swap="outer" data-push>This quarter</a>
+      <button type="submit" class="datepicker__apply">Apply</button>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/datepicker/datepicker.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

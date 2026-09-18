@@ -44,6 +44,74 @@ whose HTML is mirrored into the hidden textarea that submits.
 | `previewAction` | `string` |  | Markdown only: a route that renders `text` (posted as a form field) to an HTML fragment for the Preview view — swapped in through rAPId's runtime. Without it (or without the runtime) Preview shows the raw text. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Release notes in Markdown, previewed by the server
+
+`previewAction` receives `text` (urlencoded POST) and answers with the rendered HTML fragment.
+
+```ts
+Editor({
+  id: "notes",
+  name: "notes",
+  mode: "markdown",
+  previewAction: "/fragments/preview",
+  placeholder: "Write in Markdown…",
+})
+```
+
+```html
+<div class="editor editor--markdown" id="notes-editor" data-editor data-editor-mode="markdown" data-editor-preview="/fragments/preview">
+  <div class="editor__toolbar" role="toolbar" aria-label="Formatting">
+    <button type="button" class="editor__tool" data-editor-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)">
+      <b>B</b>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)">
+      <i>I</i>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="strike" aria-label="Strikethrough" title="Strikethrough">
+      <s>S</s>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="heading" aria-label="Heading" title="Heading">
+      <b>H</b>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="quote" aria-label="Quote" title="Quote">
+      <span class="text-mono">“</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="code" aria-label="Code" title="Code">
+      <span class="text-mono">&lt;&gt;</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="link" aria-label="Link" title="Link (Ctrl+K)">
+      <span class="text-mono">[ ]</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="image" aria-label="Image" title="Image">
+      <span class="text-mono">[img]</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="ul" aria-label="Bulleted list" title="Bulleted list">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="ol" aria-label="Numbered list" title="Numbered list">
+      <span class="text-mono">1.</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="hr" aria-label="Horizontal rule" title="Horizontal rule">
+      <span class="text-mono">—</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="clear" aria-label="Clear formatting" title="Clear formatting">
+      <span class="text-mono">Tx</span>
+    </button>
+    <span class="editor__spacer"></span>
+    <span class="editor__views" role="group" aria-label="View">
+      <button type="button" class="editor__view" data-editor-view="write" aria-pressed="true">Write</button>
+      <button type="button" class="editor__view" data-editor-view="preview" aria-pressed="false">Preview</button>
+    </span>
+  </div>
+  <textarea class="input textarea editor__source" id="notes" name="notes" placeholder="Write in Markdown…" rows="8"></textarea>
+  <div class="editor__preview" data-editor-preview-panel hidden aria-live="polite"></div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/editor/editor.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

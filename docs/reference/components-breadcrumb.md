@@ -23,6 +23,27 @@ Breadcrumb(props: { items: BreadcrumbItem[]; attrs?: Attrs }): Html
 | `label` | `string` | yes |  |
 | `href` | `string` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Where the page sits
+
+```ts
+Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-2048" }] })
+```
+
+```html
+<nav aria-label="Breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb__item">
+      <a class="breadcrumb__link" href="/invoices">Invoices</a>
+    </li>
+    <li class="breadcrumb__item" aria-current="page">INV-2048</li>
+  </ol>
+</nav>
+```
+
 ## CSS hooks
 
 Classes defined by `components/breadcrumb/breadcrumb.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

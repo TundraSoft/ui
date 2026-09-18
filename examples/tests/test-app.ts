@@ -7,7 +7,7 @@
  * rAPId's error shape, and that the error templates answer 404/500.
  * `UI_ASSETS=cdn` runs the same suite against the published CDN bundle.
  */
-import { ensureDir } from "@tundralibs/compat/file";
+import { ensureDir, writeTextFile } from "@tundralibs/compat/file";
 import { exit, getEnv } from "@tundralibs/compat/runtime";
 import type { ElementHandle, Page } from "puppeteer-core";
 import { createApp } from "../app/app.ts";
@@ -254,20 +254,110 @@ for (const name of layoutNames) {
   );
   await page.close();
 
-  // Invoices sort — only that table is replaced; the projects table stays.
+  // Invoices sort — only that table is replaced; the projects table stays,
+  // and so does the selection (data-table.js remembers it across GET swaps).
   page = await open("/components/data");
-  await click(page, '#invoices a.data-table__sort[data-action*="sort=client"]');
+  await click(page, '#invoices [data-select-row][value="INV-2047"]');
+  await click(page, '#invoices [data-select-row][value="INV-2045"]');
+  // While rows are selected the bulk bar overlays the header row (by
+  // design — clear the selection to sort by pointer), so activate the sort
+  // link the way the keyboard would rather than clicking at its position.
+  await page.$eval('#invoices a.data-table__sort[data-action*="sort=client"]', (a) => (a as HTMLElement).click());
   await waitForSwaps(page, 1, "data invoices sort");
   const inv = await page.evaluate(() => ({
     aria: document.querySelector("#invoices th[aria-sort]")?.getAttribute("aria-sort"),
     first: document.querySelector("#invoices tbody tr td:nth-child(3)")?.textContent?.trim(),
     projects: !!document.querySelector("#projects"),
+    checked: [...document.querySelectorAll("#invoices [data-select-row]:checked")].map((c) =>
+      (c as HTMLInputElement).value
+    ).sort(),
+    count: document.querySelector("#invoices [data-bulk-count]")?.textContent,
+    bulkHidden: document.querySelector("#invoices [data-bulk-bar]")?.hasAttribute("hidden"),
   }));
   ok(inv.aria === "ascending", `data: invoices sort did not apply (${inv.aria})`);
   ok(inv.first === "Adventure Works", `data: invoices not sorted by client (${inv.first})`);
   ok(inv.projects, "data: invoices swap wiped the projects table");
   ok(await stillSamePage(page), "data: a swap caused a full navigation");
+  ok(
+    inv.checked.join() === "INV-2045,INV-2047" && inv.count === "2 rows selected" && !inv.bulkHidden,
+    `data: selection lost across the sort swap (${JSON.stringify(inv)})`,
+  );
+
+  // Bulk actions post the selection through the table's own form; the
+  // reply replaces the table (the server's own selection: none).
+  // The bar is sticky at the scroll box's top edge, so Puppeteer's own
+  // scroll-into-view can leave it above the viewport; a DOM click on the
+  // submit button still submits the form with it as the submitter.
+  await page.$eval('#invoices [data-bulk-bar] button[value="assign"]', (b) => (b as HTMLButtonElement).click());
+  await waitForSwaps(page, 2, "data invoices bulk assign");
+  const assigned = await page.evaluate(() => ({
+    badges: [...document.querySelectorAll("#invoices tbody tr")].filter((r) =>
+      r.textContent?.includes("Assigned to you")
+    )
+      .map((r) => r.getAttribute("data-row-key")).sort(),
+    checked: document.querySelectorAll("#invoices [data-select-row]:checked").length,
+    bulkHidden: document.querySelector("#invoices [data-bulk-bar]")?.hasAttribute("hidden"),
+    sorted: document.querySelector("#invoices th[aria-sort]")?.getAttribute("aria-sort"),
+    veiled: (globalThis as unknown as { __busy: number }).__busy,
+  }));
+  ok(
+    assigned.badges.join() === "INV-2045,INV-2047",
+    `data: bulk assign did not mark both rows (${JSON.stringify(assigned)})`,
+  );
+  ok(
+    assigned.checked === 0 && assigned.bulkHidden,
+    `data: bulk reply should render no selection (${JSON.stringify(assigned)})`,
+  );
+  ok(assigned.sorted === "ascending", `data: bulk reply lost the table's sort (${assigned.sorted})`);
+  ok(assigned.veiled > 0, "data: the table did not wear the busy veil during the bulk post");
+  await click(page, '#invoices [data-select-row][value="INV-2046"]');
+  // The bar is sticky at the scroll box's top edge, so Puppeteer's own
+  // scroll-into-view can leave it above the viewport; a DOM click on the
+  // submit button still submits the form with it as the submitter.
+  await page.$eval('#invoices [data-bulk-bar] button[value="delete"]', (b) => (b as HTMLButtonElement).click());
+  await waitForSwaps(page, 3, "data invoices bulk delete");
+  const rowsLeft = await page.$$eval("#invoices tbody tr", (rows) => rows.map((r) => r.getAttribute("data-row-key")));
+  ok(rowsLeft.length === 6 && !rowsLeft.includes("INV-2046"), `data: bulk delete did not remove the row (${rowsLeft})`);
+  ok(await stillSamePage(page), "data: a bulk post caused a full navigation");
   await page.screenshot({ path: `${outDir}/components-data.png`, fullPage: true });
+
+  // Without the runtime the same post is Post/Redirect/Get back to the page.
+  const prg = await page.evaluate(async () => {
+    const res = await fetch("/components/data/invoices?sort=client&dir=asc", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "selected=INV-2044&op=delete",
+      redirect: "manual",
+    });
+    return { type: res.type, status: res.status };
+  });
+  ok(prg.type === "opaqueredirect", `data: no-JS bulk post should redirect (${JSON.stringify(prg)})`);
+  await page.reload({ waitUntil: "networkidle0" });
+  const afterReload = await page.$$eval(
+    "#invoices tbody tr",
+    (rows) => rows.map((r) => r.getAttribute("data-row-key")),
+  );
+  ok(
+    afterReload.length === 5 && !afterReload.includes("INV-2044"),
+    `data: reload after the no-JS delete (${afterReload})`,
+  );
+
+  // A row kebab opens the row's action strip, in the app too.
+  await click(page, '#invoices [data-row-actions="#inv-row-INV-2048-strip"]');
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector("#inv-row-INV-2048-strip") as HTMLElement | null;
+      return !!el && !el.hidden && el.getAnimations().length === 0;
+    },
+    { timeout: 2000 },
+  ).catch(() => fail("data: invoices row strip never opened"));
+  const kebab = await page.evaluate(() => {
+    const el = document.querySelector("#inv-row-INV-2048-strip") as HTMLElement;
+    const r = el.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { open: !el.hidden, visible: !!hit && el.contains(hit), items: el.querySelectorAll("a").length };
+  });
+  ok(kebab.open && kebab.visible && kebab.items === 4, `data: invoices row action strip (${JSON.stringify(kebab)})`);
   await page.close();
 }
 
@@ -341,6 +431,26 @@ for (const name of layoutNames) {
     `forms page: preview was not rendered by the server (${preview.slice(0, 120)})`,
   );
   ok(await stillSamePage(page), "forms page: a swap caused a full navigation");
+  // A real multipart upload: pending row on submit, then the server's row.
+  {
+    const samplePath = `${outDir}/sample-upload.txt`;
+    await writeTextFile(samplePath, "hello, dropzone\n");
+    const picker = await page.$("#cat-dz-1 input[type=file]");
+    await picker!.uploadFile(samplePath);
+    const n0 = await swaps(page); // last in this section: the earlier waits use absolute counts
+    await click(page, "#cat-dz-form button[type=submit]");
+    await waitForSwaps(page, n0 + 1, "forms page upload");
+    const uploaded = await page.evaluate(() => ({
+      done: [...document.querySelectorAll("#cat-dz-1 .dropzone__file--done .dropzone__file-name")].map((e) =>
+        e.textContent
+      ),
+      pending: document.querySelectorAll("#cat-dz-1 .dropzone__file--pending").length,
+    }));
+    ok(
+      uploaded.done.join() === "sample-upload.txt" && uploaded.pending === 0,
+      `forms page: upload did not come back as a done row (${JSON.stringify(uploaded)})`,
+    );
+  }
   await page.close();
 }
 

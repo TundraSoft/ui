@@ -32,6 +32,57 @@ built-in focus-trapping and `::backdrop` for free.
 | `label` | `string` |  | Accessible name when there is no visible title. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A confirmation dialog
+
+A native `<dialog>`; any `[data-modal-open="#id"]` opens it, Escape and the backdrop close it.
+
+```ts
+html`${
+  Button({ label: "Delete invoice", variant: "danger", attrs: { "data-modal-open": "#confirm-delete" } })
+}${
+  Modal({
+    id: "confirm-delete",
+    title: "Delete INV-2048?",
+    body: html`<p>This cannot be undone.</p>`,
+    footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-dismiss": "" } })}${
+      Button({
+        label: "Delete",
+        variant: "danger",
+        attrs: {
+          "data-action": "/invoices/INV-2048/delete",
+          "data-method": "post",
+          "data-target": "#invoices",
+          "data-swap": "outer",
+        },
+      })
+    }`,
+  })
+}`
+```
+
+```html
+<button type="button" class="btn btn--danger" data-modal-open="#confirm-delete">Delete invoice</button>
+<dialog class="modal" id="confirm-delete" aria-labelledby="confirm-delete-title">
+  <div class="modal__header">
+    <h2 class="modal__title" id="confirm-delete-title">Delete INV-2048?</h2>
+    <button type="button" class="modal__close" data-modal-close aria-label="Close">
+      <svg width="16" height="16" width="2" …>…</svg>
+    </button>
+  </div>
+  <div class="modal__body">
+    <p>This cannot be undone.</p>
+  </div>
+  <div class="modal__footer">
+    <button type="button" class="btn btn--ghost" data-dismiss="">Cancel</button>
+    <button type="button" class="btn btn--danger" data-action="/invoices/INV-2048/delete" data-method="post" data-target="#invoices" data-swap="outer">Delete</button>
+  </div>
+</dialog>
+```
+
 ## CSS hooks
 
 Classes defined by `components/modal/modal.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

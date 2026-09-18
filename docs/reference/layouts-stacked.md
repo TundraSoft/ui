@@ -30,6 +30,46 @@ Header → content → footer. The simplest frame.
 | `contentId` | `string` |  | Stable id for the swap/push region (§4). Default `main-content`. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A boxed marketing page
+
+```ts
+StackedLayout({
+  width: "boxed",
+  header: Navbar({
+    brand: "Acme",
+    links: [{ href: "/", label: "Home", active: true }, { href: "/pricing", label: "Pricing" }],
+  }),
+  content: html`<h1>Invoices your customers pay on time</h1>`,
+  footer: html`<p>© Acme</p>`,
+})
+```
+
+```html
+<div class="layout layout--stacked layout--boxed">
+  <header class="layout__header">
+    <nav class="navbar">
+      <div class="navbar__brand">Acme</div>
+      <button type="button" class="navbar__toggle js-only" data-toggle="#navbar-nav" aria-expanded="false" aria-controls="navbar-nav" aria-label="Toggle navigation">&#9776;</button>
+      <div class="navbar__nav" id="navbar-nav">
+        <a class="navbar__link navbar__link--active" href="/">Home</a>
+        <a class="navbar__link" href="/pricing">Pricing</a>
+      </div>
+      <div class="navbar__spacer"></div>
+    </nav>
+  </header>
+  <main class="layout__content" id="main-content">
+    <h1>Invoices your customers pay on time</h1>
+  </main>
+  <footer class="layout__footer">
+    <p>© Acme</p>
+  </footer>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/stacked/stacked.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

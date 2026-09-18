@@ -38,6 +38,26 @@ A KPI tile: icon chip, label, value, trend.
 | `trend` | `{ label: string; up: boolean }` |  | e.g. `{ label: "+12.4%", up: true }` — rendered as a status badge. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A KPI with its trend
+
+```ts
+Stat({ label: "Revenue (30d)", value: "$48,200", trend: { label: "+12.4%", up: true } })
+```
+
+```html
+<div class="stat">
+  <span class="stat__label">Revenue (30d)</span>
+  <span class="stat__value">$48,200</span>
+  <span class="stat__trend">
+    <span class="badge badge--success">+12.4%</span>
+  </span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/stat/stat.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

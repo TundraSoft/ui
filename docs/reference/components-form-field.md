@@ -58,6 +58,111 @@ What a control needs to be announced correctly inside a FormField.
 | `fields` | `Html[]` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A field with help text
+
+Pass `control` as a function to receive the id and `aria-describedby` the field expects.
+
+```ts
+FormField({
+  id: "email",
+  label: "Email",
+  required: true,
+  help: "We only use it to send receipts.",
+  control: (a) =>
+    Input({ id: a.id, name: "email", type: "email", attrs: { "aria-describedby": a.describedBy } }),
+})
+```
+
+```html
+<div class="form-field">
+  <label class="form-field__label" for="email">
+    Email
+    <span class="form-field__required" aria-hidden="true">*</span>
+  </label>
+  <input type="email" class="input" aria-describedby="email-help" id="email" name="email">
+  <p class="form-field__help" id="email-help">We only use it to send receipts.</p>
+</div>
+```
+
+### The same field after a validation error
+
+```ts
+FormField({
+  id: "email",
+  label: "Email",
+  required: true,
+  error: "Enter a valid address.",
+  control: (a) =>
+    Input({
+      id: a.id,
+      name: "email",
+      type: "email",
+      value: "ada@",
+      invalid: a.invalid,
+      attrs: { "aria-describedby": a.describedBy },
+    }),
+})
+```
+
+```html
+<div class="form-field">
+  <label class="form-field__label" for="email">
+    Email
+    <span class="form-field__required" aria-hidden="true">*</span>
+  </label>
+  <input type="email" class="input input--invalid" aria-describedby="email-error" id="email" name="email" value="ada@" aria-invalid="true">
+  <p class="form-field__error" id="email-error" role="alert">Enter a valid address.</p>
+</div>
+```
+
+### Two fields side by side, then the actions
+
+```ts
+html`${
+  FormGrid({
+    fields: [
+      FormField({
+        id: "first",
+        label: "First name",
+        span: 6,
+        control: (a) => Input({ id: a.id, name: "first" }),
+      }),
+      FormField({
+        id: "last",
+        label: "Last name",
+        span: 6,
+        control: (a) => Input({ id: a.id, name: "last" }),
+      }),
+    ],
+  })
+}${
+  FormActions({
+    content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}`,
+  })
+}`
+```
+
+```html
+<div class="form-grid">
+  <div class="form-field form-grid__col-6">
+    <label class="form-field__label" for="first">First name</label>
+    <input type="text" class="input" id="first" name="first">
+  </div>
+  <div class="form-field form-grid__col-6">
+    <label class="form-field__label" for="last">Last name</label>
+    <input type="text" class="input" id="last" name="last">
+  </div>
+</div>
+<div class="form-actions">
+  <button type="button" class="btn btn--ghost">Cancel</button>
+  <button type="submit" class="btn">Save</button>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/form-field/form-field.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

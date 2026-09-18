@@ -19,7 +19,7 @@ import { Checkbox, Choice, ChoiceGroup, Radio } from "../../components/choice/ch
 import { Accordion, Collapsible } from "../../components/collapsible/collapsible.ts";
 import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
-import { DataTable } from "../../components/data-table/data-table.ts";
+import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker, DatePickerPanel } from "../../components/datepicker/datepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
 import { Dropzone } from "../../components/dropzone/dropzone.ts";
@@ -57,6 +57,7 @@ import {
   commandItems,
   type DemoRoutes,
   type Dir,
+  type InvoiceEdits,
   invoicesTable,
   matches,
   periodPicker,
@@ -71,6 +72,8 @@ import {
 export type CatalogueState = {
   projects?: ProjectsState;
   invoices?: { key: string; dir: Dir };
+  /** What the app's bulk form has done to the invoices so far. */
+  invoiceEdits?: InvoiceEdits;
   period?: PeriodState;
 };
 
@@ -567,8 +570,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c("projects — sorted and paged by the server (#projects)", projectsTable(routes, state.projects)),
         c(
-          "invoices — selectable, bulk bar, sticky header, sorted by the server (#invoices)",
-          invoicesTable(routes, state.invoices),
+          "invoices — selectable, bulk bar, row action strips (RowActions), sticky header, sorted by the server (#invoices)",
+          invoicesTable(routes, state.invoices, state.invoiceEdits),
         ),
         c(
           "selectable, sortable, pinned/mono/numeric, bulk bar, row actions, footer",
@@ -579,6 +582,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             selected: ["2"],
             sort: { key: "name", dir: "asc" },
             buildSortHref: (k, d) => `?sort=${k}&dir=${d}`,
+            bulkAction: "?bulk",
             columns: [{ key: "id", label: "ID", pinned: true, mono: true, sortable: true }, {
               key: "name",
               label: "Name",
@@ -591,22 +595,30 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             }, { key: "amount", label: "Amount", numeric: true }],
             rows,
             rowKey: (r) => r.id,
-            bulkActions: Button({ label: "Archive", size: "sm" }),
+            bulkActions: Button({
+              label: "Archive",
+              size: "sm",
+              type: "submit",
+              attrs: { name: "op", value: "archive" },
+            }),
             rowActions: (r) =>
-              Dropdown({
+              RowActions({
                 id: `cat-dt-row-${r.id}`,
-                align: "end",
-                trigger: html`${Icon("kebab", { size: 16 })}<span class="sr-only">Row actions</span>`,
-                triggerClass: "btn btn--ghost btn--sm btn--icon",
-                content: Menu({
-                  items: [{ label: "Edit", href: "#" }, { label: "Duplicate", href: "#" }, {
-                    label: "Remove",
-                    href: "#",
-                  }],
-                }),
+                label: `Actions for ${r.name}`,
+                items: [{ label: "Edit", href: "#" }, { label: "Duplicate", href: "#" }, {
+                  label: "Remove",
+                  href: "#",
+                  danger: true,
+                }],
               }),
-            toolbar: Input({ type: "search", placeholder: "Filter", size: "sm" }),
+            toolbar: Input({
+              type: "search",
+              placeholder: "Filter",
+              size: "sm",
+              attrs: { "data-table-search": "", "aria-label": "Filter accounts" },
+            }),
             footer: html`<span>3 rows</span>`,
+            attrs: { "data-filter-scope": "" },
           }),
         ),
         ...(["sm", "md", "lg"] as const).map((maxHeight) =>
@@ -634,8 +646,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             ],
             rows,
             rowKey: (r) => r.id,
-            toolbar: Input({ type: "search", placeholder: "Search", size: "sm" }),
+            toolbar: Input({
+              type: "search",
+              placeholder: "Search",
+              size: "sm",
+              attrs: { "data-table-search": "", "aria-label": "Search rows" },
+            }),
             footer: Pagination({ page: 1, totalPages: 2, buildHref: (p) => `?p=${p}` }),
+            attrs: { "data-filter-scope": "" },
           }),
         ),
         c(
@@ -738,7 +756,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "dropzone",
       cases: [
-        c("empty", Dropzone({ id: "cat-dz-1", name: "files", accept: ".pdf", hint: "PDF up to 10 MB" })),
+        c(
+          "in an upload form (#cat-dz-1) — pick files and Upload: pending rows with progress, then the server's rows",
+          Form({
+            id: "cat-dz-form",
+            action: routes.upload,
+            attrs: { "data-action": routes.upload, "data-target": "#cat-dz-1", "data-swap": "outer" },
+            content: html`${Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB" })}${
+              FormActions({ content: Button({ label: "Upload", type: "submit" }) })
+            }`,
+          }),
+        ),
         c(
           "multiple with uploading / done / error / removable rows",
           Dropzone({

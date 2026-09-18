@@ -32,6 +32,62 @@ A reading column with an optional aside.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A blog post with a table of contents
+
+```ts
+ArticleLayout({
+  header: Navbar({ brand: "Acme", links: [{ href: "/blog", label: "Blog", active: true }] }),
+  content: html`
+    <article>
+      <h1>Why we moved to invoices-as-code</h1>
+      <p>…</p>
+    </article>
+  `,
+  aside: Menu({ items: [{ label: "Background", href: "#background" }, { label: "The move", href: "#move" }] }),
+})
+```
+
+```html
+<div class="layout layout--article layout--has-aside">
+  <header class="layout__header">
+    <nav class="navbar">
+      <div class="navbar__brand">Acme</div>
+      <button type="button" class="navbar__toggle js-only" data-toggle="#navbar-nav" aria-expanded="false" aria-controls="navbar-nav" aria-label="Toggle navigation">&#9776;</button>
+      <div class="navbar__nav" id="navbar-nav">
+        <a class="navbar__link navbar__link--active" href="/blog">Blog</a>
+      </div>
+      <div class="navbar__spacer"></div>
+    </nav>
+  </header>
+  <main class="layout__content" id="main-content">
+    <article class="layout__article">
+      <article>
+        <h1>Why we moved to invoices-as-code</h1>
+        <p>…</p>
+      </article>
+    </article>
+    <aside class="layout__aside">
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link" href="#background">
+            <span class="menu__link-label">Background</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="#move">
+            <span class="menu__link-label">The move</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+  </main>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/article/article.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

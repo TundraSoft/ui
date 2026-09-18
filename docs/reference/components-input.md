@@ -85,6 +85,67 @@ Extends `InputProps`.
 | `control` | `Html` | yes | The control itself — a plain `Input(...)`. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A required email field
+
+```ts
+Input({ id: "email", name: "email", type: "email", placeholder: "you@acme.com", required: true })
+```
+
+```html
+<input type="email" class="input" id="email" name="email" placeholder="you@acme.com" required="">
+```
+
+### A search box with an icon
+
+```ts
+InputIcon({
+  icon: Icon("search", { size: 16 }),
+  control: Input({ type: "search", placeholder: "Search invoices" }),
+})
+```
+
+```html
+<span class="input-icon">
+  <span class="input-icon__glyph" aria-hidden="true">
+    <svg width="16" height="16" width="2" …>…</svg>
+  </span>
+  <input type="search" class="input" placeholder="Search invoices">
+</span>
+```
+
+### An amount with a currency prefix
+
+```ts
+InputGroup({
+  start: "$",
+  control: Input({ name: "amount", extraClass: "input-group__control", placeholder: "0.00" }),
+})
+```
+
+```html
+<div class="input-group">
+  <span class="input-group__addon">$</span>
+  <input type="text" class="input input-group__control" name="amount" placeholder="0.00">
+</div>
+```
+
+### A floating label
+
+```ts
+FloatingInput({ id: "company", name: "company", label: "Company" })
+```
+
+```html
+<div class="input-float">
+  <input type="text" class="input" id="company" name="company" placeholder=" ">
+  <label class="input-float__label" for="company">Company</label>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/input/input.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

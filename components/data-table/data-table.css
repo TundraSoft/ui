@@ -5,6 +5,8 @@
  * swapped-in fragment behaves the same as a server-rendered one.
  */
 .data-table {
+  --data-table-header-height: 34px;
+  --data-table-select-width: 48px;
   display: flex;
   flex-direction: column;
   border: var(--border-width) solid var(--color-border);
@@ -20,6 +22,25 @@
 }
 
 .data-table > :last-child {
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+/* The bulk form (`bulkAction`) is a transparent wrapper around the bar
+   and the rows: same column, and the corner radii it inherits from the
+   root pass on to its own first/last child. */
+.data-table__form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.data-table__form > :first-child {
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.data-table__form > :last-child {
   border-end-start-radius: inherit;
   border-end-end-radius: inherit;
 }
@@ -40,12 +61,29 @@
 
 /* Shown only when the selection is non-empty; server-rendered or toggled
    by shared/js/v2-behaviors.js. */
+/* The bulk bar is a contextual action bar: it sits INSIDE the scroll box,
+   sticky over the header row (same height, pulled back up by its own
+   negative margin so it takes no flow space). Rows never move when a
+   selection starts or ends; while it shows, the column headers are
+   simply covered, the way the sticky header covers scrolled rows. The
+   select-all cell is sticky too and stacked above the bar, so it stays
+   usable — the bar's start padding leaves room for it. */
 .data-table__bulk {
+  position: sticky;
+  top: 0;
+  inset-inline-start: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex-wrap: wrap;
-  padding: var(--space-2) var(--space-4);
+  box-sizing: border-box;
+  height: var(--data-table-header-height);
+  margin-block-end: calc(-1 * var(--data-table-header-height));
+  width: 100%;
+  padding: 0 var(--space-4) 0 calc(var(--data-table-select-width) + var(--space-4));
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
   background: var(--color-surface-inverse);
   color: var(--color-text-inverse);
   font-size: var(--font-size-sm);
@@ -56,10 +94,12 @@
 }
 
 .data-table__bulk-count {
+  flex: none;
   font-weight: var(--font-weight-medium);
 }
 
 .data-table__bulk-sep {
+  flex: none;
   width: var(--border-width);
   height: 16px;
   background: var(--color-text-muted);
@@ -67,6 +107,7 @@
 }
 
 .data-table__bulk .btn {
+  flex: none;
   height: 26px;
   padding-inline: var(--space-2);
   font-size: var(--font-size-xs);
@@ -119,7 +160,8 @@
   position: sticky;
   top: 0;
   z-index: 3;
-  height: 34px;
+  height: var(--data-table-header-height);
+  box-sizing: border-box;
   padding-inline: var(--space-4);
   text-align: start;
   white-space: nowrap;
@@ -152,10 +194,25 @@
   background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 5%, var(--color-surface));
 }
 
+/* The selection column sticks at the start (a row stays selectable after
+   a horizontal scroll); a pinned column then sits right after it. */
 .data-table__select {
-  width: 38px;
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  width: var(--data-table-select-width);
+  min-width: var(--data-table-select-width);
   padding-inline: 0 0;
   padding-inline-start: var(--space-4);
+}
+
+th.data-table__select {
+  z-index: 6;
+}
+
+.data-table__select + .data-table__cell--pinned {
+  inset-inline-start: var(--data-table-select-width);
 }
 
 /* Pin the identifying column so a wide table stays readable. */
@@ -197,6 +254,119 @@ th.data-table__cell--pinned {
 .data-table__actions {
   width: 40px;
   text-align: center;
+}
+
+/* Row action strip (RowActions): absolutely positioned in the sticky
+   actions cell, anchored at the row's end, the row's own height, so it
+   covers the row's values leftwards while open — nothing moves, nothing
+   floats outside the scroll box. Under the sticky selection/pinned cells
+   (z 2) so the row's identity stays readable, above the plain cells. */
+td.data-table__actions {
+  position: sticky;
+  inset-inline-end: 0;
+  /* No z-index: it would make the cell a stacking context and trap a
+     floating descendant (a Dropdown's fixed panel) under the next rows. */
+  background: var(--color-surface);
+}
+
+td.data-table__select,
+td.data-table__cell--pinned {
+  z-index: 2;
+}
+
+.data-table__row-actions {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content; /* data-table.js caps it to the scroll box */
+  padding-inline: var(--space-3);
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+}
+
+.data-table__row-actions .btn {
+  flex: none;
+  height: 26px;
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-xs);
+  background: transparent;
+  border-color: var(--color-text-muted);
+  border-color: color-mix(in oklab, var(--color-text-inverse) 22%, transparent);
+  color: var(--color-text-inverse);
+  box-shadow: none;
+}
+
+.data-table__row-actions .btn:hover {
+  background: var(--color-surface-alt);
+  background: color-mix(in oklab, var(--color-text-inverse) 12%, transparent);
+}
+
+.data-table__row-actions .btn--danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-danger-contrast);
+}
+
+.data-table__row-actions .btn--icon {
+  border-color: transparent;
+}
+
+/* The strip slides in from the row's end: its clip edge travels from the
+   end towards the start, so the buttons emerge in place — a clip, not a
+   transform, because a transformed box inside the scroll container would
+   grow its scrollable overflow for the length of the animation. Closing
+   plays it backwards (`.is-closing`, data-table.js hides on animationend). */
+@keyframes data-table-row-actions-in {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes data-table-row-actions-out {
+  from {
+    clip-path: inset(0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 100%);
+  }
+}
+
+.data-table__row-actions:not([hidden]) {
+  animation: data-table-row-actions-in var(--transition-base);
+}
+
+.data-table__row-actions.is-closing {
+  animation-name: data-table-row-actions-out;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-table__row-actions:not([hidden]),
+  .data-table__row-actions.is-closing {
+    animation: none;
+  }
+}
+
+.data-table__row-actions-sep {
+  flex: none;
+  width: var(--border-width);
+  height: 16px;
+  background: var(--color-text-muted);
+  background: color-mix(in oklab, var(--color-text-inverse) 20%, transparent);
 }
 
 .data-table__footer {

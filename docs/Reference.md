@@ -17,7 +17,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [collapsible](reference/components-collapsible.md) — `Collapsible`, `Accordion`
 - [combobox](reference/components-combobox.md) — `ComboboxList`, `Combobox`
 - [command](reference/components-command.md) — `CommandList`, `Command`
-- [data-table](reference/components-data-table.md) — `DataTable`
+- [data-table](reference/components-data-table.md) — `RowActions`, `DataTable`
 - [datepicker](reference/components-datepicker.md) — `formatDate`, `DatePickerPanel`, `DatePicker`
 - [dropdown](reference/components-dropdown.md) — `Dropdown`
 - [dropzone](reference/components-dropzone.md) — `Dropzone`

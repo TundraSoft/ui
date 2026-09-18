@@ -11,11 +11,10 @@ import { Badge } from "../../components/badge/badge.ts";
 import { Button } from "../../components/button/button.ts";
 import type { ComboboxOption } from "../../components/combobox/combobox.ts";
 import type { CommandItem } from "../../components/command/command.ts";
-import { DataTable } from "../../components/data-table/data-table.ts";
+import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import type { DatePickerProps } from "../../components/datepicker/datepicker.ts";
 import { Input } from "../../components/input/input.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
-import { Icon } from "../../shared/icons.ts";
 
 export type Dir = "asc" | "desc";
 
@@ -32,8 +31,12 @@ export type DemoRoutes = {
   projectsPage: (page: number) => string;
   /** Sort link of the invoices table (outer-swap `#invoices`). */
   invoiceSort: (key: string, dir: Dir) => string;
+  /** Where the invoices bulk form posts (`op` + the checked `selected` ids); carries the current sort. */
+  invoiceBulk: (sort: { key: string; dir: Dir }) => string;
   /** The editor's Markdown preview route — receives `text`, answers with an HTML fragment. */
   preview: string;
+  /** The dropzone's upload form posts here (multipart); the server answers with the re-rendered `Dropzone`. */
+  upload: string;
   /** Month navigation / day pick / preset links of the period picker (outer-swap `#period`). */
   month: (year: number, month: number) => string;
   day: (iso: string) => string;
@@ -48,7 +51,9 @@ export const staticRoutes: DemoRoutes = {
   projectsSort: (key, dir) => `?psort=${key}&pdir=${dir}&page=1`,
   projectsPage: (p) => `?page=${p}`,
   invoiceSort: (key, dir) => `?sort=${key}&dir=${dir}`,
+  invoiceBulk: () => "?bulk",
   preview: "/preview",
+  upload: "?upload",
   month: (y, m) => `?month=${y}-${String(m + 1).padStart(2, "0")}`,
   day: (iso) => `?day=${iso}`,
   preset: (name) => `?preset=${name}`,
@@ -99,8 +104,14 @@ export function projectsTable(routes: DemoRoutes, state?: ProjectsState): Html {
     rowKey: (row) => row.id as string,
     sort: state.sort,
     buildSortHref: routes.projectsSort,
-    toolbar: Input({ placeholder: "Search projects...", type: "search", size: "sm" }),
+    toolbar: Input({
+      placeholder: "Search projects...",
+      type: "search",
+      size: "sm",
+      attrs: { "data-table-search": "", "aria-label": "Search projects" },
+    }),
     footer: Pagination({ page, totalPages, buildHref: routes.projectsPage, target: "#projects" }),
+    attrs: { "data-filter-scope": "" },
   });
 }
 
@@ -132,8 +143,22 @@ export function sortInvoices(sort?: { key: string; dir: Dir }): Invoice[] {
   });
 }
 
-/** The invoices table — selectable with a bulk bar; the sort route re-renders it. */
-export function invoicesTable(routes: DemoRoutes, sort: { key: string; dir: Dir } = { key: "id", dir: "desc" }): Html {
+/** What the bulk form has done so far — the app keeps one per process, a static page none. */
+export type InvoiceEdits = { deleted?: string[]; assigned?: string[] };
+
+/**
+ * The invoices table — selectable with a bulk bar whose buttons post the
+ * selection (`op=assign|delete`) to `routes.invoiceBulk`; the sort route
+ * and the bulk route both re-render it.
+ */
+export function invoicesTable(
+  routes: DemoRoutes,
+  sort: { key: string; dir: Dir } = { key: "id", dir: "desc" },
+  edits: InvoiceEdits = {},
+): Html {
+  const deleted = new Set(edits.deleted ?? []);
+  const assigned = new Set(edits.assigned ?? []);
+  const rows = sortInvoices(sort).filter((row) => !deleted.has(row.id));
   return DataTable<Invoice>({
     id: "invoices",
     title: "Invoices",
@@ -141,30 +166,48 @@ export function invoicesTable(routes: DemoRoutes, sort: { key: string; dir: Dir 
     maxHeight: "sm",
     sort,
     buildSortHref: routes.invoiceSort,
+    bulkAction: routes.invoiceBulk(sort),
     columns: [
       { key: "id", label: "Invoice", pinned: true, mono: true, sortable: true },
       { key: "client", label: "Client", sortable: true },
       {
         key: "status",
         label: "Status",
-        render: (row) => Badge({ label: row.status, variant: statusVariant(row.status), dot: row.status !== "Draft" }),
+        render: (row) =>
+          html`${Badge({ label: row.status, variant: statusVariant(row.status), dot: row.status !== "Draft" })}${
+            assigned.has(row.id)
+              ? html`
+                ${Badge({ label: "Assigned to you", variant: "accent" })}
+              `
+              : ""
+          }`,
       },
       { key: "total", label: "Total", numeric: true, sortable: true },
     ],
-    rows: sortInvoices(sort),
+    rows,
     rowKey: (row) => row.id,
-    bulkActions: html`${Button({ label: "Assign", size: "sm" })}${
-      Button({ label: "Delete", size: "sm", variant: "danger" })
+    bulkActions: html`${
+      Button({ label: "Assign", size: "sm", type: "submit", attrs: { name: "op", value: "assign" } })
+    }${
+      Button({ label: "Delete", size: "sm", variant: "danger", type: "submit", attrs: { name: "op", value: "delete" } })
     }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
-    rowActions: () =>
-      Button({
-        iconOnly: true,
-        variant: "ghost",
-        size: "sm",
-        iconStart: Icon("kebab", { size: 16 }),
-        attrs: { "aria-label": "Row actions" },
+    rowActions: (row) =>
+      RowActions({
+        id: `inv-row-${row.id}`,
+        label: `Actions for ${row.id}`,
+        items: [
+          { label: "View", href: "#" },
+          { label: "Duplicate", href: "#" },
+          { label: "Send reminder", href: "#" },
+          {
+            label: "Delete",
+            href: "#",
+            danger: true,
+          },
+        ],
       }),
-    footer: html`<span>Showing 7 of 1,204 · scroll the body, the header stays</span>`,
+    emptyMessage: "Every invoice is gone. Reload the app to get them back.",
+    footer: html`<span>Showing ${rows.length} of 1,204 · scroll the body, the header stays</span>`,
   });
 }
 

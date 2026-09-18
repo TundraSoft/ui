@@ -39,6 +39,64 @@ Dropzone(props: DropzoneProps): Html
 | `hint` | `string` |  |  |
 | `files` | `DropzoneFile[]` |  | Server-rendered upload records. A file input is never echoed back into re-rendered markup (keptValues() strips it), so this list must come from your own store, not the submitted form values. |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Attachments, with one already stored
+
+Put it in a `Form` with `data-action`/`data-target="#attachments"`/`data-swap="outer"`: the upload is a swap, pending rows show progress, and the reply is this again with your rows.
+
+```ts
+Dropzone({
+  id: "attachments",
+  name: "files",
+  multiple: true,
+  accept: ".pdf,.png",
+  hint: "PDF or PNG, up to 10 MB",
+  files: [{
+    name: "contract.pdf",
+    kind: "pdf",
+    size: "2.4 MB",
+    removeHref: "/invoices/INV-2048/attachments/1/delete",
+  }],
+})
+```
+
+```html
+<div class="dropzone" id="attachments" data-dropzone>
+  <div class="dropzone__area">
+    <input class="dropzone__input" id="attachments-input" type="file" name="files" aria-labelledby="attachments-label" accept=".pdf,.png" multiple="" aria-describedby="attachments-hint">
+    <span class="dropzone__icon">
+      <svg width="19" height="19" width="2" …>…</svg>
+    </span>
+    <span class="dropzone__label" id="attachments-label">
+      Drop files, or
+      <span class="dropzone__browse">browse</span>
+    </span>
+    <span class="dropzone__hint" id="attachments-hint">PDF or PNG, up to 10 MB</span>
+  </div>
+  <div class="dropzone__files">
+    <div class="dropzone__file dropzone__file--done">
+      <span class="dropzone__file-icon">
+        <svg width="15" height="15" width="2" …>…</svg>
+      </span>
+      <span class="dropzone__file-body">
+        <span class="dropzone__file-row">
+          <span class="dropzone__file-name">contract.pdf</span>
+          <span class="dropzone__file-size">2.4 MB</span>
+        </span>
+      </span>
+      <form method="post" action="/invoices/INV-2048/attachments/1/delete" data-action="/invoices/INV-2048/attachments/1/delete" data-target="#attachments" data-swap="outer">
+        <button type="submit" class="dropzone__remove" aria-label="Remove contract.pdf">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/dropzone/dropzone.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
@@ -49,4 +107,6 @@ Classes defined by `components/dropzone/dropzone.css` — structural, token-driv
 
 `components/dropzone/dropzone.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-dropzone-remove`.
+Attributes it reads or writes: `data-action`, `data-dropzone`, `data-dropzone-remove`.
+
+Events: `rapid:error`, `rapid:progress`, `rapid:swapped`.

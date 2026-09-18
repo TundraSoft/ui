@@ -40,6 +40,50 @@ Icon rail + content; the rail becomes a bottom tab bar on phones.
 | `contentId` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### An icon rail that becomes a tab bar on phones
+
+```ts
+RailLayout({
+  brand: "A",
+  items: [
+    { href: "/", label: "Home", icon: Icon("dashboard", { size: 20 }), active: true },
+    { href: "/invoices", label: "Invoices", icon: Icon("invoice", { size: 20 }) },
+    { href: "/settings", label: "Settings", icon: Icon("settings", { size: 20 }) },
+  ],
+  end: Avatar({ initials: "AL", size: "sm" }),
+  content: html`<h1>Home</h1>`,
+})
+```
+
+```html
+<div class="layout layout--rail">
+  <div class="layout__body">
+    <nav class="layout__rail" aria-label="Main">
+      <span class="layout__rail-brand">A</span>
+      <a class="layout__rail-link" href="/" aria-label="Home" title="Home" aria-current="page">
+        <svg width="20" height="20" width="2" width="7" height="7" width="7" height="7" width="7" height="7" width="7" height="7" …>…</svg>
+      </a>
+      <a class="layout__rail-link" href="/invoices" aria-label="Invoices" title="Invoices">
+        <svg width="20" height="20" width="2" …>…</svg>
+      </a>
+      <a class="layout__rail-link" href="/settings" aria-label="Settings" title="Settings">
+        <svg width="20" height="20" width="2" …>…</svg>
+      </a>
+      <span class="layout__rail-end">
+        <span class="avatar avatar--sm">AL</span>
+      </span>
+    </nav>
+    <main class="layout__content" id="main-content">
+      <h1>Home</h1>
+    </main>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/rail/rail.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

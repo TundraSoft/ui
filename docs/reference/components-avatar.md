@@ -38,6 +38,36 @@ AvatarGroup(props: { avatars: Html[]; attrs?: Attrs }): Html
 | `size` | `AvatarSize` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A person, by photo or initials
+
+```ts
+Avatar({ src: "/photos/ada.jpg", alt: "Ada Lovelace", size: "md" })
+```
+
+```html
+<span class="avatar">
+  <img src="/photos/ada.jpg" alt="Ada Lovelace">
+</span>
+```
+
+### Who is on the project
+
+```ts
+AvatarGroup({ avatars: [Avatar({ initials: "AL" }), Avatar({ initials: "GH" }), Avatar({ initials: "+3" })] })
+```
+
+```html
+<div class="avatar-group">
+  <span class="avatar">AL</span>
+  <span class="avatar">GH</span>
+  <span class="avatar">+3</span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/avatar/avatar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

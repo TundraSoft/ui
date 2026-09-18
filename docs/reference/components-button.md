@@ -58,6 +58,80 @@ Buttons fused into one segmented control (e.g. "Export" + a caret).
 | `block` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### The primary action
+
+```ts
+Button({ label: "Save changes", type: "submit" })
+```
+
+```html
+<button type="submit" class="btn">Save changes</button>
+```
+
+### An icon button with an accessible name
+
+```ts
+Button({
+  iconOnly: true,
+  variant: "ghost",
+  iconStart: Icon("x", { size: 16 }),
+  attrs: { "aria-label": "Close" },
+})
+```
+
+```html
+<button type="button" class="btn btn--ghost btn--icon" aria-label="Close">
+  <svg width="16" height="16" width="2" …>…</svg>
+</button>
+```
+
+### A split button
+
+```ts
+ButtonGroup({
+  buttons: [
+    Button({ label: "Export", variant: "outline" }),
+    Dropdown({
+      id: "export-more",
+      align: "end",
+      trigger: html`${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>`,
+      triggerClass: "btn btn--outline btn--icon",
+      content: Menu({ items: [{ label: "CSV", href: "/export.csv" }, { label: "PDF", href: "/export.pdf" }] }),
+    }),
+  ],
+})
+```
+
+```html
+<span class="btn-group">
+  <button type="button" class="btn btn--outline">Export</button>
+  <div class="dropdown" id="export-more">
+    <button type="button" class="dropdown__trigger btn btn--outline btn--icon" data-toggle="#export-more-panel" aria-expanded="false" aria-controls="export-more-panel">
+      <svg width="14" height="14" width="2" …>…</svg>
+      <span class="sr-only">More export options</span>
+    </button>
+    <div class="dropdown__panel dropdown__panel--end" id="export-more-panel" data-toggle-panel hidden>
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link" href="/export.csv">
+            <span class="menu__link-label">CSV</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/export.pdf">
+            <span class="menu__link-label">PDF</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</span>
+```
+
 ## CSS hooks
 
 Classes defined by `components/button/button.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

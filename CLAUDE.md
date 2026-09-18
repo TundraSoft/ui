@@ -400,6 +400,71 @@ and asserted by `test-app.ts` (28 canvases drawn, text fill on our tokens, re-re
 gallery, the admin invoice line items and the catalogue all use it. Nothing named `.table*` exists any more —
 `dropdown.js` clips only inside `.data-table__scroll` / `[data-dropdown-clip]`.
 
+**rAPId is a caret range, and upload progress is handled ahead of its release (2026-09-18).** `deno.json` imports
+`jsr:@tundralibs/rapid@^0.2.0` (was an exact `0.2.0`; `package.json` already had `^0.2.0`), so the lock resolves the
+newest 0.2.x — 0.2.1 at the time. rAPId's `main` (unreleased then) adds `rapid:progress` (`{ url, loaded, total }`,
+emitted on the swap target while a multipart body streams over `XMLHttpRequest`; `total` is `0` when unknown),
+`rapid:request`, its own `aria-busy` on the target and a one-request-per-target guard. `dropzone.js` handles it now: on
+`submit` of a `form[data-action]` holding a dropzone with picked files it renders a `.dropzone__file--pending` row per
+file (same classes as `DropzoneFile`, indeterminate `<progress>`), keyed by the form's `data-action` URL;
+`rapid:progress` with that `url` fills the bars; `rapid:swapped` drops the memory (the reply replaced the rows);
+`rapid:error` marks them `--error` with "Upload failed". The catalogue's `#cat-dz-1` sits in `#cat-dz-form` posting to
+`routes.upload` (`/fragments/upload` in the app — `ctx.payload.files` is `{ name, path, type, size }` per file —
+answering with the `Dropzone` re-rendered; the app declares `uploads.allowedExtensions`, because rAPId refuses every
+upload until told otherwise). `test-catalogue.ts` drives the client side with dispatched events; `test-app.ts` does a
+real upload (`uploadFile` + submit → done row). `docs/UI-Recipes.md` is the worked-examples guide (2026-09-18): seven
+real pages, each as a rAPId route/template and as the plain HTML it renders — its TypeScript lives in
+`examples/docs/recipes.ts` (covered by `deno task check`; run it to render every recipe's HTML), and the guide's HTML
+blocks are that render, trimmed — keep the two in step when a component's markup changes. The generated reference pages
+gained a **Usage** section the same day: `examples/docs/usage.ts` holds one to three real call sites per component and
+layout (`render: () => Html`), `scripts/build-docs.ts` cuts each snippet from that file's own text
+(`Function.toString()` would give Deno's re-emitted JavaScript) and prints the render through
+`examples/docs/pretty-html.ts`; the generator throws when a module has no entry, so a new component fails
+`deno task docs` (and the CI drift check) until it has a usage example.
+
+**Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
+row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
+carried `name="selected"` with nothing to submit through), the shared invoices kebab and the billing "PDF" were dead
+buttons, the catalogue's toolbar search boxes filtered nothing, and a sort swap silently dropped the selection. Fixes:
+`DataTable.bulkAction` wraps the bulk bar and rows (not the toolbar/footer — Enter in a search box must never submit) in
+a `<form method="post" data-action data-target="#id" data-swap="outer">`; bulk buttons are submits with
+`name="op" value="…"` (rAPId posts the submitter, `FormData(form, submitter)`); the app's `/components/data/invoices`
+route applies `op=assign|delete` to per-process state, re-renders the fragment on a swap and redirects (PRG) without JS;
+`data-table.js` remembers the checked keys per table id and re-applies them after a GET swap (sort, page, back), while a
+POST reply's own selection wins; `dropdown.js` re-places a fixed panel on scroll while its trigger is still inside its
+clipper instead of closing on any scroll (the reset's `html:focus-within` smooth scroll was still running when a
+keyboard user's Enter opened the menu, and the next scroll frame closed it). Static pages post to an inert `?bulk` like
+their sort links. Same day, the user noticed the bulk bar pushed the rows down when it appeared: it is now a
+**contextual action bar** — inside `.data-table__scroll`, `position: sticky; top: 0`, the header row's height with a
+matching negative `margin-block-end` so it takes no flow space, `z-index` above the sticky `th`s;
+`th.data-table__select` is sticky at the inline start and stacked above the bar so select-all stays usable,
+`td.data-table__select` is sticky too (rows stay selectable after a horizontal scroll) and a pinned column offsets by
+`--data-table-select-width`. `--data-table-header-height` / `--data-table-select-width` are the two tokens that keep
+bar, header and column aligned; `test-catalogue.ts` asserts the first row's top does not move when a row is selected.
+Consequence, accepted: while rows are selected the sort links are under the bar (clear the selection to sort by pointer;
+a link still works from the keyboard), which is why `test-app.ts` activates the sort link with a DOM `click()` when it
+checks that a selection survives a sort swap — a pointer click at those coordinates hits the bar. `test-catalogue.ts`,
+`test-app.ts` and `test-admin.ts` pin all of it — the lesson is that a suite which asserts a bar appears is not a suite
+which asserts the buttons in it do anything.
+
+**`RowActions` — row actions as an in-row strip (2026-09-18, prototype for comparison).** The user asked for an
+alternative to a floating dropdown per row: `RowActions({ id, label, items })` renders the kebab plus a hidden
+`.data-table__row-actions` strip — absolutely positioned inside the (now sticky-at-end) actions cell, the row's own
+height, anchored at the row's end and growing leftwards over the row's values, labelled buttons, danger item last after
+a separator, a close button. `data-table.js` opens one at a time, moves focus in, closes on Escape / close / outside
+click with focus back on the kebab, and caps the strip's `max-width` to the scroll box's `clientWidth` minus the sticky
+selection/pinned cells through the CSSOM (at 375px it otherwise ran past the box's start, or hid its first buttons under
+the pinned id). `td.data-table__select` and the pinned cell are `z-index: 2` so the row's identity stays readable under
+an open strip. Same idiom as the bulk bar: one row → row strip, many rows → header strip. Adopted the same day: the
+per-row `Dropdown` menus are gone from every data table (shared invoices, catalogue, admin `rowKebab`, the docs snippet)
+and `RowActions` is the row-actions idiom. The dropdown had also started to disappear behind the next rows once
+`td.data-table__actions` became sticky with a `z-index` (a stacking context traps a fixed panel inside it); the cell now
+has no `z-index`, so a custom `rowActions` Html that floats still works. The strip slides in from the row's end
+(`@keyframes` on `clip-path: inset(0 0 0 100%) → inset(0)`, `--transition-base`; a `transform` would grow the scroll
+box's scrollable overflow for the length of the animation) and out again (`.is-closing`, hidden on `animationend`; when
+reduced motion turns the animation off the script hides it at once, since `animationend` never comes) — tests wait for
+the strip to be hidden rather than sleeping past the animation.
+
 **Loading state is automatic for swaps (`shared/js/busy.js`, 2026-09-16).** On a `[data-action]` click or a
 `form[data-action]` submit, the region the swap will replace gets `aria-busy="true"` + `data-busy`; `skeleton.css`
 paints a translucent veil with the skeleton shimmer over `[data-busy]` and turns pointer events off (no double submits);
@@ -696,8 +761,8 @@ One package, two registries, one artifact:
 
 ### Example app (`examples/app/`, 2026-09-16)
 
-`createApp({ port, hostname, assets, quiet })` (`app.ts`) boots a real rAPId `Application` (pinned 0.2.0) wearing the
-library: `ui.core` from `createCoreTemplate`, `ui.errorTemplates` from `templates/errors.ts`, `prefer: "html"`,
+`createApp({ port, hostname, assets, quiet })` (`app.ts`) boots a real rAPId `Application` (`^0.2.0`, see below) wearing
+the library: `ui.core` from `createCoreTemplate`, `ui.errorTemplates` from `templates/errors.ts`, `prefer: "html"`,
 `history: true`, and `server.static` for the self-hosted `/ui` mount (`UI_ASSETS=cdn` switches to the CDN path — only
 meaningful once a version is on npm). `serve.ts` runs it (`deno task app`, `npm run app`, `bun run bun:app`; `PORT`
 overrides 8010). Routes: `/` (lazy `data-load` stats region, server toasts appended into `#toast-region`), `/layouts` +

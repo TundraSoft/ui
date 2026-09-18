@@ -33,6 +33,36 @@ Chip(props: { label: string | Html; removable?: boolean; static?: boolean; attrs
 - `"info"`
 - `"code"`
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A status with a dot
+
+```ts
+Badge({ label: "Overdue", variant: "danger", dot: true })
+```
+
+```html
+<span class="badge badge--danger">
+  <span class="badge__dot" aria-hidden="true"></span>
+  Overdue
+</span>
+```
+
+### A removable filter chip
+
+```ts
+Chip({ label: "Status: Open", removable: true })
+```
+
+```html
+<span class="chip chip--removable" data-dismissible="">
+  Status: Open
+  <button type="button" class="chip__remove" data-dismiss aria-label="Remove Status: Open">&times;</button>
+</span>
+```
+
 ## CSS hooks
 
 Classes defined by `components/badge/badge.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

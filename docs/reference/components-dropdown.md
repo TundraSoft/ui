@@ -27,6 +27,54 @@ Dropdown(props: DropdownProps): Html
 | `triggerClass` | `string` |  | Extra classes on the trigger, e.g. `btn btn--outline btn--icon` to make it the caret half of a split button inside a `ButtonGroup`. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A user menu
+
+```ts
+Dropdown({
+  id: "user-menu",
+  align: "end",
+  trigger: "Ada",
+  content: Menu({
+    items: [{ label: "Profile", href: "/me" }, { label: "Settings", href: "/settings" }, {
+      label: "Sign out",
+      href: "/signout",
+    }],
+  }),
+})
+```
+
+```html
+<div class="dropdown" id="user-menu">
+  <button type="button" class="dropdown__trigger btn btn--outline" data-toggle="#user-menu-panel" aria-expanded="false" aria-controls="user-menu-panel">
+    Ada
+    <svg width="14" height="14" width="2" …>…</svg>
+  </button>
+  <div class="dropdown__panel dropdown__panel--end" id="user-menu-panel" data-toggle-panel hidden>
+    <ul class="menu__list">
+      <li>
+        <a class="menu__link" href="/me">
+          <span class="menu__link-label">Profile</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu__link" href="/settings">
+          <span class="menu__link-label">Settings</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu__link" href="/signout">
+          <span class="menu__link-label">Sign out</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/dropdown/dropdown.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
@@ -38,3 +86,5 @@ Classes defined by `components/dropdown/dropdown.css` — structural, token-driv
 `components/dropdown/dropdown.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
 Attributes it reads or writes: `data-action`, `data-dropdown-clip`, `data-table`, `data-toggle`.
+
+Events: `html:focus-within`.

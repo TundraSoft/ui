@@ -47,6 +47,42 @@ the form's submit, not clicks on the radios (which it would cancel).
 | `inputAttrs` | `Attrs` |  | Extra attributes on every radio, e.g. `data-table-filter` for filter.js or `data-view-target` for view-switch.js. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A status filter
+
+A real radio group that submits under `name`; `inputAttrs: { "data-table-filter": "" }` wires it to the client-side filter.
+
+```ts
+Segmented({
+  id: "status",
+  name: "status",
+  legend: "Status",
+  value: "",
+  options: [{ value: "", label: "All" }, { value: "open", label: "Open" }, { value: "paid", label: "Paid" }],
+  inputAttrs: { "data-table-filter": "" },
+})
+```
+
+```html
+<div class="segmented" role="radiogroup" id="status" data-segmented aria-label="Status">
+  <span class="segmented__item">
+    <input class="segmented__input" type="radio" id="status-0" name="status" value="" data-table-filter="" checked="">
+    <label class="segmented__label" for="status-0">All</label>
+  </span>
+  <span class="segmented__item">
+    <input class="segmented__input" type="radio" id="status-1" name="status" value="open" data-table-filter="">
+    <label class="segmented__label" for="status-1">Open</label>
+  </span>
+  <span class="segmented__item">
+    <input class="segmented__input" type="radio" id="status-2" name="status" value="paid" data-table-filter="">
+    <label class="segmented__label" for="status-2">Paid</label>
+  </span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/segmented/segmented.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

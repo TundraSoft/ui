@@ -38,6 +38,66 @@ desktop.
 | `collapsible` | `boolean` |  | Adds a desktop-only "collapse to icons" toggle at the bottom (§ mini sidebar). Needs `id` set — the toggle targets it by selector. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### App navigation, collapsible to icons
+
+```ts
+Sidebar({
+  id: "nav",
+  brand: "Acme",
+  collapsible: true,
+  items: [
+    { label: "Dashboard", href: "/", icon: Icon("dashboard", { size: 18 }), active: true },
+    { label: "Invoices", href: "/invoices", icon: Icon("invoice", { size: 18 }) },
+  ],
+})
+```
+
+```html
+<aside class="sidebar" id="nav">
+  <div class="sidebar__brand">Acme</div>
+  <nav class="sidebar__nav" aria-label="Main">
+    <ul class="menu__list">
+      <li>
+        <a class="menu__link menu__link--active" href="/" aria-current="page">
+          <span class="menu__icon">
+            <svg width="18" height="18" width="2" width="7" height="7" width="7" height="7" width="7" height="7" width="7" height="7" …>…</svg>
+          </span>
+          <span class="menu__link-label">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu__link" href="/invoices">
+          <span class="menu__icon">
+            <svg width="18" height="18" width="2" …>…</svg>
+          </span>
+          <span class="menu__link-label">Invoices</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <button type="button" class="sidebar__collapse-toggle js-only" data-collapse="#nav" aria-expanded="true" aria-label="Collapse sidebar">
+    <span class="sidebar__collapse-icon">&#8249;</span>
+    <span class="sidebar__collapse-label">Collapse</span>
+  </button>
+</aside>
+```
+
+### The drawer toggle for a header
+
+`SidebarLayout` renders one for you; use this when the header carries its own.
+
+```ts
+SidebarToggle({ targetId: "nav", label: "Menu" })
+```
+
+```html
+<button type="button" class="navbar__toggle navbar__toggle--sidebar js-only" data-toggle="#nav" data-toggle-class="" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">Menu</button>
+```
+
 ## CSS hooks
 
 Classes defined by `components/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

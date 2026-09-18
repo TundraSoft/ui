@@ -110,6 +110,48 @@ Extends `CardHeaderProps`.
 | `footerSplit` | `boolean` |  |  |
 | `attrs` | `Attrs` |  | Escape hatch for rAPId's data-* wiring, aria-*, etc. |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A linked summary card
+
+`href` makes the title a stretched link, so the whole card is clickable without wrapping it in an `<a>`.
+
+```ts
+Card({
+  title: "Northwind Traders",
+  subtitle: "12 open invoices",
+  href: "/clients/northwind",
+  body: html`<p>Last payment received 2 days ago.</p>`,
+  footer: Badge({ label: "Active", variant: "success", dot: true }),
+})
+```
+
+```html
+<div class="card card--clickable">
+  <div class="card__content">
+    <div class="card__header">
+      <div class="card__heading">
+        <div class="card__title">
+          <a class="card__title-link" href="/clients/northwind">Northwind Traders</a>
+        </div>
+        <div class="card__subtitle">12 open invoices</div>
+      </div>
+    </div>
+    <div class="card__body">
+      <p>Last payment received 2 days ago.</p>
+    </div>
+    <div class="card__footer">
+      <span class="badge badge--success">
+        <span class="badge__dot" aria-hidden="true"></span>
+        Active
+      </span>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/card/card.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

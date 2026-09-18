@@ -31,6 +31,49 @@ fixes it. An icon alone is not an empty state.
 | `tone` | `"default" | "error"` |  |  |
 | `code` | `string` |  | Request id / status, shown monospaced. Error tone only. |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### An empty list with a way forward
+
+```ts
+Empty({
+  title: "No invoices yet",
+  text: "Create the first one and it will show up here.",
+  icon: "invoice",
+  actions: Button({ label: "New invoice", href: "/invoices/new" }),
+})
+```
+
+```html
+<div class="empty">
+  <span class="empty__icon">
+    <svg width="21" height="21" width="2" …>…</svg>
+  </span>
+  <span class="empty__title">No invoices yet</span>
+  <span class="empty__text">Create the first one and it will show up here.</span>
+  <span class="empty__actions">
+    <a class="btn" href="/invoices/new">New invoice</a>
+  </span>
+</div>
+```
+
+### A failed load, with the request id
+
+```ts
+Empty({ variant: "inline", tone: "error", title: "Could not load invoices", code: "req_01J8ZK3Q" })
+```
+
+```html
+<div class="empty empty--inline empty--error">
+  <span class="empty__body">
+    <span class="empty__title">Could not load invoices</span>
+    <span class="empty__code">req_01J8ZK3Q</span>
+  </span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/empty/empty.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

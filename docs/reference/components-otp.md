@@ -41,6 +41,34 @@ field, `name`, whichever way it was entered.
 | `autoSubmit` | `boolean` |  | Submit the surrounding form as soon as every cell is filled. |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A six-digit SMS code
+
+One `autocomplete="one-time-code"` input submits under `name`; the cells are an enhancement. `autoSubmit` submits the form when the last cell fills.
+
+```ts
+Otp({ id: "sms-code", name: "code", label: "Enter the code we texted you", groups: 3, autoSubmit: true })
+```
+
+```html
+<div class="otp" data-otp data-otp-mode="numeric" data-otp-submit="">
+  <label class="form-field__label" for="sms-code-value">Enter the code we texted you</label>
+  <input class="otp__value" id="sms-code-value" name="code" type="text" value="" maxlength="6" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" inputmode="numeric" pattern="[0-9]{6}">
+  <div class="otp__cells" role="group" aria-label="Enter the code we texted you">
+    <input class="otp__cell" id="sms-code-1" type="text" value="" aria-label="Digit 1 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+    <input class="otp__cell" id="sms-code-2" type="text" value="" aria-label="Digit 2 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    <input class="otp__cell" id="sms-code-3" type="text" value="" aria-label="Digit 3 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    <span class="otp__sep" aria-hidden="true"></span>
+    <input class="otp__cell" id="sms-code-4" type="text" value="" aria-label="Digit 4 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    <input class="otp__cell" id="sms-code-5" type="text" value="" aria-label="Digit 5 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    <input class="otp__cell" id="sms-code-6" type="text" value="" aria-label="Digit 6 of 6" autocapitalize="off" autocorrect="off" spellcheck="false" tabindex="-1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/otp/otp.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

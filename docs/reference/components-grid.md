@@ -46,6 +46,47 @@ Wraps `content` with a `col-N` span for direct placement inside a Grid.
 | `items` | `Html[]` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Three stat tiles in a row
+
+12 columns; every column collapses to full width below `md`.
+
+```ts
+Grid({
+  items: [
+    GridCol({ span: 4, content: Stat({ label: "Revenue", value: "$48,200" }) }),
+    GridCol({ span: 4, content: Stat({ label: "Open", value: "12" }) }),
+    GridCol({ span: 4, content: Stat({ label: "Overdue", value: "3", tone: "danger" }) }),
+  ],
+})
+```
+
+```html
+<div class="grid">
+  <div class="col-4">
+    <div class="stat">
+      <span class="stat__label">Revenue</span>
+      <span class="stat__value">$48,200</span>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat">
+      <span class="stat__label">Open</span>
+      <span class="stat__value">12</span>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat stat--danger">
+      <span class="stat__label">Overdue</span>
+      <span class="stat__value">3</span>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/grid/grid.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

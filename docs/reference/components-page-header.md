@@ -28,6 +28,44 @@ The title row at the top of a page: breadcrumb, h1, actions.
 | `actions` | `Html` |  | Buttons, a Segmented, a search… |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A page title with breadcrumb and actions
+
+```ts
+PageHeader({
+  title: "INV-2048",
+  subtitle: "Northwind Traders · due 15 Oct",
+  breadcrumb: Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-2048" }] }),
+  actions: html`${Button({ label: "Send reminder", variant: "outline" })}${
+    Button({ label: "Record payment" })
+  }`,
+})
+```
+
+```html
+<div class="page-header">
+  <div class="page-header__heading">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb__item">
+          <a class="breadcrumb__link" href="/invoices">Invoices</a>
+        </li>
+        <li class="breadcrumb__item" aria-current="page">INV-2048</li>
+      </ol>
+    </nav>
+    <h1 class="page-header__title">INV-2048</h1>
+    <p class="page-header__subtitle">Northwind Traders · due 15 Oct</p>
+  </div>
+  <div class="page-header__actions">
+    <button type="button" class="btn btn--outline">Send reminder</button>
+    <button type="button" class="btn">Record payment</button>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/page-header/page-header.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

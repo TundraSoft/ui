@@ -104,6 +104,30 @@ gauge, waffle) take a plain number array plus `labels`.
 - `APEXCHARTS`: `{ version: string; src: string; integrity: string }` — The one charting engine this library supports: ApexCharts, pinned. It is NOT bundled (§8: a small, stable set of file paths) — a page adds it with `ChartScript()` (static HTML) or `createCoreTemplate({ scripts: [APEXCHARTS] })` (a rAPId app), and chart.js (this component's behaviour script) renders every `[data-chart]` it finds once `window.ApexCharts` exists — a silent no-op on a page that never loaded the library. Bump the version here and nowhere else; the integrity hash is the sha384 of the file at that exact URL (`openssl dgst -sha384 -binary \| base64`).
 - `chartTypes`: `typeOperator`
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A revenue area chart
+
+Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode.
+
+```ts
+html`${ChartScript()}${
+  Chart({
+    id: "revenue",
+    type: "area",
+    series: [{ name: "Revenue", data: [12, 19, 14, 22, 28] }],
+    categories: ["May", "Jun", "Jul", "Aug", "Sep"],
+  })
+}`
+```
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@7.4.0/dist/apexcharts.min.js" integrity="sha384-fnhrfzODrKsQTTXTYoDIc5f/SIP1KuiO4hz6PmkcIBHYVaAj8QpSOtByqodkU2iO" crossorigin="anonymous" defer></script>
+<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;area&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Revenue&quot;,&quot;data&quot;:[12,19,14,22,28]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;]}}" data-chart-type="area" id="revenue"></div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/chart/chart.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

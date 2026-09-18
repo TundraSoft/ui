@@ -59,6 +59,61 @@ ever emitted (CSP). Pick the step closest to the content's box.
 | `rows` | `number` |  |  |
 | `columns` | `SkeletonWidth[][]` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A table region while it loads
+
+Render it as the initial content of a `data-load` region; the server's fragment replaces it.
+
+```ts
+html`<div id="orders" data-load data-action="/fragments/orders">${
+  SkeletonTable({ rows: 3, columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]] })
+}</div>`
+```
+
+```html
+<div id="orders" data-load data-action="/fragments/orders">
+  <div class="skeleton-table" aria-busy="true">
+    <div class="skeleton-table__head">
+      <span class="skeleton skeleton--text skeleton--w-sm" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-xs" aria-hidden="true"></span>
+    </div>
+    <div class="skeleton-table__row">
+      <span class="skeleton skeleton--text skeleton--w-lg" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-sm" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-xs" aria-hidden="true"></span>
+    </div>
+    <div class="skeleton-table__row">
+      <span class="skeleton skeleton--text skeleton--w-lg" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-sm" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-xs" aria-hidden="true"></span>
+    </div>
+    <div class="skeleton-table__row">
+      <span class="skeleton skeleton--text skeleton--w-lg" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-sm" aria-hidden="true"></span>
+      <span class="skeleton skeleton--text skeleton--w-xs" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
+```
+
+### A card placeholder
+
+```ts
+SkeletonCard()
+```
+
+```html
+<div class="skeleton-card" aria-busy="true">
+  <span class="skeleton skeleton--block" aria-hidden="true"></span>
+  <span class="skeleton skeleton--title" aria-hidden="true"></span>
+  <span class="skeleton skeleton--text skeleton--w-full" aria-hidden="true"></span>
+  <span class="skeleton skeleton--text skeleton--w-half" aria-hidden="true"></span>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/skeleton/skeleton.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):

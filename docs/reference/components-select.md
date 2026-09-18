@@ -46,6 +46,66 @@ page shows, and select.js keeps the two in step both ways. Give it an
 | `extraClass` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
+## Usage
+
+Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A plan picker
+
+Looks like the combobox; a native `<select>` carries `name` and is what submits.
+
+```ts
+Select({
+  id: "plan",
+  name: "plan",
+  value: "team",
+  options: [{ value: "free", label: "Free" }, { value: "team", label: "Team" }, {
+    value: "enterprise",
+    label: "Enterprise",
+  }],
+})
+```
+
+```html
+<div class="select" data-select>
+  <select class="select__native" id="plan-native" name="plan">
+    <option value="free">Free</option>
+    <option value="team" selected>Team</option>
+    <option value="enterprise">Enterprise</option>
+  </select>
+  <div class="combobox select__ui" data-combobox data-select-ui>
+    <div class="combobox__anchor">
+      <div class="combobox__field">
+        <input type="hidden" value="team" data-combobox-value>
+        <input class="combobox__input" id="plan" type="text" role="combobox" readonly autocomplete="off" value="Team" placeholder="" aria-expanded="false" aria-controls="plan-list" aria-autocomplete="none">
+        <span class="combobox__caret">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </div>
+      <div class="combobox__list" id="plan-list" role="listbox" hidden>
+        <div class="combobox__option" role="option" id="plan-opt-0" aria-selected="false" data-value="free">
+          <span class="combobox__option-label">Free</span>
+        </div>
+        <div class="combobox__option" role="option" id="plan-opt-1" aria-selected="true" data-value="team">
+          <span class="combobox__option-label">Team</span>
+          <span class="combobox__check">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
+        </div>
+        <div class="combobox__option" role="option" id="plan-opt-2" aria-selected="false" data-value="enterprise">
+          <span class="combobox__option-label">Enterprise</span>
+        </div>
+        <div class="combobox__hints">
+          <span>&uarr;&darr; navigate</span>
+          <span>&crarr; select</span>
+          <span class="combobox__count">3 matches</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/select/select.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
