@@ -68,11 +68,11 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Without `buildMonthHref`/`buildDayHref` the picker runs on the client; the hidden input carries the ISO value under `name`. `Input({ type: "date" })` renders this.
 
 ```ts
-DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18" })
+DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18", today: "2026-09-18" })
 ```
 
 ```html
-<div class="datepicker" id="due" data-datepicker data-datepicker-min="2026-09-18">
+<div class="datepicker" id="due" data-datepicker data-datepicker-min="2026-09-18" data-datepicker-today="2026-09-18">
   <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="due-panel" data-datepicker-trigger>
     <span class="datepicker__trigger-icon">
       <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
@@ -161,6 +161,7 @@ DatePicker({
   range: true,
   start: "2026-09-01",
   end: "2026-09-30",
+  today: "2026-09-18",
   align: "end",
   presets: [{ label: "Last 7 days", href: "/reports?preset=7d" }, {
     label: "This quarter",
@@ -170,7 +171,7 @@ DatePicker({
 ```
 
 ```html
-<div class="datepicker datepicker--end" id="period" data-datepicker data-datepicker-range="">
+<div class="datepicker datepicker--end" id="period" data-datepicker data-datepicker-range="" data-datepicker-today="2026-09-18">
   <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="period-panel" data-datepicker-trigger>
     <span class="datepicker__trigger-icon">
       <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>

@@ -449,7 +449,10 @@ component's markup changes. The generated reference pages gained a **Usage** sec
 `examples/docs/usage.ts` holds one to three real call sites per component and layout (`render: () => Html`),
 `scripts/build-docs.ts` cuts each snippet from that file's own text (`Function.toString()` would give Deno's re-emitted
 JavaScript) and prints the render through `examples/docs/pretty-html.ts`; the generator throws when a module has no
-entry, so a new component fails `deno task docs` (and the CI drift check) until it has a usage example.
+entry, so a new component fails `deno task docs` (and the CI drift check) until it has a usage example. Usage examples
+must render the same bytes every day: a `DatePicker` without `today` marks the real date as today, and the reference
+drifted the morning after it was generated (caught by the first automated rAPId bump PR, #16). Fix a date in every
+example that would otherwise read the clock.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
