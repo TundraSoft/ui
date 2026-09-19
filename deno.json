@@ -65,7 +65,7 @@
     "./wizard": "./components/wizard/wizard.ts"
   },
   "imports": {
-    "@tundralibs/rapid/ui": "jsr:@tundralibs/rapid@^0.6.0/ui",
+    "@tundralibs/rapid/ui": "jsr:@tundralibs/rapid@^0.7.0/ui",
     "@tundralibs/compat/file": "jsr:@tundralibs/compat@^2.7.2/file",
     "@tundralibs/compat/runtime": "jsr:@tundralibs/compat@^2.7.2/runtime",
     "@tundralibs/compat/webserver": "jsr:@tundralibs/compat@^2.7.2/webserver",
@@ -74,7 +74,7 @@
     "postcss-mixins": "npm:postcss-mixins@^11.0.0",
     "postcss-nesting": "npm:postcss-nesting@^13.0.0",
     "puppeteer-core": "npm:puppeteer-core@^25.11.0",
-    "@tundralibs/rapid": "jsr:@tundralibs/rapid@^0.6.0",
+    "@tundralibs/rapid": "jsr:@tundralibs/rapid@^0.7.0",
     "@tundralibs/compat/path": "jsr:@tundralibs/compat@^2.7.2/path",
     "esbuild": "npm:esbuild@0.25.12"
   },
