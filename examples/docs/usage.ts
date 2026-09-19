@@ -331,7 +331,7 @@ export const usage: Record<string, UsageExample[]> = {
       title: "A due date",
       note:
         'Without `buildMonthHref`/`buildDayHref` the picker runs on the client; the hidden input carries the ISO value under `name`. `Input({ type: "date" })` renders this.',
-      render: () => DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18" }),
+      render: () => DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18", today: "2026-09-18" }),
     },
     {
       title: "A reporting range with presets",
@@ -342,6 +342,7 @@ export const usage: Record<string, UsageExample[]> = {
           range: true,
           start: "2026-09-01",
           end: "2026-09-30",
+          today: "2026-09-18",
           align: "end",
           presets: [{ label: "Last 7 days", href: "/reports?preset=7d" }, {
             label: "This quarter",
