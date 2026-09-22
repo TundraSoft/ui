@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/TundraSoft/ui/compare/v0.6.0...v0.7.0) (2026-09-22)
+
+
+### Features
+
+* **deps:** require rAPId ^0.7.1 ([#20](https://github.com/TundraSoft/ui/issues/20)) ([6ee50fb](https://github.com/TundraSoft/ui/commit/6ee50fb0f0e66380631317df25fedc7332baaaf6))
+* **forms:** client-side validation, PasswordInput with strength bar and confirm matching ([#22](https://github.com/TundraSoft/ui/issues/22)) ([4b075a1](https://github.com/TundraSoft/ui/commit/4b075a1547b630c7062a70882497031c4a5d9a14))
+
 ## [0.6.0](https://github.com/TundraSoft/ui/compare/v0.5.0...v0.6.0) (2026-09-19)
 
 
