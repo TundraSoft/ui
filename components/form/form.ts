@@ -16,6 +16,12 @@ export type FormProps = {
    * browser validates natively; the server must validate regardless.
    */
   validate?: boolean;
+  /**
+   * Warn before leaving the page with unsaved edits (form.js): once any
+   * field changes, navigating away asks for confirmation until the form
+   * submits (or is swapped out by its own reply).
+   */
+  guard?: boolean;
   content: Html;
   attrs?: Attrs;
 };
@@ -27,6 +33,7 @@ export function Form(props: FormProps): Html {
     action: props.action,
     method: props.method ?? "post",
     "data-validate": props.validate ? "" : undefined,
+    "data-guard": props.guard ? "" : undefined,
   };
 
   return html`

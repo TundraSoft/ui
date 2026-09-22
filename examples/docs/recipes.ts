@@ -32,6 +32,13 @@ import { Dropzone, type DropzoneFile } from "../../components/dropzone/dropzone.
 import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { Toast } from "../../components/toast/toast.ts";
+import { Select } from "../../components/select/select.ts";
+import { Alert } from "../../components/alert/alert.ts";
+// Your flag set is whatever package gives you SVG strings:
+//   import flagSvg from "some-flag-set";
+//   const flag = (code: string) => raw(flagSvg[code]);
+// The demos draw a few by hand instead, through exactly that helper.
+import { flags, sampleCountries } from "../shared/flags.ts";
 import { Icon } from "../../shared/icons.ts";
 
 const out: Record<string, Html> = {};
@@ -365,6 +372,90 @@ out.toastButton = Button({
   },
 });
 out.toast = Toast({ variant: "success", body: "Reminder sent to Contoso Ltd", dismissible: true, autoDismissMs: 6000 });
+
+/* ------------------------------- 8. international contact form */
+type Contact = { email: string; phone: string; website: string; market: string };
+
+const contactForm = (received?: Contact) =>
+  Form({
+    id: "contact",
+    action: "/contact",
+    validate: true,
+    guard: true,
+    attrs: { "data-action": "/contact", "data-target": "#contact", "data-swap": "outer" },
+    content: html`${
+      received
+        ? Alert({
+          id: "contact-received",
+          variant: "success",
+          title: "Received",
+          body:
+            html`<code>${received.email}</code> · <code>${received.phone}</code> · <code>${received.website}</code> · ${received.market}`,
+        })
+        : ""
+    }${
+      FormGrid({
+        fields: [
+          FormField({
+            id: "c-email",
+            label: "Work email",
+            required: true,
+            help: "Company addresses only.",
+            span: 6,
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "email",
+                type: "email",
+                required: true,
+                domains: ["acme.com", "acme.io"],
+                messages: { required: "Enter the part before the @.", pattern: "Just the part before the @." },
+                attrs: { "aria-describedby": a.describedBy },
+              }),
+          }),
+          FormField({
+            id: "c-phone",
+            label: "Phone",
+            span: 6,
+            control: (a) => Input({ id: a.id, name: "phone", type: "tel", countries: sampleCountries }),
+          }),
+          FormField({
+            id: "c-website",
+            label: "Website",
+            span: 6,
+            control: (a) =>
+              Input({ id: a.id, name: "website", type: "url", scheme: "https://", placeholder: "acme.com" }),
+          }),
+          FormField({
+            id: "c-market",
+            label: "Primary market",
+            span: 6,
+            control: (a) =>
+              Select({
+                id: a.id,
+                name: "market",
+                value: "de",
+                options: [
+                  { value: "fr", label: "France", lead: flags.fr },
+                  { value: "de", label: "Germany", lead: flags.de },
+                  { value: "it", label: "Italy", lead: flags.it },
+                  { value: "se", label: "Sweden", lead: flags.se },
+                ],
+              }),
+          }),
+        ],
+      })
+    }${FormActions({ content: Button({ label: "Send", type: "submit" }) })}`,
+  });
+
+export const ContactPage = template<{ received?: Contact }>((d) => contactForm(d.received), "ContactPage");
+out.contact = contactForm();
+out.contactReceived = contactForm({
+  email: "grace@acme.io",
+  phone: "+49 30 901820",
+  website: "https://acme.com",
+  market: "de",
+});
 
 /** Every recipe's rendered HTML, by name. */
 export const rendered: Record<string, string> = Object.fromEntries(

@@ -16,6 +16,16 @@
  * control (Input({ messages })), else data-msg, else the browser's
  * localized text. A server-rendered error is left alone until the user
  * edits that field. Without JS: native validation, unchanged.
+ *
+ * Async checks: a control with data-validate-action is, on blur and once
+ * the native rules pass, POSTed (`name=value`, urlencoded, CSRF header
+ * from the same <body data-*> the runtime reads) to that route; a
+ * non-empty text reply is shown as the field's error and pinned with
+ * setCustomValidity until the value changes. `aria-busy` marks the
+ * pending state; a newer check aborts an older one.
+ *
+ * Guard: form[data-guard] (Form({ guard })) asks before the page is left
+ * once any field changed, until the form submits (validly) or resets.
  */
 (() => {
   const CONTROLS = "input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), textarea, select";
@@ -132,6 +142,82 @@
     if (control?.matches?.(CONTROLS) && formOf(control) && control.dataset.touched !== undefined) check(control);
   });
 
+  /* -------------------------------------------- async validation */
+  const inflight = new WeakMap();
+  const cookie = (name) => {
+    const m = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : undefined;
+  };
+  async function remoteCheck(control) {
+    const url = control.getAttribute("data-validate-action");
+    if (!url || !control.value || !control.validity.valid) return;
+    inflight.get(control)?.abort();
+    const controller = new AbortController();
+    inflight.set(control, controller);
+    control.setAttribute("aria-busy", "true");
+    const cfg = document.body?.dataset ?? {};
+    // The swap header makes rAPId answer with the fragment alone, not the page.
+    const headers = { "content-type": "application/x-www-form-urlencoded", [cfg.swapHeader || "rapid-swap"]: "1" };
+    const token = cookie(cfg.csrfCookie || "csrf");
+    if (token) headers[cfg.csrfHeader || "x-csrf-token"] = token;
+    const value = control.value;
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: new URLSearchParams({ [control.name || "value"]: value }).toString(),
+        signal: controller.signal,
+        credentials: "same-origin",
+      });
+      // The reply is an HTML fragment (a template's output): take its text.
+      const raw = res.ok ? await res.text() : "";
+      const text = new DOMParser().parseFromString(raw, "text/html").body.textContent.trim();
+      if (control.value !== value) return; // stale
+      control.setCustomValidity(text);
+      control.dataset.remoteValue = value;
+      render(control, text);
+    } catch {
+      // network / aborted: say nothing, the server decides on submit
+    } finally {
+      if (inflight.get(control) === controller) {
+        inflight.delete(control);
+        control.removeAttribute("aria-busy");
+      }
+    }
+  }
+  document.addEventListener("focusout", (event) => {
+    const control = event.target;
+    if (control?.matches?.("[data-validate-action]") && formOf(control)) remoteCheck(control);
+  });
+  document.addEventListener("input", (event) => {
+    const control = event.target;
+    if (
+      control?.matches?.("[data-validate-action]") && control.dataset.remoteValue !== undefined &&
+      control.value !== control.dataset.remoteValue
+    ) {
+      delete control.dataset.remoteValue;
+      control.setCustomValidity("");
+      if (control.dataset.touched !== undefined) check(control);
+    }
+  });
+
+  /* ------------------------------------------------------- guard */
+  const dirtyForms = () => document.querySelectorAll("form[data-guard][data-dirty]");
+  for (const type of ["input", "change"]) {
+    document.addEventListener(type, (event) => {
+      const form = event.target?.closest?.("form[data-guard]");
+      if (form) form.dataset.dirty = "";
+    });
+  }
+  document.addEventListener("reset", (event) => {
+    if (event.target?.matches?.("form[data-guard]")) delete event.target.dataset.dirty;
+  });
+  addEventListener("beforeunload", (event) => {
+    if (!dirtyForms().length) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+
   // Capture phase: runs before the rAPId runtime's (bubbling) submit
   // listener, so an invalid form never leaves the page.
   document.addEventListener("submit", (event) => {
@@ -142,11 +228,19 @@
       control.dataset.touched = "";
       if (!check(control) && !first) first = control;
     }
-    if (!first) return;
+    if (!first) {
+      delete form.dataset.dirty; // a valid submit leaves nothing unsaved
+      return;
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
     first.scrollIntoView({ block: "center" });
     first.focus();
+  }, true);
+  // A guarded form that submits natively (no data-validate) is not unsaved either.
+  document.addEventListener("submit", (event) => {
+    const form = event.target;
+    if (form?.matches?.("form[data-guard]:not([data-validate])")) delete form.dataset.dirty;
   }, true);
 
   function initAll() {

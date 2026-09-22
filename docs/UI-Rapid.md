@@ -201,6 +201,19 @@ Give the form `attrs: { "data-action": "/signup", "data-target": "#signup",
 "data-swap": "outer" }` and an `id`. A file
 input is never echoed back.
 
+Composite fields post parts: `Input({ type: "email", domains })` sends `email` and `email-domain`, tel with `countries`
+sends `phone-country` and `phone`, url with `scheme` sends `website-scheme` and `website`. Join them in the handler:
+
+```ts
+import { emailFrom, telFrom, urlFrom } from "@tundralibs/ui/shared/compose";
+const body = ((await ctx.payload) ?? {}) as Record<string, unknown>;
+const email = emailFrom(body, "email"); // "ada@acme.io", or undefined when the local part is empty
+```
+
+`Input({ validateAction: "/fragments/check-handle" })` is the async check: the validator POSTs `handle=<value>`
+(urlencoded, with the CSRF header the runtime uses) on blur once the native rules pass; answer with the message as plain
+text, or an empty body when fine — the example app's route is three lines.
+
 `Input({ type: "date" })` renders the `DatePicker` (its hidden input carries the name and ISO value); `Otp` submits one
 `autocomplete="one-time-code"` field; `Editor` submits Markdown or HTML through its textarea.
 

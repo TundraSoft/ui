@@ -12,6 +12,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [breadcrumb](reference/components-breadcrumb.md) — `Breadcrumb`
 - [button](reference/components-button.md) — `Button`, `ButtonGroup`
 - [card](reference/components-card.md) — `CardMedia`, `CardHeader`, `CardBody`, `CardFooter`, `Card`
+- [card-fields](reference/components-card-fields.md) — `CardFields`
 - [chart](reference/components-chart.md) — `ChartScript`, `chartOptions`, `Chart`
 - [choice](reference/components-choice.md) — `Choice`, `Checkbox`, `Radio`, `ChoiceGroup`
 - [collapsible](reference/components-collapsible.md) — `Collapsible`, `Accordion`
@@ -26,7 +27,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [form](reference/components-form.md) — `Form`
 - [form-field](reference/components-form-field.md) — `FormField`, `FormGrid`, `FormActions`
 - [grid](reference/components-grid.md) — `Grid`, `GridCol`
-- [input](reference/components-input.md) — `attr`, `messageAttrs`, `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
+- [input](reference/components-input.md) — `attr`, `messageAttrs`, `Counter`, `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
 - [menu](reference/components-menu.md) — `Menu`
 - [modal](reference/components-modal.md) — `Modal`
 - [navbar](reference/components-navbar.md) — `Navbar`
@@ -72,5 +73,6 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [assets](reference/package-assets.md) — `uiAssetUrl`, `uiAssetsDir`, `copyUiAssets`
 - [shared-attrs](reference/package-shared-attrs.md) — `renderAttrs`, `classAttrs`
 - [shared-classnames](reference/package-shared-classnames.md) — `cx`
+- [shared-compose](reference/package-shared-compose.md) — `emailFrom`, `telFrom`, `urlFrom`
 - [shared-icons](reference/package-shared-icons.md) — `IconSprite`, `spriteSvg`, `Icon`
 - [version](reference/package-version.md)

@@ -111,6 +111,45 @@ for (const name of pages) {
         });
       }
       await page.screenshot({ path: `${outDir}/${name}-collapsed.png`, fullPage: true });
+      // A parent item clicked in the collapsed rail opens its sublist as a
+      // flyout beside the rail — labels visible, positioned right of it.
+      const parent = await page.$(".sidebar--collapsed .menu__link[data-toggle]");
+      if (!parent) {
+        issues.push({ page: name, kind: "missing-element", detail: "no parent menu item in the collapsed rail" });
+      } else {
+        await parent.click();
+        await new Promise((r) => setTimeout(r, 250));
+        const flyout = await page.evaluate(() => {
+          const trigger = document.querySelector(".sidebar--collapsed .menu__link[data-toggle]")!;
+          const list = document.querySelector(trigger.getAttribute("data-toggle")!) as HTMLElement;
+          const rail = document.querySelector(".sidebar--collapsed")!.getBoundingClientRect();
+          const r = list.getBoundingClientRect();
+          const label = list.querySelector(".menu__link-label") as HTMLElement | null;
+          return {
+            flyout: list.classList.contains("menu__sublist--flyout"),
+            hidden: list.hidden,
+            besideRail: r.left >= rail.right && r.width > 100,
+            labelVisible: !!label && getComputedStyle(label).display !== "none",
+            title: list.querySelector(".menu__flyout-title")?.textContent?.trim(),
+            fixed: getComputedStyle(list).position,
+          };
+        });
+        if (!flyout.flyout || flyout.hidden || !flyout.besideRail || !flyout.labelVisible || flyout.fixed !== "fixed") {
+          issues.push({
+            page: name,
+            kind: "sidebar-flyout",
+            detail: `collapsed submenu did not fly out (${JSON.stringify(flyout)})`,
+          });
+        }
+        await page.screenshot({ path: `${outDir}/${name}-flyout.png` });
+        await page.keyboard.press("Escape");
+        await new Promise((r) => setTimeout(r, 250));
+        const closed = await page.$eval(
+          ".sidebar--collapsed .menu__link[data-toggle]",
+          (t) => (document.querySelector(t.getAttribute("data-toggle")!) as HTMLElement).hidden,
+        );
+        if (!closed) issues.push({ page: name, kind: "sidebar-flyout", detail: "Escape did not close the flyout" });
+      }
       await collapseBtn.click();
       await new Promise((r) => setTimeout(r, 200));
     }

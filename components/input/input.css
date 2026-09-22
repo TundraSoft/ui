@@ -159,8 +159,19 @@
   box-shadow: none;
 }
 
+/* The group is the frame, so its border replaces the control's: the
+   inner control keeps the control height minus that border, and the
+   group measures the same as a plain input. */
 .input-group > .input {
-  height: auto;
+  height: calc(var(--control-height-md) - 2 * var(--border-width));
+}
+
+.input-group > .input--sm {
+  height: calc(var(--control-height-sm) - 2 * var(--border-width));
+}
+
+.input-group > .input--lg {
+  height: calc(var(--control-height-lg) - 2 * var(--border-width));
 }
 
 .input-group .select {
@@ -235,7 +246,11 @@
 }
 
 html.js .password__field .password__input {
-  padding-inline-end: calc(var(--space-4) + 3.5em);
+  padding-inline-end: calc(var(--space-4) + 2em);
+}
+
+.password__reveal-icon {
+  display: inline-flex;
 }
 
 .password__reveal {
@@ -243,15 +258,16 @@ html.js .password__field .password__input {
   inset-block: 0;
   inset-inline-end: var(--space-2);
   margin-block: auto;
-  height: 26px;
-  padding-inline: var(--space-2);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-muted);
   font: inherit;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
   cursor: pointer;
 }
 
@@ -318,4 +334,100 @@ html.js .password__field .password__input {
   .password__bar i {
     transition: none;
   }
+}
+
+/* Caps Lock notice under a password field. */
+.password__caps {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
+}
+
+/* Live "n / max" counter under a control with `counter` + `maxLength`. */
+.input__counter {
+  display: block;
+  margin-block-start: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  text-align: end;
+}
+
+.input__counter--near {
+  color: var(--color-warning);
+}
+
+/* Search clear button inside the field — the browser's own cancel
+   button is dropped so there is one. */
+.input-clear {
+  position: relative;
+  display: block;
+}
+
+.input-clear > input[type="search"]::-webkit-search-cancel-button,
+.input-clear > input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html.js .input-clear > .input {
+  padding-inline-end: calc(var(--space-4) + 1.5em);
+}
+
+.input-clear__button {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: var(--space-2);
+  margin-block: auto;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--radius-full, 999px);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.input-clear__button:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.input-clear__button:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+/* Composite fields: the local part / number / rest takes the room; the
+   domain / country select sizes for its options (the group's default is
+   a 5ch read-only input, made for "+1"-style codes). */
+.input-group--email > .input,
+.input-group--tel > .input,
+.input-group--url > .input {
+  flex: 1 1 auto;
+  min-width: 6ch;
+}
+
+.input-group--email .select .combobox__input {
+  width: var(--input-group-domain-width, 12ch);
+}
+
+.input-group--tel .select .combobox__input {
+  width: var(--input-group-country-width, 8ch);
+}
+
+.input-group__at {
+  padding-inline: var(--space-2);
+}
+
+/* Autosizing textarea: native where supported, scrollHeight via input.js elsewhere. */
+.input.textarea--autosize {
+  field-sizing: content;
+  height: auto;
+  min-height: 0;
+  resize: none;
+  overflow: hidden;
 }

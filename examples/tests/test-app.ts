@@ -451,6 +451,63 @@ for (const name of layoutNames) {
       `forms page: upload did not come back as a done row (${JSON.stringify(uploaded)})`,
     );
   }
+
+  // Input.validateAction: the server says "taken" on blur, inline.
+  {
+    await click(page, "#cv-handle");
+    await page.keyboard.type("admin");
+    await page.$eval("#cv-handle", (el) => (el as HTMLInputElement).blur());
+    await page.waitForFunction(
+      () => !!document.querySelector("#cv-handle")?.closest(".form-field")?.querySelector(".form-field__error"),
+      { timeout: 4000 },
+    ).catch(() => fail("forms page: async handle check never answered"));
+    const taken = await page.$eval(
+      "#cv-handle",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    ok(taken === '"admin" is taken — try another.', `forms page: validateAction message (${taken})`);
+    await click(page, "#cv-handle");
+    await page.keyboard.type("x");
+    await pause();
+    const released = await page.$eval(
+      "#cv-handle",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    ok(released === null, `forms page: editing the value clears the server message (${released})`);
+  }
+
+  // The invite form: composite fields post parts, the server joins them.
+  {
+    const n0 = await swaps(page);
+    await click(page, "#inv-email");
+    await page.keyboard.type("grace");
+    await page.$eval('#cat-invite select[name="email-domain"]', (s) => {
+      (s as HTMLSelectElement).value = "acme.io";
+      s.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await page.$eval('#cat-invite select[name="phone-country"]', (s) => {
+      (s as HTMLSelectElement).value = "+44";
+      s.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await click(page, "#inv-phone");
+    await page.keyboard.type("20 7946 0958");
+    await click(page, "#inv-website");
+    await page.keyboard.type("acme.com/team");
+    await page.$eval("#cat-invite button[type=submit]", (b) => (b as HTMLButtonElement).click());
+    await waitForSwaps(page, n0 + 1, "forms page invite");
+    const joined = await page.$eval("#cat-invite-result", (el) => el.textContent?.replace(/\s+/g, " ").trim()).catch(
+      () => null,
+    );
+    ok(
+      joined?.includes("grace@acme.io") && joined?.includes("+44 20 7946 0958") &&
+        joined?.includes("https://acme.com/team"),
+      `forms page: the server joined the composite parts (${joined})`,
+    );
+    ok(
+      await page.$eval("#cat-invite", (f) => !f.hasAttribute("data-dirty")),
+      "forms page: a valid submit clears the unsaved-changes guard",
+    );
+  }
   await page.close();
 }
 

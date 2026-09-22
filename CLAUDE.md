@@ -480,6 +480,58 @@ whether it was still needed, and it was not — `components/password/` is gone, 
 `input.ts`, its CSS is in `input.css` (class names `.password*` kept) and its script is `input.js`;
 `PasswordStrength`/`PasswordLabels` (`passwordLabels` prop) are exported from `input`.
 
+**The forms batch (2026-09-22, same day, one PR).** Everything below is progressive (native attributes and plain fields
+first, script on top) and lives in `components/input/input.{ts,css,js}` unless said otherwise. `Input` is now a
+dispatcher over one `nativeInput()`; every `type` still renders natively, and some carry sugar: `type: "email"` +
+`domains` → local part + fixed `@` + a `Select` (or fixed text) named `<name>-domain`; `type: "tel"` + `countries` →
+country-code `Select` (`<name>-country`) + number; `type: "url"` + `scheme` → fixed scheme addon + hidden
+`<name>-scheme`. Each posts **two fields** — the deliberate choice over a script-composed hidden field, so no-JS and JS
+submit the same thing — and `shared/compose.ts` (`emailFrom`/`telFrom`/`urlFrom`, `@tundralibs/ui/shared/compose`) joins
+them in a handler, passing a whole value through untouched. `prefix`/`suffix` render an `InputGroup`; `counter` (+
+`maxLength`) renders `Counter()` after the control (`[data-counter-for]`, input.js keeps it current, warning from 90%);
+`type: "search"` gets a clear button by default (`[data-input-clear-button]`, fires `input` so `filter.js` follows;
+`clearable: false`); `validateAction` → `data-validate-action`, form.js POSTs `name=value` urlencoded with the CSRF
+header from `<body data-*>` on blur once native rules pass, shows a non-empty text reply and pins it with
+`setCustomValidity` until the value changes (aborts a stale request, `aria-busy` while pending). `Textarea` gained
+`counter`, `autosize` (`field-sizing: content`, scrollHeight fallback via CSSOM) and `validateAction`. `Form({ guard })`
+→ `data-guard`: form.js marks `data-dirty` on input/change, `beforeunload` asks while a dirty guarded form exists, a
+valid submit or reset clears it. Password: the toggle is now the `eye`/`eyeOff` icon with sr-only text
+(`[data-icon-show]` / `[data-icon-hide]`), and a Caps Lock notice (`[data-password-caps]`, `getModifierState` on
+keydown/keyup) shows while it is on. **`CardFields`** (`components/card-fields/`): four linked `FormField`s
+(`<name>-number/-expiry/-name/
+-cvc`, `autocomplete="cc-*"`, `inputmode="numeric"`), `fields` picks the parts (number
+always), `required` boolean or per part; card-fields.js groups the number (4-4-4-4, Amex 4-6-5), writes `data-brand` on
+the root and the brand label in the addon, sets the CVC to 3/4 digits, inserts the expiry slash and refuses an
+out-of-range month or a past date, and with `data-luhn` refuses a complete number that fails the checksum — custom
+validities, so form.js reports them; the number and CVC are never echoed (`values` takes name/expiry only). The docs
+state the PCI consequence plainly. Icons: 27 primitive-shape icons added (`eye`, `eyeOff`, `lock`, `creditCard`,
+`globe`, `phone`, `xCircle`, `checkCircle`, `chevronCircle`, `clock`, `trash`, `copy`, `download`, `externalLink`,
+`home`, `logout`, `refresh`, `star`, `minus`, `menu`, `image`, `file`, `send`, `help`, `shield`, `tag`, `lockOpen`) —
+arcs are fine, cubic curves are not; the `Collapsible` marker is now `chevronDown` in a circled `.collapsible__icon`
+instead of a text triangle. **Collapsed sidebar flyouts** (`shared/js/collapse-sidebar.js`): in the icon rail a parent's
+sublist opened by toggle.js is shown as a fixed panel beside the rail (`.menu__sublist--flyout`, titled with the
+parent's label, positioned via CSSOM after toggle.js ran — toggle.js registers later, so the handler defers one tick),
+closed on outside click, Escape, scroll, resize or expanding the sidebar; before this, clicking a parent in the rail
+showed nothing. Static demo: the catalogue's "Show toast" now uses `data-toast-open` with a `<template>` when routes are
+inert (the app keeps the server route) — it had been a dead `data-action="#"` button. Two things the user caught by
+looking: a grouped control (`.input-group > .input`) had `height: auto`, so every composite field measured 27px against
+a plain input's 36 — it is now `calc(var(--control-height-<size>) - 2 * var(--border-width))`, the group's own border
+making up the difference; and `type="search"` showed two clear buttons, ours and the browser's, so
+`::-webkit-search-cancel-button` is suppressed inside `.input-clear`. Also learned here: the `v` flag is strict inside a
+character class — `(`, `)` and `/` need escaping as well as `-` (two patterns shipped broken and only the app suite's
+console-error capture caught them), and form.js's async check must send the swap header (`rapid-swap`) or rAPId answers
+with the whole document, and must take `textContent` of the fragment rather than its markup. Flags, asked for next: the
+library **ships no flag artwork** and should not — multicolour detail against an icon set of single-colour primitives,
+hundreds of kilobytes against a ~150 KB bundle, emoji flags render as two letters on Windows (and emoji were removed
+from this project once already), and flags change and are disputed, which is a data product's job. What ships is the
+hook: `SelectOption.lead` (an `Html` slot the Combobox already had and `Select` was dropping) renders before the label
+in the list and, cloned by select.js on every change, beside the value in the closed field; `CountryCode.flag` maps to
+it. `examples/shared/flags.ts` draws five flags by hand from rects and a circle to demo the documented `raw()` recipe —
+examples are not published, so that stays out of the library. `docs/UI-Recipes.md` §8 "An international contact form" is
+the worked example for the whole composite-field family (email domains, tel countries + flags, url scheme, a `Select`
+with flag leads, the handler joining the parts with `*From`), code in `examples/docs/recipes.ts` like every other
+recipe.
+
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
 carried `name="selected"` with nothing to submit through), the shared invoices kebab and the billing "PDF" were dead

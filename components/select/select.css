@@ -72,3 +72,16 @@ html:not(.js) .select__ui {
 .select__ui .combobox__hints {
   display: none;
 }
+
+/* The picked option's `lead` beside the value in the closed field
+   (select.js clones it from the list on every change). */
+.select__lead {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin-inline-end: var(--space-2);
+}
+
+.select__lead:empty {
+  display: none;
+}

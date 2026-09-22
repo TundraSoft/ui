@@ -60,4 +60,5 @@
 @import "../components/stat/stat.css" layer(components);
 @import "../components/toolbar/toolbar.css" layer(components);
 @import "../components/otp/otp.css" layer(components);
+@import "../components/card-fields/card-fields.css" layer(components);
 @import "../components/editor/editor.css" layer(components);

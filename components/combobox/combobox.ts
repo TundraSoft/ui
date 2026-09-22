@@ -78,10 +78,12 @@ export function ComboboxList(props: ComboboxListProps): Html {
           aria-disabled="true"
         `
         : ""}
-        data-value="${opt.value}">${opt.lead ?? ""}<span class="combobox__option-label">${withMatch(
-          opt.label,
-          props.query,
-        )}</span>${opt.meta ? html`<span class="combobox__option-meta">${opt.meta}</span>` : ""}${isSelected
+        data-value="${opt.value}">${opt.lead
+          ? html`<span class="combobox__option-lead">${opt.lead}</span>`
+          : ""}<span class="combobox__option-label">${withMatch(
+            opt.label,
+            props.query,
+          )}</span>${opt.meta ? html`<span class="combobox__option-meta">${opt.meta}</span>` : ""}${isSelected
           ? html`<span class="combobox__check">${Icon("check", { size: 15 })}</span>`
           : ""}</div>
     `);

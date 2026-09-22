@@ -462,7 +462,8 @@ for (const group of catalogueGroups) {
       pressed: document.querySelector('[data-password-reveal][aria-controls="cv-password"]')?.getAttribute(
         "aria-pressed",
       ),
-      label: document.querySelector('[data-password-reveal][aria-controls="cv-password"]')?.textContent,
+      label: document.querySelector('[data-password-reveal][aria-controls="cv-password"] [data-password-reveal-label]')
+        ?.textContent,
     }));
     check(
       reveal.type === "text" && reveal.pressed === "true" && reveal.label === "Hide",
@@ -501,6 +502,150 @@ for (const group of catalogueGroups) {
     check(
       await page.$eval("#cat-pw-3", (el) => el.closest("[data-password]")!.getAttribute("data-strength-level")) !== "0",
       "forms: a prefilled password is scored on load",
+    );
+
+    // Composite fields post two parts each; the sugar is markup + attributes.
+    const composites = await page.evaluate(() => {
+      const q = (sel: string) => document.querySelector(sel);
+      return {
+        emailLocal: (q("#cat-em-1") as HTMLInputElement)?.value,
+        emailDomain: (q('[name="email-domain"]') as HTMLSelectElement)?.value,
+        emailFixed: !!q("#cat-em-2")?.closest(".input-group")?.querySelector(
+          'input[type=hidden][name="email-domain"][value="acme.com"]',
+        ),
+        telCountry: (q('[name="phone-country"]') as HTMLSelectElement)?.value,
+        telNumber: (q("#cat-tel-1") as HTMLInputElement)?.value,
+        urlScheme: (q('[name="website-scheme"]') as HTMLInputElement)?.value,
+        urlRest: (q("#cat-url-1") as HTMLInputElement)?.value,
+        prefix: q("#cat-px-1")?.closest(".input-group")?.querySelector(".input-group__addon")?.textContent?.trim(),
+        decimal: q("#cat-px-1")?.getAttribute("inputmode"),
+      };
+    });
+    check(
+      composites.emailLocal === "ada" && composites.emailDomain === "acme.io" && composites.emailFixed,
+      `forms: email domains split the value and fix a single domain (${JSON.stringify(composites)})`,
+    );
+    check(
+      composites.telCountry === "+44" && composites.telNumber === "20 7946 0958",
+      `forms: tel countries split the value (${JSON.stringify(composites)})`,
+    );
+    check(
+      composites.urlScheme === "https://" && composites.urlRest === "acme.com/team",
+      `forms: url scheme split the value (${JSON.stringify(composites)})`,
+    );
+    const flagged = await page.evaluate(() => {
+      const root = document.querySelector("#cat-tel-2")!.closest("[data-tel-countries]")!;
+      const field = root.querySelector("[data-select-lead] svg");
+      const option = root.querySelector('[role="option"] .combobox__option-lead svg');
+      return { field: !!field, option: !!option, rects: field?.querySelectorAll("rect").length ?? 0 };
+    });
+    check(
+      flagged.field && flagged.option && flagged.rects > 1,
+      `forms: a country flag shows in the list and the closed field (${JSON.stringify(flagged)})`,
+    );
+    check(
+      composites.prefix === "$" && composites.decimal === "decimal",
+      `forms: prefix addon + decimal keyboard (${JSON.stringify(composites)})`,
+    );
+
+    // Counter, clear, autosize, caps lock, guard.
+    const counter = () => page.$eval('[data-counter-for="cat-cnt-1"]', (el) => el.textContent);
+    check((await counter()) === "21 / 40", `forms: counter initialised from the value (${await counter()})`);
+    await page.type("#cat-cnt-1", " for Northwind Ltd");
+    await pause();
+    const near = await page.$eval(
+      '[data-counter-for="cat-cnt-1"]',
+      (el) => `${el.textContent}|${el.classList.contains("input__counter--near")}`,
+    );
+    check(near === "39 / 40|true", `forms: counter follows typing and warns near the limit (${near})`);
+    const clearBefore = await page.$eval(
+      '[data-input-clear-button][aria-controls="cat-srch-1"]',
+      (b) => (b as HTMLElement).hidden,
+    );
+    await page.click('[data-input-clear-button][aria-controls="cat-srch-1"]');
+    await pause();
+    const cleared = await page.evaluate(() => ({
+      value: (document.querySelector("#cat-srch-1") as HTMLInputElement).value,
+      hidden: (document.querySelector('[data-input-clear-button][aria-controls="cat-srch-1"]') as HTMLElement).hidden,
+      focused: document.activeElement?.id,
+      none: !document.querySelector("#cat-srch-2")?.closest("[data-input-clear]"),
+    }));
+    check(
+      !clearBefore && cleared.value === "" && cleared.hidden && cleared.focused === "cat-srch-1" && cleared.none,
+      `forms: search clear button (${JSON.stringify(cleared)})`,
+    );
+    const h0 = await page.$eval("#cat-ta-auto", (el) => el.getBoundingClientRect().height);
+    await page.type("#cat-ta-auto", "one\ntwo\nthree\nfour\nfive\nsix");
+    await pause();
+    const h1 = await page.$eval("#cat-ta-auto", (el) => el.getBoundingClientRect().height);
+    check(h1 > h0 + 30, `forms: autosize textarea grows (${h0} → ${h1})`);
+    await page.focus("#cv-password");
+    const caps = await page.evaluate(() => {
+      const input = document.querySelector("#cv-password")!;
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "a", modifierCapsLock: true, bubbles: true }));
+      const on = !(input.closest("[data-password]")!.querySelector("[data-password-caps]") as HTMLElement).hidden;
+      input.dispatchEvent(new KeyboardEvent("keyup", { key: "a", modifierCapsLock: false, bubbles: true }));
+      const off = (input.closest("[data-password]")!.querySelector("[data-password-caps]") as HTMLElement).hidden;
+      return { on, off };
+    });
+    check(caps.on && caps.off, `forms: Caps Lock notice follows the modifier (${JSON.stringify(caps)})`);
+    await page.type("#inv-email", "grace");
+    await pause();
+    const dirty = await page.$eval("#cat-invite", (f) => f.hasAttribute("data-dirty") && f.hasAttribute("data-guard"));
+    check(dirty, "forms: a guarded form marks itself dirty on input");
+
+    // Card fields: grouping, brand → CVC length, expiry, luhn.
+    await page.type("#card-number", "378282246310005");
+    await pause();
+    const amex = await page.evaluate(() => ({
+      value: (document.querySelector("#card-number") as HTMLInputElement).value,
+      brand: document.querySelector("#card-number")!.closest("[data-card-fields]")!.getAttribute("data-brand"),
+      label: document.querySelector("#card-number")!.closest("[data-card-fields]")!.querySelector("[data-card-brand]")
+        ?.textContent,
+      cvcMax: document.querySelector("#card-cvc")?.getAttribute("maxlength"),
+      luhnOk: (document.querySelector("#card-number") as HTMLInputElement).validity.valid,
+    }));
+    check(
+      amex.value === "3782 822463 10005" && amex.brand === "amex" && amex.label === "Amex" && amex.cvcMax === "4" &&
+        amex.luhnOk,
+      `forms: Amex grouping, brand and CVC length (${JSON.stringify(amex)})`,
+    );
+    await page.$eval("#card-number", (el) => {
+      (el as HTMLInputElement).value = "";
+    });
+    await page.type("#card-number", "4242424242424241");
+    await page.$eval("#card-number", (el) => (el as HTMLInputElement).blur());
+    await pause();
+    const luhn = await page.evaluate(() => ({
+      value: (document.querySelector("#card-number") as HTMLInputElement).value,
+      brand: document.querySelector("#card-number")!.closest("[data-card-fields]")!.getAttribute("data-brand"),
+      cvcMax: document.querySelector("#card-cvc")?.getAttribute("maxlength"),
+      error: document.querySelector("#card-number")!.closest(".form-field")!.querySelector(".form-field__error")
+        ?.textContent ?? null,
+    }));
+    check(
+      luhn.value === "4242 4242 4242 4241" && luhn.brand === "visa" && luhn.cvcMax === "3" &&
+        luhn.error === "Check the card number.",
+      `forms: Visa grouping and the Luhn message (${JSON.stringify(luhn)})`,
+    );
+    await page.type("#card-expiry", "1223");
+    await page.$eval("#card-expiry", (el) => (el as HTMLInputElement).blur());
+    await pause();
+    const expiry = await page.evaluate(() => ({
+      value: (document.querySelector("#card-expiry") as HTMLInputElement).value,
+      error: document.querySelector("#card-expiry")!.closest(".form-field")!.querySelector(".form-field__error")
+        ?.textContent ?? null,
+    }));
+    check(
+      expiry.value === "12/23" && expiry.error === "This card has expired.",
+      `forms: expiry slash + past date (${JSON.stringify(expiry)})`,
+    );
+    check(
+      (await page.$$eval(
+        "#stored-number, #stored-expiry, #stored-name, #stored-cvc",
+        (els) => els.map((e) => e.id).join(),
+      )) === "stored-number,stored-expiry",
+      "forms: CardFields renders only the parts asked for",
     );
 
     // one-time code
@@ -582,6 +727,27 @@ for (const group of catalogueGroups) {
     }
     await page.click('[data-theme-file=""]');
     await pause(300);
+  }
+
+  if (group.id === "feedback") {
+    // The static page has no runtime: "Show toast" clones a <template> into #toast-region.
+    await page.evaluate(() =>
+      document.querySelector('[data-toast-open="#cat-toast-template"]')?.scrollIntoView({ block: "center" })
+    );
+    await page.click('[data-toast-open="#cat-toast-template"]');
+    await pause();
+    const toast = await page.evaluate(() => {
+      const t = document.querySelector("#toast-region .toast") as HTMLElement | null;
+      return {
+        present: !!t,
+        text: t?.querySelector(".toast__body")?.textContent,
+        visible: !!t && t.getBoundingClientRect().height > 0,
+      };
+    });
+    check(
+      toast.present && toast.visible && toast.text?.startsWith("Saved."),
+      `feedback: Show toast shows a toast (${JSON.stringify(toast)})`,
+    );
   }
 
   if (group.id === "data") {

@@ -212,7 +212,7 @@ The same tooling runs on Node (`npm run …`) and Bun (`bun run bun:…`).
 ## Next
 
 - [Recipes](./UI-Recipes.md) — real pages, each as a rAPId route and as plain HTML: shell, sign-in, dashboard, invoices,
-  uploads, search, notifications.
+  uploads, search, notifications, an international contact form.
 - [Components](./UI-Components.md) — a tour by group, with usage.
 - [Layouts](./UI-Layouts.md) — the page frames and how they respond.
 - [rAPId integration](./UI-Rapid.md) — the shell, swaps, forms, history.

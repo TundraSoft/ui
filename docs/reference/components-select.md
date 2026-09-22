@@ -30,6 +30,7 @@ page shows, and select.js keeps the two in step both ways. Give it an
 | `value` | `string` | yes |  |
 | `label` | `string` | yes |  |
 | `disabled` | `boolean` |  |  |
+| `lead` | `Html` |  | Rendered before the label in the list, and beside the value in the closed field — a flag, an avatar, a colour swatch, a brand mark. The library ships no flag artwork; pass your own (see `CountryCode.flag`). |
 
 ### `SelectProps`
 
@@ -49,6 +50,68 @@ page shows, and select.js keeps the two in step both ways. Give it an
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Options with a lead
+
+`lead` is any `Html` before the label in the list, and beside the value in the closed field — a flag, an avatar, a colour swatch.
+
+```ts
+Select({
+  id: "market",
+  name: "market",
+  value: "de",
+  options: [{ value: "fr", label: "France", lead: flags.fr }, {
+    value: "de",
+    label: "Germany",
+    lead: flags.de,
+  }],
+})
+```
+
+```html
+<div class="select" data-select>
+  <select class="select__native" id="market-native" name="market">
+    <option value="fr">France</option>
+    <option value="de" selected>Germany</option>
+  </select>
+  <div class="combobox select__ui" data-combobox data-select-ui>
+    <div class="combobox__anchor">
+      <div class="combobox__field">
+        <span class="select__lead" data-select-lead aria-hidden="true">
+          <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
+        </span>
+        <input type="hidden" value="de" data-combobox-value>
+        <input class="combobox__input" id="market" type="text" role="combobox" readonly autocomplete="off" value="Germany" placeholder="" aria-expanded="false" aria-controls="market-list" aria-autocomplete="none">
+        <span class="combobox__caret">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </div>
+      <div class="combobox__list" id="market-list" role="listbox" hidden>
+        <div class="combobox__option" role="option" id="market-opt-0" aria-selected="false" data-value="fr">
+          <span class="combobox__option-lead">
+            <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+          </span>
+          <span class="combobox__option-label">France</span>
+        </div>
+        <div class="combobox__option" role="option" id="market-opt-1" aria-selected="true" data-value="de">
+          <span class="combobox__option-lead">
+            <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
+          </span>
+          <span class="combobox__option-label">Germany</span>
+          <span class="combobox__check">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
+        </div>
+        <div class="combobox__hints">
+          <span>&uarr;&darr; navigate</span>
+          <span>&crarr; select</span>
+          <span class="combobox__count">2 matches</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 ### A plan picker
 
@@ -110,12 +173,12 @@ Select({
 
 Classes defined by `components/select/select.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox__field`, `.combobox__hints`, `.combobox__input`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__native`, `.select__ui`
+`.combobox__field`, `.combobox__hints`, `.combobox__input`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__lead`, `.select__native`, `.select__ui`
 
 ## Behaviour
 
 `components/select/select.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-combobox-value`, `data-select`, `data-select-ui`, `data-value`.
+Attributes it reads or writes: `data-combobox-value`, `data-select`, `data-select-lead`, `data-select-ui`, `data-value`.
 
 Events: `combobox:pick`.

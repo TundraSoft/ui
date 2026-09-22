@@ -55,7 +55,9 @@ Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 3
   <h3 class="collapsible__heading">
     <button type="button" class="collapsible__trigger" data-toggle="#terms-panel" aria-expanded="false" aria-controls="terms-panel">
       Terms and conditions
-      <span class="collapsible__icon">&#9660;</span>
+      <span class="collapsible__icon" aria-hidden="true">
+        <svg width="14" height="14" width="2" …>…</svg>
+      </span>
     </button>
   </h3>
   <div class="collapsible__panel" id="terms-panel" data-toggle-panel hidden>
@@ -82,7 +84,9 @@ Accordion({
     <h3 class="collapsible__heading">
       <button type="button" class="collapsible__trigger" data-toggle="#faq-0-panel" aria-expanded="true" aria-controls="faq-0-panel">
         How do refunds work?
-        <span class="collapsible__icon">&#9660;</span>
+        <span class="collapsible__icon" aria-hidden="true">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </span>
       </button>
     </h3>
     <div class="collapsible__panel" id="faq-0-panel" data-toggle-panel>
@@ -93,7 +97,9 @@ Accordion({
     <h3 class="collapsible__heading">
       <button type="button" class="collapsible__trigger" data-toggle="#faq-1-panel" aria-expanded="false" aria-controls="faq-1-panel">
         Can I change plans?
-        <span class="collapsible__icon">&#9660;</span>
+        <span class="collapsible__icon" aria-hidden="true">
+          <svg width="14" height="14" width="2" …>…</svg>
+        </span>
       </button>
     </h3>
     <div class="collapsible__panel" id="faq-1-panel" data-toggle-panel hidden>
