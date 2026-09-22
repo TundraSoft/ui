@@ -343,6 +343,157 @@ for (const group of catalogueGroups) {
       `forms: rapid:error marks the row (${JSON.stringify(failed)})`,
     );
 
+    // Client-side validation (Form({ validate: true }) + form.js): the
+    // browser bubble is replaced by inline messages, an invalid submit is
+    // stopped before it can leave the page, the first invalid field gets
+    // focus, and fixing a field clears its message live.
+    await page.evaluate(() => document.querySelector("#cat-validate")?.scrollIntoView({ block: "center" }));
+    await pause();
+    check(
+      await page.$eval("#cat-validate", (f) => f.hasAttribute("novalidate")),
+      "forms: validate form sets novalidate",
+    );
+    await page.evaluate(() => {
+      (globalThis as unknown as { __submits: number }).__submits = 0;
+      document.addEventListener("submit", () => {
+        (globalThis as unknown as { __submits: number }).__submits++;
+      });
+      (document.querySelector("#cat-validate button[type=submit]") as HTMLButtonElement).click();
+    });
+    await pause();
+    const invalid = await page.evaluate(() => ({
+      submits: (globalThis as unknown as { __submits: number }).__submits,
+      url: location.search,
+      errors: [...document.querySelectorAll("#cat-validate .form-field__error")].map((e) => e.textContent),
+      focused: document.activeElement?.id,
+      emailInvalid: document.querySelector("#cv-email")?.getAttribute("aria-invalid"),
+      describedBy: document.querySelector("#cv-email")?.getAttribute("aria-describedby"),
+    }));
+    check(
+      invalid.submits === 0 && invalid.url === "",
+      `forms: invalid submit was stopped (${JSON.stringify(invalid)})`,
+    );
+    check(
+      invalid.errors.includes("An email address is required.") && invalid.errors.includes("At least one seat."),
+      `forms: custom messages rendered inline (${invalid.errors})`,
+    );
+    check(invalid.focused === "cv-email", `forms: first invalid field focused (${invalid.focused})`);
+    check(
+      invalid.emailInvalid === "true" && invalid.describedBy === "cv-email-error",
+      `forms: invalid field wired for a11y (${invalid.emailInvalid}, ${invalid.describedBy})`,
+    );
+    await page.type("#cv-email", "ada@acme.com");
+    await pause();
+    const emailFixed = await page.evaluate(() => ({
+      error: document.querySelector("#cv-email ~ .form-field__error")?.textContent ?? null,
+      invalid: document.querySelector("#cv-email")?.getAttribute("aria-invalid"),
+    }));
+    check(
+      emailFixed.error === null && emailFixed.invalid === null,
+      `forms: fixing a field clears its message live (${JSON.stringify(emailFixed)})`,
+    );
+    await page.type("#cv-handle", "Ab");
+    await page.$eval("#cv-handle", (el) => (el as HTMLInputElement).blur());
+    await pause();
+    const handle = await page.$eval(
+      "#cv-handle",
+      (el) => el.parentElement!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    check(
+      handle === "At least 3 characters." || handle === "Lowercase letters, digits and dashes only.",
+      `forms: pattern/minLength message on blur (${handle})`,
+    );
+
+    // Password: strength bar levels, strength floor, Show/Hide, confirm match.
+    const level = () =>
+      page.$eval("#cv-password", (el) => el.closest("[data-password]")!.getAttribute("data-strength-level"));
+    check((await level()) === "0", "forms: strength bar hidden while empty");
+    await page.type("#cv-password", "password");
+    await pause();
+    const weak = await page.evaluate(() => ({
+      level: document.querySelector("#cv-password")!.closest("[data-password]")!.getAttribute("data-strength-level"),
+      label: document.querySelector("#cv-password")!.closest("[data-password]")!.querySelector("[data-password-label]")
+        ?.textContent,
+      barHidden: (document.querySelector("#cv-password")!.closest("[data-password]")!.querySelector(
+        "[data-password-strength]",
+      ) as HTMLElement).hidden,
+    }));
+    check(
+      weak.level === "1" && weak.label === "Too weak" && !weak.barHidden,
+      `forms: a common password scores Too weak (${JSON.stringify(weak)})`,
+    );
+    await page.$eval("#cv-password", (el) => (el as HTMLInputElement).blur());
+    await pause();
+    const weakMsg = await page.$eval(
+      "#cv-password",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    check(
+      weakMsg === "Use at least 12 characters." || weakMsg === "Choose a stronger password.",
+      `forms: a weak password is reported inline (${weakMsg})`,
+    );
+    await page.$eval("#cv-password", (el) => {
+      (el as HTMLInputElement).value = "";
+    });
+    await page.type("#cv-password", "Correct-Horse-Battery-9");
+    await pause();
+    const strong = await page.evaluate(() => ({
+      level: document.querySelector("#cv-password")!.closest("[data-password]")!.getAttribute("data-strength-level"),
+      error: document.querySelector("#cv-password")!.closest(".form-field")!.querySelector(".form-field__error")
+        ?.textContent ?? null,
+    }));
+    check(
+      strong.level === "4" && strong.error === null,
+      `forms: a strong password clears the floor (${JSON.stringify(strong)})`,
+    );
+    await page.click('[data-password-reveal][aria-controls="cv-password"]');
+    await pause();
+    const reveal = await page.evaluate(() => ({
+      type: (document.querySelector("#cv-password") as HTMLInputElement).type,
+      pressed: document.querySelector('[data-password-reveal][aria-controls="cv-password"]')?.getAttribute(
+        "aria-pressed",
+      ),
+      label: document.querySelector('[data-password-reveal][aria-controls="cv-password"]')?.textContent,
+    }));
+    check(
+      reveal.type === "text" && reveal.pressed === "true" && reveal.label === "Hide",
+      `forms: Show/Hide toggle (${JSON.stringify(reveal)})`,
+    );
+    await page.click('[data-password-reveal][aria-controls="cv-password"]');
+    await page.type("#cv-confirm", "Correct-Horse-Battery-8");
+    await page.$eval("#cv-confirm", (el) => (el as HTMLInputElement).blur());
+    await pause();
+    const mismatch = await page.$eval(
+      "#cv-confirm",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    check(mismatch === "The passwords do not match.", `forms: confirm mismatch reported (${mismatch})`);
+    await page.$eval("#cv-confirm", (el) => {
+      (el as HTMLInputElement).value = "Correct-Horse-Battery-";
+    });
+    await page.type("#cv-confirm", "9");
+    await pause();
+    const matched = await page.$eval(
+      "#cv-confirm",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    check(matched === null, `forms: confirm clears when it matches (${matched})`);
+    // Editing the source password re-checks a touched confirm field.
+    await page.type("#cv-password", "x");
+    await pause();
+    const drifted = await page.$eval(
+      "#cv-confirm",
+      (el) => el.closest(".form-field")!.querySelector(".form-field__error")?.textContent ?? null,
+    );
+    check(
+      drifted === "The passwords do not match.",
+      `forms: changing the password re-checks the confirm field (${drifted})`,
+    );
+    check(
+      await page.$eval("#cat-pw-3", (el) => el.closest("[data-password]")!.getAttribute("data-strength-level")) !== "0",
+      "forms: a prefilled password is scored on load",
+    );
+
     // one-time code
     const carrierHidden = await page.$eval(
       "#otp-sms-value",

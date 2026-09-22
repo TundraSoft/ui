@@ -35,6 +35,7 @@ import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
+import { PasswordInput } from "../../components/password/password.ts";
 import { Popover, PopoverTrigger } from "../../components/popover/popover.ts";
 import { Progress, Spinner } from "../../components/progress/progress.ts";
 import { Segmented } from "../../components/segmented/segmented.ts";
@@ -122,6 +123,7 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   combobox: "forms",
   datepicker: "forms",
   otp: "forms",
+  password: "forms",
   dropzone: "forms",
   "form-field": "forms",
   form: "forms",
@@ -884,6 +886,105 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             content: FormField({ label: "Email", control: Input({ type: "email", invalid: true }) }),
           }),
         ),
+        c(
+          "validate: true — inline client-side validation (required, email, pattern, min/max, password strength + confirm)",
+          Form({
+            id: "cat-validate",
+            action: "?validate",
+            validate: true,
+            content: html`${
+              FormGrid({
+                fields: [
+                  FormField({
+                    id: "cv-email",
+                    label: "Email",
+                    required: true,
+                    span: 6,
+                    control: (a) =>
+                      Input({
+                        id: a.id,
+                        name: "email",
+                        type: "email",
+                        required: true,
+                        messages: {
+                          required: "An email address is required.",
+                          type: "That does not look like an email address.",
+                        },
+                      }),
+                  }),
+                  FormField({
+                    id: "cv-handle",
+                    label: "Handle",
+                    help: "3–20 lowercase letters, digits or dashes.",
+                    span: 6,
+                    control: (a) =>
+                      Input({
+                        id: a.id,
+                        name: "handle",
+                        minLength: 3,
+                        maxLength: 20,
+                        pattern: "[a-z0-9\\-]+",
+                        messages: {
+                          pattern: "Lowercase letters, digits and dashes only.",
+                          minLength: "At least 3 characters.",
+                        },
+                        attrs: { "aria-describedby": a.describedBy },
+                      }),
+                  }),
+                  FormField({
+                    id: "cv-seats",
+                    label: "Seats",
+                    span: 6,
+                    control: (a) =>
+                      Input({
+                        id: a.id,
+                        name: "seats",
+                        type: "number",
+                        min: 1,
+                        max: 500,
+                        value: "0",
+                        messages: { min: "At least one seat." },
+                      }),
+                  }),
+                  FormField({
+                    id: "cv-password",
+                    label: "Password",
+                    required: true,
+                    help: "At least 12 characters.",
+                    span: 6,
+                    control: (a) =>
+                      PasswordInput({
+                        id: a.id,
+                        name: "password",
+                        required: true,
+                        minLength: 12,
+                        autocomplete: "new-password",
+                        strength: true,
+                        strengthMin: 3,
+                        messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
+                        attrs: { "aria-describedby": a.describedBy },
+                      }),
+                  }),
+                  FormField({
+                    id: "cv-confirm",
+                    label: "Confirm password",
+                    required: true,
+                    span: 6,
+                    control: (a) =>
+                      PasswordInput({
+                        id: a.id,
+                        name: "confirm",
+                        required: true,
+                        autocomplete: "new-password",
+                        match: "#cv-password",
+                        messages: { match: "The passwords do not match." },
+                      }),
+                  }),
+                ],
+              })
+            }${FormActions({ content: Button({ label: "Create account", type: "submit" }) })}`,
+          }),
+        ),
       ],
     },
     {
@@ -990,6 +1091,47 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
+      ],
+    },
+    {
+      name: "password",
+      cases: [
+        c("current password — Show/Hide toggle", PasswordInput({ id: "cat-pw-1", name: "password", required: true })),
+        c(
+          "new password — strength bar (type to see it), strengthMin 3",
+          PasswordInput({
+            id: "cat-pw-2",
+            name: "password",
+            minLength: 12,
+            autocomplete: "new-password",
+            strength: true,
+            strengthMin: 3,
+          }),
+        ),
+        c(
+          "prefilled — bar scored on load",
+          PasswordInput({ id: "cat-pw-3", name: "password", value: "correct horse battery", strength: true }),
+        ),
+        c("confirm — match: '#cat-pw-2'", PasswordInput({ id: "cat-pw-4", name: "confirm", match: "#cat-pw-2" })),
+        c(
+          "no reveal toggle, disabled",
+          PasswordInput({ id: "cat-pw-5", name: "password", reveal: false, disabled: true }),
+        ),
+        c(
+          "in a FormField with a server error",
+          FormField({
+            id: "cat-pw-6",
+            label: "Current password",
+            error: "Wrong password.",
+            control: (a) =>
+              PasswordInput({
+                id: a.id,
+                name: "password",
+                invalid: a.invalid,
+                attrs: { "aria-describedby": a.describedBy },
+              }),
+          }),
+        ),
       ],
     },
     {

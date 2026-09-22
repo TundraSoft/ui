@@ -37,6 +37,7 @@ import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
+import { PasswordInput } from "../../components/password/password.ts";
 import { Popover, PopoverTrigger } from "../../components/popover/popover.ts";
 import { Progress, Spinner } from "../../components/progress/progress.ts";
 import { Segmented } from "../../components/segmented/segmented.ts";
@@ -421,6 +422,55 @@ export const usage: Record<string, UsageExample[]> = {
   ],
   "components/form": [
     {
+      title: "Client-side validation, inline",
+      note:
+        "`validate: true` shows each field's constraint failure in its error slot on blur and on submit (the browser bubble is replaced), blocks the submit and focuses the first invalid field. The constraints are the native attributes, so a page without JS still validates, and the server validates regardless.",
+      render: () =>
+        Form({
+          id: "invite",
+          action: "/team/invite",
+          validate: true,
+          attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
+          content: html`${
+            FormGrid({
+              fields: [
+                FormField({
+                  id: "invite-email",
+                  label: "Email",
+                  required: true,
+                  control: (a) =>
+                    Input({
+                      id: a.id,
+                      name: "email",
+                      type: "email",
+                      required: true,
+                      messages: {
+                        required: "An email address is required.",
+                        type: "That does not look like an email address.",
+                      },
+                    }),
+                }),
+                FormField({
+                  id: "invite-handle",
+                  label: "Handle",
+                  help: "3–20 letters, digits or dashes.",
+                  control: (a) =>
+                    Input({
+                      id: a.id,
+                      name: "handle",
+                      minLength: 3,
+                      maxLength: 20,
+                      pattern: "[a-z0-9\\-]+",
+                      messages: { pattern: "Lowercase letters, digits and dashes only." },
+                      attrs: { "aria-describedby": a.describedBy },
+                    }),
+                }),
+              ],
+            })
+          }${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}`,
+        }),
+    },
+    {
       title: "A form that swaps itself on submit",
       note:
         "The `id` is the swap target; `error` (rAPId's `RapidFormError`) renders the banner. Field errors go on each `FormField`.",
@@ -442,6 +492,53 @@ export const usage: Record<string, UsageExample[]> = {
             })
           }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
         }),
+    },
+  ],
+  "components/password": [
+    {
+      title: "Sign-in: current password with Show/Hide",
+      render: () =>
+        PasswordInput({ id: "current", name: "password", required: true, autocomplete: "current-password" }),
+    },
+    {
+      title: "Sign-up: a new password with the strength bar, and its confirm field",
+      note:
+        "`strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.",
+      render: () =>
+        html`${
+          FormField({
+            id: "new-password",
+            label: "Password",
+            required: true,
+            help: "At least 12 characters, mixed case, a number.",
+            control: (a) =>
+              PasswordInput({
+                id: a.id,
+                name: "password",
+                required: true,
+                minLength: 12,
+                autocomplete: "new-password",
+                strength: true,
+                strengthMin: 3,
+                messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
+              }),
+          })
+        }${
+          FormField({
+            id: "confirm",
+            label: "Confirm password",
+            required: true,
+            control: (a) =>
+              PasswordInput({
+                id: a.id,
+                name: "confirm",
+                required: true,
+                autocomplete: "new-password",
+                match: "#new-password",
+                messages: { match: "The passwords do not match." },
+              }),
+          })
+        }`,
     },
   ],
   "components/form-field": [
@@ -522,6 +619,22 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "A required email field",
       render: () => Input({ id: "email", name: "email", type: "email", placeholder: "you@acme.com", required: true }),
+    },
+    {
+      title: "Constraints the browser enforces",
+      note:
+        "Typed props for the native attributes; with `Form({ validate: true })` the failures show inline, `messages` replaces the browser's wording per rule.",
+      render: () =>
+        Input({
+          id: "seats",
+          name: "seats",
+          type: "number",
+          min: 1,
+          max: 500,
+          step: 1,
+          required: true,
+          messages: { min: "At least one seat.", max: "Contact sales above 500 seats." },
+        }),
     },
     {
       title: "A search box with an icon",

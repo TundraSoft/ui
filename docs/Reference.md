@@ -26,13 +26,14 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [form](reference/components-form.md) — `Form`
 - [form-field](reference/components-form-field.md) — `FormField`, `FormGrid`, `FormActions`
 - [grid](reference/components-grid.md) — `Grid`, `GridCol`
-- [input](reference/components-input.md) — `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
+- [input](reference/components-input.md) — `attr`, `messageAttrs`, `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
 - [menu](reference/components-menu.md) — `Menu`
 - [modal](reference/components-modal.md) — `Modal`
 - [navbar](reference/components-navbar.md) — `Navbar`
 - [otp](reference/components-otp.md) — `Otp`
 - [page-header](reference/components-page-header.md) — `PageHeader`
 - [pagination](reference/components-pagination.md) — `Pagination`
+- [password](reference/components-password.md) — `PasswordInput`
 - [popover](reference/components-popover.md) — `Popover`, `PopoverTrigger`
 - [progress](reference/components-progress.md) — `Progress`, `Spinner`
 - [segmented](reference/components-segmented.md) — `Segmented`

@@ -29,6 +29,9 @@ Textarea(props: TextareaProps): Html
 | `readonly` | `boolean` |  |  |
 | `required` | `boolean` |  |  |
 | `invalid` | `boolean` |  |  |
+| `minLength` | `number` |  | Native constraints; `Form({ validate: true })` shows them inline. |
+| `maxLength` | `number` |  |  |
+| `messages` | `ValidationMessages` |  | Per-rule messages for the validator. |
 | `extraClass` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
