@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.0](https://github.com/TundraSoft/ui/compare/v0.7.0...v0.8.0) (2026-09-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **forms:** composite inputs, CardFields, async validation, flags hook ([#27](https://github.com/TundraSoft/ui/issues/27))
+* **input:** `@tundralibs/ui/password` / `PasswordInput` are removed — use `Input({ type: "password", ... })` with the same props.
+
+### Features
+
+* **deps:** require rAPId ^0.8.0 ([#24](https://github.com/TundraSoft/ui/issues/24)) ([0915a8f](https://github.com/TundraSoft/ui/commit/0915a8fa78c89769b7ae656bde88c58217abb8d4))
+* **forms:** composite inputs, CardFields, async validation, flags hook ([#27](https://github.com/TundraSoft/ui/issues/27)) ([2ba8808](https://github.com/TundraSoft/ui/commit/2ba8808eb69da2d8871c1c6eacebcddecfb68e4a))
+* **input:** type="password" renders the password field; the separate PasswordInput is folded in ([#26](https://github.com/TundraSoft/ui/issues/26)) ([488a6b4](https://github.com/TundraSoft/ui/commit/488a6b4c9229f321a7020412876ea5225f7f4bdd))
+
 ## [0.7.0](https://github.com/TundraSoft/ui/compare/v0.6.0...v0.7.0) (2026-09-22)
 
 
