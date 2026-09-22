@@ -1,6 +1,7 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
+import { attr, messageAttrs, type ValidationMessages } from "../input/input.ts";
 
 export type TextareaProps = {
   id?: string;
@@ -12,6 +13,11 @@ export type TextareaProps = {
   readonly?: boolean;
   required?: boolean;
   invalid?: boolean;
+  /** Native constraints; `Form({ validate: true })` shows them inline. */
+  minLength?: number;
+  maxLength?: number;
+  /** Per-rule messages for the validator. */
+  messages?: ValidationMessages;
   extraClass?: string;
   attrs?: Attrs;
 };
@@ -25,6 +31,9 @@ export function Textarea(props: TextareaProps): Html {
   );
 
   const attrs: Attrs = {
+    ...messageAttrs(props.messages),
+    minlength: attr(props.minLength),
+    maxlength: attr(props.maxLength),
     ...props.attrs,
     id: props.id,
     name: props.name,

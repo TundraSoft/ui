@@ -454,6 +454,24 @@ must render the same bytes every day: a `DatePicker` without `today` marks the r
 drifted the morning after it was generated (caught by the first automated rAPId bump PR, #16). Fix a date in every
 example that would otherwise read the clock.
 
+**Client-side validation + `PasswordInput` (2026-09-22).** Until now validation was server-only (`RapidFormError` →
+`Form({ error })` / `FormField({ error })` / `Input({ invalid })`). `Input`/`Textarea` gained typed constraint props
+(`minLength`, `maxLength`, `pattern`, `min`, `max`, `step`, `autocomplete`), `match: "#other"` (a confirm field) and
+`messages` (per-rule text → `data-msg-<rule>`, `messageAttrs()`); `Form({ validate: true })` → `data-validate`, handled
+by `components/form/form.js`: native-first — the browser's Constraint Validation API is the rule engine (`novalidate` is
+set by the script so the bubble never shows), the message goes into the field's `.form-field__error` slot (created if
+absent, `aria-invalid` + `aria-describedby` wired, help hidden while an error shows), on first blur then live, and on
+submit. The submit veto is a **capture-phase** listener with `stopImmediatePropagation`: rAPId's runtime registers its
+bubbling submit listener before ui.js loads, so bubbling would be too late; capture at `document` runs first and stops
+the event from ever reaching the runtime, busy.js or dropzone.js. `data-match` is checked with `setCustomValidity`, and
+a confirm field is re-checked when the field it matches changes. Hidden controls (`Select`'s native `<select>`) are
+skipped. `components/password/` (`PasswordInput`) wraps `Input({ type: "password" })` with a Show/Hide button
+(`.js-only`, text labels — the icon set has no eye), an optional four-segment strength bar (`data-strength-level` 0–4 on
+the root; password.js scores length vs `minlength`, character classes, repeats, sequences and a 30-entry common list)
+and `strengthMin`, which password.js enforces through `setCustomValidity` so form.js reports it like any rule;
+password.js listens to `input` in the **capture** phase so the validity is fresh when form.js reads it on the same
+keystroke. The server must enforce every rule too — the client layer is feedback, never the gate (docs say so).
+
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
 carried `name="selected"` with nothing to submit through), the shared invoices kebab and the billing "PDF" were dead

@@ -16,10 +16,65 @@ export type InputProps = {
   readonly?: boolean;
   required?: boolean;
   invalid?: boolean;
+  /** Native constraints — the browser enforces them without JS, `Form({ validate: true })` shows them inline. */
+  minLength?: number;
+  maxLength?: number;
+  /**
+   * A regular expression the whole value must match (native `pattern`).
+   * Browsers compile it with the `v` flag: escape `-` inside a character
+   * class (`[a-z0-9\\-]+`), and `[`, `]`, `{`, `}` literally.
+   */
+  pattern?: string;
+  min?: number | string;
+  max?: number | string;
+  step?: number | "any";
+  autocomplete?: string;
+  /**
+   * Selector of the control this value must equal (a confirm field):
+   * `match: "#password"`. Checked by the validator; the server must
+   * check it too.
+   */
+  match?: string;
+  /** Per-rule messages for the validator, replacing the browser's wording. */
+  messages?: ValidationMessages;
   /** Extra classes, e.g. `input-group__control` when nested in an InputGroup. */
   extraClass?: string;
   attrs?: Attrs;
 };
+
+/** Messages the client-side validator shows instead of the browser's, per rule. */
+export type ValidationMessages = {
+  required?: string;
+  /** Wrong shape for the type (email, url, number). */
+  type?: string;
+  pattern?: string;
+  minLength?: string;
+  maxLength?: string;
+  min?: string;
+  max?: string;
+  step?: string;
+  /** For `match`. */
+  match?: string;
+};
+
+/** A number or string prop as an attribute value; undefined stays omitted. */
+export const attr = (v: number | string | undefined): string | undefined => (v === undefined ? undefined : String(v));
+
+/** `data-msg-*` attributes from `messages` (what form.js reads). */
+export function messageAttrs(messages?: ValidationMessages): Attrs {
+  if (!messages) return {};
+  return {
+    "data-msg-required": messages.required,
+    "data-msg-type": messages.type,
+    "data-msg-pattern": messages.pattern,
+    "data-msg-min-length": messages.minLength,
+    "data-msg-max-length": messages.maxLength,
+    "data-msg-min": messages.min,
+    "data-msg-max": messages.max,
+    "data-msg-step": messages.step,
+    "data-msg-match": messages.match,
+  };
+}
 
 const SIZE_CLASS: Record<InputSize, string> = {
   sm: "input--sm",
@@ -58,6 +113,7 @@ export function Input(props: InputProps): Html {
   );
 
   const attrs: Attrs = {
+    ...messageAttrs(props.messages),
     ...props.attrs,
     id: props.id,
     name: props.name,
@@ -66,6 +122,14 @@ export function Input(props: InputProps): Html {
     disabled: props.disabled ? "" : undefined,
     readonly: props.readonly ? "" : undefined,
     required: props.required ? "" : undefined,
+    minlength: attr(props.minLength),
+    maxlength: attr(props.maxLength),
+    pattern: props.pattern,
+    min: attr(props.min),
+    max: attr(props.max),
+    step: attr(props.step),
+    autocomplete: props.autocomplete,
+    "data-match": props.match,
     "aria-invalid": props.invalid ? "true" : undefined,
   };
 

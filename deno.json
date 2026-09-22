@@ -40,6 +40,7 @@
     "./otp": "./components/otp/otp.ts",
     "./page-header": "./components/page-header/page-header.ts",
     "./pagination": "./components/pagination/pagination.ts",
+    "./password": "./components/password/password.ts",
     "./popover": "./components/popover/popover.ts",
     "./progress": "./components/progress/progress.ts",
     "./segmented": "./components/segmented/segmented.ts",

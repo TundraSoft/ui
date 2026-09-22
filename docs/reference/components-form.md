@@ -24,12 +24,85 @@ Form(props: FormProps): Html
 | `action` | `string` |  |  |
 | `method` | `"get" | "post"` |  |  |
 | `error` | `{ message: string; fields: Readonly }` |  | rAPId's `RapidFormError` (§6) — rendered as a banner above `content`. |
+| `validate` | `boolean` |  | Client-side validation (form.js): the browser's own constraint checks (`required`, `type`, `minLength`, `pattern`, `min`/`max`, `match`) are shown inline in each field's error slot on blur and on submit, with the submit blocked and the first invalid field focused. Without JS the browser validates natively; the server must validate regardless. |
 | `content` | `Html` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Client-side validation, inline
+
+`validate: true` shows each field's constraint failure in its error slot on blur and on submit (the browser bubble is replaced), blocks the submit and focuses the first invalid field. The constraints are the native attributes, so a page without JS still validates, and the server validates regardless.
+
+```ts
+Form({
+  id: "invite",
+  action: "/team/invite",
+  validate: true,
+  attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
+  content: html`${
+    FormGrid({
+      fields: [
+        FormField({
+          id: "invite-email",
+          label: "Email",
+          required: true,
+          control: (a) =>
+            Input({
+              id: a.id,
+              name: "email",
+              type: "email",
+              required: true,
+              messages: {
+                required: "An email address is required.",
+                type: "That does not look like an email address.",
+              },
+            }),
+        }),
+        FormField({
+          id: "invite-handle",
+          label: "Handle",
+          help: "3–20 letters, digits or dashes.",
+          control: (a) =>
+            Input({
+              id: a.id,
+              name: "handle",
+              minLength: 3,
+              maxLength: 20,
+              pattern: "[a-z0-9\\-]+",
+              messages: { pattern: "Lowercase letters, digits and dashes only." },
+              attrs: { "aria-describedby": a.describedBy },
+            }),
+        }),
+      ],
+    })
+  }${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}`,
+})
+```
+
+```html
+<form class="form" data-action="/team/invite" data-target="#invite" data-swap="outer" id="invite" action="/team/invite" method="post" data-validate="">
+  <div class="form-grid">
+    <div class="form-field">
+      <label class="form-field__label" for="invite-email">
+        Email
+        <span class="form-field__required" aria-hidden="true">*</span>
+      </label>
+      <input type="email" class="input" data-msg-required="An email address is required." data-msg-type="That does not look like an email address." id="invite-email" name="email" required="">
+    </div>
+    <div class="form-field">
+      <label class="form-field__label" for="invite-handle">Handle</label>
+      <input type="text" class="input" data-msg-pattern="Lowercase letters, digits and dashes only." aria-describedby="invite-handle-help" id="invite-handle" name="handle" minlength="3" maxlength="20" pattern="[a-z0-9\-]+">
+      <p class="form-field__help" id="invite-handle-help">3–20 letters, digits or dashes.</p>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn">Send invite</button>
+  </div>
+</form>
+```
 
 ### A form that swaps itself on submit
 
@@ -77,3 +150,11 @@ Form({
 Classes defined by `components/form/form.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
 `.form`
+
+## Behaviour
+
+`components/form/form.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
+
+Attributes it reads or writes: `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`.
+
+Events: `rapid:swapped`.

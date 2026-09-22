@@ -26,6 +26,10 @@ Input({ type: "date", name: "due" }); // renders the DatePicker
 Input({ size: "sm" | "md" | "lg" });
 ```
 
+Constraints are typed props that render the native attributes — `required`, `minLength`, `maxLength`, `pattern`, `min`,
+`max`, `step` — plus `match: "#other"` for a confirm field and `messages` (per-rule text for the validator, see
+[Form](#formfield-form)). The browser enforces them on its own; `Form({ validate: true })` shows them inline.
+
 `FloatingInput({ id, name, label })` is the floating-label variant. `InputIcon({ icon, control, end? })` puts an icon in
 the field; `InputGroup({ start, end, control })` adds prefix/suffix addons — text, or a `Select` (give the inner control
 `extraClass: "input-group__control"`).
@@ -171,6 +175,34 @@ A native `<input type=file>` covers the area. Upload rows are server state (`pro
 picked file on submit, fills its bar from rAPId's `rapid:progress`, and the reply (the `Dropzone` again, with your rows)
 replaces them. See the [upload recipe](./UI-Recipes.md#5-attachments-with-upload-progress).
 
+### [PasswordInput](./reference/components-password.md)
+
+```ts
+PasswordInput({ id: "password", name: "password", required: true }); // sign-in: Show/Hide toggle
+PasswordInput({
+  id: "new-password",
+  name: "password",
+  required: true,
+  minLength: 12,
+  autocomplete: "new-password",
+  strength: true, // the four-segment bar, scored as the user types
+  strengthMin: 3, // below "Good" the field is invalid
+  messages: { strength: "Choose a stronger password." },
+});
+PasswordInput({
+  id: "confirm",
+  name: "confirm",
+  match: "#new-password",
+  messages: { match: "The passwords do not match." },
+});
+```
+
+The plain `Input` with a Show/Hide toggle, an optional strength bar (length, character classes, repeats, sequences and
+the most common passwords → Too weak / Weak / Good / Strong, hidden while empty, a class change only) and `match` for
+the confirm field. Client-side by nature: without JS it is a password input, nothing more. Pair with
+`Form({ validate: true })` so "too weak" and "does not match" read like any other field error; the server must enforce
+the same rules — the bar is a hint, not a gate.
+
 ### [Editor](./reference/components-editor.md)
 
 ```ts
@@ -215,6 +247,13 @@ Form({
   }${FormActions({ content: Button({ label: "Create", type: "submit" }) })}`,
 });
 ```
+
+**Client-side validation** is one prop: `Form({ validate: true })`. form.js replaces the browser's bubble with the same
+message rendered inline in the field's error slot — the markup a server error uses — on the field's first blur and on
+submit; an invalid submit is stopped before rAPId's runtime sees it and the first invalid field gets focus. The rules
+are the native constraint attributes plus `match` and a password's `strengthMin`; the wording is the browser's, or
+`messages` per rule. A server-rendered error stays until the user edits that field. Without JS the browser validates
+natively, and the server validates regardless — the client layer is feedback, never the gate.
 
 `Form({ error })` renders rAPId's `RapidFormError` as a banner (`FormErrorAlert`), `FormField({ error })` wires
 `aria-describedby` and `aria-invalid` through the `control` callback, `FormGrid` is a 12-column field grid,
