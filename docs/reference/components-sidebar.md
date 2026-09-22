@@ -102,4 +102,4 @@ SidebarToggle({ targetId: "nav", label: "Menu" })
 
 Classes defined by `components/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.menu__caret`, `.menu__link`, `.menu__link-label`, `.menu__sublist`, `.sidebar`, `.sidebar--collapsed`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`
+`.js`, `.menu__caret`, `.menu__flyout-title`, `.menu__link`, `.menu__link-label`, `.menu__sublist`, `.menu__sublist--flyout`, `.sidebar`, `.sidebar--collapsed`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`

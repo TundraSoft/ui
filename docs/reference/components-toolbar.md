@@ -48,7 +48,10 @@ Toolbar({
 
 ```html
 <div class="toolbar">
-  <input type="search" class="input input--sm" data-table-search="" placeholder="Search invoices">
+  <span class="input-clear" data-input-clear>
+    <input type="search" class="input input--sm" data-table-search="" id="search" placeholder="Search invoices">
+    <button type="button" class="input-clear__button js-only" data-input-clear-button aria-controls="search" aria-label="Clear" hidden>&times;</button>
+  </span>
   <div class="select" data-select>
     <select class="select__native" id="select-native">
       <option value="" disabled selected>All statuses</option>

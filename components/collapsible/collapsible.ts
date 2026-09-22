@@ -1,5 +1,6 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { Icon } from "../../shared/icons.ts";
 
 export type CollapsibleProps = {
   id: string;
@@ -19,7 +20,9 @@ export function Collapsible(props: CollapsibleProps): Html {
         class="collapsible__heading"><button type="button" class="collapsible__trigger" data-toggle="#${panelId}" aria-expanded="${open
           ? "true"
           : "false"}" aria-controls="${panelId}">${props
-          .title}<span class="collapsible__icon">&#9660;</span></button></h3>
+          .title}<span class="collapsible__icon" aria-hidden="true">${Icon("chevronDown", {
+            size: 14,
+          })}</span></button></h3>
       <div class="collapsible__panel" id="${panelId}" data-toggle-panel${open ? "" : html`
         hidden
       `}>${props.content}</div>

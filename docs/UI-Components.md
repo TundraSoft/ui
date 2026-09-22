@@ -32,6 +32,23 @@ typed props that render the native attributes — `required`, `minLength`, `maxL
 plus `match: "#other"` for a confirm field and `messages` (per-rule text for the validator, see
 [Form](#formfield-form)). The browser enforces them on its own; `Form({ validate: true })` shows them inline.
 
+Some types carry their own sugar, all progressive and all posting plain fields:
+
+```ts
+Input({ type: "email", name: "email", domains: ["acme.com", "acme.io"] }); // local part · @ · domain select → email + email-domain
+Input({ type: "tel", name: "phone", countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }] }); // phone-country + phone
+Input({ type: "url", name: "website", scheme: "https://" }); // website-scheme (hidden) + website
+Input({ type: "number", name: "price", prefix: "$", suffix: "per seat" }); // an InputGroup without the ceremony
+Input({ name: "title", maxLength: 60, counter: true }); // "12 / 60" under the field
+Input({ type: "search", name: "q" }); // a clear button, on by default (clearable: false)
+Input({ name: "handle", validateAction: "/fragments/check-handle" }); // asks the server on blur ("taken")
+```
+
+The composite fields (email domains, tel countries, url scheme) submit two parts each; a handler joins them with
+`emailFrom` / `telFrom` / `urlFrom` from `@tundralibs/ui/shared/compose`, which also pass a whole value through
+untouched. `validateAction` posts `<name>=<value>` once the native rules pass and shows a non-empty text reply as the
+field's error, pinned until the value changes.
+
 `FloatingInput({ id, name, label })` is the floating-label variant. `InputIcon({ icon, control, end? })` puts an icon in
 the field; `InputGroup({ start, end, control })` adds prefix/suffix addons — text, or a `Select` (give the inner control
 `extraClass: "input-group__control"`).
@@ -40,6 +57,7 @@ the field; `InputGroup({ start, end, control })` adds prefix/suffix addons — t
 
 ```ts
 Textarea({ id: "bio", name: "bio", rows: 4, placeholder: "A short bio…" });
+Textarea({ id: "memo", name: "memo", maxLength: 280, counter: true, autosize: true }); // counter + grows with the content
 ```
 
 ### [Select](./reference/components-select.md)
@@ -208,6 +226,22 @@ Client-side by nature: without JS it is a password input, nothing more. Pair wit
 weak" and "does not match" read like any other field error; the server must enforce the same rules — the bar is a hint,
 not a gate.
 
+### [CardFields](./reference/components-card-fields.md)
+
+```ts
+CardFields({ name: "card", luhn: true }); // card-number, card-expiry, card-name, card-cvc
+CardFields({ name: "stored", fields: ["number", "expiry"] }); // only the parts a flow needs
+CardFields({ name: "c", required: { cvc: false }, errors: { number: "This card was declined." } });
+```
+
+Four `FormField`s that know about each other: the number is grouped as typed and names its brand from the prefix (Visa,
+Mastercard, Amex, Discover, Diners, JCB), which sets the CVC to 3 or 4 digits; expiry is `MM/YY` with the slash inserted
+and a past date refused; every part carries the matching `autocomplete="cc-*"`. Format checks only — length, digits,
+expiry range, CVC length — plus the Luhn checksum with `luhn`, which is offline and says nothing about whether the card
+exists. `fields` picks the parts and `required` can be per part; the number and CVC are never echoed back into markup.
+Rendering card fields means the number reaches your server unless the form posts to the processor: that is PCI scope,
+and yours to decide.
+
 ### [Editor](./reference/components-editor.md)
 
 ```ts
@@ -253,12 +287,14 @@ Form({
 });
 ```
 
-**Client-side validation** is one prop: `Form({ validate: true })`. form.js replaces the browser's bubble with the same
-message rendered inline in the field's error slot — the markup a server error uses — on the field's first blur and on
-submit; an invalid submit is stopped before rAPId's runtime sees it and the first invalid field gets focus. The rules
-are the native constraint attributes plus `match` and a password's `strengthMin`; the wording is the browser's, or
-`messages` per rule. A server-rendered error stays until the user edits that field. Without JS the browser validates
-natively, and the server validates regardless — the client layer is feedback, never the gate.
+**Client-side validation** is one prop: `Form({ validate: true })`, and **unsaved-changes protection** another,
+`Form({ guard: true })`, which asks before the page is left once any field changed, until the form submits. form.js
+replaces the browser's bubble with the same message rendered inline in the field's error slot — the markup a server
+error uses — on the field's first blur and on submit; an invalid submit is stopped before rAPId's runtime sees it and
+the first invalid field gets focus. The rules are the native constraint attributes plus `match` and a password's
+`strengthMin`; the wording is the browser's, or `messages` per rule. A server-rendered error stays until the user edits
+that field. Without JS the browser validates natively, and the server validates regardless — the client layer is
+feedback, never the gate.
 
 `Form({ error })` renders rAPId's `RapidFormError` as a banner (`FormErrorAlert`), `FormField({ error })` wires
 `aria-describedby` and `aria-invalid` through the `control` callback, `FormGrid` is a 12-column field grid,

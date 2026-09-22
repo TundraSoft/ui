@@ -1,7 +1,7 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
-import { attr, messageAttrs, type ValidationMessages } from "../input/input.ts";
+import { attr, Counter, messageAttrs, type ValidationMessages } from "../input/input.ts";
 
 export type TextareaProps = {
   id?: string;
@@ -18,6 +18,12 @@ export type TextareaProps = {
   maxLength?: number;
   /** Per-rule messages for the validator. */
   messages?: ValidationMessages;
+  /** A route that checks the value on the server on blur — see `Input.validateAction`. */
+  validateAction?: string;
+  /** With `maxLength`: a live "12 / 280" counter under the control. Needs an `id` or `name`. */
+  counter?: boolean;
+  /** Grow with the content instead of scrolling (`field-sizing: content`, with a script fallback). */
+  autosize?: boolean;
   extraClass?: string;
   attrs?: Attrs;
 };
@@ -27,6 +33,7 @@ export function Textarea(props: TextareaProps): Html {
     "input",
     "textarea",
     props.invalid && "input--invalid",
+    props.autosize && "textarea--autosize",
     props.extraClass,
   );
 
@@ -42,10 +49,15 @@ export function Textarea(props: TextareaProps): Html {
     disabled: props.disabled ? "" : undefined,
     readonly: props.readonly ? "" : undefined,
     required: props.required ? "" : undefined,
+    "data-validate-action": props.validateAction,
+    "data-counter": props.counter && props.maxLength ? "" : undefined,
+    "data-autosize": props.autosize ? "" : undefined,
     "aria-invalid": props.invalid ? "true" : undefined,
   };
 
-  return html`
-    <textarea class="${className}" ${renderAttrs(attrs)}>${props.value ?? ""}</textarea>
-  `;
+  const control = html`<textarea class="${className}" ${renderAttrs(attrs)}>${props.value ?? ""}</textarea>`;
+  if (props.counter && props.maxLength) {
+    return html`${control}${Counter(props.id ?? props.name ?? "", props.maxLength, props.value?.length ?? 0)}`;
+  }
+  return control;
 }

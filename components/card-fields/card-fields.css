@@ -1,0 +1,30 @@
+/*
+ * Card fields: four FormFields in a grid. The number's brand shows as a
+ * small label at the field's end (`data-brand` on the root names it),
+ * everything else is the plain Input.
+ */
+.card-fields__number {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.card-fields__brand {
+  min-width: 4.5em;
+  justify-content: center;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.card-fields__brand:empty {
+  display: none;
+}
+
+.card-fields[data-brand="visa"] .card-fields__brand,
+.card-fields[data-brand="mastercard"] .card-fields__brand,
+.card-fields[data-brand="amex"] .card-fields__brand,
+.card-fields[data-brand="discover"] .card-fields__brand {
+  color: var(--color-text);
+}

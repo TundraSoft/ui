@@ -25,6 +25,7 @@ Form(props: FormProps): Html
 | `method` | `"get" | "post"` |  |  |
 | `error` | `{ message: string; fields: Readonly }` |  | rAPId's `RapidFormError` (§6) — rendered as a banner above `content`. |
 | `validate` | `boolean` |  | Client-side validation (form.js): the browser's own constraint checks (`required`, `type`, `minLength`, `pattern`, `min`/`max`, `match`) are shown inline in each field's error slot on blur and on submit, with the submit blocked and the first invalid field focused. Without JS the browser validates natively; the server must validate regardless. |
+| `guard` | `boolean` |  | Warn before leaving the page with unsaved edits (form.js): once any field changes, navigating away asks for confirmation until the form submits (or is swapped out by its own reply). |
 | `content` | `Html` | yes |  |
 | `attrs` | `Attrs` |  |  |
 
@@ -41,6 +42,7 @@ Form({
   id: "invite",
   action: "/team/invite",
   validate: true,
+  guard: true,
   attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
   content: html`${
     FormGrid({
@@ -72,6 +74,7 @@ Form({
               minLength: 3,
               maxLength: 20,
               pattern: "[a-z0-9\\-]+",
+              validateAction: "/fragments/check-handle",
               messages: { pattern: "Lowercase letters, digits and dashes only." },
               attrs: { "aria-describedby": a.describedBy },
             }),
@@ -83,7 +86,7 @@ Form({
 ```
 
 ```html
-<form class="form" data-action="/team/invite" data-target="#invite" data-swap="outer" id="invite" action="/team/invite" method="post" data-validate="">
+<form class="form" data-action="/team/invite" data-target="#invite" data-swap="outer" id="invite" action="/team/invite" method="post" data-validate="" data-guard="">
   <div class="form-grid">
     <div class="form-field">
       <label class="form-field__label" for="invite-email">
@@ -94,7 +97,7 @@ Form({
     </div>
     <div class="form-field">
       <label class="form-field__label" for="invite-handle">Handle</label>
-      <input type="text" class="input" data-msg-pattern="Lowercase letters, digits and dashes only." aria-describedby="invite-handle-help" id="invite-handle" name="handle" minlength="3" maxlength="20" pattern="[a-z0-9\-]+">
+      <input type="text" class="input" data-msg-pattern="Lowercase letters, digits and dashes only." aria-describedby="invite-handle-help" id="invite-handle" name="handle" minlength="3" maxlength="20" pattern="[a-z0-9\-]+" data-validate-action="/fragments/check-handle">
       <p class="form-field__help" id="invite-handle-help">3–20 letters, digits or dashes.</p>
     </div>
   </div>
@@ -155,6 +158,6 @@ Classes defined by `components/form/form.css` — structural, token-driven; over
 
 `components/form/form.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`.
+Attributes it reads or writes: `data-dirty`, `data-guard`, `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`, `data-validate-action`.
 
 Events: `rapid:swapped`.

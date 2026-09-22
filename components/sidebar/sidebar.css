@@ -83,6 +83,39 @@
   .sidebar--collapsed .sidebar__collapse-icon {
     transform: rotate(180deg);
   }
+
+  /* A parent's sublist opened from the collapsed rail floats beside it
+     (collapse-sidebar.js positions it), labels back on. */
+  .sidebar--collapsed .menu__sublist.menu__sublist--flyout {
+    display: flex;
+    position: fixed;
+    z-index: var(--z-popover);
+    min-width: 12rem;
+    max-width: calc(100vw - 2 * var(--space-4));
+    margin: 0;
+    padding: var(--space-2);
+    background: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar--collapsed .menu__sublist--flyout .menu__link-label {
+    display: inline;
+  }
+
+  .sidebar--collapsed .menu__sublist--flyout .menu__link {
+    justify-content: flex-start;
+  }
+
+  .menu__flyout-title {
+    padding: var(--space-1) var(--space-3) var(--space-2);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
 }
 
 @media screen and (max-width: 991px) {

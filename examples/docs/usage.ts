@@ -16,6 +16,7 @@ import { Badge, Chip } from "../../components/badge/badge.ts";
 import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
 import { Button, ButtonGroup } from "../../components/button/button.ts";
 import { Card } from "../../components/card/card.ts";
+import { CardFields } from "../../components/card-fields/card-fields.ts";
 import { Chart, ChartScript } from "../../components/chart/chart.ts";
 import { Checkbox, ChoiceGroup, Radio } from "../../components/choice/choice.ts";
 import { Accordion, Collapsible } from "../../components/collapsible/collapsible.ts";
@@ -429,6 +430,7 @@ export const usage: Record<string, UsageExample[]> = {
           id: "invite",
           action: "/team/invite",
           validate: true,
+          guard: true,
           attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
           content: html`${
             FormGrid({
@@ -460,6 +462,7 @@ export const usage: Record<string, UsageExample[]> = {
                       minLength: 3,
                       maxLength: 20,
                       pattern: "[a-z0-9\\-]+",
+                      validateAction: "/fragments/check-handle",
                       messages: { pattern: "Lowercase letters, digits and dashes only." },
                       attrs: { "aria-describedby": a.describedBy },
                     }),
@@ -491,6 +494,24 @@ export const usage: Record<string, UsageExample[]> = {
             })
           }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
         }),
+    },
+  ],
+  "components/card-fields": [
+    {
+      title: "Card details, all four parts",
+      note:
+        "Format checks only; `luhn: true` adds the offline checksum. The number reaches your server unless the form posts to the payment processor — PCI scope is yours to decide.",
+      render: () =>
+        CardFields({
+          name: "card",
+          luhn: true,
+          messages: { luhn: "Check the card number.", expired: "This card has expired." },
+        }),
+    },
+    {
+      title: "Only the parts a flow needs",
+      note: "A stored card's renewal wants the number and a new expiry; a merchant-initiated charge has no CVC.",
+      render: () => CardFields({ name: "stored", fields: ["number", "expiry"] }),
     },
   ],
   "components/form-field": [
@@ -568,6 +589,58 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/input": [
+    {
+      title: "A work email: only these domains",
+      note:
+        "The local part is the field (`name`), the domain a select named `<name>-domain` (fixed text with one domain). Join the two on the server with `emailFrom()` from `@tundralibs/ui/shared/compose`.",
+      render: () =>
+        Input({
+          id: "work-email",
+          name: "email",
+          type: "email",
+          required: true,
+          domains: ["acme.com", "acme.io"],
+          value: "ada@acme.io",
+        }),
+    },
+    {
+      title: "A phone with its country code",
+      note: "`<name>-country` + `<name>`; `telFrom()` joins them.",
+      render: () =>
+        Input({
+          id: "phone",
+          name: "phone",
+          type: "tel",
+          countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }],
+        }),
+    },
+    {
+      title: "A website with the scheme fixed",
+      note: "The scheme is submitted as a hidden `<name>-scheme`; `urlFrom()` joins it.",
+      render: () => Input({ id: "site", name: "website", type: "url", scheme: "https://", placeholder: "acme.com" }),
+    },
+    {
+      title: "An amount with a prefix and a suffix",
+      render: () =>
+        Input({ id: "price", name: "price", type: "number", prefix: "$", suffix: "per seat", min: 0, step: "any" }),
+    },
+    {
+      title: "A title with a character counter",
+      render: () => Input({ id: "title", name: "title", maxLength: 60, counter: true, value: "Quarterly invoice run" }),
+    },
+    {
+      title: "A search box with its clear button",
+      note:
+        'On by default for `type: "search"`; clearing fires `input`, so a `filter.js` scope resets. `clearable: false` drops it.',
+      render: () =>
+        Input({
+          id: "q",
+          name: "q",
+          type: "search",
+          placeholder: "Search invoices",
+          attrs: { "data-table-search": "" },
+        }),
+    },
     {
       title: "A required email field",
       render: () => Input({ id: "email", name: "email", type: "email", placeholder: "you@acme.com", required: true }),
@@ -893,6 +966,19 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/textarea": [
+    {
+      title: "A note that grows, with a counter",
+      render: () =>
+        Textarea({
+          id: "memo",
+          name: "memo",
+          rows: 2,
+          maxLength: 280,
+          counter: true,
+          autosize: true,
+          placeholder: "Anything the customer should know…",
+        }),
+    },
     {
       title: "A note",
       render: () => Textarea({ id: "note", name: "note", rows: 4, placeholder: "Anything the customer should know…" }),

@@ -19,6 +19,7 @@ import { Checkbox, Choice, ChoiceGroup, Radio } from "../../components/choice/ch
 import { Accordion, Collapsible } from "../../components/collapsible/collapsible.ts";
 import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
+import { CardFields } from "../../components/card-fields/card-fields.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker, DatePickerPanel } from "../../components/datepicker/datepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
@@ -28,7 +29,7 @@ import { Empty } from "../../components/empty/empty.ts";
 import { FormActions, FormField, FormGrid } from "../../components/form-field/form-field.ts";
 import { Form } from "../../components/form/form.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
-import { FloatingInput, Input, InputGroup, InputIcon } from "../../components/input/input.ts";
+import { Counter, FloatingInput, Input, InputGroup, InputIcon } from "../../components/input/input.ts";
 import { Menu } from "../../components/menu/menu.ts";
 import { Modal } from "../../components/modal/modal.ts";
 import { Navbar } from "../../components/navbar/navbar.ts";
@@ -57,6 +58,7 @@ import {
   commandItems,
   type DemoRoutes,
   type Dir,
+  inviteForm,
   type InvoiceEdits,
   invoicesTable,
   matches,
@@ -122,6 +124,7 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   combobox: "forms",
   datepicker: "forms",
   otp: "forms",
+  "card-fields": "forms",
   dropzone: "forms",
   "form-field": "forms",
   form: "forms",
@@ -922,6 +925,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                         minLength: 3,
                         maxLength: 20,
                         pattern: "[a-z0-9\\-]+",
+                        validateAction: routes.checkHandle || undefined,
                         messages: {
                           pattern: "Lowercase letters, digits and dashes only.",
                           minLength: "At least 3 characters.",
@@ -1004,6 +1008,68 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "input",
       cases: [
+        c(
+          "type email + domains — local part, fixed @, the domain (one domain: fixed text)",
+          html`<div class="stack stack--sm">${
+            Input({
+              id: "cat-em-1",
+              name: "email",
+              type: "email",
+              domains: ["acme.com", "acme.io"],
+              value: "ada@acme.io",
+            })
+          }${Input({ id: "cat-em-2", name: "email", type: "email", domains: ["acme.com"] })}</div>`,
+        ),
+        c(
+          "type tel + countries — country code, then the number",
+          Input({
+            id: "cat-tel-1",
+            name: "phone",
+            type: "tel",
+            countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }, { code: "+91", label: "IN" }],
+            value: "+44 20 7946 0958",
+          }),
+        ),
+        c(
+          "type url + scheme — https:// fixed, the rest typed",
+          Input({ id: "cat-url-1", name: "website", type: "url", scheme: "https://", value: "https://acme.com/team" }),
+        ),
+        c(
+          "prefix / suffix",
+          html`<div class="stack stack--sm">${
+            Input({
+              id: "cat-px-1",
+              name: "amount",
+              type: "number",
+              prefix: "$",
+              suffix: "per seat",
+              min: 0,
+              step: "any",
+            })
+          }${Input({ id: "cat-px-2", name: "weight", type: "number", suffix: "kg" })}</div>`,
+        ),
+        c(
+          "Counter() alone — for a custom control that sets data-counter itself",
+          html`${Input({ id: "cat-cnt-2", name: "tag", maxLength: 10, attrs: { "data-counter": "" } })}${
+            Counter("cat-cnt-2", 10)
+          }`,
+        ),
+        c(
+          "counter (maxLength 40)",
+          Input({ id: "cat-cnt-1", name: "title", maxLength: 40, counter: true, value: "Quarterly invoice run" }),
+        ),
+        c(
+          "type search — clear button (clearable: false to drop it)",
+          html`<div class="stack stack--sm">${
+            Input({ id: "cat-srch-1", name: "q", type: "search", placeholder: "Search", value: "invoices" })
+          }${
+            Input({ id: "cat-srch-2", name: "q", type: "search", placeholder: "No clear button", clearable: false })
+          }</div>`,
+        ),
+        c(
+          "the invite form — email domains + tel countries + url scheme, validate + guard (#cat-invite; the app joins the parts)",
+          inviteForm(routes),
+        ),
         c("Input sizes", row(...inputSizes.map((size) => Input({ size, placeholder: size })))),
         c(
           "states",
@@ -1156,6 +1222,42 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
+      ],
+    },
+    {
+      name: "card-fields",
+      cases: [
+        c(
+          "all four parts, luhn on, in a validating form — type 4242 4242 4242 4242 / 34 (Amex → 4-6-5, CVC 4)",
+          Form({
+            id: "cat-card-form",
+            action: "?card",
+            validate: true,
+            content: html`${
+              CardFields({
+                name: "card",
+                luhn: true,
+                messages: { luhn: "Check the card number.", expired: "This card has expired." },
+              })
+            }${FormActions({ content: Button({ label: "Pay", type: "submit" }) })}`,
+          }),
+        ),
+        c(
+          "number + expiry only (a stored card's update)",
+          CardFields({ name: "stored", fields: ["number", "expiry"] }),
+        ),
+        c(
+          "no cardholder name, required off for CVC",
+          CardFields({ name: "c3", fields: ["number", "expiry", "cvc"], required: { cvc: false } }),
+        ),
+        c(
+          "server errors + values (name and expiry only — the number is never echoed)",
+          CardFields({
+            name: "c4",
+            values: { name: "Ada Lovelace", expiry: "12/24" },
+            errors: { number: "This card was declined.", expiry: "This card has expired." },
+          }),
+        ),
       ],
     },
     {
@@ -1523,6 +1625,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "textarea",
       cases: [
         c(
+          "counter (maxLength 280)",
+          Textarea({ id: "cat-ta-cnt", name: "note", maxLength: 280, counter: true, rows: 3, value: "Ship it." }),
+        ),
+        c(
+          "autosize — grows with the content",
+          Textarea({ id: "cat-ta-auto", name: "note", autosize: true, rows: 2, placeholder: "Type a few lines…" }),
+        ),
+        c(
           "plain / rows / states",
           row(
             Textarea({ placeholder: "Plain" }),
@@ -1554,11 +1664,19 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "toast",
       cases: [
         c(
-          "from the server — data-action appends into #toast-region",
-          Button({
-            label: "Show toast",
-            attrs: { "data-action": routes.toast, "data-target": "#toast-region", "data-swap": "append" },
-          }),
+          routes.toast === "#"
+            ? "Show toast — data-toast-open clones a <template> into #toast-region (no server on this page)"
+            : "from the server — data-action appends into #toast-region",
+          routes.toast === "#"
+            ? html`${
+              Button({ label: "Show toast", attrs: { "data-toast-open": "#cat-toast-template" } })
+            }<template id="cat-toast-template">${
+              Toast({ variant: "success", body: "Saved.", meta: "just now", dismissible: true, autoDismissMs: 6000 })
+            }</template>`
+            : Button({
+              label: "Show toast",
+              attrs: { "data-action": routes.toast, "data-target": "#toast-region", "data-swap": "append" },
+            }),
         ),
         c(
           "Toast variants",

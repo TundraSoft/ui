@@ -8,7 +8,10 @@
  */
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { Badge } from "../../components/badge/badge.ts";
+import { Alert } from "../../components/alert/alert.ts";
 import { Button } from "../../components/button/button.ts";
+import { Form } from "../../components/form/form.ts";
+import { FormActions, FormField, FormGrid } from "../../components/form-field/form-field.ts";
 import type { ComboboxOption } from "../../components/combobox/combobox.ts";
 import type { CommandItem } from "../../components/command/command.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
@@ -37,6 +40,10 @@ export type DemoRoutes = {
   preview: string;
   /** The dropzone's upload form posts here (multipart); the server answers with the re-rendered `Dropzone`. */
   upload: string;
+  /** `Input.validateAction` for the handle field — answers a message (taken) or nothing; empty on a static page. */
+  checkHandle: string;
+  /** The invite form (email domains, tel countries, url scheme) posts here; the server joins the parts. */
+  invite: string;
   /** Month navigation / day pick / preset links of the period picker (outer-swap `#period`). */
   month: (year: number, month: number) => string;
   day: (iso: string) => string;
@@ -54,6 +61,8 @@ export const staticRoutes: DemoRoutes = {
   invoiceBulk: () => "?bulk",
   preview: "/preview",
   upload: "?upload",
+  checkHandle: "",
+  invite: "?invite",
   month: (y, m) => `?month=${y}-${String(m + 1).padStart(2, "0")}`,
   day: (iso) => `?day=${iso}`,
   preset: (name) => `?preset=${name}`,
@@ -112,6 +121,79 @@ export function projectsTable(routes: DemoRoutes, state?: ProjectsState): Html {
     }),
     footer: Pagination({ page, totalPages, buildHref: routes.projectsPage, target: "#projects" }),
     attrs: { "data-filter-scope": "" },
+  });
+}
+
+/* ------------------------------------------------------------- invite */
+
+/** What `/forms/invite` joined from the parts the composite fields posted. */
+export type InviteResult = { email: string; phone: string; website: string };
+
+/**
+ * The invite form: an email restricted to the company's domains, a phone
+ * with a country code, a website with a fixed scheme — each posts two
+ * parts the server joins with `emailFrom` / `telFrom` / `urlFrom`. With a
+ * `result`, the form re-renders with what the server received.
+ */
+export function inviteForm(routes: DemoRoutes, result?: InviteResult): Html {
+  return Form({
+    id: "cat-invite",
+    action: routes.invite,
+    validate: true,
+    guard: true,
+    attrs: { "data-action": routes.invite, "data-target": "#cat-invite", "data-swap": "outer" },
+    content: html`${
+      result
+        ? Alert({
+          variant: "success",
+          title: "Received",
+          body: html`<code>${result.email}</code> · <code>${result.phone}</code> · <code>${result.website}</code>`,
+          id: "cat-invite-result",
+        })
+        : ""
+    }${
+      FormGrid({
+        fields: [
+          FormField({
+            id: "inv-email",
+            label: "Work email",
+            required: true,
+            help: "Only company addresses.",
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "email",
+                type: "email",
+                required: true,
+                domains: ["acme.com", "acme.io", "acme.dev"],
+                messages: { required: "Enter the part before the @.", pattern: "Just the part before the @." },
+                attrs: { "aria-describedby": a.describedBy },
+              }),
+          }),
+          FormField({
+            id: "inv-phone",
+            label: "Phone",
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "phone",
+                type: "tel",
+                countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }, { code: "+91", label: "IN" }, {
+                  code: "+49",
+                  label: "DE",
+                }],
+                messages: { pattern: "Digits, spaces and dashes only." },
+              }),
+          }),
+          FormField({
+            id: "inv-website",
+            label: "Website",
+            control: (a) =>
+              Input({ id: a.id, name: "website", type: "url", scheme: "https://", placeholder: "acme.com/team" }),
+          }),
+        ],
+      })
+    }${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}`,
   });
 }
 

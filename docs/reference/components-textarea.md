@@ -32,12 +32,34 @@ Textarea(props: TextareaProps): Html
 | `minLength` | `number` |  | Native constraints; `Form({ validate: true })` shows them inline. |
 | `maxLength` | `number` |  |  |
 | `messages` | `ValidationMessages` |  | Per-rule messages for the validator. |
+| `validateAction` | `string` |  | A route that checks the value on the server on blur — see `Input.validateAction`. |
+| `counter` | `boolean` |  | With `maxLength`: a live "12 / 280" counter under the control. Needs an `id` or `name`. |
+| `autosize` | `boolean` |  | Grow with the content instead of scrolling (`field-sizing: content`, with a script fallback). |
 | `extraClass` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A note that grows, with a counter
+
+```ts
+Textarea({
+  id: "memo",
+  name: "memo",
+  rows: 2,
+  maxLength: 280,
+  counter: true,
+  autosize: true,
+  placeholder: "Anything the customer should know…",
+})
+```
+
+```html
+<textarea class="input textarea textarea--autosize" maxlength="280" id="memo" name="memo" placeholder="Anything the customer should know…" rows="2" data-counter="" data-autosize=""></textarea>
+<span class="input__counter js-only" data-counter-for="memo" aria-live="polite">0 / 280</span>
+```
 
 ### A note
 

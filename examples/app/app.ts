@@ -41,6 +41,7 @@ import { ComboboxList } from "../../components/combobox/combobox.ts";
 import { CommandList } from "../../components/command/command.ts";
 import { DatePicker } from "../../components/datepicker/datepicker.ts";
 import { Dropzone, type DropzoneFile } from "../../components/dropzone/dropzone.ts";
+import { emailFrom, telFrom, urlFrom } from "../../shared/compose.ts";
 import { Icon } from "../../shared/icons.ts";
 import { APEXCHARTS } from "../../components/chart/chart.ts";
 import { layoutIndex, type LayoutName, layoutNames, layoutSamples } from "../shared/layout-samples.ts";
@@ -49,6 +50,7 @@ import {
   commandItems,
   type DemoRoutes,
   type Dir,
+  inviteForm,
   type InvoiceEdits,
   invoicesTable,
   matches,
@@ -170,6 +172,8 @@ const appRoutes = (period: PeriodState): DemoRoutes => {
     invoiceBulk: (sort) => `/components/data/invoices?sort=${sort.key}&dir=${sort.dir}`,
     preview: "/fragments/preview",
     upload: "/fragments/upload",
+    checkHandle: "/fragments/check-handle",
+    invite: "/forms/invite",
     month: (y, m) => `/components/forms?month=${y}-${String(m + 1).padStart(2, "0")}${range}`,
     day: (iso) => `/components/forms?day=${iso}${range}`,
     preset: (name) => `/components/forms?preset=${name}`,
@@ -719,6 +723,25 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
     }));
     return { content: { files } };
   });
+  // Input.validateAction: a text reply (the message) or an empty body.
+  app.post("/fragments/check-handle", { template: CheckHandleFragment }, async (ctx) => {
+    const body = ((await ctx.payload) ?? {}) as Record<string, string>;
+    const handle = String(body.handle ?? "").toLowerCase();
+    return {
+      content: { message: ["admin", "root", "ada"].includes(handle) ? `"${handle}" is taken — try another.` : "" },
+    };
+  });
+  // The invite form: composite fields post their parts; the server joins them.
+  app.post("/forms/invite", { template: { render: InviteFragment, prefer: "html" as const } }, async (ctx) => {
+    const body = ((await ctx.payload) ?? {}) as Record<string, unknown>;
+    const result = {
+      email: emailFrom(body, "email") ?? "",
+      phone: telFrom(body, "phone") ?? "",
+      website: urlFrom(body, "website") ?? "",
+    };
+    if (!ctx.isSwap) return { content: result, redirect: "/components/forms" };
+    return { content: result };
+  });
   app.post("/fragments/preview", { template: PreviewFragment }, async (ctx) => {
     const body = ((await ctx.payload) ?? {}) as Record<string, string>;
     return { content: { text: String(body.text ?? "") } };
@@ -745,6 +768,12 @@ const formatSize = (bytes: number): string =>
     : bytes < 1024 * 1024
     ? `${Math.round(bytes / 1024)} KB`
     : `${(bytes / 1048576).toFixed(1)} MB`;
+
+const CheckHandleFragment = template<{ message: string }>((d) => html`${d.message}`, "CheckHandleFragment");
+const InviteFragment = template<{ email: string; phone: string; website: string }>(
+  (d) => inviteForm(appRoutes({ start: "2026-09-14", end: "2026-09-22" }), d),
+  "InviteFragment",
+);
 
 const UploadFragment = template<{ files: DropzoneFile[] }>(
   (d) => Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB", files: d.files }),
