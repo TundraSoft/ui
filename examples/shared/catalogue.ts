@@ -35,7 +35,6 @@ import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
-import { PasswordInput } from "../../components/password/password.ts";
 import { Popover, PopoverTrigger } from "../../components/popover/popover.ts";
 import { Progress, Spinner } from "../../components/progress/progress.ts";
 import { Segmented } from "../../components/segmented/segmented.ts";
@@ -123,7 +122,6 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   combobox: "forms",
   datepicker: "forms",
   otp: "forms",
-  password: "forms",
   dropzone: "forms",
   "form-field": "forms",
   form: "forms",
@@ -953,9 +951,10 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                     help: "At least 12 characters.",
                     span: 6,
                     control: (a) =>
-                      PasswordInput({
+                      Input({
                         id: a.id,
                         name: "password",
+                        type: "password",
                         required: true,
                         minLength: 12,
                         autocomplete: "new-password",
@@ -971,9 +970,10 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                     required: true,
                     span: 6,
                     control: (a) =>
-                      PasswordInput({
+                      Input({
                         id: a.id,
                         name: "confirm",
+                        type: "password",
                         required: true,
                         autocomplete: "new-password",
                         match: "#cv-password",
@@ -1050,6 +1050,71 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             }),
           ),
         ),
+        c(
+          'Input({ type: "password" }) — the password field with its Show/Hide toggle',
+          Input({ id: "cat-pw-1", name: "password", type: "password", required: true }),
+        ),
+        c(
+          "reveal: false — the bare native control",
+          Input({ id: "cat-pw-0", name: "password", type: "password", reveal: false }),
+        ),
+        c(
+          "new password — strength bar (type to see it), strengthMin 3",
+          Input({
+            type: "password",
+            id: "cat-pw-2",
+            name: "password",
+            minLength: 12,
+            autocomplete: "new-password",
+            strength: true,
+            strengthMin: 3,
+          }),
+        ),
+        c(
+          "prefilled — bar scored on load",
+          Input({
+            type: "password",
+            id: "cat-pw-3",
+            name: "password",
+            value: "correct horse battery",
+            strength: true,
+          }),
+        ),
+        c(
+          "confirm — match: '#cat-pw-2'",
+          Input({
+            type: "password",
+            id: "cat-pw-4",
+            name: "confirm",
+            match: "#cat-pw-2",
+          }),
+        ),
+        c(
+          "no reveal toggle, disabled",
+          Input({
+            type: "password",
+            id: "cat-pw-5",
+            name: "password",
+            reveal: false,
+            disabled: true,
+          }),
+        ),
+        c(
+          "in a FormField with a server error",
+          FormField({
+            id: "cat-pw-6",
+            label: "Current password",
+            error: "Wrong password.",
+            control: (a) =>
+              Input({
+                type: "password",
+                id: a.id,
+                name: "password",
+                invalid: a.invalid,
+                attrs: { "aria-describedby": a.describedBy },
+              }),
+          }),
+        ),
       ],
     },
     {
@@ -1091,47 +1156,6 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
-      ],
-    },
-    {
-      name: "password",
-      cases: [
-        c("current password — Show/Hide toggle", PasswordInput({ id: "cat-pw-1", name: "password", required: true })),
-        c(
-          "new password — strength bar (type to see it), strengthMin 3",
-          PasswordInput({
-            id: "cat-pw-2",
-            name: "password",
-            minLength: 12,
-            autocomplete: "new-password",
-            strength: true,
-            strengthMin: 3,
-          }),
-        ),
-        c(
-          "prefilled — bar scored on load",
-          PasswordInput({ id: "cat-pw-3", name: "password", value: "correct horse battery", strength: true }),
-        ),
-        c("confirm — match: '#cat-pw-2'", PasswordInput({ id: "cat-pw-4", name: "confirm", match: "#cat-pw-2" })),
-        c(
-          "no reveal toggle, disabled",
-          PasswordInput({ id: "cat-pw-5", name: "password", reveal: false, disabled: true }),
-        ),
-        c(
-          "in a FormField with a server error",
-          FormField({
-            id: "cat-pw-6",
-            label: "Current password",
-            error: "Wrong password.",
-            control: (a) =>
-              PasswordInput({
-                id: a.id,
-                name: "password",
-                invalid: a.invalid,
-                attrs: { "aria-describedby": a.describedBy },
-              }),
-          }),
-        ),
       ],
     },
     {

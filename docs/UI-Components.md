@@ -26,8 +26,10 @@ Input({ type: "date", name: "due" }); // renders the DatePicker
 Input({ size: "sm" | "md" | "lg" });
 ```
 
-Constraints are typed props that render the native attributes — `required`, `minLength`, `maxLength`, `pattern`, `min`,
-`max`, `step` — plus `match: "#other"` for a confirm field and `messages` (per-rule text for the validator, see
+`type: "password"` renders the [password field](#password-input-type-password) — the same `<input>` with a Show/Hide
+toggle, and `strength` / `strengthMin` / `match` for sign-up forms; `reveal: false` is the bare control. Constraints are
+typed props that render the native attributes — `required`, `minLength`, `maxLength`, `pattern`, `min`, `max`, `step` —
+plus `match: "#other"` for a confirm field and `messages` (per-rule text for the validator, see
 [Form](#formfield-form)). The browser enforces them on its own; `Form({ validate: true })` shows them inline.
 
 `FloatingInput({ id, name, label })` is the floating-label variant. `InputIcon({ icon, control, end? })` puts an icon in
@@ -175,13 +177,14 @@ A native `<input type=file>` covers the area. Upload rows are server state (`pro
 picked file on submit, fills its bar from rAPId's `rapid:progress`, and the reply (the `Dropzone` again, with your rows)
 replaces them. See the [upload recipe](./UI-Recipes.md#5-attachments-with-upload-progress).
 
-### [PasswordInput](./reference/components-password.md)
+### Password (`Input({ type: "password" })`)
 
 ```ts
-PasswordInput({ id: "password", name: "password", required: true }); // sign-in: Show/Hide toggle
-PasswordInput({
+Input({ id: "password", name: "password", type: "password", required: true }); // sign-in: Show/Hide toggle
+Input({
   id: "new-password",
   name: "password",
+  type: "password",
   required: true,
   minLength: 12,
   autocomplete: "new-password",
@@ -189,19 +192,21 @@ PasswordInput({
   strengthMin: 3, // below "Good" the field is invalid
   messages: { strength: "Choose a stronger password." },
 });
-PasswordInput({
+Input({
   id: "confirm",
   name: "confirm",
+  type: "password",
   match: "#new-password",
   messages: { match: "The passwords do not match." },
 });
 ```
 
-The plain `Input` with a Show/Hide toggle, an optional strength bar (length, character classes, repeats, sequences and
-the most common passwords → Too weak / Weak / Good / Strong, hidden while empty, a class change only) and `match` for
-the confirm field. Client-side by nature: without JS it is a password input, nothing more. Pair with
-`Form({ validate: true })` so "too weak" and "does not match" read like any other field error; the server must enforce
-the same rules — the bar is a hint, not a gate.
+`Input({ type: "password" })` renders this field: the plain input with a Show/Hide toggle, an optional strength bar
+(length, character classes, repeats, sequences and the most common passwords → Too weak / Weak / Good / Strong, hidden
+while empty, a class change only) and `match` for the confirm field; `reveal: false` is the bare native control.
+Client-side by nature: without JS it is a password input, nothing more. Pair with `Form({ validate: true })` so "too
+weak" and "does not match" read like any other field error; the server must enforce the same rules — the bar is a hint,
+not a gate.
 
 ### [Editor](./reference/components-editor.md)
 

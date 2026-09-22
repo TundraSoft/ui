@@ -37,7 +37,6 @@ import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Pagination } from "../../components/pagination/pagination.ts";
-import { PasswordInput } from "../../components/password/password.ts";
 import { Popover, PopoverTrigger } from "../../components/popover/popover.ts";
 import { Progress, Spinner } from "../../components/progress/progress.ts";
 import { Segmented } from "../../components/segmented/segmented.ts";
@@ -494,53 +493,6 @@ export const usage: Record<string, UsageExample[]> = {
         }),
     },
   ],
-  "components/password": [
-    {
-      title: "Sign-in: current password with Show/Hide",
-      render: () =>
-        PasswordInput({ id: "current", name: "password", required: true, autocomplete: "current-password" }),
-    },
-    {
-      title: "Sign-up: a new password with the strength bar, and its confirm field",
-      note:
-        "`strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.",
-      render: () =>
-        html`${
-          FormField({
-            id: "new-password",
-            label: "Password",
-            required: true,
-            help: "At least 12 characters, mixed case, a number.",
-            control: (a) =>
-              PasswordInput({
-                id: a.id,
-                name: "password",
-                required: true,
-                minLength: 12,
-                autocomplete: "new-password",
-                strength: true,
-                strengthMin: 3,
-                messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
-              }),
-          })
-        }${
-          FormField({
-            id: "confirm",
-            label: "Confirm password",
-            required: true,
-            control: (a) =>
-              PasswordInput({
-                id: a.id,
-                name: "confirm",
-                required: true,
-                autocomplete: "new-password",
-                match: "#new-password",
-                messages: { match: "The passwords do not match." },
-              }),
-          })
-        }`,
-    },
-  ],
   "components/form-field": [
     {
       title: "A field with help text",
@@ -653,6 +605,59 @@ export const usage: Record<string, UsageExample[]> = {
         }),
     },
     { title: "A floating label", render: () => FloatingInput({ id: "company", name: "company", label: "Company" }) },
+    {
+      title: "Password: the bare control",
+      note:
+        "`reveal: false` gives the native control alone — for an `InputGroup`, or a page that must not offer to reveal the value.",
+      render: () => Input({ id: "pw-bare", name: "password", type: "password", reveal: false }),
+    },
+    {
+      title: 'Sign-in: current password with Show/Hide (what `Input({ type: "password" })` renders)',
+      render: () =>
+        Input({ id: "current", name: "password", type: "password", required: true, autocomplete: "current-password" }),
+    },
+    {
+      title: "Password: sign-up, with the strength bar and a confirm field",
+      note:
+        "`strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.",
+      render: () =>
+        html`${
+          FormField({
+            id: "new-password",
+            label: "Password",
+            required: true,
+            help: "At least 12 characters, mixed case, a number.",
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "password",
+                type: "password",
+                required: true,
+                minLength: 12,
+                autocomplete: "new-password",
+                strength: true,
+                strengthMin: 3,
+                messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
+              }),
+          })
+        }${
+          FormField({
+            id: "confirm",
+            label: "Confirm password",
+            required: true,
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "confirm",
+                type: "password",
+                required: true,
+                autocomplete: "new-password",
+                match: "#new-password",
+                messages: { match: "The passwords do not match." },
+              }),
+          })
+        }`,
+    },
   ],
   "components/menu": [
     {

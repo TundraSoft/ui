@@ -470,7 +470,15 @@ skipped. `components/password/` (`PasswordInput`) wraps `Input({ type: "password
 the root; password.js scores length vs `minlength`, character classes, repeats, sequences and a 30-entry common list)
 and `strengthMin`, which password.js enforces through `setCustomValidity` so form.js reports it like any rule;
 password.js listens to `input` in the **capture** phase so the validity is fresh when form.js reads it on the same
-keystroke. The server must enforce every rule too — the client layer is feedback, never the gate (docs say so).
+keystroke. The server must enforce every rule too — the client layer is feedback, never the gate (docs say so). Same
+day: **`Input({ type: "password" })` delegates to `PasswordInput`** the way `type: "date"` delegates to `DatePicker` —
+the toggle by default; `strength`/`strengthMin`/`reveal` are password-only props on `Input`; `reveal: false` is the bare
+control (and what `PasswordInput` itself passes when it calls `Input`, which is how the two modules import each other
+without recursing). Every existing `type: "password"` call site gained the toggle with no other change; the docs and
+usage examples teach the `Input` form, the separate `PasswordInput` export lasted one release (0.7.0): the user asked
+whether it was still needed, and it was not — `components/password/` is gone, the template is `PasswordField()` inside
+`input.ts`, its CSS is in `input.css` (class names `.password*` kept) and its script is `input.js`;
+`PasswordStrength`/`PasswordLabels` (`passwordLabels` prop) are exported from `input`.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes

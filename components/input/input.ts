@@ -37,6 +37,23 @@ export type InputProps = {
   match?: string;
   /** Per-rule messages for the validator, replacing the browser's wording. */
   messages?: ValidationMessages;
+  /**
+   * `type: "password"` only: show the strength bar (new passwords). The
+   * password field has a Show/Hide toggle by default, the
+   * bar with `strength`, `strengthMin` as the validator's floor, `match`
+   * for a confirm field.
+   */
+  strength?: boolean;
+  /** `type: "password"` only, with `strength`: the lowest level (1–4) the validator accepts. */
+  strengthMin?: PasswordStrength;
+  /**
+   * `type: "password"` only: `false` renders the bare native control (no
+   * toggle, no bar) — inside an `InputGroup`, or when the page must not
+   * offer to reveal the value.
+   */
+  reveal?: boolean;
+  /** `type: "password"` only: the toggle's and strength levels' text, for translation. */
+  passwordLabels?: Partial<PasswordLabels>;
   /** Extra classes, e.g. `input-group__control` when nested in an InputGroup. */
   extraClass?: string;
   attrs?: Attrs;
@@ -55,6 +72,8 @@ export type ValidationMessages = {
   step?: string;
   /** For `match`. */
   match?: string;
+  /** For a password's `strengthMin`. */
+  strength?: string;
 };
 
 /** A number or string prop as an attribute value; undefined stays omitted. */
@@ -90,6 +109,69 @@ const SIZE_CLASS: Record<InputSize, string> = {
  * `id` or `name` (ids are deterministic, §4). `disabled` disables the
  * trigger; `required`/`invalid` are the surrounding FormField's job.
  */
+export type PasswordStrength = 1 | 2 | 3 | 4;
+
+/** Text of the password field's toggle and strength levels, for translation (`passwordLabels`). */
+export type PasswordLabels = {
+  show: string;
+  hide: string;
+  strength: string;
+  levels: readonly [string, string, string, string];
+};
+
+const PASSWORD_LABELS: PasswordLabels = {
+  show: "Show",
+  hide: "Hide",
+  strength: "Password strength",
+  levels: ["Too weak", "Weak", "Good", "Strong"],
+};
+
+/**
+ * What `Input({ type: "password" })` renders: the bare control inside a
+ * wrapper with a Show/Hide toggle (`.js-only`), an optional strength bar
+ * (`strength`; input.js scores the value into `data-strength-level` 0–4,
+ * `strengthMin` becomes a custom validity the validator reports) and
+ * `match` for a confirm field. Without JS it is a password input, nothing
+ * more; `reveal: false` renders the bare control alone.
+ */
+function PasswordField(props: InputProps): Html {
+  const id = props.id ?? props.name ?? "password";
+  const labels = { ...PASSWORD_LABELS, ...props.passwordLabels };
+  const control = Input({
+    ...props,
+    id,
+    name: props.name ?? id,
+    autocomplete: props.autocomplete ?? "current-password",
+    reveal: false,
+    extraClass: props.extraClass ? `password__input ${props.extraClass}` : "password__input",
+    attrs: {
+      ...props.attrs,
+      "data-strength-min": props.strength && props.strengthMin ? String(props.strengthMin) : undefined,
+      "data-msg-strength": props.messages?.strength,
+    },
+  });
+  const reveal = html`
+    <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="${id}"
+      aria-pressed="false" data-label-show="${labels.show}" data-label-hide="${labels.hide}">${labels.show}</button>
+  `;
+  const strength = props.strength
+    ? html`
+      <div class="password__strength js-only" data-password-strength hidden>
+        <div class="password__bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <p
+          class="password__strength-label"><span class="sr-only">${labels
+            .strength}: </span><span data-password-label ${renderAttrs({
+              "data-levels": labels.levels.join("|"),
+            })}></span></p>
+      </div>
+    `
+    : "";
+  return html`
+    <div class="password" data-password
+      data-strength-level="0"><div class="password__field">${control}${reveal}</div>${strength}</div>
+  `;
+}
+
 function DateInput(props: InputProps): Html {
   const name = props.name ?? props.id ?? "date";
   return DatePicker({
@@ -104,6 +186,7 @@ function DateInput(props: InputProps): Html {
 
 export function Input(props: InputProps): Html {
   if (props.type === "date") return DateInput(props);
+  if (props.type === "password" && props.reveal !== false) return PasswordField(props);
 
   const className = cx(
     "input",

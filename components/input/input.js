@@ -1,5 +1,5 @@
 /*
- * Password field (PasswordInput): the Show/Hide toggle flips the input's
+ * Password field (Input({ type: "password" })): the Show/Hide toggle flips the input's
  * type; the strength bar scores the value on every keystroke — length,
  * character classes, repeated characters, keyboard/number sequences and
  * the most common passwords — into levels 1–4 written to
