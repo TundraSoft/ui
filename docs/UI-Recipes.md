@@ -10,7 +10,7 @@ type-checked against the library on every change; the HTML blocks are what that 
 ## TL;DR
 
 - Every recipe is one page or one region a product actually has: an app shell, sign-in, a dashboard, an invoices table
-  with bulk actions, attachments with upload progress, search, notifications.
+  with bulk actions, attachments with upload progress, search, notifications, an international contact form.
 - **rAPId**: the template is a function of typed data; a route returns that data (the whole page on a navigation, one
   region on a swap). Nothing is hand-wired on the client.
 - **Plain HTML**: the same markup, served by your framework of choice. The behaviour script in `ui.js` keys off `data-*`
@@ -956,6 +956,207 @@ Keep toasts in a `<template>` and play them with a button that carries `data-toa
 `ui.js` clones the template into the region, dismisses on the close button or after `data-toast-autodismiss`
 milliseconds, and stacks several. Server-rendered pages can also just include the toast markup in the region on the next
 render.
+
+---
+
+## 8. An international contact form
+
+Four fields that each know something about the world: an email restricted to the company's domains, a phone with its
+country code and flag, a website with the scheme fixed, and a market picker with flags in the list. Each composite field
+posts **two plain fields**, and the handler joins them.
+
+### Flags first
+
+The library ships no flag artwork, on purpose: flags are multicolour detail next to an icon set of single-colour
+primitives, a full set weighs more than the whole bundle, emoji flags render as two letters on Windows, and flags change
+and some are disputed. `CountryCode.flag` and `SelectOption.lead` take any `Html`, so bring the set you want with the
+same one-line helper the icon docs use:
+
+```ts
+import { raw } from "@tundralibs/rapid/ui";
+import flagSvg from "some-flag-set"; // any package that gives you SVG strings
+
+/** Constant markup, never user data — that is what makes `raw()` safe here. */
+const flag = (code: string) => raw(flagSvg[code]);
+
+const countries = [
+  { code: "+49", label: "DE", flag: flag("de") },
+  { code: "+33", label: "FR", flag: flag("fr") },
+];
+```
+
+The repository's demos draw five flags by hand in `examples/shared/flags.ts` through exactly that helper, so the
+examples need no dependency.
+
+### rAPId
+
+```ts
+import { Alert } from "@tundralibs/ui/alert";
+import { Input } from "@tundralibs/ui/input";
+import { Select } from "@tundralibs/ui/select";
+import { emailFrom, telFrom, urlFrom } from "@tundralibs/ui/shared/compose";
+
+type Contact = { email: string; phone: string; website: string; market: string };
+
+const contactForm = (received?: Contact) =>
+  Form({
+    id: "contact",
+    action: "/contact",
+    validate: true, // inline messages
+    guard: true, // warn before leaving with unsaved edits
+    attrs: { "data-action": "/contact", "data-target": "#contact", "data-swap": "outer" },
+    content: html`${
+      received
+        ? Alert({
+          id: "contact-received",
+          variant: "success",
+          title: "Received",
+          body: html`<code>${received.email}</code> · <code>${received.phone}</code>`,
+        })
+        : ""
+    }${
+      FormGrid({
+        fields: [
+          FormField({
+            id: "c-email",
+            label: "Work email",
+            required: true,
+            help: "Company addresses only.",
+            span: 6,
+            control: (a) =>
+              Input({
+                id: a.id,
+                name: "email",
+                type: "email",
+                required: true,
+                domains: ["acme.com", "acme.io"],
+                messages: { required: "Enter the part before the @.", pattern: "Just the part before the @." },
+                attrs: { "aria-describedby": a.describedBy },
+              }),
+          }),
+          FormField({
+            id: "c-phone",
+            label: "Phone",
+            span: 6,
+            control: (a) => Input({ id: a.id, name: "phone", type: "tel", countries }),
+          }),
+          FormField({
+            id: "c-website",
+            label: "Website",
+            span: 6,
+            control: (a) => Input({ id: a.id, name: "website", type: "url", scheme: "https://" }),
+          }),
+          FormField({
+            id: "c-market",
+            label: "Primary market",
+            span: 6,
+            control: (a) =>
+              Select({
+                id: a.id,
+                name: "market",
+                value: "de",
+                options: [{ value: "fr", label: "France", lead: flag("fr") }, {
+                  value: "de",
+                  label: "Germany",
+                  lead: flag("de"),
+                }],
+              }),
+          }),
+        ],
+      })
+    }${FormActions({ content: Button({ label: "Send", type: "submit" }) })}`,
+  });
+
+const ContactPage = template<{ received?: Contact }>((d) => contactForm(d.received), "ContactPage");
+
+app.get("/contact", { template: ContactPage }, () => ({ content: {} }));
+app.post("/contact", { template: { render: ContactPage, prefer: "html" } }, async (ctx) => {
+  const body = ((await ctx.payload) ?? {}) as Record<string, unknown>;
+  const received: Contact = {
+    email: emailFrom(body, "email") ?? "", // "grace" + "acme.io" → "grace@acme.io"
+    phone: telFrom(body, "phone") ?? "", // "+49" + "30 901820" → "+49 30 901820"
+    website: urlFrom(body, "website") ?? "", // "https://" + "acme.com" → "https://acme.com"
+    market: String(body.market ?? ""),
+  };
+  await leads.record(received);
+  if (!ctx.isSwap) return { content: { received }, redirect: "/contact/thanks" };
+  return { content: { received } };
+});
+```
+
+The parts are named after the field: `email` and `email-domain`, `phone-country` and `phone`, `website-scheme` and
+`website`. Each `*From` helper passes a value through untouched when it already carries the other half, so the same
+handler accepts a plain `Input` posting one whole value.
+
+### Plain HTML
+
+The same markup, served by anything. The email field, trimmed of the domain list's options:
+
+```html
+<div class="input-group input-group--email" data-email-domains>
+  <input type="text" class="input input-group__control" id="c-email" name="email" required pattern="[^@\s]+"
+    inputmode="email" autocomplete="off" data-email-local=""
+    data-msg-required="Enter the part before the @." data-msg-pattern="Just the part before the @.">
+  <span class="input-group__addon input-group__at" aria-hidden="true">@</span>
+  <span class="input-group__addon">
+    <div class="select" data-select>
+      <select class="select__native" id="c-email-domain-native" name="email-domain" aria-label="Email domain">
+        <option value="acme.com" selected>acme.com</option>
+        <option value="acme.io">acme.io</option>
+      </select>
+      <div class="combobox select__ui" data-combobox data-select-ui>…</div>
+    </div>
+  </span>
+</div>
+```
+
+The phone and the market picker are the same select markup with a flag in two places: `.select__lead` in the closed
+field, and `.combobox__option-lead` on each option. The script clones the one from the other when the value changes:
+
+```html
+<div class="input-group input-group--tel" data-tel-countries>
+  <span class="input-group__addon">
+    <div class="select" data-select>
+      <select class="select__native" id="c-phone-country-native" name="phone-country" aria-label="Country code"
+        autocomplete="tel-country-code">
+        <option value="+33" selected>+33 FR</option>
+        <option value="+49">+49 DE</option>
+      </select>
+      <div class="combobox select__ui" data-combobox data-select-ui>
+        <div class="combobox__anchor">
+          <div class="combobox__field">
+            <span class="select__lead" data-select-lead aria-hidden="true"><svg …>…</svg></span>
+            <input type="hidden" value="+33" data-combobox-value>
+            <input class="combobox__input" id="c-phone-country" type="text" role="combobox" readonly value="+33 FR"
+              aria-expanded="false" aria-controls="c-phone-country-list" aria-autocomplete="none">
+            <span class="combobox__caret"><svg …>…</svg></span>
+          </div>
+          <div class="combobox__list" id="c-phone-country-list" role="listbox" hidden>
+            <div class="combobox__option" role="option" id="c-phone-country-opt-0" aria-selected="true" data-value="+33">
+              <span class="combobox__option-lead"><svg …>…</svg></span>
+              <span class="combobox__option-label">+33 FR</span>
+            </div>
+            …
+          </div>
+        </div>
+      </div>
+    </div>
+  </span>
+  <input type="text" class="input input-group__control" id="c-phone" name="phone" inputmode="tel"
+    pattern="[0-9 \(\)\-]{4,20}" autocomplete="tel-national">
+</div>
+
+<div class="input-group input-group--url" data-url-scheme>
+  <span class="input-group__addon">https://<input type="hidden" name="website-scheme" value="https://"></span>
+  <input type="text" class="input input-group__control" id="c-website" name="website" inputmode="url"
+    pattern="[^\s\/][^\s]*" autocomplete="url" placeholder="acme.com">
+</div>
+```
+
+Without JavaScript the native `<select>` is what shows and submits, the flags come with it as plain option text, and
+every `pattern` is enforced by the browser. Two notes for the patterns you write yourself: browsers compile them with
+the `v` flag, so `-`, `(`, `)` and `/` must be escaped inside a character class, and the server still validates
+everything.
 
 ---
 

@@ -527,7 +527,10 @@ from this project once already), and flags change and are disputed, which is a d
 hook: `SelectOption.lead` (an `Html` slot the Combobox already had and `Select` was dropping) renders before the label
 in the list and, cloned by select.js on every change, beside the value in the closed field; `CountryCode.flag` maps to
 it. `examples/shared/flags.ts` draws five flags by hand from rects and a circle to demo the documented `raw()` recipe —
-examples are not published, so that stays out of the library.
+examples are not published, so that stays out of the library. `docs/UI-Recipes.md` §8 "An international contact form" is
+the worked example for the whole composite-field family (email domains, tel countries + flags, url scheme, a `Select`
+with flag leads, the handler joining the parts with `*From`), code in `examples/docs/recipes.ts` like every other
+recipe.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes
