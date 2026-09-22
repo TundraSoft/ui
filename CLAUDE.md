@@ -520,7 +520,14 @@ making up the difference; and `type="search"` showed two clear buttons, ours and
 `::-webkit-search-cancel-button` is suppressed inside `.input-clear`. Also learned here: the `v` flag is strict inside a
 character class — `(`, `)` and `/` need escaping as well as `-` (two patterns shipped broken and only the app suite's
 console-error capture caught them), and form.js's async check must send the swap header (`rapid-swap`) or rAPId answers
-with the whole document, and must take `textContent` of the fragment rather than its markup.
+with the whole document, and must take `textContent` of the fragment rather than its markup. Flags, asked for next: the
+library **ships no flag artwork** and should not — multicolour detail against an icon set of single-colour primitives,
+hundreds of kilobytes against a ~150 KB bundle, emoji flags render as two letters on Windows (and emoji were removed
+from this project once already), and flags change and are disputed, which is a data product's job. What ships is the
+hook: `SelectOption.lead` (an `Html` slot the Combobox already had and `Select` was dropping) renders before the label
+in the list and, cloned by select.js on every change, beside the value in the closed field; `CountryCode.flag` maps to
+it. `examples/shared/flags.ts` draws five flags by hand from rects and a circle to demo the documented `raw()` recipe —
+examples are not published, so that stays out of the library.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes

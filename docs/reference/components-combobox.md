@@ -141,7 +141,7 @@ ComboboxList({
 
 Classes defined by `components/combobox/combobox.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox`, `.combobox--multi`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-meta`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
+`.combobox`, `.combobox--multi`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
 
 ## Behaviour
 

@@ -30,6 +30,7 @@ import { FormActions, FormField, FormGrid } from "../../components/form-field/fo
 import { Form } from "../../components/form/form.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { Counter, FloatingInput, Input, InputGroup, InputIcon } from "../../components/input/input.ts";
+import { flags, sampleCountries } from "./flags.ts";
 import { Menu } from "../../components/menu/menu.ts";
 import { Modal } from "../../components/modal/modal.ts";
 import { Navbar } from "../../components/navbar/navbar.ts";
@@ -1031,6 +1032,10 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "type tel + countries with flags — the library ships none; the demo draws five (examples/shared/flags.ts)",
+          Input({ id: "cat-tel-2", name: "phone", type: "tel", countries: sampleCountries, value: "+49 30 901820" }),
+        ),
+        c(
           "type url + scheme — https:// fixed, the rest typed",
           Input({ id: "cat-url-1", name: "website", type: "url", scheme: "https://", value: "https://acme.com/team" }),
         ),
@@ -1460,6 +1465,20 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "select",
       cases: [
+        c(
+          "options with a lead — any Html before the label, here a flag",
+          Select({
+            id: "cat-sel-lead",
+            name: "market",
+            value: "de",
+            options: [
+              { value: "fr", label: "France", lead: flags.fr },
+              { value: "de", label: "Germany", lead: flags.de },
+              { value: "it", label: "Italy", lead: flags.it },
+              { value: "se", label: "Sweden", lead: flags.se },
+            ],
+          }),
+        ),
         c(
           "plain / placeholder / value",
           row(

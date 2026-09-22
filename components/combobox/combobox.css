@@ -125,6 +125,12 @@
   background: var(--color-surface-sunken);
 }
 
+.combobox__option-lead {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
 .combobox__option-label {
   flex: 1 1 auto;
   min-width: 0;

@@ -16,6 +16,7 @@ import { Badge, Chip } from "../../components/badge/badge.ts";
 import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
 import { Button, ButtonGroup } from "../../components/button/button.ts";
 import { Card } from "../../components/card/card.ts";
+import { flags, sampleCountries } from "../shared/flags.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
 import { Chart, ChartScript } from "../../components/chart/chart.ts";
 import { Checkbox, ChoiceGroup, Radio } from "../../components/choice/choice.ts";
@@ -615,6 +616,12 @@ export const usage: Record<string, UsageExample[]> = {
         }),
     },
     {
+      title: "The same, with flags",
+      note:
+        "The library ships no flag artwork. `flag` takes any `Html`, so wrap a licensed set in `raw()` once. These five are drawn by hand in `examples/shared/flags.ts`.",
+      render: () => Input({ id: "phone-flags", name: "phone", type: "tel", countries: sampleCountries }),
+    },
+    {
       title: "A website with the scheme fixed",
       note: "The scheme is submitted as a hidden `<name>-scheme`; `urlFrom()` joins it.",
       render: () => Input({ id: "site", name: "website", type: "url", scheme: "https://", placeholder: "acme.com" }),
@@ -871,6 +878,22 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/select": [
+    {
+      title: "Options with a lead",
+      note:
+        "`lead` is any `Html` before the label in the list, and beside the value in the closed field — a flag, an avatar, a colour swatch.",
+      render: () =>
+        Select({
+          id: "market",
+          name: "market",
+          value: "de",
+          options: [{ value: "fr", label: "France", lead: flags.fr }, {
+            value: "de",
+            label: "Germany",
+            lead: flags.de,
+          }],
+        }),
+    },
     {
       title: "A plan picker",
       note: "Looks like the combobox; a native `<select>` carries `name` and is what submits.",

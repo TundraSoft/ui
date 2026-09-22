@@ -4,7 +4,9 @@
  * native control (filter.js, a form's own script) sees a normal select;
  * a programmatic/autofill change on the native control repaints the UI.
  * Typing in the read-only field jumps to the first option starting with
- * those letters, like a native select does. */
+ * those letters, like a native select does. An option's `lead` (a flag,
+ * an avatar) is cloned from the list into the closed field so the field
+ * shows what the list showed. */
 (() => {
   function ui(select) {
     const root = select.querySelector("[data-select-ui]");
@@ -44,6 +46,11 @@
       : "";
     if (u.hidden) u.hidden.value = value;
     if (u.input && u.input.value !== label) u.input.value = label;
+    const slot = select.querySelector("[data-select-lead]");
+    if (slot) {
+      const lead = picked?.querySelector(".combobox__option-lead");
+      slot.replaceChildren(...(lead ? [...lead.cloneNode(true).childNodes] : []));
+    }
     u.options.forEach((o) => o.setAttribute("aria-selected", String(o === picked)));
   });
 

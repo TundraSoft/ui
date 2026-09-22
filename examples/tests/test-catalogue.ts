@@ -533,6 +533,16 @@ for (const group of catalogueGroups) {
       composites.urlScheme === "https://" && composites.urlRest === "acme.com/team",
       `forms: url scheme split the value (${JSON.stringify(composites)})`,
     );
+    const flagged = await page.evaluate(() => {
+      const root = document.querySelector("#cat-tel-2")!.closest("[data-tel-countries]")!;
+      const field = root.querySelector("[data-select-lead] svg");
+      const option = root.querySelector('[role="option"] .combobox__option-lead svg');
+      return { field: !!field, option: !!option, rects: field?.querySelectorAll("rect").length ?? 0 };
+    });
+    check(
+      flagged.field && flagged.option && flagged.rects > 1,
+      `forms: a country flag shows in the list and the closed field (${JSON.stringify(flagged)})`,
+    );
     check(
       composites.prefix === "$" && composites.decimal === "decimal",
       `forms: prefix addon + decimal keyboard (${JSON.stringify(composites)})`,

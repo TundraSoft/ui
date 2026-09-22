@@ -8,6 +8,12 @@ export type SelectOption = {
   value: string;
   label: string;
   disabled?: boolean;
+  /**
+   * Rendered before the label in the list, and beside the value in the
+   * closed field — a flag, an avatar, a colour swatch, a brand mark. The
+   * library ships no flag artwork; pass your own (see `CountryCode.flag`).
+   */
+  lead?: Html;
 };
 
 export type SelectProps = {
@@ -78,11 +84,15 @@ export function Select(props: SelectProps): Html {
     `
   );
 
+  const hasLeads = props.options.some((o) => o.lead);
+
   return html`
     <div class="${wrapperClass}"
       data-select><select class="select__native"${renderAttrs(
         nativeAttrs,
-      )}>${placeholderOption}${options}</select><div class="combobox select__ui" data-combobox data-select-ui><div class="combobox__anchor"><div class="combobox__field"><input type="hidden" value="${current
+      )}>${placeholderOption}${options}</select><div class="combobox select__ui" data-combobox data-select-ui><div class="combobox__anchor"><div class="combobox__field">${hasLeads
+        ? html`<span class="select__lead" data-select-lead aria-hidden="true">${current?.lead ?? ""}</span>`
+        : ""}<input type="hidden" value="${current
         ?.value ??
         ""}" data-combobox-value><input class="combobox__input" id="${base}" type="text" role="combobox" readonly autocomplete="off" value="${current
         ?.label ?? ""}" placeholder="${props.placeholder ??

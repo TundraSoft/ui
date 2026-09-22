@@ -44,6 +44,19 @@ Input({ type: "search", name: "q" }); // a clear button, on by default (clearabl
 Input({ name: "handle", validateAction: "/fragments/check-handle" }); // asks the server on blur ("taken")
 ```
 
+Country codes take a `flag`, and `SelectOption` takes a `lead` — any `Html` shown before the label in the list and
+beside the value in the closed field. **The library ships no flag artwork**: flags are multicolour, heavy, and they
+change, so they belong to a set you choose. Bring one the way the icon docs describe:
+
+```ts
+import { raw } from "@tundralibs/rapid/ui";
+import flags from "some-flag-set"; // any package that gives you SVG strings
+const flag = (code: string) => raw(flags[code]); // constant markup, never user data
+
+Input({ type: "tel", name: "phone", countries: [{ code: "+44", label: "UK", flag: flag("gb") }] });
+Select({ name: "market", options: [{ value: "de", label: "Germany", lead: flag("de") }] });
+```
+
 The composite fields (email domains, tel countries, url scheme) submit two parts each; a handler joins them with
 `emailFrom` / `telFrom` / `urlFrom` from `@tundralibs/ui/shared/compose`, which also pass a whole value through
 untouched. `validateAction` posts `<name>=<value>` once the native rules pass and shows a non-empty text reply as the

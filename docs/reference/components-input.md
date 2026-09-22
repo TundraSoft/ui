@@ -68,12 +68,17 @@ InputGroup(props: InputGroupProps): Html
 
 ### `CountryCode`
 
-A country code for `Input({ type: "tel", countries })`: `{ code: "+44", label: "UK" }`.
+A country code for `Input({ type: "tel", countries })`:
+`{ code: "+44", label: "UK" }`. `flag` is any `Html` shown before the
+code in the list and in the closed field — the library ships no flag
+artwork (it is multicolour, heavy, and changes), so bring a set:
+`flag: raw(flags.gb)` over any package that gives you SVG strings.
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `code` | `string` | yes |  |
 | `label` | `string` |  |  |
+| `flag` | `Html` |  |  |
 
 ### `InputProps`
 
@@ -287,6 +292,85 @@ Input({
     </div>
   </span>
   <input type="tel" class="input input-group__control" inputmode="tel" id="phone" name="phone" pattern="[0-9 \(\)\-]{4,20}" autocomplete="tel-national">
+</div>
+```
+
+### The same, with flags
+
+The library ships no flag artwork. `flag` takes any `Html`, so wrap a licensed set in `raw()` once. These five are drawn by hand in `examples/shared/flags.ts`.
+
+```ts
+Input({ id: "phone-flags", name: "phone", type: "tel", countries: sampleCountries })
+```
+
+```html
+<div class="input-group input-group--tel" data-tel-countries>
+  <span class="input-group__addon">
+    <div class="select" data-select>
+      <select class="select__native" aria-label="Country code" autocomplete="tel-country-code" id="phone-flags-country-native" name="phone-country">
+        <option value="+33" selected>+33 FR</option>
+        <option value="+49">+49 DE</option>
+        <option value="+39">+39 IT</option>
+        <option value="+81">+81 JP</option>
+        <option value="+46">+46 SE</option>
+      </select>
+      <div class="combobox select__ui" data-combobox data-select-ui>
+        <div class="combobox__anchor">
+          <div class="combobox__field">
+            <span class="select__lead" data-select-lead aria-hidden="true">
+              <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+            </span>
+            <input type="hidden" value="+33" data-combobox-value>
+            <input class="combobox__input" id="phone-flags-country" type="text" role="combobox" readonly autocomplete="off" value="+33 FR" placeholder="" aria-expanded="false" aria-controls="phone-flags-country-list" aria-autocomplete="none">
+            <span class="combobox__caret">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__list" id="phone-flags-country-list" role="listbox" hidden>
+            <div class="combobox__option" role="option" id="phone-flags-country-opt-0" aria-selected="true" data-value="+33">
+              <span class="combobox__option-lead">
+                <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+              </span>
+              <span class="combobox__option-label">+33 FR</span>
+              <span class="combobox__check">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__option" role="option" id="phone-flags-country-opt-1" aria-selected="false" data-value="+49">
+              <span class="combobox__option-lead">
+                <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
+              </span>
+              <span class="combobox__option-label">+49 DE</span>
+            </div>
+            <div class="combobox__option" role="option" id="phone-flags-country-opt-2" aria-selected="false" data-value="+39">
+              <span class="combobox__option-lead">
+                <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+              </span>
+              <span class="combobox__option-label">+39 IT</span>
+            </div>
+            <div class="combobox__option" role="option" id="phone-flags-country-opt-3" aria-selected="false" data-value="+81">
+              <span class="combobox__option-lead">
+                <svg width="20" height="14" width="24" height="16" …>…</svg>
+              </span>
+              <span class="combobox__option-label">+81 JP</span>
+            </div>
+            <div class="combobox__option" role="option" id="phone-flags-country-opt-4" aria-selected="false" data-value="+46">
+              <span class="combobox__option-lead">
+                <svg width="20" height="14" width="24" height="16" width="24" height="16" width="3" height="16" width="24" height="3" …>…</svg>
+              </span>
+              <span class="combobox__option-label">+46 SE</span>
+            </div>
+            <div class="combobox__hints">
+              <span>&uarr;&darr; navigate</span>
+              <span>&crarr; select</span>
+              <span class="combobox__count">5 matches</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </span>
+  <input type="tel" class="input input-group__control" inputmode="tel" id="phone-flags" name="phone" pattern="[0-9 \(\)\-]{4,20}" autocomplete="tel-national">
 </div>
 ```
 

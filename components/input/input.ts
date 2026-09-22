@@ -7,8 +7,14 @@ import { Icon } from "../../shared/icons.ts";
 
 export type InputSize = "sm" | "md" | "lg";
 
-/** A country code for `Input({ type: "tel", countries })`: `{ code: "+44", label: "UK" }`. */
-export type CountryCode = { code: string; label?: string };
+/**
+ * A country code for `Input({ type: "tel", countries })`:
+ * `{ code: "+44", label: "UK" }`. `flag` is any `Html` shown before the
+ * code in the list and in the closed field — the library ships no flag
+ * artwork (it is multicolour, heavy, and changes), so bring a set:
+ * `flag: raw(flags.gb)` over any package that gives you SVG strings.
+ */
+export type CountryCode = { code: string; label?: string; flag?: Html };
 
 export type InputProps = {
   id?: string;
@@ -331,7 +337,11 @@ function TelCountriesField(props: InputProps, countries: CountryCode[]): Html {
         id: `${id}-country`,
         name: `${name}-country`,
         value: match?.code ?? countries[0]?.code,
-        options: countries.map((c) => ({ value: c.code, label: c.label ? `${c.code} ${c.label}` : c.code })),
+        options: countries.map((c) => ({
+          value: c.code,
+          label: c.label ? `${c.code} ${c.label}` : c.code,
+          lead: c.flag,
+        })),
         disabled: props.disabled,
         attrs: { "aria-label": "Country code", autocomplete: "tel-country-code" },
       })}</span>${control}</div>
