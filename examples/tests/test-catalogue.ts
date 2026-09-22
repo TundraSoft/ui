@@ -240,13 +240,22 @@ for (const group of catalogueGroups) {
     const closedAgain = await page.$eval(".input-group .select .combobox__list", (el) => el.hasAttribute("hidden"));
     check(closedAgain, "forms: clicking the caret again did not close the list");
 
-    // editor: markdown toolbar wraps the selection; html surface mirrors into the textarea
+    // editor: markdown toolbar wraps the selection; html surface mirrors into the textarea.
+    // Scroll first so Puppeteer's click needs no scroll of its own (a scroll between
+    // selecting and clicking dropped the selection under Bun once), and wait for the
+    // wrap rather than reading the value on the next tick.
+    await page.evaluate(() => document.querySelector("#note-editor")?.scrollIntoView({ block: "center" }));
+    await pause();
     await page.$eval("#note", (el) => {
       const ta = el as HTMLTextAreaElement;
       ta.focus();
       ta.setSelectionRange(0, 13);
     });
     await page.click('#note-editor [data-editor-cmd="bold"]');
+    await page.waitForFunction(
+      () => (document.querySelector("#note") as HTMLTextAreaElement).value.startsWith("**"),
+      { timeout: 2000 },
+    ).catch(() => {});
     const md = await page.$eval("#note", (el) => (el as HTMLTextAreaElement).value);
     check(md.startsWith("**Release notes**"), `forms: markdown bold did not wrap the selection (${md.slice(0, 30)})`);
     await page.click('#note-editor [data-editor-view="preview"]');
