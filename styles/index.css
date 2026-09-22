@@ -60,5 +60,4 @@
 @import "../components/stat/stat.css" layer(components);
 @import "../components/toolbar/toolbar.css" layer(components);
 @import "../components/otp/otp.css" layer(components);
-@import "../components/password/password.css" layer(components);
 @import "../components/editor/editor.css" layer(components);

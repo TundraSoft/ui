@@ -220,9 +220,10 @@ app.post("/signin", { template: { render: SignInPage, prefer: "html" }, layout: 
 });
 ```
 
-The form's `id` is the swap target, so a validation failure re-renders just the form in place, with the values the
-server chose to keep. Pass the error's `fields[name]` to each `FormField`, and use the `control` callback so the input
-gets `aria-describedby` and `aria-invalid` for free. `layout: false` because `AuthLayout` is a complete frame.
+`Input({ type: "password" })` renders the password field with its Show/Hide toggle (the `.js-only` button is hidden
+without JS). The form's `id` is the swap target, so a validation failure re-renders just the form in place, with the
+values the server chose to keep. Pass the error's `fields[name]` to each `FormField`, and use the `control` callback so
+the input gets `aria-describedby` and `aria-invalid` for free. `layout: false` because `AuthLayout` is a complete frame.
 
 ### Plain HTML
 
@@ -239,7 +240,14 @@ The clean form, and (second block) the same form as the server re-renders it aft
     <div class="form-field">
       <label class="form-field__label"
         for="password">Password<span class="form-field__required" aria-hidden="true">*</span></label>
-      <input type="password" class="input" autocomplete="current-password" id="password" name="password">
+      <div class="password" data-password data-strength-level="0">
+        <div class="password__field">
+          <input type="password" class="input password__input" autocomplete="current-password" id="password"
+            name="password">
+          <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="password"
+            aria-pressed="false" data-label-show="Show" data-label-hide="Hide">Show</button>
+        </div>
+      </div>
     </div>
     <label class="switch">
       <input type="checkbox" class="switch__input" name="remember">
@@ -269,8 +277,14 @@ The clean form, and (second block) the same form as the server re-renders it aft
     </div>
     <div class="form-field">
       <label class="form-field__label" for="password">Password<span class="form-field__required" aria-hidden="true">*</span></label>
-      <input type="password" class="input input--invalid" aria-describedby="password-error" autocomplete="current-password"
-        id="password" name="password" aria-invalid="true">
+      <div class="password" data-password data-strength-level="0">
+        <div class="password__field">
+          <input type="password" class="input password__input input--invalid" aria-describedby="password-error"
+            autocomplete="current-password" id="password" name="password" aria-invalid="true">
+          <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="password"
+            aria-pressed="false" data-label-show="Show" data-label-hide="Hide">Show</button>
+        </div>
+      </div>
       <p class="form-field__error" id="password-error" role="alert">Wrong password.</p>
     </div>
     …

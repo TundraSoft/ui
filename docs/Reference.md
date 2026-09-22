@@ -33,7 +33,6 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [otp](reference/components-otp.md) — `Otp`
 - [page-header](reference/components-page-header.md) — `PageHeader`
 - [pagination](reference/components-pagination.md) — `Pagination`
-- [password](reference/components-password.md) — `PasswordInput`
 - [popover](reference/components-popover.md) — `Popover`, `PopoverTrigger`
 - [progress](reference/components-progress.md) — `Progress`, `Spinner`
 - [segmented](reference/components-segmented.md) — `Segmented`

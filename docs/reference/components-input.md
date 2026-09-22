@@ -81,6 +81,10 @@ InputGroup(props: InputGroupProps): Html
 | `autocomplete` | `string` |  |  |
 | `match` | `string` |  | Selector of the control this value must equal (a confirm field): `match: "#password"`. Checked by the validator; the server must check it too. |
 | `messages` | `ValidationMessages` |  | Per-rule messages for the validator, replacing the browser's wording. |
+| `strength` | `boolean` |  | `type: "password"` only: show the strength bar (new passwords). The password field has a Show/Hide toggle by default, the bar with `strength`, `strengthMin` as the validator's floor, `match` for a confirm field. |
+| `strengthMin` | `PasswordStrength` |  | `type: "password"` only, with `strength`: the lowest level (1–4) the validator accepts. |
+| `reveal` | `boolean` |  | `type: "password"` only: `false` renders the bare native control (no toggle, no bar) — inside an `InputGroup`, or when the page must not offer to reveal the value. |
+| `passwordLabels` | `Partial` |  | `type: "password"` only: the toggle's and strength levels' text, for translation. |
 | `extraClass` | `string` |  | Extra classes, e.g. `input-group__control` when nested in an InputGroup. |
 | `attrs` | `Attrs` |  |  |
 
@@ -99,6 +103,32 @@ Messages the client-side validator shows instead of the browser's, per rule.
 | `max` | `string` |  |  |
 | `step` | `string` |  |  |
 | `match` | `string` |  | For `match`. |
+| `strength` | `string` |  | For a password's `strengthMin`. |
+
+### `PasswordStrength`
+
+`type="date"` renders the library's DatePicker (client mode) instead of
+the native control — one look across browsers, keyboard navigation,
+min/max, tokens. Its hidden input carries `name` and the ISO value, so
+a form posts exactly what a native date input would. Needs a stable
+`id` or `name` (ids are deterministic, §4). `disabled` disables the
+trigger; `required`/`invalid` are the surrounding FormField's job.
+
+- `"1"`
+- `"2"`
+- `"3"`
+- `"4"`
+
+### `PasswordLabels`
+
+Text of the password field's toggle and strength levels, for translation (`passwordLabels`).
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `show` | `string` | yes |  |
+| `hide` | `string` | yes |  |
+| `strength` | `string` | yes |  |
+| `levels` | `typeOperator` | yes |  |
 
 ### `FloatingInputProps`
 
@@ -208,8 +238,126 @@ FloatingInput({ id: "company", name: "company", label: "Company" })
 </div>
 ```
 
+### Password: the bare control
+
+`reveal: false` gives the native control alone — for an `InputGroup`, or a page that must not offer to reveal the value.
+
+```ts
+Input({ id: "pw-bare", name: "password", type: "password", reveal: false })
+```
+
+```html
+<input type="password" class="input" id="pw-bare" name="password">
+```
+
+### Sign-in: current password with Show/Hide (what `Input({ type: "password" })` renders)
+
+```ts
+Input({ id: "current", name: "password", type: "password", required: true, autocomplete: "current-password" })
+```
+
+```html
+<div class="password" data-password data-strength-level="0">
+  <div class="password__field">
+    <input type="password" class="input password__input" id="current" name="password" required="" autocomplete="current-password">
+    <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="current" aria-pressed="false" data-label-show="Show" data-label-hide="Hide">Show</button>
+  </div>
+</div>
+```
+
+### Password: sign-up, with the strength bar and a confirm field
+
+`strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.
+
+```ts
+html`${
+  FormField({
+    id: "new-password",
+    label: "Password",
+    required: true,
+    help: "At least 12 characters, mixed case, a number.",
+    control: (a) =>
+      Input({
+        id: a.id,
+        name: "password",
+        type: "password",
+        required: true,
+        minLength: 12,
+        autocomplete: "new-password",
+        strength: true,
+        strengthMin: 3,
+        messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
+      }),
+  })
+}${
+  FormField({
+    id: "confirm",
+    label: "Confirm password",
+    required: true,
+    control: (a) =>
+      Input({
+        id: a.id,
+        name: "confirm",
+        type: "password",
+        required: true,
+        autocomplete: "new-password",
+        match: "#new-password",
+        messages: { match: "The passwords do not match." },
+      }),
+  })
+}`
+```
+
+```html
+<div class="form-field">
+  <label class="form-field__label" for="new-password">
+    Password
+    <span class="form-field__required" aria-hidden="true">*</span>
+  </label>
+  <div class="password" data-password data-strength-level="0">
+    <div class="password__field">
+      <input type="password" class="input password__input" data-msg-min-length="Use at least 12 characters." data-strength-min="3" data-msg-strength="Choose a stronger password." id="new-password" name="password" required="" minlength="12" autocomplete="new-password">
+      <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="new-password" aria-pressed="false" data-label-show="Show" data-label-hide="Hide">Show</button>
+    </div>
+    <div class="password__strength js-only" data-password-strength hidden>
+      <div class="password__bar" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+      </div>
+      <p class="password__strength-label">
+        <span class="sr-only">Password strength:</span>
+        <span data-password-label data-levels="Too weak|Weak|Good|Strong"></span>
+      </p>
+    </div>
+  </div>
+  <p class="form-field__help" id="new-password-help">At least 12 characters, mixed case, a number.</p>
+</div>
+<div class="form-field">
+  <label class="form-field__label" for="confirm">
+    Confirm password
+    <span class="form-field__required" aria-hidden="true">*</span>
+  </label>
+  <div class="password" data-password data-strength-level="0">
+    <div class="password__field">
+      <input type="password" class="input password__input" data-msg-match="The passwords do not match." id="confirm" name="confirm" required="" autocomplete="new-password" data-match="#new-password">
+      <button type="button" class="password__reveal js-only" data-password-reveal aria-controls="confirm" aria-pressed="false" data-label-show="Show" data-label-hide="Hide">Show</button>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/input/input.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox__field`, `.combobox__input`, `.combobox__list`, `.input`, `.input--invalid`, `.input--lg`, `.input--multiline`, `.input--sm`, `.input-float`, `.input-float__label`, `.input-group`, `.input-group__addon`, `.input-group__control`, `.input-icon`, `.input-icon--end`, `.input-icon__glyph`, `.select`, `.select__native`
+`.combobox__field`, `.combobox__input`, `.combobox__list`, `.input`, `.input--invalid`, `.input--lg`, `.input--multiline`, `.input--sm`, `.input-float`, `.input-float__label`, `.input-group`, `.input-group__addon`, `.input-group__control`, `.input-icon`, `.input-icon--end`, `.input-icon__glyph`, `.password`, `.password__bar`, `.password__field`, `.password__input`, `.password__reveal`, `.password__strength`, `.password__strength-label`, `.select`, `.select__native`
+
+## Behaviour
+
+`components/input/input.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
+
+Attributes it reads or writes: `data-label-hide`, `data-label-show`, `data-levels`, `data-msg-strength`, `data-password`, `data-password-label`, `data-password-reveal`, `data-password-strength`, `data-strength-level`, `data-strength-min`.
+
+Events: `rapid:swapped`.
