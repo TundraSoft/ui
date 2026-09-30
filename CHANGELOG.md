@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/TundraSoft/ui/compare/v0.9.0...v0.10.0) (2026-09-30)
+
+
+### Features
+
+* TimePicker and DateTimePicker; the select tick follows a pick ([#30](https://github.com/TundraSoft/ui/issues/30)) ([8b08973](https://github.com/TundraSoft/ui/commit/8b0897300ade7c30311d2d2df7457e661de9562c))
+
+
+### Bug Fixes
+
+* **modal:** an open select list, date or time panel is no longer clipped by the dialog ([8b08973](https://github.com/TundraSoft/ui/commit/8b0897300ade7c30311d2d2df7457e661de9562c))
+* **select:** the tick stayed on the server-rendered option after a pick ([8b08973](https://github.com/TundraSoft/ui/commit/8b0897300ade7c30311d2d2df7457e661de9562c))
+
 ## [0.9.0](https://github.com/TundraSoft/ui/compare/v0.8.0...v0.9.0) (2026-09-27)
 
 
