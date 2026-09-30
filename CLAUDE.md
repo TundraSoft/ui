@@ -157,8 +157,8 @@ card, button, switch, choice (checkbox/radio), input (+ floating-label and prefi
 `InputGroup`), textarea, select, alert, form-field/form-grid/form-actions, form, menu (multi-level, recursive), navbar,
 sidebar (+ optional desktop "collapse to icons" mini-sidebar mode, see below), app-shell, auth-layout, grid (12-col,
 collapses to 1 col below md), tabs, collapsible/accordion, dropdown, wizard, pagination, modal (native `<dialog>`),
-toast, badge/chip, avatar, breadcrumb, tooltip (CSS-only), progress/spinner, chart (ApexCharts only — see "Charts"
-below).
+toast, badge/chip, avatar, breadcrumb, tooltip (CSS-only), progress/spinner, timepicker, datetimepicker, chart
+(ApexCharts only — see "Charts" below).
 
 **v2 additions (2026-09-14, migrated from a design-agent revamp):** data-table (dense, sticky header, selection + bulk
 bar, pinned/numeric/ mono columns), combobox (single/multi, server-swapped listbox, keyboard nav), datepicker
@@ -531,6 +531,40 @@ examples are not published, so that stays out of the library. `docs/UI-Recipes.m
 the worked example for the whole composite-field family (email domains, tel countries + flags, url scheme, a `Select`
 with flag leads, the handler joining the parts with `*From`), code in `examples/docs/recipes.ts` like every other
 recipe.
+
+**TimePicker, DateTimePicker, and the stuck Select tick (2026-09-30, asked for by the Brevily console).**
+`components/timepicker/` (`TimePicker`): two typeable `role="spinbutton"` segments (hours carries `id`, minutes
+`<id>-minute`) plus a slot listbox (`<id>-list`, every `step` minutes, default 15, inside `min`–`max`) and an optional
+`zone` chip (text only). Progressive like `Otp`: the markup's value input is a native `<input type="time">` with `name`,
+`min`, `max`, `required` (what no-JS shows and posts); timepicker.js flips it to `type="hidden"` — a `display: none`
+control with constraints would block a submit with no visible message — and moves the constraints to a custom validity
+on the **hours** segment (`data-msg-required|incomplete|min|max`). Two form.js hooks came with it: `data-validate-skip`
+(the minutes segment: form.js clears a field's one error slot whenever _any_ control in it re-checks valid, so one
+composite control needs one reporting part) and `[data-validate-group]` (focus moving between a control's parts is not a
+blur; the picker reports its own blur by dispatching `change` on the hours segment). The segment `input` listener is
+capture-phase, like password.js, so validity is fresh before form.js reads it. Keyboard: digits fill and jump,
+`:`/`.`/space/→ go to minutes, ↑/↓ step, PageUp/PageDown by `step`, Home/End, Backspace on empty minutes walks back,
+paste `9:30`/`0930`; Alt+↓ or F4 opens the list with focus _in_ the listbox (`aria-activedescendant`), typed digits jump
+(`9` → 09:00, `14` → 14:00), Enter/Space pick, Escape returns focus. `Input({ type: "time" })` now delegates to it (the
+native `step` in seconds becomes minutes). `components/datetimepicker/` (`DateTimePicker`): a client-mode `DatePicker`
+(`<id>-date`, `<name>-date`) beside a `TimePicker` (`<id>-time`, `<name>-time`), plus a `data-datetime-value` hidden
+input named `name` that is rendered **disabled** and enabled by the script, so a no-JS post never carries a stale whole
+value. datetimepicker.js writes `YYYY-MM-DDTHH:MM:00Z` on every part `change`, moves the time's bounds on the first/last
+allowed day, and reports a missing half via `data-timepicker-error` (wrapper message first). `local: true` converts the
+UTC-rendered value/bounds into the browser's zone on init and names it in the chip (`data-datetimepicker-zone="auto"`,
+`Intl` short name). Presets are server-computed instants (`dateTimePresets(now)`); `dateTimeFrom(body, name)` in
+`shared/compose` reads the whole value or joins the no-JS parts as UTC. Wrapper hooks: `timepicker:refresh` and
+`datepicker:refresh` (both take an optional `detail.value`); datepicker.js gained `retarget()` so a refresh that jumps
+months keeps its nav buttons right. datetimepicker.js inits in a `queueMicrotask` because its file sorts _before_
+datepicker/timepicker in the bundle and their listeners must exist first. **The Select bug**: `ComboboxList` rendered
+the `.combobox__check` icon only into the option selected at render time, and combobox.js moved `aria-selected` but not
+the icon — so after a pick the tick stayed on the first option (Select and single/multi Combobox alike). Every option
+now carries the icon and CSS shows it off `[aria-selected="true"]`. **Floating panels in a modal**: `dialog:modal` has
+UA `overflow: auto`, which clipped the time list / date panel / select list at the dialog's edge;
+`.modal:has(.combobox--open, .datepicker--open, .timepicker--open) { overflow: visible }` lets an open panel spill out
+(no `:has()` → the old clip, not a break). Also learned: a selector list containing `:has()` is dropped whole by a
+browser that lacks it — give `:has()` its own rule. The catalogue's modal group has a "form in a modal" case (Select +
+DateTimePicker) and `test-catalogue.ts` drives all of it, including a no-JS pass and an `Asia/Kolkata` local-mode pass.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the
 row-menu dropdowns worked but nothing else did: every bulk button was a `type="button"` outside any form (the checkboxes

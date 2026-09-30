@@ -25,6 +25,7 @@ import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker } from "../../components/datepicker/datepicker.ts";
+import { DateTimePicker, dateTimePresets } from "../../components/datetimepicker/datetimepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
 import { Dropzone } from "../../components/dropzone/dropzone.ts";
 import { Editor } from "../../components/editor/editor.ts";
@@ -51,6 +52,7 @@ import { Switch } from "../../components/switch/switch.ts";
 import { Tabs } from "../../components/tabs/tabs.ts";
 import { Textarea } from "../../components/textarea/textarea.ts";
 import { Timeline } from "../../components/timeline/timeline.ts";
+import { TimePicker } from "../../components/timepicker/timepicker.ts";
 import { Toast, ToastRegion } from "../../components/toast/toast.ts";
 import { Toolbar } from "../../components/toolbar/toolbar.ts";
 import { Tooltip } from "../../components/tooltip/tooltip.ts";
@@ -351,6 +353,27 @@ export const usage: Record<string, UsageExample[]> = {
             href: "/reports?preset=q",
           }],
         }),
+    },
+  ],
+  "components/datetimepicker": [
+    {
+      title: "A link's go-live time, with presets",
+      note:
+        'Posts `go_live` as one UTC instant (`2026-10-01T09:00:00Z`); read it with `dateTimeFrom(body, "go_live")`, which also joins the `-date`/`-time` parts a no-JS page sends. Build the presets from the request\'s clock.',
+      render: () =>
+        DateTimePicker({
+          id: "go-live",
+          name: "go_live",
+          value: "2026-10-01T09:00:00Z",
+          min: "2026-09-30T12:00:00Z",
+          today: "2026-09-30",
+          presets: dateTimePresets(new Date("2026-09-30T12:00:00Z")),
+        }),
+    },
+    {
+      title: "An audit-log bound in the viewer's zone",
+      note: "`local` shows and edits the viewer's wall time and names their zone; the posted value is still UTC.",
+      render: () => DateTimePicker({ id: "log-from", name: "from", local: true, step: 60, today: "2026-09-30" }),
     },
   ],
   "components/dropdown": [
@@ -1005,6 +1028,33 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "A note",
       render: () => Textarea({ id: "note", name: "note", rows: 4, placeholder: "Anything the customer should know…" }),
+    },
+  ],
+  "components/timepicker": [
+    {
+      title: "A time in a form field",
+      note:
+        'Posts `HH:MM` under `name`; without JS it is a native `<input type="time">`. `Input({ type: "time" })` renders this too.',
+      render: () =>
+        FormField({
+          id: "pickup",
+          label: "Pickup",
+          help: "Between 08:00 and 18:00.",
+          control: (a) =>
+            TimePicker({
+              id: a.id,
+              name: "pickup",
+              value: "09:30",
+              min: "08:00",
+              max: "18:00",
+              step: 30,
+              required: true,
+            }),
+        }),
+    },
+    {
+      title: "A scheduled send, in UTC",
+      render: () => TimePicker({ id: "send-at", name: "send_at", value: "14:00", zone: "UTC", label: "Send at" }),
     },
   ],
   "components/timeline": [

@@ -152,10 +152,18 @@
   color: var(--color-text-subtle);
 }
 
+/* Every option carries the tick; aria-selected shows it, so a pick made
+   by the script moves it along with the state (a server-rendered tick on
+   the initial option alone stayed put). */
 .combobox__check {
   flex: 0 0 auto;
   display: inline-flex;
   color: var(--color-text);
+  visibility: hidden;
+}
+
+.combobox__option[aria-selected="true"] .combobox__check {
+  visibility: visible;
 }
 
 .combobox__empty {

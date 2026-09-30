@@ -92,13 +92,16 @@ Select({
             <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
           </span>
           <span class="combobox__option-label">France</span>
+          <span class="combobox__check" aria-hidden="true">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
         </div>
         <div class="combobox__option" role="option" id="market-opt-1" aria-selected="true" data-value="de">
           <span class="combobox__option-lead">
             <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
           </span>
           <span class="combobox__option-label">Germany</span>
-          <span class="combobox__check">
+          <span class="combobox__check" aria-hidden="true">
             <svg width="15" height="15" width="2" …>…</svg>
           </span>
         </div>
@@ -148,15 +151,21 @@ Select({
       <div class="combobox__list" id="plan-list" role="listbox" hidden>
         <div class="combobox__option" role="option" id="plan-opt-0" aria-selected="false" data-value="free">
           <span class="combobox__option-label">Free</span>
+          <span class="combobox__check" aria-hidden="true">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
         </div>
         <div class="combobox__option" role="option" id="plan-opt-1" aria-selected="true" data-value="team">
           <span class="combobox__option-label">Team</span>
-          <span class="combobox__check">
+          <span class="combobox__check" aria-hidden="true">
             <svg width="15" height="15" width="2" …>…</svg>
           </span>
         </div>
         <div class="combobox__option" role="option" id="plan-opt-2" aria-selected="false" data-value="enterprise">
           <span class="combobox__option-label">Enterprise</span>
+          <span class="combobox__check" aria-hidden="true">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
         </div>
         <div class="combobox__hints">
           <span>&uarr;&darr; navigate</span>

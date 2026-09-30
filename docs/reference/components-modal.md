@@ -87,7 +87,7 @@ html`${
 
 Classes defined by `components/modal/modal.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.modal`, `.modal__body`, `.modal__close`, `.modal__footer`, `.modal__header`, `.modal__title`
+`.combobox--open`, `.datepicker--open`, `.modal`, `.modal__body`, `.modal__close`, `.modal__footer`, `.modal__header`, `.modal__title`, `.timepicker--open`
 
 ## Behaviour
 

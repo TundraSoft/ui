@@ -158,6 +158,6 @@ Classes defined by `components/form/form.css` — structural, token-driven; over
 
 `components/form/form.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-dirty`, `data-guard`, `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`, `data-validate-action`.
+Attributes it reads or writes: `data-dirty`, `data-guard`, `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`, `data-validate-action`, `data-validate-group`, `data-validate-skip`.
 
 Events: `rapid:swapped`.

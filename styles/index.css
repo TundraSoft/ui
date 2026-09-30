@@ -48,6 +48,8 @@
 @import "../components/data-table/data-table.css" layer(components);
 @import "../components/combobox/combobox.css" layer(components);
 @import "../components/datepicker/datepicker.css" layer(components);
+@import "../components/timepicker/timepicker.css" layer(components);
+@import "../components/datetimepicker/datetimepicker.css" layer(components);
 @import "../components/command/command.css" layer(components);
 @import "../components/dropzone/dropzone.css" layer(components);
 @import "../components/slider/slider.css" layer(components);
