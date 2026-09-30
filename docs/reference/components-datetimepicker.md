@@ -118,14 +118,14 @@ DateTimePicker({
 ```html
 <div class="datetimepicker" id="go-live" data-datetimepicker="" data-datetimepicker-min="2026-09-30T12:00:00Z">
   <div class="datetimepicker__fields">
-    <div class="datepicker" id="go-live-date" data-datepicker data-datepicker-min="2026-09-30" data-datepicker-today="2026-09-30">
+    <div class="datepicker datepicker--client" id="go-live-date" data-datepicker data-datepicker-min="2026-09-30" data-datepicker-today="2026-09-30">
       <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="go-live-date-panel" data-datepicker-trigger>
         <span class="datepicker__trigger-icon">
           <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
         </span>
         <span data-datepicker-label>1 Oct 2026</span>
       </button>
-      <input type="hidden" name="go_live-date" value="2026-10-01" data-datepicker-start>
+      <input type="date" class="input datepicker__native" name="go_live-date" value="2026-10-01" min="2026-09-30" aria-label="Date" data-datepicker-start="">
       <div class="datepicker__panel" id="go-live-date-panel" role="group" aria-label="Calendar" hidden>
         <div class="datepicker__header">
           <span class="datepicker__nav-group">
@@ -810,14 +810,14 @@ DateTimePicker({ id: "log-from", name: "from", local: true, step: 60, today: "20
 ```html
 <div class="datetimepicker" id="log-from" data-datetimepicker="" data-datetimepicker-local="" data-datetimepicker-zone="auto">
   <div class="datetimepicker__fields">
-    <div class="datepicker" id="log-from-date" data-datepicker data-datepicker-today="2026-09-30">
+    <div class="datepicker datepicker--client" id="log-from-date" data-datepicker data-datepicker-today="2026-09-30">
       <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="log-from-date-panel" data-datepicker-trigger aria-label="Pick a date">
         <span class="datepicker__trigger-icon">
           <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
         </span>
         <span data-datepicker-label>Pick a date</span>
       </button>
-      <input type="hidden" name="from-date" value="" data-datepicker-start>
+      <input type="date" class="input datepicker__native" name="from-date" value="" aria-label="Date" data-datepicker-start="">
       <div class="datepicker__panel" id="log-from-date-panel" role="group" aria-label="Calendar" hidden>
         <div class="datepicker__header">
           <span class="datepicker__nav-group">

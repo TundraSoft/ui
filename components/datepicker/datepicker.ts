@@ -224,6 +224,26 @@ export function DatePicker(props: DatePickerProps): Html {
   const triggerLabel = props.range
     ? `${formatDate(props.start) || "Start date"} – ${formatDate(props.end) || "End date"}`
     : formatDate(props.start);
+  // Server mode works without JS (its links are plain GETs), so its value
+  // travels in a hidden input. Client mode needs its script to pick
+  // anything, so its value input is a native date field — what a no-JS
+  // page shows and posts — that datepicker.js turns hidden on enhance.
+  const valueInput = (name: string, value: string | undefined, marker: string, label: string) =>
+    serverMode
+      ? html`<input type="hidden" ${renderAttrs({ name, value: value ?? "", [marker]: "" })}>`
+      : html`<input ${
+        renderAttrs({
+          type: "date",
+          class: "input datepicker__native",
+          name,
+          value: value ?? "",
+          min: props.min,
+          max: props.max,
+          disabled: props.disabled ? "" : undefined,
+          "aria-label": label,
+          [marker]: "",
+        })
+      }>`;
 
   return html`
     <div class="${cx(
@@ -231,6 +251,7 @@ export function DatePicker(props: DatePickerProps): Html {
       props.align === "end" && "datepicker--end",
       props.inline && "datepicker--inline",
       props.open && "datepicker--open",
+      !serverMode && "datepicker--client",
     )}" id="${props.id}"
       data-datepicker${renderAttrs({
         // Client-mode state, read by datepicker.js when it re-renders.
@@ -249,9 +270,13 @@ export function DatePicker(props: DatePickerProps): Html {
         })}><span class="datepicker__trigger-icon">${Icon("calendar", {
           size: 15,
         })}</span><span data-datepicker-label>${triggerLabel ||
-        "Pick a date"}</span></button><input type="hidden" name="${props.name}" value="${props.start ??
-        ""}" data-datepicker-start>${props.range
-        ? html`<input type="hidden" name="${props.name}_end" value="${props.end ?? ""}" data-datepicker-end>`
+        "Pick a date"}</span></button>${valueInput(
+          props.name,
+          props.start,
+          "data-datepicker-start",
+          props.range ? "Start date" : "Date",
+        )}${props.range
+        ? valueInput(`${props.name}_end`, props.end, "data-datepicker-end", "End date")
         : ""}<div class="datepicker__panel" id="${props.id}-panel" role="group" aria-label="Calendar"${props.open
         ? ""
         : html`

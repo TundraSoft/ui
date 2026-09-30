@@ -12,6 +12,8 @@
  * re-renders the day grid, a pick writes the hidden input(s) and the
  * trigger label, and in range mode the first pick is the start and the
  * second the end. Same classes and ARIA as the server-rendered panel.
+ * Client mode's value inputs are native date fields (the no-JS control),
+ * turned into hidden inputs here on init and after every swap.
  * `datepicker:refresh` on the root repaints after a wrapper changed the
  * bounds or (with `detail: { value }`) the date.
  */
@@ -220,6 +222,23 @@
     renderDays(dp, y, m);
     retarget(dp, y, m);
   });
+
+  // Client mode renders native date fields (the no-JS control); from here
+  // on the calendar sets them, so they become hidden inputs — a hidden
+  // native field with min/max could block a submit with nothing to show.
+  function initAll() {
+    document.querySelectorAll("[data-datepicker]:not([data-datepicker-server]) input.datepicker__native").forEach(
+      (input) => {
+        if (input.type === "hidden") return;
+        const value = input.value;
+        input.type = "hidden";
+        input.value = value;
+      },
+    );
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initAll);
+  else initAll();
+  document.addEventListener("rapid:swapped", initAll);
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || event.defaultPrevented) return;

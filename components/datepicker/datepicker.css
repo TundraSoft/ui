@@ -27,6 +27,22 @@
   margin-top: var(--space-3);
 }
 
+/* Client mode without JS: the native date field is the control (the
+   calendar needs the script). Enhanced, the script hides that field and
+   the trigger + calendar take over. */
+.datepicker__native {
+  width: auto;
+}
+
+html:not(.js) .datepicker--client .datepicker__trigger,
+html:not(.js) .datepicker--client .datepicker__panel {
+  display: none;
+}
+
+.js .datepicker__native {
+  display: none;
+}
+
 .datepicker--end .datepicker__panel {
   inset-inline-start: auto;
   inset-inline-end: 0;
