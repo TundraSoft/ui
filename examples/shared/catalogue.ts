@@ -22,6 +22,7 @@ import { Command, CommandList } from "../../components/command/command.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker, DatePickerPanel } from "../../components/datepicker/datepicker.ts";
+import { DateTimePicker, dateTimePresets } from "../../components/datetimepicker/datetimepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
 import { Dropzone } from "../../components/dropzone/dropzone.ts";
 import { Editor } from "../../components/editor/editor.ts";
@@ -49,6 +50,7 @@ import { Switch } from "../../components/switch/switch.ts";
 import { Tabs } from "../../components/tabs/tabs.ts";
 import { Textarea } from "../../components/textarea/textarea.ts";
 import { Timeline } from "../../components/timeline/timeline.ts";
+import { TimePicker } from "../../components/timepicker/timepicker.ts";
 import { Toast, ToastRegion } from "../../components/toast/toast.ts";
 import { Toolbar } from "../../components/toolbar/toolbar.ts";
 import { Tooltip } from "../../components/tooltip/tooltip.ts";
@@ -124,6 +126,8 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   segmented: "forms",
   combobox: "forms",
   datepicker: "forms",
+  timepicker: "forms",
+  datetimepicker: "forms",
   otp: "forms",
   "card-fields": "forms",
   dropzone: "forms",
@@ -729,6 +733,113 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       ],
     },
     {
+      name: "timepicker",
+      cases: [
+        c(
+          "typeable segments, 15-minute slots, zone chip (#tp-basic)",
+          TimePicker({ id: "tp-basic", name: "at", value: "09:30", zone: "UTC", label: "Start time" }),
+        ),
+        c(
+          "min/max, 30-minute step, empty (#tp-bounds)",
+          TimePicker({ id: "tp-bounds", name: "open", min: "09:00", max: "17:30", step: 30 }),
+        ),
+        c(
+          "required, in a validated form (#tp-form)",
+          Form({
+            id: "tp-form",
+            action: "?time",
+            validate: true,
+            content: html`${
+              FormField({
+                id: "tp-req",
+                label: "Pickup",
+                required: true,
+                help: "Between 08:00 and 18:00.",
+                control: (a) =>
+                  TimePicker({
+                    id: a.id,
+                    name: "pickup",
+                    required: true,
+                    min: "08:00",
+                    max: "18:00",
+                    messages: { required: "Pick a pickup time." },
+                  }),
+              })
+            }${FormActions({ content: Button({ label: "Book", type: "submit" }) })}`,
+          }),
+        ),
+        c(
+          "invalid (a server error), align end",
+          TimePicker({ id: "tp-invalid", name: "late", value: "23:45", invalid: true, align: "end" }),
+        ),
+        c("disabled", TimePicker({ id: "tp-disabled", name: "off", value: "12:00", disabled: true })),
+        c('Input({ type: "time" }) renders it', Input({ id: "tp-input", name: "t", type: "time", step: 1800 })),
+      ],
+    },
+    {
+      name: "datetimepicker",
+      cases: [
+        c(
+          "UTC, presets, bounds (#dtp-basic)",
+          DateTimePicker({
+            id: "dtp-basic",
+            name: "go_live",
+            value: "2026-09-20T09:00:00Z",
+            min: "2026-09-14T08:30:00Z",
+            max: "2026-12-31T23:59:00Z",
+            today: "2026-09-14",
+            presets: dateTimePresets(new Date("2026-09-14T10:12:00Z")),
+          }),
+        ),
+        c(
+          "empty, required, in a validated form (#dtp-form)",
+          Form({
+            id: "dtp-form",
+            action: "?expiry",
+            validate: true,
+            content: html`${
+              FormField({
+                id: "dtp-req-time",
+                label: "Expires",
+                required: true,
+                control: () =>
+                  DateTimePicker({ id: "dtp-req", name: "expires", required: true, today: "2026-09-14", step: 60 }),
+              })
+            }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+          }),
+        ),
+        c(
+          "local — edited in the viewer's zone, posted as UTC (#dtp-local)",
+          DateTimePicker({
+            id: "dtp-local",
+            name: "audit_from",
+            value: "2026-09-14T23:30:00Z",
+            local: true,
+            today: "2026-09-14",
+          }),
+        ),
+        c(
+          "invalid, disabled",
+          row(
+            DateTimePicker({
+              id: "dtp-invalid",
+              name: "i",
+              value: "2026-09-14T12:00:00Z",
+              invalid: true,
+              today: "2026-09-14",
+            }),
+            DateTimePicker({
+              id: "dtp-disabled",
+              name: "d",
+              value: "2026-09-14T12:00:00Z",
+              disabled: true,
+              today: "2026-09-14",
+            }),
+          ),
+        ),
+      ],
+    },
+    {
       name: "dropdown",
       cases: dropdownAligns.map((align) =>
         c(
@@ -1211,6 +1322,47 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           html`${
             Button({ label: "Open labelled modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-2" } })
           }${Modal({ id: "cat-modal-2", label: "Plain dialog", body: lorem })}`,
+        ),
+        c(
+          "a form in a modal — Select, DateTimePicker (#cat-modal-3)",
+          html`${
+            Button({ label: "Open form modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-3" } })
+          }${
+            Modal({
+              id: "cat-modal-3",
+              title: "New destination",
+              body: html`${
+                FormField({
+                  id: "cat-modal-sel",
+                  label: "Kind",
+                  control: (a) =>
+                    Select({
+                      id: a.id,
+                      name: "kind",
+                      value: "webhook",
+                      options: [
+                        { value: "webhook", label: "Webhook" },
+                        { value: "ga4", label: "Google Analytics 4" },
+                        { value: "slack", label: "Slack" },
+                      ],
+                    }),
+                })
+              }${
+                FormField({
+                  id: "cat-modal-at-time",
+                  label: "Starts",
+                  control: () =>
+                    DateTimePicker({
+                      id: "cat-modal-at",
+                      name: "starts",
+                      value: "2026-09-15T09:00:00Z",
+                      today: "2026-09-14",
+                    }),
+                })
+              }`,
+              footer: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}`,
+            })
+          }`,
         ),
       ],
     },

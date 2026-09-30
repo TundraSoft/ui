@@ -12,6 +12,8 @@
  * re-renders the day grid, a pick writes the hidden input(s) and the
  * trigger label, and in range mode the first pick is the start and the
  * second the end. Same classes and ARIA as the server-rendered panel.
+ * `datepicker:refresh` on the root repaints after a wrapper changed the
+ * bounds or (with `detail: { value }`) the date.
  */
 (() => {
   const MONTHS = [
@@ -116,6 +118,20 @@
     }
   }
 
+  /* Every nav button's target moves with the view. */
+  function retarget(dp, y, m) {
+    const targets = {
+      "prev-year": [y - 1, m],
+      prev: m === 0 ? [y - 1, 11] : [y, m - 1],
+      next: m === 11 ? [y + 1, 0] : [y, m + 1],
+      "next-year": [y + 1, m],
+    };
+    dp.querySelectorAll("button[data-month][data-nav]").forEach((btn) => {
+      const t = targets[btn.getAttribute("data-nav")];
+      if (t) btn.setAttribute("data-month", `${t[0]}-${t[1]}`);
+    });
+  }
+
   function currentView(dp) {
     const v = dp.getAttribute("data-datepicker-view");
     if (v) {
@@ -171,17 +187,7 @@
       if (nav) {
         const [y, m] = nav.getAttribute("data-month").split("-").map(Number);
         renderDays(dp, y, m);
-        // Every nav button's target moves with the view.
-        const targets = {
-          "prev-year": [y - 1, m],
-          prev: m === 0 ? [y - 1, 11] : [y, m - 1],
-          next: m === 11 ? [y + 1, 0] : [y, m + 1],
-          "next-year": [y + 1, m],
-        };
-        dp.querySelectorAll("button[data-month][data-nav]").forEach((btn) => {
-          const t = targets[btn.getAttribute("data-nav")];
-          if (t) btn.setAttribute("data-month", `${t[0]}-${t[1]}`);
-        });
+        retarget(dp, y, m);
         return;
       }
     }
@@ -195,6 +201,24 @@
         if (owner !== dp) setOpen(owner, false);
       },
     );
+  });
+
+  // A wrapper (the DateTimePicker) moved min/max, or sets the date
+  // (`detail: { value: "yyyy-mm-dd" | "" }`, single mode): repaint.
+  document.addEventListener("datepicker:refresh", (event) => {
+    const dp = event.target?.closest?.("[data-datepicker]");
+    if (!dp || dp.hasAttribute("data-datepicker-server")) return;
+    const value = event.detail?.value;
+    if (typeof value === "string") {
+      const startInput = dp.querySelector("[data-datepicker-start]");
+      const label = dp.querySelector("[data-datepicker-label]");
+      if (startInput) startInput.value = value;
+      if (label) label.textContent = fmt(value) || "Pick a date";
+      dp.removeAttribute("data-datepicker-view");
+    }
+    const [y, m] = currentView(dp);
+    renderDays(dp, y, m);
+    retarget(dp, y, m);
   });
 
   document.addEventListener("keydown", (event) => {

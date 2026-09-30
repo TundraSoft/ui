@@ -70,9 +70,15 @@ Toolbar({
         <div class="combobox__list" id="select-list" role="listbox" hidden>
           <div class="combobox__option" role="option" id="select-opt-0" aria-selected="false" data-value="open">
             <span class="combobox__option-label">Open</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
           </div>
           <div class="combobox__option" role="option" id="select-opt-1" aria-selected="false" data-value="paid">
             <span class="combobox__option-label">Paid</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
           </div>
           <div class="combobox__hints">
             <span>&uarr;&darr; navigate</span>

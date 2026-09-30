@@ -268,3 +268,5 @@ Classes defined by `components/datepicker/datepicker.css` — structural, token-
 `components/datepicker/datepicker.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
 Attributes it reads or writes: `data-action`, `data-datepicker`, `data-datepicker-end`, `data-datepicker-label`, `data-datepicker-max`, `data-datepicker-min`, `data-datepicker-range`, `data-datepicker-server`, `data-datepicker-start`, `data-datepicker-today`, `data-datepicker-trigger`, `data-datepicker-view`, `data-day`, `data-month`, `data-nav`, `data-target`.
+
+Events: `datepicker:refresh`.

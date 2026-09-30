@@ -1,0 +1,56 @@
+/*
+ * Date-time picker: the date trigger and the time field side by side
+ * (wrapping on a narrow screen), presets underneath. Both halves keep
+ * their own look; this only lays them out.
+ */
+.datetimepicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.datetimepicker__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.datetimepicker--invalid .datepicker__trigger {
+  border-color: var(--color-danger);
+}
+
+.js .datetimepicker__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.datetimepicker__preset {
+  height: 28px;
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    color: var(--color-disabled-text);
+    border-color: var(--color-border);
+    cursor: not-allowed;
+  }
+}

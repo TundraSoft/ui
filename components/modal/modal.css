@@ -9,6 +9,14 @@
   color: var(--color-text);
 }
 
+/* A modal dialog scrolls its own overflow (UA `overflow: auto`), which
+   clips a floating panel — a select's list, a date or time picker — at the
+   dialog's edge. While one is open the dialog lets it spill out instead.
+   (A browser without :has() keeps the clip: the panel still scrolls.) */
+.modal:has(.combobox--open, .datepicker--open, .timepicker--open) {
+  overflow: visible;
+}
+
 .modal::backdrop {
   background: var(--color-overlay);
 }

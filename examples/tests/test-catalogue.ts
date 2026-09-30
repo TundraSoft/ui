@@ -695,6 +695,171 @@ for (const group of catalogueGroups) {
     );
     check(described, "forms: error state wires aria-invalid + aria-describedby on the cells");
 
+    // select: the tick follows a pick (it stayed on the server-rendered option)
+    await page.click("#cat-sel");
+    await page.click("#cat-sel-list [data-value=b]");
+    await page.click("#cat-sel");
+    const ticks = await page.$$eval(
+      "#cat-sel-list [role=option]",
+      (els) =>
+        els.map((e) =>
+          `${e.getAttribute("data-value")}:${getComputedStyle(e.querySelector(".combobox__check")!).visibility}`
+        )
+          .join(),
+    );
+    check(ticks === "a:hidden,b:visible", `forms: select tick moves with the pick (${ticks})`);
+    await page.keyboard.press("Escape");
+
+    // time picker
+    const value = (sel: string) => page.$eval(sel, (el) => (el as HTMLInputElement).value);
+    const focused = () => page.evaluate(() => document.activeElement?.id);
+    const carrierState = await page.$eval("#tp-basic-value", (el) => {
+      const i = el as HTMLInputElement;
+      return `${i.type}|${i.name}|${i.value}`;
+    });
+    check(carrierState === "hidden|at|09:30", `forms: timepicker value input enhanced to hidden (${carrierState})`);
+    await page.click("#tp-basic");
+    await page.keyboard.type("14");
+    check((await focused()) === "tp-basic-minute", "forms: timepicker hours complete → focus jumps to minutes");
+    await page.keyboard.type("05");
+    check((await value("#tp-basic-value")) === "14:05", "forms: typed 14 05 posts 14:05");
+    await page.keyboard.press("ArrowUp");
+    check((await value("#tp-basic-value")) === "14:06", "forms: ArrowUp steps the minutes");
+    await page.keyboard.press("PageUp");
+    check((await value("#tp-basic-value")) === "14:21", "forms: PageUp moves by the slot step");
+    await page.keyboard.down("Alt");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.up("Alt");
+    const listState = await page.$eval("#tp-basic-list", (el) => ({
+      open: !(el as HTMLElement).hidden,
+      focused: document.activeElement === el,
+      active: el.getAttribute("aria-activedescendant"),
+    }));
+    check(
+      listState.open && listState.focused && listState.active === "tp-basic-slot-1430",
+      `forms: Alt+ArrowDown opens the slots at the next one (${JSON.stringify(listState)})`,
+    );
+    await page.keyboard.type("9");
+    const jumped = await page.$eval("#tp-basic-list", (el) => el.getAttribute("aria-activedescendant"));
+    check(jumped === "tp-basic-slot-0900", `forms: typing 9 in the slots jumps to 09:00 (${jumped})`);
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    const afterPick = {
+      value: await value("#tp-basic-value"),
+      focus: await focused(),
+      hidden: await page.$eval("#tp-basic-list", (el) => (el as HTMLElement).hidden),
+      ticked: await page.$$eval(
+        "#tp-basic-list [role=option]",
+        (els) =>
+          els.filter((e) => getComputedStyle(e.querySelector(".timepicker__check")!).visibility === "visible").map((
+            e,
+          ) => e.getAttribute("data-value")).join(),
+      ),
+    };
+    check(
+      afterPick.value === "09:15" && afterPick.focus === "tp-basic" && afterPick.hidden && afterPick.ticked === "09:15",
+      `forms: Enter picks the slot, closes, returns focus, moves the tick (${JSON.stringify(afterPick)})`,
+    );
+    await page.click("[aria-controls=tp-bounds-list]");
+    const bounded = await page.$$eval(
+      "#tp-bounds-list .timepicker__slot:not([hidden])",
+      (els) => `${els.length}|${els[0]?.getAttribute("data-value")}|${els.at(-1)?.getAttribute("data-value")}`,
+    );
+    check(bounded === "18|09:00|17:30", `forms: slots honour min/max/step (${bounded})`);
+    await page.keyboard.press("Escape");
+    check((await focused()) === "tp-bounds", "forms: Escape closes the slots and returns focus");
+
+    const tpError = () => page.$eval("#tp-form", (f) => f.querySelector(".form-field__error")?.textContent ?? null);
+    await page.click("#tp-form button[type=submit]");
+    await pause();
+    check((await tpError()) === "Pick a pickup time.", `forms: required time reported on submit (${await tpError()})`);
+    check((await focused()) === "tp-req", "forms: submit focuses the time picker's hours");
+    await page.keyboard.type("0730");
+    await page.click("h1");
+    await pause(400);
+    check(
+      (await tpError()) === "Pick 08:00 or later.",
+      `forms: min reported on leaving the control (${await tpError()})`,
+    );
+    const frame = await page.$eval("#tp-form .timepicker__field", (el) => getComputedStyle(el).borderColor);
+    const danger = await page.$eval("#tp-form .form-field__error", (el) => getComputedStyle(el).color);
+    check(frame === danger, `forms: invalid time paints the frame (${frame} vs ${danger})`);
+    await page.click("#tp-req");
+    await page.keyboard.type("09");
+    await pause();
+    check((await tpError()) === null, `forms: fixing the hour clears the error (${await tpError()})`);
+
+    // date-time picker
+    const whole = () => value("#dtp-basic [data-datetime-value]");
+    check((await whole()) === "2026-09-20T09:00:00Z", `forms: datetime posts one UTC instant (${await whole()})`);
+    await page.click("#dtp-basic [data-datetime-preset]");
+    const preset = [
+      await whole(),
+      await value("#dtp-basic-time-value"),
+      await page.$eval("#dtp-basic [data-datepicker-label]", (e) => e.textContent),
+    ].join("|");
+    check(
+      preset === "2026-09-15T09:00:00Z|09:00|15 Sep 2026",
+      `forms: "Tomorrow 09:00" preset sets both halves (${preset})`,
+    );
+    await (await page.$$("#dtp-basic [data-datetime-preset]"))[2].click();
+    check((await whole()) === "2026-09-30T23:59:00Z", `forms: "End of month" preset (${await whole()})`);
+    await page.click("#dtp-basic [data-datepicker-trigger]");
+    await page.click("#dtp-basic [data-day='2026-09-14']");
+    const minDay = await page.$eval(
+      "#dtp-basic-time",
+      (e) => e.closest("[data-timepicker]")!.getAttribute("data-timepicker-min"),
+    );
+    check(minDay === "08:30", `forms: on the first allowed day the time takes the bound's minimum (${minDay})`);
+    await page.click("#dtp-form button[type=submit]");
+    await pause();
+    const dtpError = await page.$eval("#dtp-form", (f) => f.querySelector(".form-field__error")?.textContent);
+    check(dtpError === "Pick a date.", `forms: required datetime asks for the date first (${dtpError})`);
+
+    // local mode, in a zone with a half-hour offset
+    {
+      const local = await browser.newPage();
+      await local.emulateTimezone("Asia/Kolkata");
+      await local.goto(`file://${root}/forms.html`, { waitUntil: "load" });
+      await pause();
+      const read = () =>
+        local.evaluate(() => ({
+          whole: (document.querySelector("#dtp-local [data-datetime-value]") as HTMLInputElement).value,
+          date: (document.querySelector("#dtp-local [data-datepicker-start]") as HTMLInputElement).value,
+          time: (document.querySelector("#dtp-local-time-value") as HTMLInputElement).value,
+          zone: document.querySelector("#dtp-local .timepicker__zone")?.textContent,
+        }));
+      const before = await read();
+      check(
+        before.whole === "2026-09-14T23:30:00Z" && before.date === "2026-09-15" && before.time === "05:00" &&
+          before.zone === "GMT+5:30",
+        `forms: local mode shows the viewer's wall time and zone (${JSON.stringify(before)})`,
+      );
+      await local.click("#dtp-local-time-minute");
+      await local.keyboard.type("45");
+      const after = await read();
+      check(after.whole === "2026-09-15T00:15:00Z", `forms: local edits post UTC (${after.whole})`);
+      await local.close();
+    }
+
+    // no JS: the native time input is the control
+    {
+      const plain = await browser.newPage();
+      await plain.setJavaScriptEnabled(false);
+      await plain.goto(`file://${root}/forms.html`, { waitUntil: "load" });
+      const native = await plain.$eval("#tp-basic-value", (el) => {
+        const i = el as HTMLInputElement;
+        return `${i.type}|${i.name}|${i.value}|${i.offsetParent !== null}|${
+          (document.querySelector("#tp-basic") as HTMLElement).offsetParent === null
+        }`;
+      });
+      check(
+        native === "time|at|09:30|true|true",
+        `forms: without JS the native time input shows and posts (${native})`,
+      );
+      await plain.close();
+    }
+
     // Every theme: computed body background, light and dark.
     const bodyBg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     const baseBg = await bodyBg();
@@ -748,6 +913,36 @@ for (const group of catalogueGroups) {
       toast.present && toast.visible && toast.text?.startsWith("Saved."),
       `feedback: Show toast shows a toast (${JSON.stringify(toast)})`,
     );
+
+    // A form in a modal: the select's tick follows a pick, and a floating
+    // panel spills out of the dialog instead of being clipped by it.
+    await page.click("[data-modal-open='#cat-modal-3']");
+    await pause(300);
+    await page.click("#cat-modal-sel");
+    await page.click("#cat-modal-sel-list [data-value=ga4]");
+    await page.click("#cat-modal-sel");
+    const modalTicks = await page.$$eval(
+      "#cat-modal-sel-list [role=option]",
+      (els) =>
+        els.filter((e) => getComputedStyle(e.querySelector(".combobox__check")!).visibility === "visible").map((e) =>
+          e.getAttribute("data-value")
+        ).join(),
+    );
+    check(modalTicks === "ga4", `feedback: select in a modal ticks the picked option only (${modalTicks})`);
+    await page.keyboard.press("Escape");
+    await page.click("[aria-controls=cat-modal-at-time-list]");
+    const spill = await page.evaluate(() => {
+      const dlg = document.getElementById("cat-modal-3")!;
+      const list = document.getElementById("cat-modal-at-time-list")!.getBoundingClientRect();
+      const hit = document.elementFromPoint(list.left + 20, list.bottom - 12);
+      return { overflow: getComputedStyle(dlg).overflow, reachable: !!hit?.closest("#cat-modal-at-time-list") };
+    });
+    check(
+      spill.overflow === "visible" && spill.reachable,
+      `feedback: an open time list escapes the modal's clip (${JSON.stringify(spill)})`,
+    );
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
   }
 
   if (group.id === "data") {

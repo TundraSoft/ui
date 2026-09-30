@@ -17,6 +17,10 @@
  * localized text. A server-rendered error is left alone until the user
  * edits that field. Without JS: native validation, unchanged.
  *
+ * Composite controls: data-validate-skip keeps a part out of the checks
+ * (one error slot has one owner — the TimePicker's minutes segment), and
+ * focus moving inside a [data-validate-group] is not a blur.
+ *
  * Async checks: a control with data-validate-action is, on blur and once
  * the native rules pass, POSTed (`name=value`, urlencoded, CSRF header
  * from the same <body data-*> the runtime reads) to that route; a
@@ -102,7 +106,7 @@
   }
 
   const check = (control) => {
-    if (!visible(control) || control.disabled) return true;
+    if (!visible(control) || control.disabled || control.hasAttribute("data-validate-skip")) return true;
     const text = message(control);
     render(control, text);
     return !text;
@@ -112,6 +116,9 @@
   document.addEventListener("focusout", (event) => {
     const control = event.target;
     if (!control?.matches?.(CONTROLS) || !formOf(control)) return;
+    // Moving between the parts of one control (a time picker's segments
+    // and slot list) is not leaving it; the control reports its own blur.
+    if (control.closest("[data-validate-group]")?.contains(event.relatedTarget)) return;
     control.dataset.touched = "";
     check(control);
   });

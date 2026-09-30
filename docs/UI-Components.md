@@ -140,6 +140,45 @@ in flow (an inline picker is page content and ignores outside clicks). Server mo
 swaps that re-render the whole control; the route returns `DatePicker(...)` again. Hidden inputs `name` / `name_end`
 carry ISO dates.
 
+### [TimePicker](./reference/components-timepicker.md)
+
+```ts
+TimePicker({ id: "pickup", name: "pickup", value: "09:30", min: "08:00", max: "18:00", step: 30, required: true });
+TimePicker({ id: "send-at", name: "send_at", zone: "UTC", label: "Send at" });
+Input({ type: "time", name: "t" }); // renders the TimePicker
+```
+
+A 24-hour time as two typeable segments. Keyboard first: digits fill a segment and jump on (`14` → minutes), `:` jumps
+too, ↑/↓ step a segment, PageUp/PageDown move by `step`, a pasted `9:30` fills both; Alt+↓ (or the chevron) opens a list
+of slots every `step` minutes (default 15) inside `min`–`max`, where typed digits jump (`9` → 09:00) and Enter picks.
+Posts ISO `HH:MM` under `name`. `zone` is a label chip, nothing more. Without JS the markup's native
+`<input type="time">` is the control; with it, `required`/`min`/`max` are reported on the hours segment, so
+`Form({ validate: true })` shows them in the field's error slot (`messages` for the wording). The server checks them
+too.
+
+### [DateTimePicker](./reference/components-datetimepicker.md)
+
+```ts
+DateTimePicker({
+  id: "go-live",
+  name: "go_live",
+  value: "2026-10-01T09:00:00Z",
+  min: now.toISOString(),
+  presets: dateTimePresets(now), // Tomorrow 09:00 · In 1 week · End of month
+});
+DateTimePicker({ id: "from", name: "from", local: true }); // the viewer's zone, posted as UTC
+
+// in the handler
+const goLive = dateTimeFrom(await ctx.payload, "go_live"); // "2026-10-01T09:00:00Z" | undefined
+```
+
+A `DatePicker` beside a `TimePicker`, posting **one ISO UTC instant** under `name`. On the first and last allowed days
+the time's bounds follow `min`/`max`; a missing half is reported through the time's validity ("Pick a date."). By
+default the parts are UTC wall time and the chip says so; `local: true` converts the value and bounds into the viewer's
+zone, names it in the chip, and still posts UTC. The parts also post as `<name>-date` / `<name>-time` — all a no-JS page
+can send — and `dateTimeFrom()` (`@tundralibs/ui/shared/compose`) reads whichever arrived. Presets are instants the
+server computes (pass the request's clock) and show only with JS.
+
 ### [Otp](./reference/components-otp.md)
 
 ```ts

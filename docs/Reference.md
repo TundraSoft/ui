@@ -20,6 +20,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [command](reference/components-command.md) — `CommandList`, `Command`
 - [data-table](reference/components-data-table.md) — `RowActions`, `DataTable`
 - [datepicker](reference/components-datepicker.md) — `formatDate`, `DatePickerPanel`, `DatePicker`
+- [datetimepicker](reference/components-datetimepicker.md) — `toUtcIso`, `utcParts`, `dateTimePresets`, `DateTimePicker`
 - [dropdown](reference/components-dropdown.md) — `Dropdown`
 - [dropzone](reference/components-dropzone.md) — `Dropzone`
 - [editor](reference/components-editor.md) — `Editor`
@@ -46,6 +47,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [tabs](reference/components-tabs.md) — `Tabs`
 - [textarea](reference/components-textarea.md) — `Textarea`
 - [timeline](reference/components-timeline.md) — `Timeline`
+- [timepicker](reference/components-timepicker.md) — `timeToMinutes`, `minutesToTime`, `timeSlots`, `TimePicker`
 - [toast](reference/components-toast.md) — `Toast`, `ToastRegion`
 - [toolbar](reference/components-toolbar.md) — `Toolbar`
 - [tooltip](reference/components-tooltip.md) — `Tooltip`
@@ -73,6 +75,6 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [assets](reference/package-assets.md) — `uiAssetUrl`, `uiAssetsDir`, `copyUiAssets`
 - [shared-attrs](reference/package-shared-attrs.md) — `renderAttrs`, `classAttrs`
 - [shared-classnames](reference/package-shared-classnames.md) — `cx`
-- [shared-compose](reference/package-shared-compose.md) — `emailFrom`, `telFrom`, `urlFrom`
+- [shared-compose](reference/package-shared-compose.md) — `emailFrom`, `telFrom`, `urlFrom`, `dateTimeFrom`
 - [shared-icons](reference/package-shared-icons.md) — `IconSprite`, `spriteSvg`, `Icon`
 - [version](reference/package-version.md)

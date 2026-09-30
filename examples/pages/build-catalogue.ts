@@ -54,6 +54,8 @@ const COMPONENT_ICON: Record<string, IconName> = {
   segmented: "list",
   combobox: "search",
   datepicker: "calendar",
+  timepicker: "clock",
+  datetimepicker: "calendar",
   otp: "terminal",
   dropzone: "upload",
   "form-field": "list",

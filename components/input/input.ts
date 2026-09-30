@@ -2,6 +2,7 @@ import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { DatePicker } from "../datepicker/datepicker.ts";
+import { TimePicker } from "../timepicker/timepicker.ts";
 import { Select } from "../select/select.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -280,6 +281,30 @@ function DateInput(props: InputProps): Html {
   });
 }
 
+/**
+ * `type: "time"` renders the TimePicker. `step` keeps the native unit
+ * (seconds) and becomes the slot spacing in minutes; `min`/`max` are
+ * ISO `HH:MM`.
+ */
+function TimeInput(props: InputProps): Html {
+  const name = props.name ?? props.id ?? "time";
+  const bound = (v: number | string | undefined) => (typeof v === "string" ? v : undefined);
+  return TimePicker({
+    id: props.id ?? `${name}-time`,
+    name,
+    value: props.value,
+    step: typeof props.step === "number" && props.step >= 60 ? Math.round(props.step / 60) : undefined,
+    min: bound(props.min) ?? props.attrs?.min,
+    max: bound(props.max) ?? props.attrs?.max,
+    required: props.required,
+    disabled: props.disabled,
+    invalid: props.invalid,
+    messages: props.messages
+      ? { required: props.messages.required, min: props.messages.min, max: props.messages.max }
+      : undefined,
+  });
+}
+
 /** `type: "email"` + `domains`: local part, a fixed `@`, the domain. */
 function EmailDomainsField(props: InputProps, domains: string[]): Html {
   const name = props.name ?? props.id ?? "email";
@@ -370,6 +395,7 @@ function UrlSchemeField(props: InputProps, scheme: string): Html {
 
 export function Input(props: InputProps): Html {
   if (props.type === "date") return DateInput(props);
+  if (props.type === "time") return TimeInput(props);
   if (props.type === "password" && props.reveal !== false) return PasswordField(props);
 
   let control: Html;
