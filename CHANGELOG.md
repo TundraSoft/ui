@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/TundraSoft/ui/compare/v0.10.0...v0.10.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **datepicker:** without JS, a client-mode date is a native date field ([#32](https://github.com/TundraSoft/ui/issues/32)) ([a633453](https://github.com/TundraSoft/ui/commit/a63345383311550dc7b7620b29d1b0bf2f25f93b))
+
 ## [0.10.0](https://github.com/TundraSoft/ui/compare/v0.9.0...v0.10.0) (2026-09-30)
 
 
