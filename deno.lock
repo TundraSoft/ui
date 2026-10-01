@@ -20,13 +20,13 @@
     "jsr:@tundralibs/compat@^2.7.4": "2.7.5",
     "jsr:@tundralibs/compat@^2.7.5": "2.7.5",
     "jsr:@tundralibs/cronus@^1.1.1": "1.1.1",
-    "jsr:@tundralibs/crypt@^1.4.1": "1.4.1",
+    "jsr:@tundralibs/crypt@^1.5.0": "1.5.0",
     "jsr:@tundralibs/doctor@^1.5.3": "1.5.3",
     "jsr:@tundralibs/guardian@^1.3.3": "1.3.3",
     "jsr:@tundralibs/id@^1.1.4": "1.1.4",
     "jsr:@tundralibs/metro-man@^1.0.8": "1.0.8",
     "jsr:@tundralibs/radrouter@^1.3.2": "1.3.2",
-    "jsr:@tundralibs/rapid@~0.8.3": "0.8.3",
+    "jsr:@tundralibs/rapid@~0.8.4": "0.8.4",
     "jsr:@tundralibs/restler@^1.2.1": "1.3.1",
     "jsr:@tundralibs/rpc@^1.3.0": "1.3.0",
     "jsr:@tundralibs/slogger@^1.2.4": "1.2.4",
@@ -34,7 +34,7 @@
     "jsr:@tundralibs/utils@^1.3.1": "1.4.0",
     "jsr:@tundralibs/utils@^1.4.0": "1.4.0",
     "npm:@jsr/tundralibs__compat@^2.7.2": "2.7.5",
-    "npm:@jsr/tundralibs__rapid@~0.8.3": "0.8.3",
+    "npm:@jsr/tundralibs__rapid@~0.8.4": "0.8.4",
     "npm:esbuild@0.25.12": "0.25.12",
     "npm:postcss-import@16": "16.2.0_postcss@8.5.28",
     "npm:postcss-import@^16.1.0": "16.2.0_postcss@8.5.28",
@@ -116,12 +116,12 @@
         "jsr:@tundralibs/utils@^1.4.0"
       ]
     },
-    "@tundralibs/crypt@1.4.1": {
-      "integrity": "53e2ec0bb00c68b1ec5a9869d787b4fd60bd2bc94e44fee30812e243b42b0c18",
+    "@tundralibs/crypt@1.5.0": {
+      "integrity": "defcf026abae82a7e01313dc44a3249e28a5128df4a4ba7ee24c8d4010febd17",
       "dependencies": [
         "jsr:@std/encoding",
         "jsr:@std/fmt",
-        "jsr:@tundralibs/utils@^1.3.1"
+        "jsr:@tundralibs/utils@^1.4.0"
       ]
     },
     "@tundralibs/doctor@1.5.3": {
@@ -157,8 +157,8 @@
         "jsr:@tundralibs/utils@^1.3.1"
       ]
     },
-    "@tundralibs/rapid@0.8.3": {
-      "integrity": "8eba9161a503090f08b4c374cc8039d02c05f31d96bd5481d119ad2f3ae697eb",
+    "@tundralibs/rapid@0.8.4": {
+      "integrity": "734047108704b266d882728af1c46314ab2febbbe7ef0a8bb301655063d91e00",
       "dependencies": [
         "jsr:@tundralibs/ambient",
         "jsr:@tundralibs/compat@^2.7.5",
@@ -641,14 +641,14 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__cronus/1.1.1.tgz"
     },
-    "@jsr/tundralibs__crypt@1.4.1": {
-      "integrity": "sha512-/iKFLzNhBkHTREJfedK3s+Iqfk7T9E//23ATaEkiWcHCXUp93GSbEJgMkVGsnA6v5arDlpaVCe8o0NSKpmWDqQ==",
+    "@jsr/tundralibs__crypt@1.5.0": {
+      "integrity": "sha512-bMfzyP+bAejCWdJCm01RVLdnB8Qp17cOFtrl//8mCNiUXoYmWpQLB/HjSe4IWX8ipyP0cjbrSbd5WUdjjgyAoQ==",
       "dependencies": [
         "@jsr/std__encoding",
         "@jsr/std__fmt",
         "@jsr/tundralibs__utils"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__crypt/1.4.1.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__crypt/1.5.0.tgz"
     },
     "@jsr/tundralibs__doctor@1.5.3": {
       "integrity": "sha512-MzLVoO8FDaKx8OoT12dSF7FoWpPRuXYL1wICZsafEA7mWrSxILiT3gDSdYJIV/NoS9G6VaNR+4hWeawd5Ee56w==",
@@ -657,8 +657,8 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__doctor/1.5.3.tgz"
     },
-    "@jsr/tundralibs__drivers@1.2.3": {
-      "integrity": "sha512-TGcNC2WpDq4bttQVOy2oAObfPPsQswCR1LefvvGGOMKIh9Tt4+NJda0mtNI05EhqNV3MlqSXPM6qqtyztwxnuA==",
+    "@jsr/tundralibs__drivers@1.4.1": {
+      "integrity": "sha512-GQbubhEJzj2TlkmXHL1PaRwZLpsJ/Sf8oR1yOPfaxL5WecBkhA5Z26voIIWSpsRYlBRENytps9aaxi7d5gJLsQ==",
       "dependencies": [
         "@jsr/tundralibs__compat",
         "@jsr/tundralibs__id",
@@ -668,7 +668,7 @@
         "mariadb",
         "mongodb"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__drivers/1.2.3.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__drivers/1.4.1.tgz"
     },
     "@jsr/tundralibs__guardian@1.3.3": {
       "integrity": "sha512-bwIwd6Ah6WyoYNTLAMd2O1N/xKDYJ472dwCixY8cnxQAzcLg/QFkfCkvxoYbIXbY6HkyfguYItFMq1mmDJkh9Q==",
@@ -693,8 +693,8 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__metro-man/1.0.8.tgz"
     },
-    "@jsr/tundralibs__norm@1.9.6": {
-      "integrity": "sha512-LwfgUJHcb+u56tY6+3B759b6vCTtjzCy2t8LFD0Tyh5zZ9kYJItj/CI8YBRAzoT4Z6c+83imBHfT0wAgXyyO0Q==",
+    "@jsr/tundralibs__norm@1.10.0": {
+      "integrity": "sha512-F8jtm4EPjysgFCgEammTRBcIrwd8JT+rICwDZvxrj4Pt8AEk93DDmRFs6PUgwH5wuoBWh3NaY6Tb/0Oj6ndUcw==",
       "dependencies": [
         "@jsr/tundralibs__cacher",
         "@jsr/tundralibs__compat",
@@ -705,17 +705,17 @@
         "@jsr/tundralibs__oql",
         "@jsr/tundralibs__utils"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__norm/1.9.6.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__norm/1.10.0.tgz"
     },
-    "@jsr/tundralibs__oql@1.2.2": {
-      "integrity": "sha512-lknzqD21LGY0L+fEIR2dqOsO9nRHKP30TVm2yXf2RrRKO8E1yeftHsQlSRIkyAgzNOirEuO7WRRBABsMJ4eeSQ==",
+    "@jsr/tundralibs__oql@1.3.0": {
+      "integrity": "sha512-Le14S9c6oaAdSMqqowQrLHb9H/QNojcXHEyk2WE5LJH2yyhBKLQwuSFioJ9oh/eJ+dbNn3vtP/NcJnsm8RnJIg==",
       "dependencies": [
         "@jsr/tundralibs__utils"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__oql/1.2.2.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__oql/1.3.0.tgz"
     },
-    "@jsr/tundralibs__pact@0.12.0": {
-      "integrity": "sha512-cnGHHcBYCMGosaTpLTxpo1f43RXZSwig5JQYhVdIX8Zcm01CN0585IP5GeCAu/OP4TOAbOmei7RCHFCxcSpwaQ==",
+    "@jsr/tundralibs__pact@0.13.0": {
+      "integrity": "sha512-FIstI/Q31S2Z/DAg6Mo2/igOlsYTkTM6NixidtBXxndRvxTwr0bR96ewhhY3uEmm37dvAUgNOHPH4w8f/up4vw==",
       "dependencies": [
         "@jsr/std__encoding",
         "@jsr/tundralibs__cacher",
@@ -725,7 +725,7 @@
         "@jsr/tundralibs__restler",
         "@jsr/tundralibs__utils"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__pact/0.12.0.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__pact/0.13.0.tgz"
     },
     "@jsr/tundralibs__radrouter@1.3.2": {
       "integrity": "sha512-lHX3bB7ONwzgMrrgKsb3WAdeEB2ODmQG589Po9oPR1nWhHO3dp/tZmS39jPbwcXSj4tqnymHZLGAIbFPNbOIgg==",
@@ -735,8 +735,8 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__radrouter/1.3.2.tgz"
     },
-    "@jsr/tundralibs__rapid@0.8.3": {
-      "integrity": "sha512-Bwx+K31WMnc/M4B7EKsDEHwWlAoyZbcSmIz0eWSWNnnBCQxSiqnokPMkVUHvOBH6lnnTUsmcKsvAGuUZlPT/pw==",
+    "@jsr/tundralibs__rapid@0.8.4": {
+      "integrity": "sha512-zL25rWSR/am9VqGE8IZ6KDPbMIGRnL7OhfWmCn2quj90ncK1vOAaGPiLMLpeim/taGNouCSxr8qAjoJnK6/nxQ==",
       "dependencies": [
         "@jsr/tundralibs__ambient",
         "@jsr/tundralibs__compat",
@@ -753,7 +753,7 @@
         "@jsr/tundralibs__tracer",
         "@jsr/tundralibs__utils"
       ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__rapid/0.8.3.tgz"
+      "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__rapid/0.8.4.tgz"
     },
     "@jsr/tundralibs__restler@1.3.1": {
       "integrity": "sha512-hZCXmPtnWDFr7Z8uW4lSH3GJgiIo4imO4tS87qdgFOJdl3OwxF0mPrpGL2ulzG9BZbSAjSf3TkAzjOjA9yvW+w==",
@@ -804,8 +804,8 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/tundralibs__utils/1.4.0.tgz"
     },
-    "@mongodb-js/saslprep@1.5.4": {
-      "integrity": "sha512-05UC0jQsjKAOuXQ0H9Ud9vUTJpZIg+n/FinpR30tI5I8pY2inTfPOZ5OF/cg3Ce/N9MoD1xhRCeOsJtuTbFYlw==",
+    "@mongodb-js/saslprep@1.5.5": {
+      "integrity": "sha512-0PV4mvjGd2Q2/viDvXuoSNzTjQngHvtuWUry1vqvcK4Q/CTeO1zEKMf9set01DMocJnogl/pyNAdvyk+Pe0kQA==",
       "dependencies": [
         "sparse-bitfield"
       ]
@@ -1248,7 +1248,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@tundralibs/compat@^2.7.2",
-      "jsr:@tundralibs/rapid@~0.8.3",
+      "jsr:@tundralibs/rapid@~0.8.4",
       "npm:esbuild@0.25.12",
       "npm:postcss-import@^16.1.0",
       "npm:postcss-mixins@11",
@@ -1259,7 +1259,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@jsr/tundralibs__compat@^2.7.2",
-        "npm:@jsr/tundralibs__rapid@~0.8.3",
+        "npm:@jsr/tundralibs__rapid@~0.8.4",
         "npm:esbuild@0.25.12",
         "npm:postcss-import@^16.1.0",
         "npm:postcss-mixins@11",
