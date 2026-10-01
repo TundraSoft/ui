@@ -240,6 +240,16 @@
   else initAll();
   document.addEventListener("rapid:swapped", initAll);
 
+  // Tabbing (or clicking into another field) out of a floating picker
+  // closes it; a click on nothing focusable (focus moves to nothing, or to
+  // a focusable ancestor such as a <dialog>) is the outside-click handler's.
+  document.addEventListener("focusout", (event) => {
+    const dp = event.target?.closest?.("[data-datepicker]:not(.datepicker--inline)");
+    const to = event.relatedTarget;
+    if (!dp || !to || dp.contains(to) || to.contains(dp)) return;
+    if (dp.classList.contains("datepicker--open")) setOpen(dp, false);
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || event.defaultPrevented) return;
     const dp = event.target.closest?.("[data-datepicker]");

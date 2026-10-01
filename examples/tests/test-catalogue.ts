@@ -239,6 +239,51 @@ for (const group of catalogueGroups) {
     await pause();
     const closedAgain = await page.$eval(".input-group .select .combobox__list", (el) => el.hasAttribute("hidden"));
     check(closedAgain, "forms: clicking the caret again did not close the list");
+    // The field itself toggles too, like a native select (it was open-only,
+    // so the caret was the one way to close it), and Tab away closes it.
+    const selOpen = () => page.$eval("#cat-sel-list", (el) => !el.hasAttribute("hidden"));
+    await page.$eval("#cat-sel", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click("#cat-sel");
+    await pause();
+    const fieldOpens = await selOpen();
+    await page.click("#cat-sel");
+    await pause();
+    const fieldCloses = !(await selOpen());
+    await page.click("#cat-sel");
+    await pause();
+    await page.keyboard.press("Tab");
+    await pause();
+    const tabCloses = !(await selOpen());
+    // A <label for> click is re-dispatched to the input: it toggles too.
+    await page.evaluate(() => {
+      const label = document.createElement("label");
+      label.htmlFor = "cat-sel";
+      label.id = "cat-sel-probe-label";
+      label.textContent = "Probe";
+      document.querySelector("#cat-sel")!.closest("[data-select]")!.before(label);
+    });
+    await page.click("#cat-sel-probe-label");
+    await pause();
+    const labelOpens = await selOpen();
+    await page.click("#cat-sel-probe-label");
+    await pause();
+    const labelCloses = !(await selOpen());
+    await page.$eval("#cat-sel-probe-label", (el) => el.remove());
+    check(
+      fieldOpens && fieldCloses && tabCloses && labelOpens && labelCloses,
+      `forms: select field/label click or Tab does not toggle the list (${
+        JSON.stringify({ fieldOpens, fieldCloses, tabCloses, labelOpens, labelCloses })
+      })`,
+    );
+    // A searchable combobox keeps its list open on a click into its input.
+    await page.$eval("#reviewer", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click("#reviewer");
+    await pause();
+    await page.click("#reviewer");
+    await pause();
+    const stays = await page.$eval("#reviewer-list", (el) => !el.hasAttribute("hidden"));
+    await page.keyboard.press("Escape");
+    check(stays, "forms: a second click in a searchable combobox's input closed its list");
 
     // editor: markdown toolbar wraps the selection; html surface mirrors into the textarea.
     // Scroll first so Puppeteer's click needs no scroll of its own (a scroll between
