@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/TundraSoft/ui/compare/v0.10.1...v0.11.0) (2026-10-01)
+
+
+### Features
+
+* **deps:** require rAPId ^0.8.4 ([#35](https://github.com/TundraSoft/ui/issues/35)) ([8c9e226](https://github.com/TundraSoft/ui/commit/8c9e2261d9e0d7c6375fdb7c98faa2fd5af28142))
+
+
+### Bug Fixes
+
+* **select:** clicking the field or its label toggles the list ([#34](https://github.com/TundraSoft/ui/issues/34)) ([88aadcd](https://github.com/TundraSoft/ui/commit/88aadcd2dc314ea667388ca8d34aa4ae5d072bf0))
+
 ## [0.10.1](https://github.com/TundraSoft/ui/compare/v0.10.0...v0.10.1) (2026-10-01)
 
 
