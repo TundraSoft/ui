@@ -1,6 +1,7 @@
 /*
  * Combobox: keyboard navigation over a server-rendered listbox, open on
- * focus, pick on click/Enter, dismiss on Escape/outside click. Without
+ * focus (a read-only Select: on click, toggling), pick on click/Enter,
+ * dismiss on Escape, outside click or focus leaving the control. Without
  * this script it is a text input plus a visible listbox — still usable.
  *
  * Filtering: with `data-combobox-action` on the input AND rAPId's runtime
@@ -217,12 +218,48 @@
     open(root, true);
   });
 
+  // Focus opens a typeable list; a read-only one (Select) stays shut until
+  // clicked or arrowed, like a native select — so a dialog that focuses it
+  // on open does not unfold it, and the first click is not a close.
   document.addEventListener("focusin", (event) => {
     const root = event.target.closest?.("[data-combobox]");
-    if (root && event.target.matches("input[role='combobox']")) open(root, true);
+    if (root && event.target.matches("input[role='combobox']") && !event.target.readOnly) open(root, true);
+  });
+
+  // Focus leaving the control for another focusable element (Tab, a click
+  // on another field) closes the list. A click on something that takes no
+  // focus moves focus to nothing, or to a focusable ancestor (a <dialog>) —
+  // that is the outside-click handler's job, and leaving it there is what
+  // keeps a press on an option from closing the list before the click lands.
+  document.addEventListener("focusout", (event) => {
+    const root = event.target?.closest?.("[data-combobox]");
+    const to = event.relatedTarget;
+    if (!root || !to || root.contains(to) || to.contains(root)) return;
+    if (isOpen(root)) open(root, false);
   });
 
   document.addEventListener("click", (event) => {
+    // A click on a combobox's <label> is followed by the browser's own click
+    // on the input — let that one act, or the sweep below would close the
+    // list and the input click reopen it.
+    const label = event.target.closest?.("label");
+    if (label && !event.target.closest("[data-combobox]") && label.control?.closest("[data-combobox]")) return;
+
+    // Any click closes every other open list.
+    document.querySelectorAll("[data-combobox].combobox--open").forEach((root) => {
+      if (event.target.closest?.("[data-combobox]") !== root) open(root, false);
+    });
+
+    // A click on the input: a read-only one (Select) toggles like a native
+    // select; a typeable one opens (focusin does not fire again when the
+    // input already had focus, e.g. after Escape closed the list).
+    const input = event.target.closest?.("[data-combobox] input[role='combobox']");
+    if (input && !input.disabled) {
+      const root = input.closest("[data-combobox]");
+      open(root, input.readOnly ? !isOpen(root) : true);
+      return;
+    }
+
     // A click on the field itself (the caret, the padding) — not on the
     // input or a token button — focuses the input and toggles the list.
     const field = event.target.closest?.("[data-combobox] .combobox__field");
@@ -252,11 +289,6 @@
     if (remove) {
       const root = remove.closest("[data-combobox]");
       if (root) removeToken(root, remove.getAttribute("data-combobox-remove") ?? "");
-      return;
     }
-
-    document.querySelectorAll("[data-combobox].combobox--open").forEach((root) => {
-      if (event.target.closest?.("[data-combobox]") !== root) open(root, false);
-    });
   });
 })();

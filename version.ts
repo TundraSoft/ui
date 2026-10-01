@@ -26,7 +26,7 @@ export const UI_CSS: UiAsset = {
 export const UI_JS: UiAsset = {
   file: "ui.js",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.10.1/dist/ui.js", // x-release-please-version
-  integrity: "sha384-ntc32NE3Ou6MnNQseDnDUhxELUNm2MzZpc8D0TzIPVTII9D/6SwdkTUswOpAQFv1",
+  integrity: "sha384-qzvIz2188ZshlUXNJDKTrbYlDno9CKZgqYaWTv00IMh1eZpJTZArNcy0ChEXB6hR",
 };
 
 /** The icon set as an SVG sprite (`<use href="…/icons.svg#icon-<name>">`, same-origin only). */

@@ -636,7 +636,13 @@ with the page.
   `ComboboxOption.disabled` exists for this (`aria-disabled`, skipped on click). Inside an `InputGroup` (the addon wraps
   it, so the rules are descendant, not child, selectors) the field loses its frame, the read-only input is `5ch` wide
   and the list is `max-content` wide with a minimum, so a "+1" country-code select does not squeeze its options into a
-  5ch column. `combobox.js` dispatches `combobox:pick` on a single pick — that is the wrapper hook.
+  5ch column. `combobox.js` dispatches `combobox:pick` on a single pick — that is the wrapper hook. (2026-10-02) A click
+  on the read-only input, or its `<label for>`, **toggles** the list like a native select (it was open-only, so the
+  caret was the one way to close it); a Select does not open on focus (a dialog's autofocus would unfold it and turn the
+  first click into a close); a searchable combobox still opens on focus and stays open on a click into its input. Focus
+  moving to another focusable element closes a combobox list or a floating date picker — but not focus moving to nothing
+  or to a focusable _ancestor_ (a `<dialog>`): a press on a non-focusable option does exactly that, and closing there
+  would hide the list before the click lands.
 - **Open combobox = one box**: while open, field and list share a 2px accent frame (border + 1px `box-shadow` spread)
   instead of an outline around the field alone; the list's top edge is open. `.chip` pads symmetrically;
   `.chip--removable` pads less on the button side.
