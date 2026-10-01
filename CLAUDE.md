@@ -563,7 +563,12 @@ now carries the icon and CSS shows it off `[aria-selected="true"]`. **Floating p
 UA `overflow: auto`, which clipped the time list / date panel / select list at the dialog's edge;
 `.modal:has(.combobox--open, .datepicker--open, .timepicker--open) { overflow: visible }` lets an open panel spill out
 (no `:has()` → the old clip, not a break). Also learned: a selector list containing `:has()` is dropped whole by a
-browser that lacks it — give `:has()` its own rule. The catalogue's modal group has a "form in a modal" case (Select +
+browser that lacks it — give `:has()` its own rule. **No-JS date half (0.10.1, same day, from the console):** a
+client-mode `DatePicker` (every `Input({ type: "date" })` and the DateTimePicker's date) rendered its value as
+`type="hidden"`, so a no-JS page could not change it. Client mode now renders native
+`<input type="date" class="input datepicker__native">` fields (`min`/`max`/`disabled` carried) that datepicker.js flips
+to hidden on init and after swaps, and `html:not(.js) .datepicker--client` hides the trigger and calendar; server mode
+keeps its hidden inputs (its links work without JS). The catalogue's modal group has a "form in a modal" case (Select +
 DateTimePicker) and `test-catalogue.ts` drives all of it, including a no-JS pass and an `Asia/Kolkata` local-mode pass.
 
 **Data-table actions review (2026-09-18)** — a probe that clicked every table control found that selection and the

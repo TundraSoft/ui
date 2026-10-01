@@ -72,14 +72,14 @@ DatePicker({ id: "due", name: "due", start: "2026-10-15", min: "2026-09-18", tod
 ```
 
 ```html
-<div class="datepicker" id="due" data-datepicker data-datepicker-min="2026-09-18" data-datepicker-today="2026-09-18">
+<div class="datepicker datepicker--client" id="due" data-datepicker data-datepicker-min="2026-09-18" data-datepicker-today="2026-09-18">
   <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="due-panel" data-datepicker-trigger>
     <span class="datepicker__trigger-icon">
       <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
     </span>
     <span data-datepicker-label>15 Oct 2026</span>
   </button>
-  <input type="hidden" name="due" value="2026-10-15" data-datepicker-start>
+  <input type="date" class="input datepicker__native" name="due" value="2026-10-15" min="2026-09-18" aria-label="Date" data-datepicker-start="">
   <div class="datepicker__panel" id="due-panel" role="group" aria-label="Calendar" hidden>
     <div class="datepicker__header">
       <span class="datepicker__nav-group">
@@ -171,15 +171,15 @@ DatePicker({
 ```
 
 ```html
-<div class="datepicker datepicker--end" id="period" data-datepicker data-datepicker-range="" data-datepicker-today="2026-09-18">
+<div class="datepicker datepicker--end datepicker--client" id="period" data-datepicker data-datepicker-range="" data-datepicker-today="2026-09-18">
   <button type="button" class="datepicker__trigger" aria-expanded="false" aria-controls="period-panel" data-datepicker-trigger>
     <span class="datepicker__trigger-icon">
       <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
     </span>
     <span data-datepicker-label>1 Sep 2026 – 30 Sep 2026</span>
   </button>
-  <input type="hidden" name="period" value="2026-09-01" data-datepicker-start>
-  <input type="hidden" name="period_end" value="2026-09-30" data-datepicker-end>
+  <input type="date" class="input datepicker__native" name="period" value="2026-09-01" aria-label="Start date" data-datepicker-start="">
+  <input type="date" class="input datepicker__native" name="period_end" value="2026-09-30" aria-label="End date" data-datepicker-end="">
   <div class="datepicker__panel" id="period-panel" role="group" aria-label="Calendar" hidden>
     <div class="datepicker__header">
       <span class="datepicker__nav-group">
@@ -261,7 +261,7 @@ DatePicker({
 
 Classes defined by `components/datepicker/datepicker.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.datepicker`, `.datepicker--end`, `.datepicker--inline`, `.datepicker--open`, `.datepicker__apply`, `.datepicker__day`, `.datepicker__day--end`, `.datepicker__day--in-range`, `.datepicker__day--outside`, `.datepicker__day--start`, `.datepicker__day--today`, `.datepicker__days`, `.datepicker__footer`, `.datepicker__grid`, `.datepicker__header`, `.datepicker__month`, `.datepicker__nav`, `.datepicker__nav-group`, `.datepicker__panel`, `.datepicker__preset`, `.datepicker__trigger`, `.datepicker__trigger-icon`, `.datepicker__weekday`, `.datepicker__weekdays`
+`.datepicker`, `.datepicker--client`, `.datepicker--end`, `.datepicker--inline`, `.datepicker--open`, `.datepicker__apply`, `.datepicker__day`, `.datepicker__day--end`, `.datepicker__day--in-range`, `.datepicker__day--outside`, `.datepicker__day--start`, `.datepicker__day--today`, `.datepicker__days`, `.datepicker__footer`, `.datepicker__grid`, `.datepicker__header`, `.datepicker__month`, `.datepicker__native`, `.datepicker__nav`, `.datepicker__nav-group`, `.datepicker__panel`, `.datepicker__preset`, `.datepicker__trigger`, `.datepicker__trigger-icon`, `.datepicker__weekday`, `.datepicker__weekdays`, `.js`
 
 ## Behaviour
 
@@ -269,4 +269,4 @@ Classes defined by `components/datepicker/datepicker.css` — structural, token-
 
 Attributes it reads or writes: `data-action`, `data-datepicker`, `data-datepicker-end`, `data-datepicker-label`, `data-datepicker-max`, `data-datepicker-min`, `data-datepicker-range`, `data-datepicker-server`, `data-datepicker-start`, `data-datepicker-today`, `data-datepicker-trigger`, `data-datepicker-view`, `data-day`, `data-month`, `data-nav`, `data-target`.
 
-Events: `datepicker:refresh`.
+Events: `datepicker:refresh`, `rapid:swapped`.

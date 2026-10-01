@@ -790,6 +790,8 @@ for (const group of catalogueGroups) {
     check((await tpError()) === null, `forms: fixing the hour clears the error (${await tpError()})`);
 
     // date-time picker
+    const dateField = await page.$eval("#dtp-basic [data-datepicker-start]", (el) => (el as HTMLInputElement).type);
+    check(dateField === "hidden", `forms: client-mode date field enhanced to hidden (${dateField})`);
     const whole = () => value("#dtp-basic [data-datetime-value]");
     check((await whole()) === "2026-09-20T09:00:00Z", `forms: datetime posts one UTC instant (${await whole()})`);
     await page.click("#dtp-basic [data-datetime-preset]");
@@ -856,6 +858,15 @@ for (const group of catalogueGroups) {
       check(
         native === "time|at|09:30|true|true",
         `forms: without JS the native time input shows and posts (${native})`,
+      );
+      const nativeDate = await plain.$eval("#dtp-basic-date", (root) => {
+        const i = root.querySelector("[data-datepicker-start]") as HTMLInputElement;
+        const trigger = root.querySelector("[data-datepicker-trigger]") as HTMLElement;
+        return `${i.type}|${i.name}|${i.value}|${i.min}|${i.offsetParent !== null}|${trigger.offsetParent === null}`;
+      });
+      check(
+        nativeDate === "date|go_live-date|2026-09-20|2026-09-14|true|true",
+        `forms: without JS the datetime's date half is a native date field (${nativeDate})`,
       );
       await plain.close();
     }
