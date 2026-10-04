@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -59,20 +59,18 @@ export function Button(props: ButtonProps): Html {
   const inner = html`${props.iconStart}${props.label}${props.iconEnd}`;
 
   if (props.href && !props.disabled) {
-    const attrs: Attrs = {
-      ...props.attrs,
-      id: props.id ?? props.attrs?.id,
+    const attrs: Attrs = mergeAttrs(props.attrs, {
+      id: props.id,
       href: props.href,
-    };
+    });
     return html`<a${classAttrs(className, attrs)}>${inner}</a>`;
   }
 
-  const attrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     disabled: props.disabled ? "" : undefined,
     "aria-busy": props.loading ? "true" : undefined,
-  };
+  });
 
   return html`
     <button type="${props.type ?? "button"}" ${classAttrs(className, attrs)}>${inner}</button>
@@ -90,8 +88,11 @@ export type CopyButtonProps = {
   id?: string;
   /** The text copied. */
   value: string;
-  /** @default "Copy" */
-  label?: string;
+  /**
+   * The visible text. `false`: icon-only — the copy icon turns into a check
+   * for two seconds, and `ariaLabel` names the button. @default "Copy"
+   */
+  label?: string | false;
   /** Shown for two seconds after a copy. @default "Copied" */
   doneLabel?: string;
   /** Leading icon. @default the copy icon */
@@ -112,6 +113,24 @@ export type CopyButtonProps = {
  */
 export function CopyButton(props: CopyButtonProps): Html {
   const done = props.doneLabel ?? "Copied";
+  if (props.label === false) {
+    return Button({
+      id: props.id,
+      iconOnly: true,
+      label: html`
+        <span class="btn__copy-label" data-copy-label>${props.icon || Icon("copy", { size: 15 })}</span><span
+          class="btn__copy-done" data-copy-done>${Icon("check", { size: 15 })}</span>
+      `,
+      variant: props.variant ?? "ghost",
+      size: props.size ?? "sm",
+      attrs: mergeAttrs(props.attrs, {
+        class: cx("btn--copy", props.attrs?.class),
+        "data-copy": props.value,
+        "data-copy-announce": done,
+        "aria-label": props.ariaLabel ?? "Copy",
+      }),
+    });
+  }
   const label = html`
     <span class="btn__copy-label" data-copy-label>${props.icon === false
       ? ""
@@ -123,12 +142,11 @@ export function CopyButton(props: CopyButtonProps): Html {
     label,
     variant: props.variant ?? "outline",
     size: props.size ?? "sm",
-    attrs: {
-      ...props.attrs,
+    attrs: mergeAttrs(props.attrs, {
       class: cx("btn--copy", props.attrs?.class),
       "data-copy": props.value,
       "data-copy-announce": done,
       "aria-label": props.ariaLabel,
-    },
+    }),
   });
 }

@@ -73,7 +73,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 ## package
 
 - [assets](reference/package-assets.md) — `uiAssetUrl`, `uiAssetsDir`, `copyUiAssets`
-- [shared-attrs](reference/package-shared-attrs.md) — `renderAttrs`, `classAttrs`
+- [shared-attrs](reference/package-shared-attrs.md) — `mergeAttrs`, `renderAttrs`, `classAttrs`
 - [shared-classnames](reference/package-shared-classnames.md) — `cx`
 - [shared-compose](reference/package-shared-compose.md) — `emailFrom`, `telFrom`, `urlFrom`, `dateTimeFrom`
 - [shared-icons](reference/package-shared-icons.md) — `IconSprite`, `spriteSvg`, `Icon`

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { FormField, FormGrid } from "../form-field/form-field.ts";
 import { Input, type ValidationMessages } from "../input/input.ts";
 
@@ -142,6 +142,6 @@ export function CardFields(props: CardFieldsProps): Html {
   };
 
   return html`<div class="card-fields" data-card-fields ${
-    renderAttrs({ ...props.attrs, "data-luhn": props.luhn ? "" : undefined })
+    renderAttrs(mergeAttrs(props.attrs, { "data-luhn": props.luhn ? "" : undefined }))
   }>${FormGrid({ fields: parts.map(field) })}</div>`;
 }

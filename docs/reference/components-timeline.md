@@ -37,6 +37,7 @@ A marker's colour, over what `status` would give it.
 | `status` | `"done" | "current" | "pending"` |  |  |
 | `icon` | `Html` |  | The marker's glyph (12–14px), over the status's own (a check when done). |
 | `tone` | `TimelineTone` |  | The marker's colour, over the status's. |
+| `attrs` | `Attrs` |  | Attributes on this item's `<li>` (a class merges). |
 
 ### `TimelineProps`
 
@@ -44,6 +45,7 @@ A marker's colour, over what `status` would give it.
 | --- | --- | --- | --- |
 | `id` | `string` |  |  |
 | `items` | `TimelineItem[]` | yes |  |
+| `attrs` | `Attrs` |  | Attributes on the `<ol>` (a class merges). |
 
 ## Usage
 

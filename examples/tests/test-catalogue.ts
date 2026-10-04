@@ -224,7 +224,9 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       "#cat-seg-count .segmented__count",
       (els) => els.map((e) => `${e.textContent}${e.classList.contains("segmented__count--alert") ? "!" : ""}`).join(),
     );
-    check(counts === "128,120,3!,0!", `forms: segmented counts (${counts})`);
+    check(counts === "48.2k,120,3!,0!", `forms: segmented counts (${counts})`);
+    const countTitle = await page.$eval("#cat-seg-count .segmented__count", (e) => e.getAttribute("title"));
+    check(countTitle === "48,213", `forms: segmented countTitle (${countTitle})`);
   }
 
   if (group === "data") {
@@ -239,11 +241,14 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
           'form[method=post][action="?lock"][data-action="?lock"][data-target="#cat-dt-adv"] input[name=_csrf][value=demo-token]',
         ),
         del: !!t.querySelector('form[action="?delete"]:not([data-action]) button[data-confirm="Delete Northwind?"]'),
+        // data-confirm given through attrs, with no confirm prop, is kept.
+        viaAttrs: !!t.querySelector('form[action="?archive"] button[data-confirm="Archive Northwind?"]'),
         none: !document.querySelector("#cat-dt-none .data-table__select, #cat-dt-none [data-bulk-bar]"),
       };
     });
     check(
-      adv.head && adv.cell && adv.merged && adv.boxes === "true,false,true" && adv.lock && adv.del && adv.none,
+      adv.head && adv.cell && adv.merged && adv.boxes === "true,false,true" && adv.lock && adv.del && adv.viaAttrs &&
+        adv.none,
       `data: column attrs / rowSelectable / POST row actions (${JSON.stringify(adv)})`,
     );
 
@@ -318,10 +323,15 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       tones: document.querySelectorAll("#cat-tl-tones .timeline__item--danger .timeline__marker svg").length,
       text: !!document.querySelector("#cat-tl-tones .timeline__text"),
       ownIcon: !!document.querySelector(".empty__icon > .cat-own-icon"),
+      tlAttrs: !!document.querySelector(
+        "ol#cat-tl-tones.timeline.cat-tl[data-kind=tones] > li.timeline__item.cat-tl-danger",
+      ),
+      emptyHtml: !!document.querySelector("#cat-empty-details .empty__text strong"),
+      details: !!document.querySelector("#cat-empty-details .empty__text + .empty__details .badge"),
     }));
     check(
-      misc.tones === 1 && misc.text && misc.ownIcon,
-      `data: timeline tones / empty Html icon (${JSON.stringify(misc)})`,
+      misc.tones === 1 && misc.text && misc.ownIcon && misc.tlAttrs && misc.emptyHtml && misc.details,
+      `data: timeline tones+attrs / empty Html icon, text, details (${JSON.stringify(misc)})`,
     );
   }
 
@@ -387,6 +397,23 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       copy.text === "https://go.acme.com/spring" && copy.marked && copy.shows,
       `actions: CopyButton (${JSON.stringify(copy)})`,
     );
+    await clickIn("#cat-copy-icon");
+    await pause();
+    const iconOnly = await page.evaluate(() => {
+      const b = document.getElementById("cat-copy-icon")!;
+      return {
+        text: (globalThis as unknown as { __copied?: string }).__copied,
+        name: b.getAttribute("aria-label"),
+        visibleText: b.textContent!.trim(),
+        icon: b.classList.contains("btn--icon"),
+        check: getComputedStyle(b.querySelector(".btn__copy-done")!).display !== "none",
+      };
+    });
+    check(
+      iconOnly.text === "brv_ak_7f2c" && iconOnly.name === "Copy key id" && iconOnly.visibleText === "" &&
+        iconOnly.icon && iconOnly.check,
+      `actions: icon-only CopyButton (${JSON.stringify(iconOnly)})`,
+    );
   }
 
   if (group === "cards") {
@@ -398,10 +425,18 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       stepsOnly: !document.querySelector("#cat-wz-steps .wizard__content") &&
         document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
       sub: !!document.querySelector(".page-header--sub h2.page-header__title"),
+      tabTitle: document.querySelector("#cat-tablinks .tabs__count")?.getAttribute("title"),
+      wizard: (() => {
+        const ol = document.querySelector("#cat-wz-steps ol")!;
+        return `${ol.getAttribute("aria-label")}|${ol.classList.contains("cat-wz-list")}|${
+          ol.querySelector("[aria-current=step] .wizard__step-label")?.textContent?.trim()
+        }|${ol.querySelector(".wizard__step--done .sr-only")?.textContent}`;
+      })(),
       badge: !!document.querySelector(".page-header--sub .page-header__title-row .badge"),
     }));
     check(
-      cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge,
+      cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge &&
+        cards.tabTitle === "1,204" && cards.wizard === "Import steps|true|Columns|Done: ",
       `cards: TabLinks / Wizard steps-only / PageHeader level 2 (${JSON.stringify(cards)})`,
     );
   }

@@ -32,7 +32,8 @@ the form's submit, not clicks on the radios (which it would cancel).
 | `icon` | `Html` |  | Icon-only: `ariaLabel` then becomes required. |
 | `ariaLabel` | `string` |  |  |
 | `disabled` | `boolean` |  |  |
-| `count` | `number | string` |  | A number after the label — how many rows the option would show. |
+| `count` | `number | string | Html` |  | A number after the label: plain, or markup (a compact figure). |
+| `countTitle` | `string` |  | The exact figure as a tooltip when `count` is rounded ("48.2k" → "48,213"). |
 | `alert` | `boolean` |  | Paint `count` in the danger tone (a queue that needs attention). |
 
 ### `SegmentedProps`

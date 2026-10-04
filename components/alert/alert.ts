@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -49,12 +49,11 @@ export function Alert(props: AlertProps): Html {
   const className = cx("alert", VARIANT_CLASS[variant]);
   const icon = props.icon === false ? undefined : props.icon ?? defaultIcon(variant);
 
-  const attrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     role: "alert",
     "data-dismissible": props.dismissible ? "" : undefined,
-  };
+  });
 
   const items = props.items?.map((item) => html`<li>${item}</li>`) ?? [];
   const fields = Object.entries(props.fields ?? {}).map(([name, message]) =>

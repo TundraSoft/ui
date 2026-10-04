@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type CardVariant = "outlined" | "elevated" | "flat" | "danger";
@@ -160,13 +160,12 @@ export function Card(props: CardProps): Html {
     extraClass,
   );
 
-  const attrs: Attrs = {
-    ...restAttrs,
-    id: props.id ?? restAttrs.id,
+  const attrs: Attrs = mergeAttrs(restAttrs, {
+    id: props.id,
     href: tag === "a" ? props.href : undefined,
     role: needsFocusHandling ? "button" : undefined,
     tabindex: needsFocusHandling ? "0" : undefined,
-  };
+  });
 
   const header = CardHeader(props, {
     titleHref: useStretchLink && props.title ? props.href : undefined,

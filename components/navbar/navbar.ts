@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type NavbarLink = {
@@ -26,7 +26,7 @@ export function Navbar(props: NavbarProps): Html {
   );
 
   return html`
-    <nav class="navbar" ${renderAttrs({ ...props.attrs, id: props.id ?? props.attrs?.id })}>${props.brand &&
+    <nav class="navbar" ${renderAttrs(mergeAttrs(props.attrs, { id: props.id }))}>${props.brand &&
       html`<div class="navbar__brand">${props.brand}</div>`}${hasLinks &&
       html`
         <button type="button" class="navbar__toggle js-only" data-toggle="#${navId}" aria-expanded="false"

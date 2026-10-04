@@ -24,7 +24,8 @@ fixes it. An icon alone is not an empty state.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `title` | `string` | yes |  |
-| `text` | `string` |  |  |
+| `text` | `string | Html` |  |  |
+| `details` | `Html` |  | Between the text and the actions: a plan line, a note, a small list. |
 | `icon` | `IconName | Html` |  | One of the library's icons by name, or your own markup (another icon set). |
 | `actions` | `Html` |  |  |
 | `variant` | `"card" | "inline" | "page"` |  | inline = inside a list/table region; page = a whole route. |
@@ -78,4 +79,4 @@ Empty({ variant: "inline", tone: "error", title: "Could not load invoices", code
 
 Classes defined by `components/empty/empty.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.empty`, `.empty--error`, `.empty--inline`, `.empty--page`, `.empty__actions`, `.empty__body`, `.empty__code`, `.empty__icon`, `.empty__text`, `.empty__title`
+`.empty`, `.empty--error`, `.empty--inline`, `.empty--page`, `.empty__actions`, `.empty__body`, `.empty__code`, `.empty__details`, `.empty__icon`, `.empty__text`, `.empty__title`

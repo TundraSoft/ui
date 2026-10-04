@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 export type TabItem = {
   /** Page-unique: becomes `tab-<id>` / `panel-<id>`, and the `#tab-<id>`
@@ -40,7 +40,7 @@ export function Tabs(props: TabsProps): Html {
   );
 
   return html`<div${
-    classAttrs("tabs", { ...props.attrs, id: props.id ?? props.attrs?.id })
+    classAttrs("tabs", mergeAttrs(props.attrs, { id: props.id }))
   }><div class="tabs__list" role="tablist">${tabs}</div>${panels}</div>`;
 }
 
@@ -52,7 +52,10 @@ export type TabLink = {
   /** Before the label. */
   icon?: Html;
   /** A number after the label. */
-  count?: number | string;
+  /** A number after the label: plain, or markup (a compact figure). */
+  count?: number | string | Html;
+  /** The exact figure as a tooltip when `count` is rounded. */
+  countTitle?: string;
   /** After the label: a plan or status `Badge`. */
   badge?: Html;
   /** Extra attributes on the link (`data-action` + `data-target` + `data-push` for a swap). */
@@ -68,13 +71,20 @@ export type TabLink = {
 export function TabLinks(props: { items: TabLink[]; label?: string; id?: string; attrs?: Attrs }): Html {
   const links = props.items.map((item) =>
     html`<a${
-      classAttrs("tabs__tab", { ...item.attrs, href: item.href, "aria-current": item.current ? "page" : undefined })
+      classAttrs(
+        "tabs__tab",
+        mergeAttrs(item.attrs, { href: item.href, "aria-current": item.current ? "page" : undefined }),
+      )
     }>${item.icon ? html`<span class="tabs__icon">${item.icon}</span>` : ""}${item.label}${
-      item.count === undefined ? "" : html`<span class="tabs__count">${String(item.count)}</span>`
+      item.count === undefined ? "" : html`
+        <span class="tabs__count" ${renderAttrs({ title: item.countTitle })}>${typeof item.count === "number"
+          ? String(item.count)
+          : item.count}</span>
+      `
     }${item.badge ?? ""}</a>`
   );
   return html`
-    <nav${classAttrs("tabs tabs--links", { ...props.attrs, id: props.id ?? props.attrs?.id })}${renderAttrs({
+    <nav${classAttrs("tabs tabs--links", mergeAttrs(props.attrs, { id: props.id }))}${renderAttrs({
       "aria-label": props.label ?? "Sections",
     })}>
       <div class="tabs__list">${links}</div>

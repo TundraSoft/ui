@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -143,14 +143,13 @@ export function TimePicker(props: TimePickerProps): Html {
       })
     }>`;
 
-  const rootAttrs: Attrs = {
-    ...props.attrs,
+  const rootAttrs: Attrs = mergeAttrs(props.attrs, {
     "data-timepicker": "",
     "data-validate-group": "",
     "data-timepicker-min": props.min,
     "data-timepicker-max": props.max,
     "data-timepicker-required": props.required ? "" : undefined,
-  };
+  });
 
   return html`
     <div

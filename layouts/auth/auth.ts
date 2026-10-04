@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 
 export type AuthLayoutProps = {
   brand?: string | Html;
@@ -29,6 +29,6 @@ export function AuthLayout(props: AuthLayoutProps): Html {
   }
 
   return html`<main${
-    classAttrs("layout layout--auth", { ...props.attrs, id: props.contentId ?? "main-content" })
+    classAttrs("layout layout--auth", mergeAttrs(props.attrs, { id: props.contentId ?? "main-content" }))
   }>${panel}</main>`;
 }

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export type CollapsibleProps = {
@@ -40,10 +40,9 @@ export function Accordion(props: AccordionProps): Html {
   const panels = props.items.map((item, index) => Collapsible({ ...item, id: item.id ?? `${props.id}-${index}` }));
 
   return html`
-    <div class="accordion" ${renderAttrs({
-      ...props.attrs,
-      id: props.id ?? props.attrs?.id,
+    <div class="accordion" ${renderAttrs(mergeAttrs(props.attrs, {
+      id: props.id,
       "data-accordion-group": "",
-    })}>${panels}</div>
+    }))}>${panels}</div>
   `;
 }

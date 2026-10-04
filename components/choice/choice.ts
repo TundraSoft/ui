@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type ChoiceType = "checkbox" | "radio";
@@ -16,14 +16,13 @@ export type ChoiceProps = {
 };
 
 export function Choice(props: ChoiceProps): Html {
-  const attrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     name: props.name,
     value: props.value,
     checked: props.checked ? "" : undefined,
     disabled: props.disabled ? "" : undefined,
-  };
+  });
 
   return html`<label class="choice"><input type="${props.type}" class="choice__input"${renderAttrs(attrs)}>${
     props.label && html`<span class="choice__label">${props.label}</span>`

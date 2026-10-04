@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type BadgeVariant =
@@ -48,10 +48,9 @@ export function Chip(
     attrs?: Attrs;
   },
 ): Html {
-  const attrs: Attrs = {
-    ...props.attrs,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
     "data-dismissible": props.removable ? "" : undefined,
-  };
+  });
   return html`<span${
     classAttrs("chip", attrs, props.static && "chip--static", props.removable && "chip--removable")
   }>${props.label}${

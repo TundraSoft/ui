@@ -11,7 +11,10 @@ export type SegmentedOption = {
   ariaLabel?: string;
   disabled?: boolean;
   /** A number after the label — how many rows the option would show. */
-  count?: number | string;
+  /** A number after the label: plain, or markup (a compact figure). */
+  count?: number | string | Html;
+  /** The exact figure as a tooltip when `count` is rounded ("48.2k" → "48,213"). */
+  countTitle?: string;
   /** Paint `count` in the danger tone (a queue that needs attention). */
   alert?: boolean;
 };
@@ -61,11 +64,11 @@ export function Segmented(props: SegmentedProps): Html {
                   disabled: opt.disabled ? "" : undefined,
                   "aria-label": opt.ariaLabel,
                 })}><label class="segmented__label" for="${optId}">${opt.icon ?? ""}${opt.label ??
-                ""}${opt.count === undefined
-                ? ""
-                : html`<span class="${cx("segmented__count", opt.alert && "segmented__count--alert")}">${
-                  String(opt.count)
-                }</span>`}</label></span>
+                ""}${opt.count === undefined ? "" : html`
+                <span class="${cx("segmented__count", opt.alert && "segmented__count--alert")}" ${renderAttrs({
+                  title: opt.countTitle,
+                })}>${typeof opt.count === "number" ? String(opt.count) : opt.count}</span>
+              `}</label></span>
           `;
         },
       )}</div>

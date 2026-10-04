@@ -122,3 +122,18 @@
 .empty--page .empty__title {
   font-size: var(--font-size-2xl);
 }
+
+/* Between the text and the actions: a plan line, a note. */
+.empty__details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.empty--inline .empty__details {
+  align-items: flex-start;
+  font-size: var(--font-size-xs);
+}
