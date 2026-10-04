@@ -764,6 +764,13 @@ Rules that make them frames and keep them device-compatible:
   full-bleed on wide screens, navigation reachable (visible nav, or a drawer toggle that actually opens the sidebar
   on-screen and closes on Escape), rail is a full-width bottom bar on phones, split shows exactly one pane on phones,
   article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to the demo builder and this list.
+- **SidebarLayout 992–1199 is a grid, not a wrapping flex row (fixed 2026-10-05).** The range used `flex-wrap: wrap` so
+  the aside could drop below the content, but the content's `auto` basis (its own width; 100% when boxed) wrapped the
+  content itself onto a second line under the sticky sidebar, and a wrapped aside started at the row's edge, under the
+  sidebar too — open since 2026-09-18 because `test-layouts.ts` only checked "within the viewport". The body is now
+  `grid-template-columns: auto minmax(0, 1fr)` there (sidebar spans both rows; the column follows the full sidebar, the
+  collapsed rail, or nothing for the fixed drawer), and the suite asserts that `#main-content` and any aside start at
+  the sidebar's edge whenever an in-flow sidebar is visible.
 - `app-shell` and `auth-layout` were components in name only; they are now `layouts/sidebar` and `layouts/auth`
   (breaking rename, pre-publish).
 
