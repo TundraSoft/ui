@@ -6,14 +6,15 @@
 (() => {
   document.addEventListener("click", (event) => {
     const tab = event.target.closest?.(".tabs__tab");
-    if (tab) activate(tab);
+    // TabLinks are plain links to other pages: nothing to activate here.
+    if (tab && tab.tagName !== "A") activate(tab);
   });
 
   document.addEventListener("keydown", (event) => {
     const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
     if (!keys.includes(event.key)) return;
     const tab = event.target.closest?.(".tabs__tab");
-    if (!tab) return;
+    if (!tab || tab.tagName === "A") return;
     const list = [...tab.parentElement.querySelectorAll(".tabs__tab")];
     const index = list.indexOf(tab);
     let next;

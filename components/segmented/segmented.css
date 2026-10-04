@@ -117,3 +117,28 @@
 .segmented--block .segmented__label {
   flex: 1 1 0;
 }
+
+/* An option's count: quiet tabular figures after the label; the alert
+   tone for a queue that is not empty. */
+.segmented__count {
+  min-width: 1.4em;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.segmented__input:checked + .segmented__label .segmented__count {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.segmented__count--alert,
+.segmented__input:checked + .segmented__label .segmented__count--alert {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}

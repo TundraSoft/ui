@@ -27,7 +27,9 @@ export function Dropdown(props: DropdownProps): Html {
   const triggerClass = props.triggerClass ?? (plain ? "btn btn--outline" : undefined);
   const trigger = plain ? html`${props.trigger}${Icon("chevronDown", { size: 14 })}` : props.trigger;
 
-  return html`<div${classAttrs("dropdown", { ...props.attrs, id: props.id })}><button type="button" class="${
+  return html`<div${
+    classAttrs("dropdown", { ...props.attrs, id: props.id ?? props.attrs?.id })
+  }><button type="button" class="${
     cx("dropdown__trigger", triggerClass)
   }" data-toggle="#${panelId}" aria-expanded="false" aria-controls="${panelId}">${trigger}</button><div class="${panelClass}" id="${panelId}" data-toggle-panel hidden>${props.content}</div></div>`;
 }

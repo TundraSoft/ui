@@ -85,3 +85,47 @@
 .timeline__item--pending .timeline__title {
   color: var(--color-text-subtle);
 }
+
+.timeline__text {
+  margin-top: 2px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+/* Tones: the marker's colour over the status's (an icon decides the glyph). */
+.timeline__item--neutral .timeline__marker {
+  border: none;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+}
+
+.timeline__item--success .timeline__marker {
+  border: none;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.timeline__item--warning .timeline__marker {
+  border: none;
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.timeline__item--danger .timeline__marker {
+  border: none;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.timeline__item--info .timeline__marker {
+  border: none;
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
+.timeline__item--accent .timeline__marker {
+  border: none;
+  background: var(--color-accent, var(--color-primary));
+  color: var(--color-accent-contrast, var(--color-primary-contrast));
+}

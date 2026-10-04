@@ -32,7 +32,9 @@ export type SelectProps = {
 
 /**
  * A single-choice select that looks and behaves like the Combobox (same
- * field, caret, list, keyboard navigation) — minus free typing. Two
+ * field, caret, list, keyboard navigation) — minus free typing. Its
+ * visible control is a `<button role="combobox">`, so it never blocks a
+ * form's implicit submission (Enter in a search box beside it submits). Two
  * controls, one value: a native `<select>` carries `name` and submits
  * (and is what a no-JS page shows); the combobox UI is what an enhanced
  * page shows, and select.js keeps the two in step both ways. Give it an
@@ -86,6 +88,9 @@ export function Select(props: SelectProps): Html {
 
   const hasLeads = props.options.some((o) => o.lead);
 
+  // The visible control is a button (the APG "select-only combobox"): a
+  // read-only text input would count as a second text field and stop
+  // Enter in a sibling search box from submitting its form.
   return html`
     <div class="${wrapperClass}"
       data-select><select class="select__native"${renderAttrs(
@@ -94,12 +99,18 @@ export function Select(props: SelectProps): Html {
         ? html`<span class="select__lead" data-select-lead aria-hidden="true">${current?.lead ?? ""}</span>`
         : ""}<input type="hidden" value="${current
         ?.value ??
-        ""}" data-combobox-value><input class="combobox__input" id="${base}" type="text" role="combobox" readonly autocomplete="off" value="${current
-        ?.label ?? ""}" placeholder="${props.placeholder ??
-        ""}" aria-expanded="false" aria-controls="${listId}" aria-autocomplete="none"${renderAttrs({
-          disabled: props.disabled ? "" : undefined,
-          "aria-invalid": props.invalid ? "true" : undefined,
-        })}><span class="combobox__caret">${Icon("chevronDown", {
+        ""}" data-combobox-value><button type="button" class="combobox__input select__button" id="${base}" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="${listId}"${renderAttrs(
+          {
+            disabled: props.disabled ? "" : undefined,
+            "aria-invalid": props.invalid ? "true" : undefined,
+            "aria-required": props.required ? "true" : undefined,
+            // A label given through attrs names the visible control too.
+            "aria-label": props.attrs?.["aria-label"],
+            "aria-labelledby": props.attrs?.["aria-labelledby"],
+            "data-placeholder": props.placeholder,
+          },
+        )}><span class="${cx("select__text", !current && "select__text--placeholder")}" data-select-text>${current
+        ?.label ?? props.placeholder ?? ""}</span></button><span class="combobox__caret">${Icon("chevronDown", {
           size: 15,
         })}</span></div><div class="combobox__list" id="${listId}" role="listbox" hidden>${ComboboxList({
           id: base,

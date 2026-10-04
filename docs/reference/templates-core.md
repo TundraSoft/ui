@@ -14,7 +14,9 @@ createCoreTemplate(options = …: CoreOptions): RapidTemplate
 
 Builds the document shell — `Application.initialize({ ui: { core:
 createCoreTemplate({...}) } })`. Head/meta/viewport, this library's
-assets (CDN or self-hosted), a skip-link and the toast region.
+assets (CDN or self-hosted), a skip-link, the toast region and the
+confirmation dialog; `htmlAttrs` / `bodyAttrs` / `viewport` reach the
+parts rAPId's `htmlDocument` keeps fixed.
 
 ## Types
 
@@ -32,6 +34,16 @@ Where the document shell loads `ui.css` / `ui.js` from.
 - `"cdn"`
 - `/${string}`
 
+### `DocumentAttrs`
+
+Attributes for `<html>` or `<body>`: fixed, or worked out per request
+from the page's data and the view bag — a theme the person chose
+(`data-theme` on `<html>`, so the first paint is already right), the
+runtime's `<body data-*>` overrides, a page class.
+
+- `Attrs`
+- `((data: RapidCoreData, view: RapidView) => Attrs)`
+
 ### `CoreOptions`
 
 | Prop | Type | Required | Description |
@@ -44,6 +56,10 @@ Where the document shell loads `ui.css` / `ui.js` from.
 | `toastRegion` | `boolean` |  | Render the shared `ToastRegion` every page gets. @default true |
 | `history` | `boolean` |  | Also load rAPId's opt-in history module (`/__rapid/history.js`) — pair with `ui: { history: true }`. @default false |
 | `live` | `boolean` |  | Also load rAPId's live bridge (`/__rapid/live.js`) — pair with `ui: { live: true }`. @default false |
+| `viewport` | `string` |  | The viewport meta's content — `"width=device-width, initial-scale=1, viewport-fit=cover"` for a layout that reads `env(safe-area-inset-*)`. |
+| `htmlAttrs` | `DocumentAttrs` |  | Attributes on `<html>` (besides `lang`), see {@link DocumentAttrs}. |
+| `bodyAttrs` | `DocumentAttrs` |  | Attributes on `<body>`, see {@link DocumentAttrs}. |
+| `confirmDialog` | `boolean` |  | Render the page's `ConfirmModal`, which every `data-confirm` trigger asks in (without it modal.js uses the browser's `confirm()`). |
 
 ## Constants
 

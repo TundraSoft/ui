@@ -10,7 +10,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [avatar](reference/components-avatar.md) — `Avatar`, `AvatarGroup`
 - [badge](reference/components-badge.md) — `Badge`, `Chip`
 - [breadcrumb](reference/components-breadcrumb.md) — `Breadcrumb`
-- [button](reference/components-button.md) — `Button`, `ButtonGroup`
+- [button](reference/components-button.md) — `Button`, `ButtonGroup`, `CopyButton`
 - [card](reference/components-card.md) — `CardMedia`, `CardHeader`, `CardBody`, `CardFooter`, `Card`
 - [card-fields](reference/components-card-fields.md) — `CardFields`
 - [chart](reference/components-chart.md) — `ChartScript`, `chartOptions`, `Chart`
@@ -25,12 +25,12 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [dropzone](reference/components-dropzone.md) — `Dropzone`
 - [editor](reference/components-editor.md) — `Editor`
 - [empty](reference/components-empty.md) — `Empty`
-- [form](reference/components-form.md) — `Form`
+- [form](reference/components-form.md) — `CsrfField`, `Form`
 - [form-field](reference/components-form-field.md) — `FormField`, `FormGrid`, `FormActions`
 - [grid](reference/components-grid.md) — `Grid`, `GridCol`
 - [input](reference/components-input.md) — `attr`, `messageAttrs`, `Counter`, `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
 - [menu](reference/components-menu.md) — `Menu`
-- [modal](reference/components-modal.md) — `Modal`
+- [modal](reference/components-modal.md) — `Modal`, `ConfirmModal`
 - [navbar](reference/components-navbar.md) — `Navbar`
 - [otp](reference/components-otp.md) — `Otp`
 - [page-header](reference/components-page-header.md) — `PageHeader`
@@ -44,7 +44,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [slider](reference/components-slider.md) — `Slider`
 - [stat](reference/components-stat.md) — `Stat`
 - [switch](reference/components-switch.md) — `Switch`
-- [tabs](reference/components-tabs.md) — `Tabs`
+- [tabs](reference/components-tabs.md) — `Tabs`, `TabLinks`
 - [textarea](reference/components-textarea.md) — `Textarea`
 - [timeline](reference/components-timeline.md) — `Timeline`
 - [timepicker](reference/components-timepicker.md) — `timeToMinutes`, `minutesToTime`, `timeSlots`, `TimePicker`

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type WizardStepStatus = "pending" | "active" | "done";
@@ -12,7 +12,11 @@ export type WizardStep = {
 export type WizardProps = {
   id?: string;
   steps: WizardStep[];
-  content: Html;
+  /**
+   * The current step's body. Leave it out to draw the step strip alone —
+   * a multi-page flow whose pages carry their own content.
+   */
+  content?: Html;
   attrs?: Attrs;
 };
 
@@ -33,9 +37,13 @@ export function Wizard(props: WizardProps): Html {
   });
 
   return html`
-    <div class="wizard" ${renderAttrs({ ...props.attrs, id: props.id })}>
+    <div ${classAttrs(
+      "wizard",
+      { ...props.attrs, id: props.id ?? props.attrs?.id },
+      props.content === undefined && "wizard--steps-only",
+    )}>
       <ol class="wizard__steps">${items}</ol>
-      <div class="wizard__content">${props.content}</div>
+      ${props.content === undefined ? "" : html`<div class="wizard__content">${props.content}</div>`}
     </div>
   `;
 }

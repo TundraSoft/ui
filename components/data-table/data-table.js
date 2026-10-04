@@ -11,6 +11,13 @@
  * back/forward) to whichever remembered rows are still present. A POST
  * swap is the bulk form's own reply: the server rendered the selection it
  * wants (usually none), and that wins.
+ *
+ * Select all N (`DataTable.selectAll`): once every row on the page is
+ * ticked, [data-bulk-select-all] shows; picking it sets the hidden
+ * [data-bulk-all] to "1" (the server then acts on its whole match) and
+ * the count reads the total. Unticking a row, Clear, or the same button
+ * again returns to the ticked rows. The count's wording comes from
+ * `data-one` / `data-other` on [data-bulk-count] (`{n}` = the number).
  */
 (() => {
   /** table id → Set of checked row keys, as of the last change. */
@@ -30,6 +37,12 @@
       if (keys.has(box.value)) setRow(box, true);
     });
   }
+  const countText = (el, n) => {
+    const one = el.getAttribute("data-one") || "1 row selected";
+    const other = el.getAttribute("data-other") || "{n} rows selected";
+    return n === 1 ? one : other.replace("{n}", n.toLocaleString("en-US"));
+  };
+
   function refresh(table) {
     const bar = table.querySelector("[data-bulk-bar]");
     const rows = table.querySelectorAll("[data-select-row]");
@@ -37,8 +50,19 @@
 
     if (bar) {
       bar.hidden = checked === 0;
+      const everything = bar.querySelector("[data-bulk-all]");
+      const offer = bar.querySelector("[data-bulk-select-all]");
+      // Any row unticked after "Select all": back to the ticked rows.
+      if (everything && everything.value === "1" && checked < rows.length) everything.value = "";
+      const taken = everything?.value === "1";
       const count = bar.querySelector("[data-bulk-count]");
-      if (count) count.textContent = checked === 1 ? "1 row selected" : `${checked} rows selected`;
+      if (count) count.textContent = taken && offer ? offer.getAttribute("data-selected") : countText(count, checked);
+      if (offer) {
+        const total = Number(offer.getAttribute("data-total") || 0);
+        offer.hidden = !taken && (checked < rows.length || total <= rows.length);
+        offer.textContent = taken ? offer.getAttribute("data-clear") : offer.getAttribute("data-label");
+        offer.setAttribute("aria-pressed", String(taken));
+      }
     }
 
     const all = table.querySelector("[data-select-all]");
@@ -67,14 +91,30 @@
     remember(table);
   });
 
-  document.addEventListener("click", (event) => {
-    const clear = event.target.closest?.("[data-bulk-clear]");
-    if (!clear) return;
-    const table = clear.closest(".data-table");
-    if (!table) return;
+  function clearAll(table) {
+    const everything = table.querySelector("[data-bulk-all]");
+    if (everything) everything.value = "";
     table.querySelectorAll("[data-select-row]").forEach((box) => setRow(box, false));
     refresh(table);
     remember(table);
+  }
+
+  document.addEventListener("click", (event) => {
+    const clear = event.target.closest?.("[data-bulk-clear]");
+    const table = (clear ?? event.target.closest?.("[data-bulk-select-all]"))?.closest(".data-table");
+    if (!table) return;
+    if (clear) {
+      clearAll(table);
+      return;
+    }
+    const everything = table.querySelector("[data-bulk-all]");
+    if (!everything) return;
+    if (everything.value === "1") {
+      clearAll(table);
+      return;
+    }
+    everything.value = "1";
+    refresh(table);
   });
 
   /* Row action strips: one open at a time, Escape / close / outside click

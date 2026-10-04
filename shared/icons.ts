@@ -29,6 +29,7 @@ const ICONS = {
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/>',
   moon: '<path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5z"/>',
   kebab: '<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
+  more: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   coin:
     '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M9 10.5c0-1.1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .4-3 1.5 1.3 1.5 3 1.5 3-.4 3-1.5"/>',
   trendUp: '<polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/>',

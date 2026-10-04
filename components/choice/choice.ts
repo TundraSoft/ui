@@ -18,7 +18,7 @@ export type ChoiceProps = {
 export function Choice(props: ChoiceProps): Html {
   const attrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     name: props.name,
     value: props.value,
     checked: props.checked ? "" : undefined,

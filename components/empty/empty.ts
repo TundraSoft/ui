@@ -5,7 +5,8 @@ import { Icon, type IconName } from "../../shared/icons.ts";
 export type EmptyProps = {
   title: string;
   text?: string;
-  icon?: IconName;
+  /** One of the library's icons by name, or your own markup (another icon set). */
+  icon?: IconName | Html;
   actions?: Html;
   /** inline = inside a list/table region; page = a whole route. */
   variant?: "card" | "inline" | "page";
@@ -31,7 +32,13 @@ export function Empty(props: EmptyProps): Html {
       props.variant === "page" && "empty--page",
       props.tone === "error" && "empty--error",
     )
-  }">${props.icon ? html`<span class="empty__icon">${Icon(props.icon, { size: inline ? 16 : 21 })}</span>` : ""}${
-    inline ? html`<span class="empty__body">${body}</span>` : body
-  }${props.actions ? html`<span class="empty__actions">${props.actions}</span>` : ""}</div>`;
+  }">${
+    props.icon
+      ? html`<span class="empty__icon">${
+        typeof props.icon === "string" ? Icon(props.icon, { size: inline ? 16 : 21 }) : props.icon
+      }</span>`
+      : ""
+  }${inline ? html`<span class="empty__body">${body}</span>` : body}${
+    props.actions ? html`<span class="empty__actions">${props.actions}</span>` : ""
+  }</div>`;
 }

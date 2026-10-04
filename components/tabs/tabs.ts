@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 export type TabItem = {
   /** Page-unique: becomes `tab-<id>` / `panel-<id>`, and the `#tab-<id>`
@@ -40,6 +40,44 @@ export function Tabs(props: TabsProps): Html {
   );
 
   return html`<div${
-    classAttrs("tabs", { ...props.attrs, id: props.id })
+    classAttrs("tabs", { ...props.attrs, id: props.id ?? props.attrs?.id })
   }><div class="tabs__list" role="tablist">${tabs}</div>${panels}</div>`;
+}
+
+export type TabLink = {
+  label: string | Html;
+  href: string;
+  /** The page being shown. */
+  current?: boolean;
+  /** Before the label. */
+  icon?: Html;
+  /** A number after the label. */
+  count?: number | string;
+  /** After the label: a plan or status `Badge`. */
+  badge?: Html;
+  /** Extra attributes on the link (`data-action` + `data-target` + `data-push` for a swap). */
+  attrs?: Attrs;
+};
+
+/**
+ * Tabs that are pages: the same strip, but each tab is a link to its own
+ * URL and the content is whatever that page renders below — no panels,
+ * no script. The current one carries `aria-current="page"`. Use `Tabs`
+ * when the panels are all on this page.
+ */
+export function TabLinks(props: { items: TabLink[]; label?: string; id?: string; attrs?: Attrs }): Html {
+  const links = props.items.map((item) =>
+    html`<a${
+      classAttrs("tabs__tab", { ...item.attrs, href: item.href, "aria-current": item.current ? "page" : undefined })
+    }>${item.icon ? html`<span class="tabs__icon">${item.icon}</span>` : ""}${item.label}${
+      item.count === undefined ? "" : html`<span class="tabs__count">${String(item.count)}</span>`
+    }${item.badge ?? ""}</a>`
+  );
+  return html`
+    <nav${classAttrs("tabs tabs--links", { ...props.attrs, id: props.id ?? props.attrs?.id })}${renderAttrs({
+      "aria-label": props.label ?? "Sections",
+    })}>
+      <div class="tabs__list">${links}</div>
+      </nav>
+  `;
 }

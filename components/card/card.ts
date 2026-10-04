@@ -162,7 +162,7 @@ export function Card(props: CardProps): Html {
 
   const attrs: Attrs = {
     ...restAttrs,
-    id: props.id,
+    id: props.id ?? restAttrs.id,
     href: tag === "a" ? props.href : undefined,
     role: needsFocusHandling ? "button" : undefined,
     tabindex: needsFocusHandling ? "0" : undefined,

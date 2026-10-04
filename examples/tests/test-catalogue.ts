@@ -99,6 +99,334 @@ async function openPage(file: string): Promise<Page> {
   return page;
 }
 
+/**
+ * The pieces added for the Brevily console (2026-10-04): column and cell
+ * attributes, per-row selection, select-all, POST row actions, the
+ * confirmation dialog, an open-on-arrival modal, a Select that never
+ * blocks implicit submission, autosubmit, copy, counts, link tabs, the
+ * collapsing breadcrumb and a clearable date-time. One block per page.
+ */
+async function consoleGaps(page: Page, group: string): Promise<void> {
+  /** Record the form's submits instead of letting them navigate. */
+  const trapSubmits = (selector: string) =>
+    page.$eval(selector, (form) => {
+      const w = globalThis as unknown as { __subs: string[] };
+      w.__subs = [];
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const ev = e as SubmitEvent;
+        w.__subs.push(
+          `${(ev.submitter as HTMLButtonElement | null)?.textContent?.trim() ?? ""}|${
+            new URLSearchParams(new FormData(form as HTMLFormElement) as unknown as Record<string, string>).toString()
+          }`,
+        );
+      });
+    });
+  const submits = () => page.evaluate(() => (globalThis as unknown as { __subs: string[] }).__subs);
+  const confirmOpen = () =>
+    page.evaluate(() => {
+      const d = document.querySelector("dialog[data-confirm-dialog]") as HTMLDialogElement;
+      return {
+        open: d.open,
+        text: d.querySelector("[data-confirm-text]")!.textContent,
+        ok: d.querySelector("[data-confirm-ok]")!.textContent,
+        danger: d.querySelector("[data-confirm-ok]")!.classList.contains("btn--danger"),
+      };
+    });
+  const clickIn = (selector: string) => page.$eval(selector, (el) => (el as HTMLElement).click());
+
+  if (group === "forms") {
+    // A Select's control is a button: Enter in the search box beside it submits.
+    await trapSubmits("#cat-autosubmit");
+    await page.$eval("#cat-autosubmit input[type=search]", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click("#cat-autosubmit input[type=search]");
+    await page.keyboard.type("north");
+    await pause();
+    const typed = (await submits()).length;
+    await page.keyboard.press("Enter");
+    await pause();
+    const afterEnter = (await submits()).length;
+    check(
+      typed === 0 && afterEnter === 1,
+      `forms: autosubmit fired on typing (${typed}) or Enter did not submit beside a Select (${afterEnter})`,
+    );
+    // A pick and a radio each submit once.
+    await page.click("#cat-autosubmit-status");
+    await pause();
+    await page.click('#cat-autosubmit-status-list [data-value="active"]');
+    await pause();
+    await clickIn("#cat-autosubmit-range-1");
+    await pause();
+    const subs = await submits();
+    check(
+      subs.length === 3 && subs[1].includes("status=active") && subs[2].includes("range=30d"),
+      `forms: autosubmit on a Select pick / Segmented change (${JSON.stringify(subs)})`,
+    );
+
+    // The Select button: Space opens, arrows move, Enter picks and keeps focus.
+    await page.$eval("#cat-sel", (el) => el.scrollIntoView({ block: "center" }));
+    await page.focus("#cat-sel");
+    await page.keyboard.press("Space");
+    await pause();
+    const opened = await page.$eval("#cat-sel-list", (el) => !el.hasAttribute("hidden"));
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await pause();
+    const keyed = await page.evaluate(() => ({
+      text: document.getElementById("cat-sel")!.textContent!.trim(),
+      native: (document.getElementById("cat-sel-native") as HTMLSelectElement).value,
+      closed: document.getElementById("cat-sel-list")!.hasAttribute("hidden"),
+      focus: document.activeElement?.id,
+      tag: document.getElementById("cat-sel")!.tagName,
+    }));
+    check(
+      opened && keyed.tag === "BUTTON" && keyed.closed && keyed.focus === "cat-sel" && keyed.native !== "",
+      `forms: select button keyboard (opened ${opened}, ${JSON.stringify(keyed)})`,
+    );
+
+    // Combobox({ hints: false })
+    await page.$eval("#cat-cb-nohints", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click("#cat-cb-nohints");
+    await pause();
+    const hints = await page.$eval(
+      "#cat-cb-nohints-list",
+      (el) => ({
+        open: !el.hasAttribute("hidden"),
+        hints: getComputedStyle(el.querySelector(".combobox__hints")!).display,
+      }),
+    );
+    check(
+      hints.open && hints.hints === "none",
+      `forms: combobox hints: false still shows the bar (${JSON.stringify(hints)})`,
+    );
+    await page.keyboard.press("Escape");
+
+    // DateTimePicker({ clearable })
+    const clearBefore = await page.$eval(
+      "#dtp-clear [data-datetime-clear]",
+      (el) => (el as HTMLElement).offsetParent !== null,
+    );
+    await clickIn("#dtp-clear [data-datetime-clear]");
+    await pause();
+    const cleared = await page.$eval("#dtp-clear", (el) => ({
+      whole: (el.querySelector("[data-datetime-value]") as HTMLInputElement).value,
+      date: (el.querySelector("[data-datepicker-start]") as HTMLInputElement).value,
+      button: (el.querySelector("[data-datetime-clear]") as HTMLElement).hidden,
+    }));
+    check(
+      clearBefore && cleared.whole === "" && cleared.date === "" && cleared.button,
+      `forms: datetimepicker Clear (${clearBefore}, ${JSON.stringify(cleared)})`,
+    );
+
+    // Segmented counts
+    const counts = await page.$$eval(
+      "#cat-seg-count .segmented__count",
+      (els) => els.map((e) => `${e.textContent}${e.classList.contains("segmented__count--alert") ? "!" : ""}`).join(),
+    );
+    check(counts === "128,120,3!,0!", `forms: segmented counts (${counts})`);
+  }
+
+  if (group === "data") {
+    const adv = await page.evaluate(() => {
+      const t = document.getElementById("cat-dt-adv")!;
+      return {
+        head: !!t.querySelector('th[data-col="name"]'),
+        cell: !!t.querySelector('td[data-card="primary"][title="Account Northwind"]'),
+        merged: !!t.querySelector("td.cat-dt-status[data-card=badge]"),
+        boxes: [...t.querySelectorAll("tbody tr")].map((r) => !!r.querySelector("[data-select-row]")).join(),
+        lock: !!t.querySelector(
+          'form[method=post][action="?lock"][data-action="?lock"][data-target="#cat-dt-adv"] input[name=_csrf][value=demo-token]',
+        ),
+        del: !!t.querySelector('form[action="?delete"]:not([data-action]) button[data-confirm="Delete Northwind?"]'),
+        none: !document.querySelector("#cat-dt-none .data-table__select, #cat-dt-none [data-bulk-bar]"),
+      };
+    });
+    check(
+      adv.head && adv.cell && adv.merged && adv.boxes === "true,false,true" && adv.lock && adv.del && adv.none,
+      `data: column attrs / rowSelectable / POST row actions (${JSON.stringify(adv)})`,
+    );
+
+    // Select all N
+    await page.$eval("#cat-dt-adv", (el) => el.scrollIntoView({ block: "center" }));
+    await clickIn("#cat-dt-adv [data-select-all]");
+    await pause();
+    const bar = () =>
+      page.$eval("#cat-dt-adv", (t) => ({
+        count: t.querySelector("[data-bulk-count]")!.textContent,
+        offer: (t.querySelector("[data-bulk-select-all]") as HTMLElement).hidden
+          ? ""
+          : t.querySelector("[data-bulk-select-all]")!.textContent,
+        all: (t.querySelector("[data-bulk-all]") as HTMLInputElement).value,
+      }));
+    const ticked = await bar();
+    await clickIn("#cat-dt-adv [data-bulk-select-all]");
+    await pause();
+    const taken = await bar();
+    await clickIn("#cat-dt-adv [data-select-row][value='1']");
+    await pause();
+    const dropped = await bar();
+    check(
+      ticked.count === "2 accounts selected" && ticked.offer === "Select all 240" && ticked.all === "" &&
+        taken.count === "All 240 selected" && taken.offer === "Clear selection" && taken.all === "1" &&
+        dropped.count === "1 account selected" && dropped.offer === "" && dropped.all === "",
+      `data: select all (${JSON.stringify({ ticked, taken, dropped })})`,
+    );
+    await clickIn("#cat-dt-adv [data-select-row][value='3']");
+
+    // A confirmed row action: Cancel drops it, Confirm submits with the same button.
+    await trapSubmits("#cat-dt-adv-1-strip form[action='?delete']");
+    await clickIn("[data-row-actions='#cat-dt-adv-1-strip']");
+    await pause(400);
+    await clickIn("#cat-dt-adv-1-strip form[action='?delete'] button");
+    await pause();
+    const asked = await confirmOpen();
+    await clickIn("dialog[data-confirm-dialog] [data-modal-close]");
+    await pause();
+    const afterCancel = (await submits()).length;
+    await clickIn("#cat-dt-adv-1-strip form[action='?delete'] button");
+    await pause();
+    await clickIn("dialog[data-confirm-dialog] [data-confirm-ok]");
+    await pause();
+    const sent = await submits();
+    check(
+      asked.open && asked.text === "Delete Northwind?" && asked.danger && afterCancel === 0 &&
+        sent.length === 1 && sent[0].startsWith("Delete|") && sent[0].includes("_csrf=demo-token") &&
+        sent[0].includes("id=1"),
+      `data: confirmed POST row action (${JSON.stringify({ asked, afterCancel, sent })})`,
+    );
+    await page.keyboard.press("Escape");
+
+    // Lists in a DataTable toolbar open over the sticky header, unclipped.
+    for (const id of ["cat-dt-tools-status", "cat-dt-tools-owner"]) {
+      await page.$eval(`#${id}`, (el) => el.scrollIntoView({ block: "center" }));
+      await page.click(`#${id}`);
+      await pause();
+      const over = await page.$eval(`#${id}-list`, (list) => {
+        const head = list.closest(".data-table")!.querySelector("thead")!.getBoundingClientRect();
+        const r = list.getBoundingClientRect();
+        const y = Math.max(r.top + 4, head.top + 4);
+        const hit = document.elementFromPoint(r.left + 12, y);
+        return { open: !list.hasAttribute("hidden"), over: r.bottom > head.top, top: !!hit && list.contains(hit) };
+      });
+      check(over.open && over.over && over.top, `data: ${id} list hidden under the table (${JSON.stringify(over)})`);
+      await page.keyboard.press("Escape");
+      await page.click("h1");
+    }
+
+    const misc = await page.evaluate(() => ({
+      tones: document.querySelectorAll("#cat-tl-tones .timeline__item--danger .timeline__marker svg").length,
+      text: !!document.querySelector("#cat-tl-tones .timeline__text"),
+      ownIcon: !!document.querySelector(".empty__icon > .cat-own-icon"),
+    }));
+    check(
+      misc.tones === 1 && misc.text && misc.ownIcon,
+      `data: timeline tones / empty Html icon (${JSON.stringify(misc)})`,
+    );
+  }
+
+  if (group === "feedback") {
+    // A modal rendered with `open` opens when a swap brings it in.
+    await clickIn("#cat-modal-open-trigger");
+    await pause();
+    const auto = await page.$eval("#cat-modal-open", (d) => (d as HTMLDialogElement).open && d.matches(":modal"));
+    check(auto, "feedback: Modal({ open }) did not open when swapped in");
+    await clickIn("#cat-modal-open [data-modal-close]");
+    await pause();
+
+    // data-confirm on a link: Cancel stays, Confirm follows it.
+    await clickIn("#cat-confirm a[data-confirm]");
+    await pause();
+    const link = await confirmOpen();
+    await page.keyboard.press("Escape");
+    await pause();
+    const stayed = await page.evaluate(() => location.hash);
+    await clickIn("#cat-confirm a[data-confirm]");
+    await pause();
+    await clickIn("dialog[data-confirm-dialog] [data-confirm-ok]");
+    await pause();
+    const went = await page.evaluate(() => location.hash);
+    // A danger button names its own OK.
+    await clickIn("#cat-confirm-del");
+    await pause();
+    const del = await confirmOpen();
+    await clickIn("dialog[data-confirm-dialog] [data-modal-close]");
+    // A submit button: the replay carries the same submitter.
+    await trapSubmits("#cat-confirm-form");
+    await clickIn("#cat-confirm-form button");
+    await pause();
+    await clickIn("dialog[data-confirm-dialog] [data-confirm-ok]");
+    await pause();
+    const sent = await submits();
+    check(
+      link.open && link.text === "Leave this page?" && !link.danger && link.ok === "Confirm" &&
+        stayed !== "#cat-confirmed" && went === "#cat-confirmed" &&
+        del.text === "Delete it for good?" && del.ok === "Delete" && del.danger &&
+        sent.length === 1 && sent[0].startsWith("Send (submit)|"),
+      `feedback: data-confirm (${JSON.stringify({ link, stayed, went, del, sent })})`,
+    );
+    await page.evaluate(() => history.replaceState(null, "", location.pathname));
+  }
+
+  if (group === "actions") {
+    await page.evaluate(() => {
+      const w = globalThis as unknown as { __copied?: string };
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText: (t: string) => ((w.__copied = t), Promise.resolve()) },
+      });
+    });
+    await clickIn("#cat-copy");
+    await pause();
+    const copy = await page.evaluate(() => ({
+      text: (globalThis as unknown as { __copied?: string }).__copied,
+      marked: document.getElementById("cat-copy")!.hasAttribute("data-copied"),
+      shows: getComputedStyle(document.querySelector("#cat-copy .btn__copy-done")!).display !== "none",
+    }));
+    check(
+      copy.text === "https://go.acme.com/spring" && copy.marked && copy.shows,
+      `actions: CopyButton (${JSON.stringify(copy)})`,
+    );
+  }
+
+  if (group === "cards") {
+    await clickIn("#cat-tablinks a:nth-child(2)");
+    await pause();
+    const cards = await page.evaluate(() => ({
+      current: document.querySelector("#cat-tablinks [aria-current=page]")?.textContent?.trim(),
+      selected: document.querySelectorAll("#cat-tablinks [aria-selected]").length,
+      stepsOnly: !document.querySelector("#cat-wz-steps .wizard__content") &&
+        document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
+      sub: !!document.querySelector(".page-header--sub h2.page-header__title"),
+      badge: !!document.querySelector(".page-header--sub .page-header__title-row .badge"),
+    }));
+    check(
+      cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge,
+      `cards: TabLinks / Wizard steps-only / PageHeader level 2 (${JSON.stringify(cards)})`,
+    );
+  }
+
+  if (group === "navigation") {
+    const folded = await page.$eval("#cat-bc-fold", (box) => ({
+      more: getComputedStyle(box.querySelector(".breadcrumb__more")!).display,
+      mids: [...box.querySelectorAll(".breadcrumb__item--mid")].map((e) => getComputedStyle(e).display).join(),
+      overflow: box.scrollWidth - box.clientWidth,
+    }));
+    await page.$eval("#cat-bc-fold", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click("#cat-bc-fold summary");
+    await pause();
+    const menu = await page.$$eval(
+      "#cat-bc-fold .breadcrumb__menu-link",
+      (els) => els.filter((e) => (e as HTMLElement).offsetParent !== null).map((e) => e.textContent).join("|"),
+    );
+    check(
+      folded.more === "flex" && folded.mids === "none,none" && folded.overflow <= 0 &&
+        menu === "Settings|Groups & permissions",
+      `navigation: breadcrumb collapse (${JSON.stringify({ ...folded, menu })})`,
+    );
+  }
+}
+
 for (const group of catalogueGroups) {
   const file = `${group.id}.html`;
   const page = await openPage(file);
@@ -203,7 +531,7 @@ for (const group of catalogueGroups) {
     await pause();
     const sel = await page.evaluate(() => ({
       native: (document.getElementById("cat-sel-native") as HTMLSelectElement).value,
-      shown: (document.getElementById("cat-sel") as HTMLInputElement).value,
+      shown: document.getElementById("cat-sel")!.textContent!.trim(),
       closed: document.getElementById("cat-sel-list")!.hasAttribute("hidden"),
     }));
     check(
@@ -212,12 +540,12 @@ for (const group of catalogueGroups) {
     );
     await page.select("#cat-sel-native", "a");
     await pause();
-    const back = await page.$eval("#cat-sel", (el) => (el as HTMLInputElement).value);
+    const back = await page.$eval("#cat-sel", (el) => el.textContent!.trim());
     check(back === "Alpha", `forms: native change did not repaint the select UI (${back})`);
 
     // a Select inside an InputGroup: its list must escape the group (no overflow clip)
-    await page.$eval(".input-group .select input[role=combobox]", (el) => el.scrollIntoView({ block: "center" }));
-    await page.click(".input-group .select input[role=combobox]");
+    await page.$eval(".input-group .select [role=combobox]", (el) => el.scrollIntoView({ block: "center" }));
+    await page.click(".input-group .select [role=combobox]");
     await pause();
     const grouped = await page.evaluate(() => {
       const list = document.querySelector(".input-group .select .combobox__list") as HTMLElement;
@@ -1202,6 +1530,8 @@ for (const group of catalogueGroups) {
     await pause();
     check(await page.$eval("#gh-card", (el) => el.hasAttribute("hidden")), "actions: popover closes on outside click");
   }
+
+  await consoleGaps(page, group.id);
 
   /* ---------------------------------------------------------- dark */
   await page.screenshot({ path: `${outDir}/${group.id}-light.png`, fullPage: true });

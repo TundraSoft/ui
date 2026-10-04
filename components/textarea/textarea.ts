@@ -42,7 +42,7 @@ export function Textarea(props: TextareaProps): Html {
     minlength: attr(props.minLength),
     maxlength: attr(props.maxLength),
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     name: props.name,
     placeholder: props.placeholder,
     rows: props.rows !== undefined ? String(props.rows) : undefined,

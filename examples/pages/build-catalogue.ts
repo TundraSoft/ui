@@ -26,6 +26,7 @@ import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Sidebar } from "../../components/sidebar/sidebar.ts";
 import { Stat } from "../../components/stat/stat.ts";
 import { ToastRegion } from "../../components/toast/toast.ts";
+import { ConfirmModal } from "../../components/modal/modal.ts";
 import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { Icon, type IconName, iconNames } from "../../shared/icons.ts";
 import { catalogue, catalogueCss, type CatalogueGroup, catalogueGroups, catalogueHtml } from "../shared/catalogue.ts";
@@ -193,7 +194,7 @@ const doc = (title: string, body: Html) =>
     <a class="skip-link" href="#main-content">Skip to content</a>
     ${body}
     ${palette}
-    ${ToastRegion()}
+    ${ToastRegion()}${ConfirmModal()}
     ${ChartScript()}
     <script src="../dist/ui.js"></script>
     <script src="catalogue.js"></script>
@@ -323,8 +324,20 @@ ${catalogueCss}`,
 await writeTextFile(
   "demo/catalogue.js",
   `/* Harness-only: swap the theme stylesheet. Dark mode is the library's own
-   theme-toggle.js ([data-theme-toggle]) — nothing to add here. */
+   theme-toggle.js ([data-theme-toggle]) — nothing to add here.
+   [data-cat-swap-in="#template"] stands in for a server swap on a static
+   page: it appends the template's content to <body> and dispatches
+   rapid:swapped there, as the runtime would. */
 (() => {
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-cat-swap-in]");
+    const tpl = btn && document.querySelector(btn.getAttribute("data-cat-swap-in"));
+    if (!tpl) return;
+    const holder = document.createElement("div");
+    holder.append(tpl.content.cloneNode(true));
+    document.body.append(holder);
+    holder.dispatchEvent(new CustomEvent("rapid:swapped", { bubbles: true, detail: { method: "get" } }));
+  });
   const link = document.getElementById("theme-css");
   document.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-theme-file]");

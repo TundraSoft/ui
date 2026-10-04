@@ -664,6 +664,48 @@ for (
   await page.close();
 }
 
+/* ------------------------------------------------------ document shell */
+{
+  // createCoreTemplate's own document: <html>/<body> attributes, one
+  // viewport, the page meta rAPId's htmlDocument would write, the confirm dialog.
+  const text = await (await fetch(`${base}/?theme=dark`)).text();
+  const plain = await (await fetch(`${base}/`)).text();
+  ok(
+    text.startsWith('<!doctype html><html lang="en" data-theme="dark">'),
+    `core: <html> attributes (${text.slice(0, 60)})`,
+  );
+  ok(plain.startsWith('<!doctype html><html lang="en">'), `core: no stray <html> attributes (${plain.slice(0, 60)})`);
+  ok((text.match(/<meta name="viewport"/g) ?? []).length === 1, "core: exactly one viewport meta");
+  ok(text.includes('content="width=device-width, initial-scale=1, viewport-fit=cover"'), "core: viewport option");
+  ok(text.includes('<meta charset="utf-8">'), "core: charset");
+  ok(/<body data-swap-header="rapid-swap">/.test(text), "core: <body> attributes");
+  ok((text.match(/data-confirm-dialog/g) ?? []).length === 1, "core: one ConfirmModal per page");
+  // The server's data-theme beats a choice stored in this browser, and is stored in its place.
+  const page = await open("/?theme=dark");
+  await page.evaluate(() => localStorage.setItem("ui-theme", "light"));
+  await page.reload({ waitUntil: "networkidle0" });
+  const shell = await page.evaluate(() => ({
+    theme: document.documentElement.dataset.theme,
+    stored: localStorage.getItem("ui-theme"),
+    title: document.title,
+    dialog: !!document.querySelector("dialog[data-confirm-dialog]"),
+  }));
+  ok(
+    shell.theme === "dark" && shell.stored === "dark" && shell.title !== "" && shell.dialog,
+    `core: in the browser (${JSON.stringify(shell)})`,
+  );
+  // A toggle announces the choice, for the app to save.
+  const announced = await page.evaluate(() =>
+    new Promise<string>((resolve) => {
+      document.addEventListener("theme:change", (e) => resolve((e as CustomEvent).detail.theme), { once: true });
+      (document.querySelector("[data-theme-toggle]") as HTMLElement).click();
+    })
+  );
+  ok(announced === "light", `core: theme:change carried ${announced}`);
+  await page.evaluate(() => localStorage.removeItem("ui-theme"));
+  await page.close();
+}
+
 /* ---------------------------------------------------------- inline CSP */
 {
   // Every page: no inline style/script anywhere (the app must run under a strict CSP).

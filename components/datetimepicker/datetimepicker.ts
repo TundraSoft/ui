@@ -48,6 +48,14 @@ export type DateTimePickerProps = {
   invalid?: boolean;
   /** Which edge the floating panels align to. */
   align?: "start" | "end";
+  /**
+   * A Clear button beside the fields that empties both halves (an
+   * optional moment: an expiry, a schedule). Shown only with JS, and only
+   * while there is something to clear.
+   */
+  clearable?: boolean;
+  /** The Clear button's text. @default "Clear" */
+  clearLabel?: string;
   messages?: DateTimePickerMessages;
   /** Extra attributes for the root (a caller's `class` is merged). */
   attrs?: Attrs;
@@ -131,7 +139,7 @@ export function DateTimePicker(props: DateTimePickerProps): Html {
 
   const rootAttrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     "data-datetimepicker": "",
     "data-datetimepicker-local": props.local ? "" : undefined,
     // The chip says UTC until the script can name the viewer's zone.
@@ -169,9 +177,17 @@ export function DateTimePicker(props: DateTimePickerProps): Html {
         zone: props.zone ?? "UTC",
         align: props.align,
         messages: msg,
-      })}</div><input type="hidden" name="${props.name}" value="${normal(
-        props.value,
-      ) ?? ""}" data-datetime-value disabled>${presets.length
+      })}${props.clearable
+        ? html`
+          <button type="button" class="btn btn--ghost btn--sm datetimepicker__clear js-only" data-datetime-clear
+            ${renderAttrs({
+              hidden: parts || props.disabled ? undefined : "",
+              disabled: props.disabled ? "" : undefined,
+            })}>${props.clearLabel ?? "Clear"}</button>
+        `
+        : ""}</div><input type="hidden" name="${props.name}" value="${normal(
+          props.value,
+        ) ?? ""}" data-datetime-value disabled>${presets.length
         ? html`<div class="datetimepicker__presets js-only" role="group" aria-label="Presets">${
           presets.map((p) =>
             html`

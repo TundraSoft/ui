@@ -610,6 +610,17 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
         stylesheets: ["/app.css"],
         scripts: [APEXCHARTS],
         head: html`<link rel="icon" href="/favicon.svg">`,
+        // What rAPId's htmlDocument keeps fixed: a viewport that lets a
+        // layout read env(safe-area-inset-*), a theme the server already
+        // knows on <html> (no light flash before theme-toggle.js runs —
+        // here from ?theme=, in an app from the person's preference), and
+        // the runtime's <body data-*> config.
+        viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+        htmlAttrs: (_data, view) =>
+          view.query["theme"] === "dark" || view.query["theme"] === "light"
+            ? { "data-theme": view.query["theme"] }
+            : {},
+        bodyAttrs: { "data-swap-header": "rapid-swap" },
       }),
       errorTemplates,
       prefer: "html",

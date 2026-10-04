@@ -9,6 +9,12 @@ export type ModalProps = {
   footer?: string | Html;
   /** Accessible name when there is no visible title. */
   label?: string;
+  /**
+   * Open as soon as it is on the page — on load, and when a swap puts it
+   * there (modal.js). Re-render a form's modal with `open` after a failed
+   * submit so its errors are in front of the person, not behind a click.
+   */
+  open?: boolean;
   attrs?: Attrs;
 };
 
@@ -20,10 +26,11 @@ export type ModalProps = {
  */
 export function Modal(props: ModalProps): Html {
   const titleId = `${props.id}-title`;
-  return html`<dialog${classAttrs("modal", { ...props.attrs, id: props.id })}${
+  return html`<dialog${classAttrs("modal", { ...props.attrs, id: props.id ?? props.attrs?.id })}${
     renderAttrs({
       "aria-labelledby": props.title ? titleId : undefined,
       "aria-label": props.title ? undefined : props.label,
+      "data-modal-autoopen": props.open ? "" : undefined,
     })
   }>${
     props.title &&
@@ -37,4 +44,39 @@ export function Modal(props: ModalProps): Html {
   }<div class="modal__body">${props.body}</div>${
     props.footer && html`<div class="modal__footer">${props.footer}</div>`
   }</dialog>`;
+}
+
+export type ConfirmModalProps = {
+  /** @default "confirm-dialog" */
+  id?: string;
+  /** @default "Are you sure?" */
+  title?: string;
+  /** The OK button; a trigger's `data-confirm-label` overrides it. @default "Confirm" */
+  confirmLabel?: string;
+  /** @default "Cancel" */
+  cancelLabel?: string;
+};
+
+/**
+ * The page's one confirmation dialog. Any link, button or submit button
+ * carrying `data-confirm="<question>"` (`RowAction.confirm`, or `attrs`)
+ * asks here first; Confirm carries on with exactly what was clicked —
+ * same submitter, same swap — Cancel or Escape drops it. The OK button
+ * turns danger when the trigger is a `btn--danger` (or carries
+ * `data-confirm-tone="danger"`). Render it once per page (the core
+ * template does, unless `confirmDialog: false`); without it modal.js
+ * falls back to the browser's `confirm()`.
+ */
+export function ConfirmModal(props: ConfirmModalProps = {}): Html {
+  return Modal({
+    id: props.id ?? "confirm-dialog",
+    title: props.title ?? "Are you sure?",
+    attrs: { class: "modal--confirm", "data-confirm-dialog": "", "data-confirm-default": props.confirmLabel },
+    body: html`<p class="modal__text" data-confirm-text></p>`,
+    footer: html`
+      <button type="button" class="btn btn--ghost" data-modal-close>${props.cancelLabel ??
+        "Cancel"}</button><button type="button" class="btn"
+        data-confirm-ok>${props.confirmLabel ?? "Confirm"}</button>
+    `,
+  });
 }

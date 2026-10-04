@@ -35,6 +35,12 @@ export type ComboboxProps = {
   action?: string;
   emptyText?: string;
   hint?: string;
+  /**
+   * The keyboard-hint bar under the list ("↑↓ navigate · ↵ select · 12
+   * matches"). Turn it off where the list reads as a dropdown, not a
+   * search. @default true
+   */
+  hints?: boolean;
 };
 
 /**
@@ -124,7 +130,12 @@ export function Combobox(props: ComboboxProps): Html {
     : html`<input type="hidden" name="${props.name}" value="${current?.value ?? ""}" data-combobox-value>`;
 
   return html`
-    <div class="${cx("combobox", props.multi && "combobox--multi", props.open && "combobox--open")}"
+    <div class="${cx(
+      "combobox",
+      props.multi && "combobox--multi",
+      props.open && "combobox--open",
+      props.hints === false && "combobox--no-hints",
+    )}"
       data-combobox${renderAttrs({ "data-combobox-name": props.multi ? props.name : undefined })}>${props.label
         ? html`<label class="form-field__label" for="${props.id}">${props.label}</label>`
         : ""}<div class="combobox__anchor"><div class="combobox__field">${tokens}${valueInput}<input class="combobox__input" id="${props

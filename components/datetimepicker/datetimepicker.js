@@ -13,6 +13,8 @@
  *    through the time picker's validity (data-timepicker-error) — the one
  *    error slot the validator knows about
  *  - [data-datetime-preset] buttons set both halves at once
+ *  - [data-datetime-clear] (`clearable`) empties both, and shows only
+ *    while either half holds something
  *  - with data-datetimepicker-local the halves are the viewer's wall
  *    time: the server-rendered UTC value and bounds are converted on
  *    init, the zone chip names the browser's zone, and the posted value
@@ -77,6 +79,9 @@
     setAttr(p.time, "data-timepicker-error", error);
     p.time.dispatchEvent(new CustomEvent("timepicker:refresh", { bubbles: true }));
 
+    const clear = root.querySelector("[data-datetime-clear]");
+    if (clear) clear.hidden = !date && !time;
+
     const whole = join(root, date, time);
     if (p.whole.value !== whole) {
       p.whole.value = whole;
@@ -101,6 +106,16 @@
   });
 
   document.addEventListener("click", (event) => {
+    const clear = event.target?.closest?.("[data-datetime-clear]");
+    const from = clear?.closest("[data-datetimepicker]");
+    if (from && !clear.disabled) {
+      const p = parts(from);
+      p.date?.dispatchEvent(new CustomEvent("datepicker:refresh", { bubbles: true, detail: { value: "" } }));
+      p.time?.dispatchEvent(new CustomEvent("timepicker:refresh", { bubbles: true, detail: { value: "" } }));
+      sync(from);
+      from.querySelector(".datepicker__trigger")?.focus();
+      return;
+    }
     const preset = event.target?.closest?.("[data-datetime-preset]");
     const root = preset?.closest("[data-datetimepicker]");
     if (!root || preset.disabled) return;

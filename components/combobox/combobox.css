@@ -234,3 +234,9 @@
   color: var(--color-disabled-text);
   cursor: not-allowed;
 }
+
+/* Combobox({ hints: false }): a list that reads as a dropdown. The bar is
+   still rendered (a swapped ComboboxList brings its own), just not shown. */
+.combobox--no-hints .combobox__hints {
+  display: none;
+}

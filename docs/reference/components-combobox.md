@@ -52,6 +52,7 @@ Combobox(props: ComboboxProps): Html
 | `action` | `string` |  | URL that returns a fresh `ComboboxList(...)` fragment for `?q=<text>`. combobox.js debounces `input` and calls `window.rapid.swap()` on it; without it (or without rAPId's runtime) the rendered options are filtered client-side instead. |
 | `emptyText` | `string` |  |  |
 | `hint` | `string` |  |  |
+| `hints` | `boolean` |  | The keyboard-hint bar under the list ("↑↓ navigate · ↵ select · 12 matches"). Turn it off where the list reads as a dropdown, not a search. @default true |
 
 ### `ComboboxListProps`
 
@@ -150,12 +151,12 @@ ComboboxList({
 
 Classes defined by `components/combobox/combobox.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox`, `.combobox--multi`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
+`.combobox`, `.combobox--multi`, `.combobox--no-hints`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
 
 ## Behaviour
 
 `components/combobox/combobox.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-target`, `data-combobox-value`, `data-value`.
+Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
 
 Events: `combobox:pick`.

@@ -12,7 +12,7 @@ import { Alert, FormErrorAlert } from "../../components/alert/alert.ts";
 import { Avatar, AvatarGroup } from "../../components/avatar/avatar.ts";
 import { Badge, Chip } from "../../components/badge/badge.ts";
 import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
-import { Button, ButtonGroup } from "../../components/button/button.ts";
+import { Button, ButtonGroup, CopyButton } from "../../components/button/button.ts";
 import { Card, CardBody, CardFooter, CardHeader, CardMedia } from "../../components/card/card.ts";
 import { Chart, chartTypes } from "../../components/chart/chart.ts";
 import { Checkbox, Choice, ChoiceGroup, Radio } from "../../components/choice/choice.ts";
@@ -28,12 +28,12 @@ import { Dropzone } from "../../components/dropzone/dropzone.ts";
 import { Editor } from "../../components/editor/editor.ts";
 import { Empty } from "../../components/empty/empty.ts";
 import { FormActions, FormField, FormGrid } from "../../components/form-field/form-field.ts";
-import { Form } from "../../components/form/form.ts";
+import { CsrfField, Form } from "../../components/form/form.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { Counter, FloatingInput, Input, InputGroup, InputIcon } from "../../components/input/input.ts";
 import { flags, sampleCountries } from "./flags.ts";
 import { Menu } from "../../components/menu/menu.ts";
-import { Modal } from "../../components/modal/modal.ts";
+import { ConfirmModal, Modal } from "../../components/modal/modal.ts";
 import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
@@ -47,7 +47,7 @@ import { Skeleton, SkeletonCard, SkeletonTable } from "../../components/skeleton
 import { Slider } from "../../components/slider/slider.ts";
 import { Stat } from "../../components/stat/stat.ts";
 import { Switch } from "../../components/switch/switch.ts";
-import { Tabs } from "../../components/tabs/tabs.ts";
+import { TabLinks, Tabs } from "../../components/tabs/tabs.ts";
 import { Textarea } from "../../components/textarea/textarea.ts";
 import { Timeline } from "../../components/timeline/timeline.ts";
 import { TimePicker } from "../../components/timepicker/timepicker.ts";
@@ -188,6 +188,7 @@ const skeletonWidths = ["xs", "sm", "md", "lg", "xl", "half", "full"] as const;
 const statTones = ["neutral", "primary", "success", "warning", "danger", "info"] as const;
 const toastVariants = ["neutral", "success", "warning", "danger", "info", "ink"] as const;
 const timelineStatuses = ["done", "current", "pending"] as const;
+const timelineTones = ["neutral", "success", "warning", "danger", "info", "accent"] as const;
 const wizardStatuses = ["pending", "active", "done"] as const;
 const popoverAligns = ["center", "start", "end"] as const;
 const dropdownAligns = ["start", "end"] as const;
@@ -240,6 +241,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           ),
         ),
         c("FormErrorAlert (RapidFormError)", FormErrorAlert(formError)),
+        c(
+          "actions",
+          Alert({
+            variant: "warning",
+            title: "This link is flagged",
+            body: "Visitors see a warning instead of the destination.",
+            actions: html`${Button({ label: "Change destination", size: "sm" })}${
+              Button({ label: "Ask for a review", size: "sm", variant: "outline" })
+            }`,
+          }),
+        ),
       ],
     },
     {
@@ -284,6 +296,20 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           Breadcrumb({ items: [{ label: "Home", href: "#" }, { label: "Settings", href: "#" }, { label: "Profile" }] }),
         ),
         c("single", Breadcrumb({ items: [{ label: "Home" }] })),
+        c(
+          "collapse — the middle folds into … when the trail does not fit (#cat-bc-fold)",
+          html`<div class="cat-narrow" id="cat-bc-fold">${
+            Breadcrumb({
+              collapse: true,
+              items: [
+                { label: "Northwind Traders", href: "#" },
+                { label: "Settings", href: "#" },
+                { label: "Groups & permissions", href: "#" },
+                { label: "Billing administrators" },
+              ],
+            })
+          }</div>`,
+        ),
       ],
     },
     {
@@ -310,6 +336,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           ),
         ),
         c("block", Button({ label: "Block", block: true })),
+        c(
+          "CopyButton (#cat-copy)",
+          row(
+            CopyButton({ id: "cat-copy", value: "https://go.acme.com/spring" }),
+            CopyButton({ value: "brv_ak_7f2c", label: "Copy key", icon: false, variant: "ghost" }),
+          ),
+        ),
         c(
           "ButtonGroup (see dropdown for the split-button caret)",
           ButtonGroup({
@@ -455,6 +488,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "combobox",
       cases: [
+        c(
+          "hints: false — reads as a dropdown (#cat-cb-nohints)",
+          Combobox({
+            id: "cat-cb-nohints",
+            name: "owner",
+            placeholder: "Owner",
+            hints: false,
+            options: [{ value: "ada", label: "Ada Lovelace" }, { value: "alan", label: "Alan Turing" }],
+          }),
+        ),
         c(
           "server-driven — action answers ?q= with a ComboboxList (#reviewer)",
           Combobox({
@@ -665,6 +708,107 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "cellAttrs / headAttrs, rowSelectable, selectAll, countLabels, POST row actions with confirm (#cat-dt-adv)",
+          DataTable<Row>({
+            id: "cat-dt-adv",
+            selectable: true,
+            rowSelectable: (r) => r.status !== "Paused",
+            selectAll: { total: 240, fields: { status: "active" } },
+            countLabels: { one: "1 account selected", other: "{n} accounts selected" },
+            bulkAction: "?bulk",
+            bulkActions: Button({
+              label: "Archive",
+              size: "sm",
+              type: "submit",
+              attrs: { name: "op", value: "archive", "data-confirm": "Archive the selected accounts?" },
+            }),
+            columns: [
+              {
+                key: "name",
+                label: "Name",
+                headAttrs: { "data-col": "name" },
+                cellAttrs: (r) => ({ "data-card": "primary", title: `Account ${r.name}` }),
+              },
+              { key: "status", label: "Status", cellAttrs: { class: "cat-dt-status", "data-card": "badge" } },
+              { key: "amount", label: "Amount", numeric: true },
+            ],
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-adv-${r.id}`,
+                label: `Actions for ${r.name}`,
+                csrfToken: "demo-token",
+                items: [
+                  { label: "Open", href: "#" },
+                  { label: "Lock", post: "?lock", fields: { id: r.id }, target: "#cat-dt-adv" },
+                  {
+                    label: "Delete",
+                    post: "?delete",
+                    fields: { id: r.id },
+                    danger: true,
+                    confirm: `Delete ${r.name}?`,
+                  },
+                ],
+              }),
+          }),
+        ),
+        c(
+          "rowSelectable — no row on the page can be selected: no column, no bar (#cat-dt-none)",
+          DataTable<Row>({
+            id: "cat-dt-none",
+            selectable: true,
+            rowSelectable: () => false,
+            bulkActions: Button({ label: "Archive", size: "sm" }),
+            columns: [{ key: "name", label: "Name" }],
+            rows,
+            rowKey: (r) => r.id,
+          }),
+        ),
+        c(
+          "a Select and a Combobox in the toolbar — their lists open over the sticky header (#cat-dt-tools)",
+          DataTable<Row>({
+            id: "cat-dt-tools",
+            maxHeight: "sm",
+            toolbar: html`${
+              Select({
+                id: "cat-dt-tools-status",
+                name: "status",
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "active", label: "Active" },
+                  {
+                    value: "paused",
+                    label: "Paused",
+                  },
+                  { value: "closed", label: "Closed" },
+                  { value: "draft", label: "Draft" },
+                ],
+                attrs: { "aria-label": "Status" },
+              })
+            }${
+              Combobox({
+                id: "cat-dt-tools-owner",
+                name: "owner",
+                placeholder: "Owner",
+                hints: false,
+                options: rows.map((r) => ({ value: r.id, label: r.name })),
+              })
+            }`,
+            columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }, {
+              key: "amount",
+              label: "Amount",
+              numeric: true,
+            }],
+            rows: [
+              ...rows,
+              ...rows.map((r) => ({ ...r, id: `${r.id}b` })),
+              ...rows.map((r) => ({ ...r, id: `${r.id}c` })),
+            ],
+            rowKey: (r) => r.id,
+          }),
+        ),
+        c(
           "emptyMessage",
           DataTable<Row>({
             id: "cat-dt-msg",
@@ -809,6 +953,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "clearable — an optional moment (#dtp-clear)",
+          DateTimePicker({
+            id: "dtp-clear",
+            name: "expires_on",
+            value: "2026-10-01T18:00:00Z",
+            today: "2026-09-14",
+            clearable: true,
+          }),
+        ),
+        c(
           "local — edited in the viewer's zone, posted as UTC (#dtp-local)",
           DateTimePicker({
             id: "dtp-local",
@@ -933,22 +1087,33 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     },
     {
       name: "empty",
-      cases: emptyVariants.flatMap((variant) =>
-        emptyTones.map((tone) =>
-          c(
-            `variant ${variant} · tone ${tone}`,
-            Empty({
-              variant,
-              tone,
-              icon: tone === "error" ? "warning" : "folder",
-              title: `${variant} ${tone}`,
-              text: "Some explanatory text.",
-              code: tone === "error" ? "500 · req_1" : undefined,
-              actions: Button({ label: "Act", size: "sm" }),
-            }),
+      cases: [
+        ...emptyVariants.flatMap((variant) =>
+          emptyTones.map((tone) =>
+            c(
+              `variant ${variant} · tone ${tone}`,
+              Empty({
+                variant,
+                tone,
+                icon: tone === "error" ? "warning" : "folder",
+                title: `${variant} ${tone}`,
+                text: "Some explanatory text.",
+                code: tone === "error" ? "500 · req_1" : undefined,
+                actions: Button({ label: "Act", size: "sm" }),
+              }),
+            )
           )
-        )
-      ),
+        ),
+        c(
+          "icon as Html (another icon set)",
+          Empty({
+            variant: "inline",
+            icon: html`<span class="cat-own-icon">#</span>`,
+            title: "No tags yet",
+            text: "Tags group links by campaign.",
+          }),
+        ),
+      ],
     },
     {
       name: "form-field",
@@ -989,6 +1154,51 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "form",
       cases: [
         c("plain", Form({ id: "cat-form-1", action: "#", content: FormField({ label: "Name", control: Input({}) }) })),
+        c(
+          "csrfToken — the hidden field a no-JS POST carries; CsrfField for a hand-built form",
+          html`${
+            Form({
+              id: "cat-form-csrf",
+              action: "?save",
+              csrfToken: "demo-token",
+              content: FormField({ label: "Name", control: Input({ name: "name" }) }),
+            })
+          }<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${
+            Button({ label: "Revoke", size: "sm", variant: "danger", type: "submit" })
+          }</form>`,
+        ),
+        c(
+          "autosubmit — a filter bar: a choice submits, typing does not (#cat-autosubmit)",
+          Form({
+            id: "cat-autosubmit",
+            action: "?filter",
+            method: "get",
+            autosubmit: true,
+            attrs: { "data-cat-autosubmit": "" },
+            content: html`<div class="cat-row">${
+              Input({ type: "search", name: "q", placeholder: "Search", size: "sm", attrs: { "aria-label": "Search" } })
+            }${
+              Select({
+                id: "cat-autosubmit-status",
+                name: "status",
+                options: [{ value: "", label: "All" }, { value: "active", label: "Active" }, {
+                  value: "paused",
+                  label: "Paused",
+                }],
+                attrs: { "aria-label": "Status" },
+              })
+            }${
+              Segmented({
+                id: "cat-autosubmit-range",
+                name: "range",
+                size: "sm",
+                value: "7d",
+                legend: "Range",
+                options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
+              })
+            }</div>`,
+          }),
+        ),
         c(
           "method get + error banner",
           Form({
@@ -1307,6 +1517,50 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "modal",
       cases: [
         c(
+          "open — shown as soon as it is on the page: on load, or when a swap brings it (#cat-modal-open)",
+          html`${
+            Button({
+              label: "Swap it in",
+              variant: "outline",
+              attrs: { "data-cat-swap-in": "#cat-modal-open-template", id: "cat-modal-open-trigger" },
+            })
+          }<template id="cat-modal-open-template">${
+            Modal({
+              id: "cat-modal-open",
+              title: "Opened by the server",
+              open: true,
+              body:
+                html`<p>Rendered with <code>open: true</code>, the way a form that failed inside a modal comes back.</p>`,
+              footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
+            })
+          }</template>`,
+        ),
+        c(
+          "ConfirmModal + data-confirm — a link, a button and a submit button ask first (#cat-confirm)",
+          html`
+            <div class="cat-row"
+              id="cat-confirm">${Button({
+                label: "Leave (link)",
+                href: "#cat-confirmed",
+                variant: "outline",
+                attrs: { "data-confirm": "Leave this page?" },
+              })}${Button({
+                label: "Delete (button)",
+                variant: "danger",
+                attrs: { "data-confirm": "Delete it for good?", "data-confirm-label": "Delete", id: "cat-confirm-del" },
+              })}<form method="get" action="#cat-confirmed" id="cat-confirm-form">${Button({
+                label: "Send (submit)",
+                type: "submit",
+                attrs: { "data-confirm": "Send the form?" },
+              })}</form></div>
+            <p
+              class="text-muted text-2xs">One ConfirmModal per page: this page's chrome renders it (the core template does in a rAPId app). Its props, kept out of the page in a template:</p>
+            <template id="cat-confirm-sample">${ConfirmModal(
+              { id: "cat-confirm-sample-dialog", title: "Sure?", confirmLabel: "OK", cancelLabel: "Back" },
+            )}</template>
+          `,
+        ),
+        c(
           "title + footer (button opens)",
           html`${Button({ label: "Open modal", attrs: { "data-modal-open": "#cat-modal-1" } })}${
             Modal({
@@ -1472,6 +1726,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c("title only", PageHeader({ title: "Title" })),
         c(
+          "level 2 + badge — a section's own header",
+          PageHeader({
+            level: 2,
+            title: "Single sign-on",
+            subtitle: "Let people sign in with your identity provider.",
+            badge: Badge({ label: "Business", variant: "accent" }),
+            actions: Button({ label: "Add provider", size: "sm" }),
+          }),
+        ),
+        c(
           "subtitle, breadcrumb, actions",
           PageHeader({
             title: "Projects",
@@ -1597,6 +1861,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               }],
             }),
           )
+        ),
+        c(
+          "counts + Html label (#cat-seg-count)",
+          Segmented({
+            id: "cat-seg-count",
+            name: "seg-count",
+            size: "sm",
+            value: "",
+            legend: "Status",
+            options: [
+              { value: "", label: "All", count: 128 },
+              { value: "active", label: "Active", count: 120 },
+              { value: "flagged", label: html`${Icon("warning", { size: 13 })}Flagged`, count: 3, alert: true },
+              { value: "paused", label: "Paused", count: 0, alert: true },
+            ],
+          }),
         ),
         c(
           "icons + block",
@@ -1783,6 +2063,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "TabLinks — tabs that are pages (#cat-tablinks)",
+          TabLinks({
+            id: "cat-tablinks",
+            label: "Analytics",
+            items: [
+              { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
+              { label: "Conversions", href: "#", count: 12 },
+              { label: "Attribution", href: "#", badge: Badge({ label: "Pro", variant: "neutral" }) },
+            ],
+          }),
+        ),
+        c(
           "active = second",
           Tabs({
             id: "cat-tabs-2",
@@ -1827,6 +2119,24 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               ...timelineStatuses.map((status) => ({ title: status as string, meta: `meta for ${status}`, status })),
               { title: "No status" },
             ],
+          }),
+        ),
+        c(
+          "tones, icons and text",
+          Timeline({
+            id: "cat-tl-tones",
+            items: timelineTones.map((tone) => ({
+              title: `tone ${tone}`,
+              meta: "Sep 14",
+              text: "What happened, and what happens next.",
+              tone,
+              icon: tone === "danger"
+                ? Icon("x", { size: 12 })
+                : tone === "info"
+                ? Icon("info", { size: 12 })
+                : undefined,
+              status: "done" as const,
+            })),
           }),
         ),
       ],
@@ -1905,6 +2215,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "every step status",
           Wizard({ id: "cat-wz", steps: wizardStatuses.map((status) => ({ label: status, status })), content: lorem }),
         ),
+        c(
+          "steps only — no content (a flow whose pages carry their own)",
+          Wizard({
+            id: "cat-wz-steps",
+            steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, { label: "Results" }],
+          }),
+        ),
       ],
     },
   ];
@@ -1952,5 +2269,7 @@ export const catalogueCss =
 .cat-case__label { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-muted); font-family: var(--font-family-mono, monospace); }
 .cat-case__body { padding: var(--space-4); border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
+.cat-narrow { max-width: 320px; }
+.cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-swatch { background: var(--color-surface-alt); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-2); text-align: center; font-size: var(--font-size-xs); }
 `;

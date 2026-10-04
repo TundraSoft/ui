@@ -43,18 +43,35 @@ html:not(.js) .select__ui {
   display: none;
 }
 
-/* Read-only text field: the whole field is a hand, the text caret is hidden. */
+/* The control is a button styled as the combobox's input: the whole field
+   is a hand, the text sits at the start and ellipsizes. */
 .select__ui .combobox__field {
   cursor: pointer;
 }
 
-.select__ui .combobox__input {
+.select__button {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+  padding-inline-end: 0;
+  text-align: start;
   cursor: pointer;
-  caret-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.select__ui .combobox__input:disabled {
+.select__button:disabled {
   cursor: not-allowed;
+}
+
+.select__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.select__text--placeholder {
+  color: var(--color-text-subtle);
 }
 
 .select--disabled .combobox__field {
@@ -67,8 +84,7 @@ html:not(.js) .select__ui {
   border-color: var(--color-danger);
 }
 
-/* Hidden list still lays out zero height; the hints bar is noise for a
-   plain select. */
+/* The hints bar is noise for a plain select. */
 .select__ui .combobox__hints {
   display: none;
 }

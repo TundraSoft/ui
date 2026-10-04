@@ -64,7 +64,8 @@ The runtime dispatches bubbling `CustomEvent`s a component can listen for instea
 (`detail: { status, url, method,
 swap, title? }`) and `rapid:error` (`detail: { status, body }`). It exposes
 `window.rapid.swap(url, target, opts)` and `window.rapid.refresh(target)` as the only public JS API surface for
-triggering a fetch+swap programmatically.
+triggering a fetch+swap programmatically; with the history module loaded it adds
+`window.rapid.history.push(url, target, opts?)` (a swap that also pushes the URL — GET only, the region needs an `id`).
 
 ### 3. Swap fragments must be self-contained
 
@@ -670,6 +671,53 @@ with the page.
   Union `EditorMode` is catalogued like every other.
 - Harness lessons: a radio that is visually hidden under its label is "not clickable" to Puppeteer — use a DOM click;
   after adding nav buttons, select them by `data-nav`, not by index.
+
+**Console gaps round (2026-10-04)** — a review of the Brevily console
+(`/Volumes/Coding/Psionic/url-shortner/apps/console`, the library's main downstream app) found workarounds that were
+really missing props; each became library surface, catalogued and asserted in `test-catalogue.ts` (`consoleGaps()`):
+
+- **DataTable**: `DataTableColumn.headAttrs` / `cellAttrs` (fixed or `(row) => Attrs`, `class` merges — the hook for a
+  CSS-only card layout on a phone, which the console had done by regex-rewriting the rendered table);
+  `rowSelectable(row)` (an opted-out row keeps an empty cell; no selectable row → no column, no bar); `selectAll`
+  (`{ total, fields, … }` → hidden `all=1` + the filter, "Select all N" / "Clear selection" in the bar, dropped again
+  when a row is unticked); `countLabels` (`{n}`). `RowAction.post` (+ `fields`, `target` for a swap, `confirm`) renders
+  its own one-button POST form with the CSRF field (`RowActionsProps.csrfToken`); a destructive row action is never a
+  GET.
+- **Confirmation**: `ConfirmModal()` (in `modal.ts`; the core template renders one per page unless
+  `confirmDialog: false`) and a kit-wide `[data-confirm]` in `modal.js`: a capture-phase click listener stops the click
+  before the runtime / busy.js / form scripts, asks, and on Confirm replays `trigger.click()` — same submitter, same
+  swap. Danger tone from `btn--danger` or `data-confirm-tone`, OK label from `data-confirm-label`. A submit in an
+  invalid `form[data-validate]` is not asked about (form.js reports first). Two `data-confirm-dialog`s on a page is a
+  bug: the first wins (the catalogue keeps its sample in a `<template>`).
+- **`Modal({ open })`** → `data-modal-autoopen`, opened on load and after `rapid:swapped` (once per element).
+- **Select's visible control is a `<button role="combobox">`** (APG select-only), not a read-only `<input>`: a read-only
+  text input still counts as a field that blocks implicit submission, so a search box beside a Select never submitted on
+  Enter. combobox.js keys off `[role=combobox]` and `selectOnly(el)` (a button or a read-only input: no open on focus,
+  click toggles, Space picks while open); the label lives in `[data-select-text]`; `aria-label` from `attrs` names the
+  button too. Tests read `textContent`, not `.value`.
+- **`Combobox({ hints: false })`** → `.combobox--no-hints` (CSS-hidden, so a swapped `ComboboxList` needs no flag).
+- **Core template**: rAPId's `htmlDocument` has no hook for `<html>`/`<body>` attributes or the viewport, so
+  `createCoreTemplate` now writes the document itself (same escaping, same `canonical`/`og:`/meta rules) and takes
+  `viewport`, `htmlAttrs`, `bodyAttrs` (fixed or `(data, view) => Attrs`). A server-set `data-theme` on `<html>` now
+  **wins** over the browser's stored choice in `theme-toggle.js` (and is stored), and a toggle dispatches `theme:change`
+  (`detail.theme`) for the app to save — the console had a `<meta>` + localStorage dance for this.
+- **Form**: `csrfToken` / `csrfField` (default `_csrf`, what rAPId's `csrf()` reads without the header) and
+  `CsrfField()` for hand-built forms; `autosubmit` → `shared/js/autosubmit.js` (a choice submits via `requestSubmit()`,
+  typing never does; a searchable Combobox submits on `combobox:pick`).
+- **Copy**: `CopyButton()` + `shared/js/copy.js` (`[data-copy]` / `[data-copy-target]`, `data-copied` for 2 s, label
+  swap in CSS, announced via the toast region).
+- **Smaller slots**: `Segmented` option `label` may be `Html`, plus `count` / `alert`; `Empty.icon` takes `Html`;
+  `PageHeader({ level: 2, badge })`; `TabLinks()` (link tabs, `aria-current`, `icon`/`count`/`badge`; tabs.js ignores
+  `a.tabs__tab`); `Wizard` without `content` (`.wizard--steps-only`); `Alert({ actions })`; `Timeline` items `icon` /
+  `tone` (`TimelineTone`) / `text`; `Breadcrumb({ collapse })` (container query on the nav at 480px folds the middle
+  crumbs into a `<details>` "…" menu — no script); `DateTimePicker({ clearable })`; a `more` (horizontal dots) icon.
+- **Bug fixed on the way**: a component that spreads `attrs` and then sets `id: props.id` dropped a caller's `attrs.id`
+  whenever the `id` prop was absent (Button, Card, Alert, Tabs, Wizard, Modal, Dropdown, Navbar, Sidebar, Pagination,
+  Chart, Choice, Collapsible, Switch, Textarea, Toast, Form, DateTimePicker). Every such object now uses
+  `id: props.id ?? props.attrs?.id`. Do the same in any new component.
+
+The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
+`page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 
 ## Layouts (`layouts/`, 2026-09-15)
 

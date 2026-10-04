@@ -172,7 +172,7 @@ export function chartOptions(props: ChartProps): Obj {
  * the engine.
  */
 export function Chart(props: ChartProps): Html {
-  const attrs: Attrs = { ...props.attrs, id: props.id };
+  const attrs: Attrs = { ...props.attrs, id: props.id ?? props.attrs?.id };
   return html`
     <div class="chart" data-chart="${JSON.stringify(chartOptions(props))}" data-chart-type="${props
       .type}" ${renderAttrs(attrs)}></div>

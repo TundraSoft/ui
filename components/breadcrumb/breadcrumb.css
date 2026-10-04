@@ -31,3 +31,98 @@
   color: var(--color-text);
   font-weight: var(--font-weight-medium);
 }
+
+/* Breadcrumb({ collapse }): the middle crumbs fold into a "…" disclosure
+   when the trail does not fit. The nav is the measured container; without
+   container queries the full trail shows and the "…" stays hidden. */
+.breadcrumb-nav--collapse {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.breadcrumb__more {
+  display: none;
+}
+
+.breadcrumb-nav--collapse .breadcrumb {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.breadcrumb-nav--collapse .breadcrumb__item {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.breadcrumb-nav--collapse .breadcrumb__item[aria-current="page"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@container (max-width: 480px) {
+  .breadcrumb__item--mid {
+    display: none;
+  }
+
+  .breadcrumb__more {
+    display: flex;
+  }
+}
+
+.breadcrumb__menu {
+  position: relative;
+}
+
+.breadcrumb__more-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.breadcrumb__more-button::-webkit-details-marker {
+  display: none;
+}
+
+.breadcrumb__more-button:hover {
+  color: var(--color-text);
+  background: var(--color-surface-sunken);
+}
+
+.breadcrumb__more-button:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+.breadcrumb__menu-list {
+  position: absolute;
+  inset-inline-start: 0;
+  top: calc(100% + var(--space-1));
+  z-index: var(--z-dropdown);
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.breadcrumb__menu-link {
+  display: block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.breadcrumb__menu-link:hover {
+  background: var(--color-surface-sunken);
+}
