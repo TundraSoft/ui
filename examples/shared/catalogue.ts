@@ -242,6 +242,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c("FormErrorAlert (RapidFormError)", FormErrorAlert(formError)),
         c(
+          "role — status by default for neutral/success/info, alert for warning/danger; override or none (#cat-alert-roles)",
+          html`<div class="stack stack--sm" id="cat-alert-roles">${Alert({ variant: "success", body: "Saved." })}${
+            Alert({ variant: "danger", body: "Could not save." })
+          }${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${
+            Alert({ variant: "neutral", role: "none", body: "A static note." })
+          }</div>`,
+        ),
+        c(
           "actions",
           Alert({
             variant: "warning",

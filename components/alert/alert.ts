@@ -16,6 +16,14 @@ export type AlertProps = {
   fields?: Readonly<Record<string, string>>;
   /** Leading icon; status variants get one by default. Pass `false` to suppress. */
   icon?: string | Html | false;
+  /**
+   * How a screen reader announces it. `"alert"` interrupts (an error, a
+   * warning); `"status"` waits its turn (a confirmation, a note); `"none"`
+   * renders no live role (a static notice that was on the page from the
+   * start). Defaults by variant: `alert` for warning and danger, `status`
+   * for neutral, success and info.
+   */
+  role?: "alert" | "status" | "none";
   /** Buttons or links under the text — what to do about it. */
   actions?: Html;
   dismissible?: boolean;
@@ -48,10 +56,11 @@ export function Alert(props: AlertProps): Html {
   const variant = props.variant ?? "neutral";
   const className = cx("alert", VARIANT_CLASS[variant]);
   const icon = props.icon === false ? undefined : props.icon ?? defaultIcon(variant);
+  const role = props.role ?? (variant === "warning" || variant === "danger" ? "alert" : "status");
 
   const attrs: Attrs = mergeAttrs(props.attrs, {
     id: props.id,
-    role: "alert",
+    role: role === "none" ? undefined : role,
     "data-dismissible": props.dismissible ? "" : undefined,
   });
 

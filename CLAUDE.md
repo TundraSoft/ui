@@ -722,7 +722,9 @@ really missing props; each became library surface, catalogued and asserted in `t
   `Wizard` marks the active step `aria-current="step"`, reads done steps as "Done: …" (`doneLabel`), names the list
   (`label`) and takes `listAttrs`; `Timeline` and each `TimelineItem` take `attrs`; `CopyButton({ label: false })` is
   icon-only (`ariaLabel` names it). `TabLinks({ listAttrs })` (attributes on the `.tabs__list` strip — the console's
-  sideways-scroll class) followed once the console had adopted the rest. Not taken: a measuring `Breadcrumb` (the
+  sideways-scroll class) followed once the console had adopted the rest. `Alert({ role })` came the same way: the role
+  now defaults by variant — `alert` (interrupts) for warning/danger, `status` (polite) for neutral/success/info — and
+  `"none"` drops it; a "Saved." notice used to interrupt a screen reader. Not taken: a measuring `Breadcrumb` (the
   console folds only when the trail is actually cut, at any width; the library's `collapse` is a 480px container query —
   different behaviour, the console keeps its own).
 

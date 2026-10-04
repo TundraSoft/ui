@@ -336,6 +336,12 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "feedback") {
+    const roles = await page.$$eval(
+      "#cat-alert-roles > .alert",
+      (els) => els.map((e) => e.getAttribute("role")).join(),
+    );
+    check(roles === "status,alert,alert,", `feedback: alert roles by variant / override / none (${roles})`);
+
     // A modal rendered with `open` opens when a swap brings it in.
     await clickIn("#cat-modal-open-trigger");
     await pause();
