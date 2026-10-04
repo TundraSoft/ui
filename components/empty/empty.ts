@@ -4,7 +4,9 @@ import { Icon, type IconName } from "../../shared/icons.ts";
 
 export type EmptyProps = {
   title: string;
-  text?: string;
+  text?: string | Html;
+  /** Between the text and the actions: a plan line, a note, a small list. */
+  details?: Html;
   /** One of the library's icons by name, or your own markup (another icon set). */
   icon?: IconName | Html;
   actions?: Html;
@@ -23,7 +25,9 @@ export function Empty(props: EmptyProps): Html {
   const inline = props.variant === "inline";
   const body = html`<span class="empty__title">${props.title}</span>${
     props.text ? html`<span class="empty__text">${props.text}</span>` : ""
-  }${props.code ? html`<span class="empty__code">${props.code}</span>` : ""}`;
+  }${props.details ? html`<span class="empty__details">${props.details}</span>` : ""}${
+    props.code ? html`<span class="empty__code">${props.code}</span>` : ""
+  }`;
 
   return html`<div class="${
     cx(

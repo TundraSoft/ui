@@ -8,6 +8,18 @@ import { cx } from "./classnames.ts";
  */
 export type Attrs = Record<string, string | undefined>;
 
+/**
+ * A caller's `attrs` with the component's own attributes on top — except
+ * that an own value of `undefined` ("not set by this prop") never erases
+ * what the caller passed. A plain `{ ...attrs, own: maybe }` spread drops
+ * the caller's `own` whenever the prop is absent; use this instead.
+ */
+export function mergeAttrs(base: Attrs | undefined, own: Attrs): Attrs {
+  const out: Attrs = { ...base };
+  for (const [name, value] of Object.entries(own)) if (value !== undefined) out[name] = value;
+  return out;
+}
+
 /** Attribute *names* are the one thing that must go through `raw()`, so
  * they are validated instead of escaped — a name is never user data. */
 const NAME = /^[a-zA-Z_:][-a-zA-Z0-9_:.]*$/;

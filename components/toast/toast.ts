@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -64,12 +64,11 @@ export function Toast(props: ToastProps): Html {
 
   // No role="status" here: the ToastRegion is already aria-live, and a
   // live region inside a live region announces twice.
-  const attrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     "data-dismissible": "",
     "data-toast-autodismiss": props.autoDismissMs ? String(props.autoDismissMs) : undefined,
-  };
+  });
 
   return html`<div${classAttrs(className, attrs)}>${
     icon && html`<span class="toast__icon">${icon}</span>`

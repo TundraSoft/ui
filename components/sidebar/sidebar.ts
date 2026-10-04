@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { Menu, type MenuItem } from "../menu/menu.ts";
 
 export type SidebarProps = {
@@ -21,7 +21,7 @@ export function Sidebar(props: SidebarProps): Html {
         aria-label="Collapse sidebar"><span class="sidebar__collapse-icon">&#8249;</span><span class="sidebar__collapse-label">Collapse</span></button>
     `;
 
-  return html`<aside${classAttrs("sidebar", { ...props.attrs, id: props.id ?? props.attrs?.id })}>${
+  return html`<aside${classAttrs("sidebar", mergeAttrs(props.attrs, { id: props.id }))}>${
     props.brand && html`<div class="sidebar__brand">${props.brand}</div>`
   }<nav class="sidebar__nav" aria-label="Main">${
     Menu({ items: props.items, id: props.id ? `${props.id}-menu` : undefined })
@@ -38,14 +38,13 @@ export function Sidebar(props: SidebarProps): Html {
 export function SidebarToggle(
   props: { targetId: string; label?: string | Html; attrs?: Attrs },
 ): Html {
-  const attrs: Attrs = {
-    ...props.attrs,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
     "data-toggle": `#${props.targetId}`,
     "data-toggle-class": "",
     "aria-expanded": "false",
     "aria-controls": props.targetId,
     "aria-label": props.attrs?.["aria-label"] ?? "Open navigation",
-  };
+  });
   return html`
     <button type="button" ${classAttrs("navbar__toggle navbar__toggle--sidebar js-only", attrs)}>${props.label ??
       html`&#9776;`}</button>

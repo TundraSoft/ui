@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 export function Progress(
   props: { value: number; max?: number; attrs?: Attrs },
@@ -13,11 +13,10 @@ export function Progress(
 }
 
 export function Spinner(props: { label?: string; attrs?: Attrs } = {}): Html {
-  const attrs: Attrs = {
-    ...props.attrs,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
     role: "status",
     "aria-label": props.label ?? "Loading",
-  };
+  });
   return html`
     <span class="spinner" ${renderAttrs(attrs)}></span>
   `;

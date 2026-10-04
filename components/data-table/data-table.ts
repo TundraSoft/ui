@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 
@@ -186,7 +186,7 @@ export type RowActionsProps = {
 /** One strip item: a link, a POST form, or a bare button. */
 function rowItem(i: RowAction, props: RowActionsProps): Html {
   const cls = cx("btn btn--sm", i.danger && "btn--danger");
-  const attrs: Attrs = { ...i.attrs, "data-confirm": i.confirm };
+  const attrs: Attrs = mergeAttrs(i.attrs, { "data-confirm": i.confirm });
   if (i.href) return html`<a${classAttrs(cls, { ...attrs, href: i.href })}>${i.label}</a>`;
   if (!i.post) return html`<button type="button" ${classAttrs(cls, attrs)}>${i.label}</button>`;
   const fields = Object.entries(i.fields ?? {}).map(([name, value]) =>
@@ -352,7 +352,7 @@ export function DataTable<T extends Record<string, unknown>>(
     `
     : region;
 
-  return html`<div${classAttrs("data-table", { ...props.attrs, id: props.id ?? props.attrs?.id })}>${
+  return html`<div${classAttrs("data-table", mergeAttrs(props.attrs, { id: props.id }))}>${
     props.title || props.toolbar
       ? html`<div class="data-table__toolbar">${
         props.title ? html`<span class="data-table__title">${props.title}</span>` : ""

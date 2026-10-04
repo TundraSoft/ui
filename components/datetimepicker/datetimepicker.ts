@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { DatePicker } from "../datepicker/datepicker.ts";
 import { TimePicker, type TimePickerMessages } from "../timepicker/timepicker.ts";
@@ -137,9 +137,8 @@ export function DateTimePicker(props: DateTimePickerProps): Html {
     return value ? [{ label: p.label, value }] : [];
   });
 
-  const rootAttrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const rootAttrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     "data-datetimepicker": "",
     "data-datetimepicker-local": props.local ? "" : undefined,
     // The chip says UTC until the script can name the viewer's zone.
@@ -148,7 +147,7 @@ export function DateTimePicker(props: DateTimePickerProps): Html {
     "data-datetimepicker-max": normal(props.max),
     "data-datetimepicker-required": props.required ? "" : undefined,
     "data-msg-date": msg.date,
-  };
+  });
 
   return html`
     <div

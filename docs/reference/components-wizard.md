@@ -36,6 +36,9 @@ Wizard(props: WizardProps): Html
 | `id` | `string` |  |  |
 | `steps` | `WizardStep[]` | yes |  |
 | `content` | `Html` |  | The current step's body. Leave it out to draw the step strip alone — a multi-page flow whose pages carry their own content. |
+| `label` | `string` |  | The step list's accessible name ("Import steps"). |
+| `doneLabel` | `string` |  | Read before a done step's label by screen readers (the visible mark is a check). @default "Done" |
+| `listAttrs` | `Attrs` |  | Attributes on the `<ol>` itself (a class merges). |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -56,15 +59,18 @@ Wizard({
 <div class="wizard" id="checkout">
   <ol class="wizard__steps">
     <li class="wizard__step wizard__step--done">
-      <span class="wizard__step-index">&#10003;</span>
-      <span class="wizard__step-label">Cart</span>
+      <span class="wizard__step-index" aria-hidden="true">&#10003;</span>
+      <span class="wizard__step-label">
+        <span class="sr-only">Done:</span>
+        Cart
+      </span>
     </li>
-    <li class="wizard__step wizard__step--active">
-      <span class="wizard__step-index">2</span>
+    <li class="wizard__step wizard__step--active" aria-current="step">
+      <span class="wizard__step-index" aria-hidden="true">2</span>
       <span class="wizard__step-label">Payment</span>
     </li>
     <li class="wizard__step">
-      <span class="wizard__step-index">3</span>
+      <span class="wizard__step-index" aria-hidden="true">3</span>
       <span class="wizard__step-label">Review</span>
     </li>
   </ol>

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type WizardStepStatus = "pending" | "active" | "done";
@@ -17,6 +17,12 @@ export type WizardProps = {
    * a multi-page flow whose pages carry their own content.
    */
   content?: Html;
+  /** The step list's accessible name ("Import steps"). */
+  label?: string;
+  /** Read before a done step's label by screen readers (the visible mark is a check). @default "Done" */
+  doneLabel?: string;
+  /** Attributes on the `<ol>` itself (a class merges). */
+  listAttrs?: Attrs;
   attrs?: Attrs;
 };
 
@@ -30,19 +36,25 @@ export function Wizard(props: WizardProps): Html {
     );
     return html`
       <li
-        class="${className}"><span class="wizard__step-index">${status === "done"
+        class="${className}"
+        ${renderAttrs({
+          "aria-current": status === "active" ? "step" : undefined,
+        })}><span class="wizard__step-index" aria-hidden="true">${status ===
+            "done"
           ? html`&#10003;`
-          : String(index + 1)}</span><span class="wizard__step-label">${step.label}</span></li>
+          : String(index + 1)}</span><span class="wizard__step-label">${status === "done"
+          ? html`<span class="sr-only">${props.doneLabel ?? "Done"}: </span>`
+          : ""}${step.label}</span></li>
     `;
   });
 
   return html`
     <div ${classAttrs(
       "wizard",
-      { ...props.attrs, id: props.id ?? props.attrs?.id },
+      mergeAttrs(props.attrs, { id: props.id }),
       props.content === undefined && "wizard--steps-only",
     )}>
-      <ol class="wizard__steps">${items}</ol>
+      <ol ${classAttrs("wizard__steps", mergeAttrs(props.listAttrs, { "aria-label": props.label }))}>${items}</ol>
       ${props.content === undefined ? "" : html`<div class="wizard__content">${props.content}</div>`}
     </div>
   `;

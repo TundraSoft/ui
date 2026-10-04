@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export type ModalProps = {
@@ -26,7 +26,7 @@ export type ModalProps = {
  */
 export function Modal(props: ModalProps): Html {
   const titleId = `${props.id}-title`;
-  return html`<dialog${classAttrs("modal", { ...props.attrs, id: props.id ?? props.attrs?.id })}${
+  return html`<dialog${classAttrs("modal", mergeAttrs(props.attrs, { id: props.id }))}${
     renderAttrs({
       "aria-labelledby": props.title ? titleId : undefined,
       "aria-label": props.title ? undefined : props.label,

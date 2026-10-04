@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 import { ComboboxList } from "../combobox/combobox.ts";
@@ -54,14 +54,13 @@ export function Select(props: SelectProps): Html {
     props.extraClass,
   );
 
-  const nativeAttrs: Attrs = {
-    ...props.attrs,
+  const nativeAttrs: Attrs = mergeAttrs(props.attrs, {
     id: `${base}-native`,
     name: props.name,
     disabled: props.disabled ? "" : undefined,
     required: props.required ? "" : undefined,
     "aria-invalid": props.invalid ? "true" : undefined,
-  };
+  });
 
   const placeholderOption = props.placeholder
     ? html`<option value="" disabled${

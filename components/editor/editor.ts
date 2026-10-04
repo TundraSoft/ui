@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 import { Textarea } from "../textarea/textarea.ts";
 
@@ -103,7 +103,7 @@ export function Editor(props: EditorProps): Html {
   return html`
     <div${classAttrs(
       "editor",
-      { ...props.attrs, id: `${props.id}-editor` },
+      mergeAttrs(props.attrs, { id: `${props.id}-editor` }),
       `editor--${mode}`,
       props.invalid && "editor--invalid",
       props.disabled && "editor--disabled",

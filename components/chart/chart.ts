@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 /**
  * The one charting engine this library supports: ApexCharts, pinned.
@@ -172,7 +172,7 @@ export function chartOptions(props: ChartProps): Obj {
  * the engine.
  */
 export function Chart(props: ChartProps): Html {
-  const attrs: Attrs = { ...props.attrs, id: props.id ?? props.attrs?.id };
+  const attrs: Attrs = mergeAttrs(props.attrs, { id: props.id });
   return html`
     <div class="chart" data-chart="${JSON.stringify(chartOptions(props))}" data-chart-type="${props
       .type}" ${renderAttrs(attrs)}></div>

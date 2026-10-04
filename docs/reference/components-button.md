@@ -75,7 +75,7 @@ it is an inert button — pair it with the visible text it copies.
 | --- | --- | --- | --- |
 | `id` | `string` |  |  |
 | `value` | `string` | yes | The text copied. |
-| `label` | `string` |  |  |
+| `label` | `string | "false"` |  | The visible text. `false`: icon-only — the copy icon turns into a check for two seconds, and `ariaLabel` names the button. @default "Copy" |
 | `doneLabel` | `string` |  | Shown for two seconds after a copy. @default "Copied" |
 | `icon` | `Html | "false"` |  | Leading icon. @default the copy icon |
 | `variant` | `ButtonVariant` |  |  |

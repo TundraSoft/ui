@@ -341,6 +341,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           row(
             CopyButton({ id: "cat-copy", value: "https://go.acme.com/spring" }),
             CopyButton({ value: "brv_ak_7f2c", label: "Copy key", icon: false, variant: "ghost" }),
+            CopyButton({ id: "cat-copy-icon", value: "brv_ak_7f2c", label: false, ariaLabel: "Copy key id" }),
           ),
         ),
         c(
@@ -742,6 +743,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 items: [
                   { label: "Open", href: "#" },
                   { label: "Lock", post: "?lock", fields: { id: r.id }, target: "#cat-dt-adv" },
+                  // A confirm passed through attrs, not the prop, must survive.
+                  { label: "Archive", post: "?archive", attrs: { "data-confirm": `Archive ${r.name}?` } },
                   {
                     label: "Delete",
                     post: "?delete",
@@ -1105,13 +1108,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           )
         ),
         c(
-          "icon as Html (another icon set)",
-          Empty({
-            variant: "inline",
-            icon: html`<span class="cat-own-icon">#</span>`,
-            title: "No tags yet",
-            text: "Tags group links by campaign.",
-          }),
+          "icon as Html (another icon set), text as Html, details (#cat-empty-details)",
+          html`<div id="cat-empty-details">${
+            Empty({
+              variant: "inline",
+              icon: html`<span class="cat-own-icon">#</span>`,
+              title: "No tags yet",
+              text: html`Tags group links by <strong>campaign</strong>.`,
+              details: html`<span>Included in ${Badge({ label: "Pro", variant: "accent" })}</span>`,
+              actions: Button({ label: "Compare plans", size: "sm", variant: "outline" }),
+            })
+          }</div>`,
         ),
       ],
     },
@@ -1871,7 +1878,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             value: "",
             legend: "Status",
             options: [
-              { value: "", label: "All", count: 128 },
+              { value: "", label: "All", count: html`<span>48.2k</span>`, countTitle: "48,213" },
               { value: "active", label: "Active", count: 120 },
               { value: "flagged", label: html`${Icon("warning", { size: 13 })}Flagged`, count: 3, alert: true },
               { value: "paused", label: "Paused", count: 0, alert: true },
@@ -2069,7 +2076,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             label: "Analytics",
             items: [
               { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
-              { label: "Conversions", href: "#", count: 12 },
+              { label: "Conversions", href: "#", count: html`<span>1.2k</span>`, countTitle: "1,204" },
               { label: "Attribution", href: "#", badge: Badge({ label: "Pro", variant: "neutral" }) },
             ],
           }),
@@ -2125,7 +2132,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "tones, icons and text",
           Timeline({
             id: "cat-tl-tones",
+            attrs: { class: "cat-tl", "data-kind": "tones" },
             items: timelineTones.map((tone) => ({
+              attrs: { class: `cat-tl-${tone}` },
               title: `tone ${tone}`,
               meta: "Sep 14",
               text: "What happened, and what happens next.",
@@ -2219,6 +2228,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "steps only — no content (a flow whose pages carry their own)",
           Wizard({
             id: "cat-wz-steps",
+            label: "Import steps",
+            listAttrs: { class: "cat-wz-list" },
             steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, { label: "Results" }],
           }),
         ),

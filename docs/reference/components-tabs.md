@@ -52,7 +52,8 @@ when the panels are all on this page.
 | `href` | `string` | yes |  |
 | `current` | `boolean` |  | The page being shown. |
 | `icon` | `Html` |  | Before the label. |
-| `count` | `number | string` |  | A number after the label. |
+| `count` | `number | string | Html` |  | A number after the label: plain, or markup (a compact figure). |
+| `countTitle` | `string` |  | The exact figure as a tooltip when `count` is rounded. |
 | `badge` | `Html` |  | After the label: a plan or status `Badge`. |
 | `attrs` | `Attrs` |  | Extra attributes on the link (`data-action` + `data-target` + `data-push` for a swap). |
 

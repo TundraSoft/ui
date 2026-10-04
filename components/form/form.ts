@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { FormErrorAlert } from "../alert/alert.ts";
 
 export type FormProps = {
@@ -54,15 +54,14 @@ export function CsrfField(props: { token?: string; name?: string }): Html {
 }
 
 export function Form(props: FormProps): Html {
-  const attrs: Attrs = {
-    ...props.attrs,
-    id: props.id ?? props.attrs?.id,
+  const attrs: Attrs = mergeAttrs(props.attrs, {
+    id: props.id,
     action: props.action,
     method: props.method ?? "post",
     "data-validate": props.validate ? "" : undefined,
     "data-guard": props.guard ? "" : undefined,
     "data-autosubmit": props.autosubmit ? "" : undefined,
-  };
+  });
 
   return html`
     <form class="form" ${renderAttrs(attrs)}>${CsrfField({ token: props.csrfToken, name: props.csrfField })}${props

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 export type PaginationProps = {
   id?: string;
@@ -69,7 +69,7 @@ export function Pagination(props: PaginationProps): Html {
     );
 
   return html`
-    <nav aria-label="Pagination" ${classAttrs(undefined, { ...props.attrs, id: props.id ?? props.attrs?.id })}>
+    <nav aria-label="Pagination" ${classAttrs(undefined, mergeAttrs(props.attrs, { id: props.id }))}>
       <ul class="pagination">${page <= 1
         ? disabled(html`&#8249;`, "Previous page")
         : link(page - 1, html`&#8249;`, "Previous page")}${pages}${page >= totalPages
