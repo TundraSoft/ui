@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/TundraSoft/ui/compare/v0.12.0...v0.13.0) (2026-10-04)
+
+
+### Features
+
+* mergeAttrs everywhere, and the console's follow-up asks ([#39](https://github.com/TundraSoft/ui/issues/39)) ([b26e8fb](https://github.com/TundraSoft/ui/commit/b26e8fb64ffb552f7e7046cf66b461df4cf7208d))
+
 ## [0.12.0](https://github.com/TundraSoft/ui/compare/v0.11.0...v0.12.0) (2026-10-04)
 
 
