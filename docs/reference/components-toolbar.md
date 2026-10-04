@@ -62,7 +62,9 @@ Toolbar({
       <div class="combobox__anchor">
         <div class="combobox__field">
           <input type="hidden" value="" data-combobox-value>
-          <input class="combobox__input" id="select" type="text" role="combobox" readonly autocomplete="off" value="" placeholder="All statuses" aria-expanded="false" aria-controls="select-list" aria-autocomplete="none">
+          <button type="button" class="combobox__input select__button" id="select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-list" data-placeholder="All statuses">
+            <span class="select__text select__text--placeholder" data-select-text>All statuses</span>
+          </button>
           <span class="combobox__caret">
             <svg width="15" height="15" width="2" …>…</svg>
           </span>

@@ -3,7 +3,7 @@
  * native value and fires `change` on it, so anything listening to the
  * native control (filter.js, a form's own script) sees a normal select;
  * a programmatic/autofill change on the native control repaints the UI.
- * Typing in the read-only field jumps to the first option starting with
+ * Typing on the closed button jumps to the first option starting with
  * those letters, like a native select does. An option's `lead` (a flag,
  * an avatar) is cloned from the list into the closed field so the field
  * shows what the list showed. */
@@ -13,7 +13,7 @@
     return root
       ? {
         root,
-        input: root.querySelector("input[role='combobox']"),
+        input: root.querySelector("[role='combobox']"),
         hidden: root.querySelector("[data-combobox-value]"),
         options: Array.from(root.querySelectorAll("[role='option']")),
       }
@@ -45,7 +45,11 @@
       ? (picked.querySelector(".combobox__option-label")?.textContent ?? picked.textContent).trim()
       : "";
     if (u.hidden) u.hidden.value = value;
-    if (u.input && u.input.value !== label) u.input.value = label;
+    const text = u.input?.querySelector("[data-select-text]");
+    if (text) {
+      text.textContent = label || u.input.getAttribute("data-placeholder") || "";
+      text.classList.toggle("select__text--placeholder", !label);
+    }
     const slot = select.querySelector("[data-select-lead]");
     if (slot) {
       const lead = picked?.querySelector(".combobox__option-lead");
@@ -59,9 +63,12 @@
   let lastKey = 0;
   document.addEventListener("keydown", (event) => {
     const input = event.target;
-    if (!input.matches?.("[data-select-ui] input[role='combobox']")) return;
+    if (!input.matches?.("[data-select-ui] [role='combobox']")) return;
+    if (event.defaultPrevented) return;
     if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return;
     const now = Date.now();
+    // A space starts nothing: it opens the list (the button's own click).
+    if (event.key === " " && now - lastKey > 600) return;
     buffer = now - lastKey > 600 ? event.key : buffer + event.key;
     lastKey = now;
     const select = input.closest("[data-select]");

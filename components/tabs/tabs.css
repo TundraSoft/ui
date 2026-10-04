@@ -39,3 +39,32 @@
 .tabs__panel {
   padding-top: var(--space-4);
 }
+
+/* TabLinks: the same strip, each tab a link to its own page. */
+a.tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.tabs__tab[aria-current="page"] {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tabs__icon {
+  display: inline-flex;
+}
+
+.tabs__count {
+  min-width: 1.4em;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  text-align: center;
+}

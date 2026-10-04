@@ -16,13 +16,27 @@ Timeline(props: TimelineProps): Html
 
 ## Types
 
+### `TimelineTone`
+
+A marker's colour, over what `status` would give it.
+
+- `"neutral"`
+- `"success"`
+- `"warning"`
+- `"danger"`
+- `"info"`
+- `"accent"`
+
 ### `TimelineItem`
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `title` | `string` | yes |  |
-| `meta` | `string` |  |  |
+| `title` | `string | Html` | yes |  |
+| `meta` | `string | Html` |  |  |
+| `text` | `string | Html` |  | A line or two under the title — what happened, what happens next. |
 | `status` | `"done" | "current" | "pending"` |  |  |
+| `icon` | `Html` |  | The marker's glyph (12–14px), over the status's own (a check when done). |
+| `tone` | `TimelineTone` |  | The marker's colour, over the status's. |
 
 ### `TimelineProps`
 
@@ -90,4 +104,4 @@ Timeline({
 
 Classes defined by `components/timeline/timeline.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.timeline`, `.timeline__body`, `.timeline__item`, `.timeline__item--current`, `.timeline__item--done`, `.timeline__item--pending`, `.timeline__line`, `.timeline__marker`, `.timeline__meta`, `.timeline__rail`, `.timeline__title`
+`.timeline`, `.timeline__body`, `.timeline__item`, `.timeline__item--accent`, `.timeline__item--current`, `.timeline__item--danger`, `.timeline__item--done`, `.timeline__item--info`, `.timeline__item--neutral`, `.timeline__item--pending`, `.timeline__item--success`, `.timeline__item--warning`, `.timeline__line`, `.timeline__marker`, `.timeline__meta`, `.timeline__rail`, `.timeline__text`, `.timeline__title`

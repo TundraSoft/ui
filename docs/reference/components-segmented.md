@@ -28,10 +28,12 @@ the form's submit, not clicks on the radios (which it would cancel).
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `value` | `string` | yes |  |
-| `label` | `string` |  |  |
+| `label` | `string | Html` |  | Text, or markup (an icon and words); escaped like any `Html`. |
 | `icon` | `Html` |  | Icon-only: `ariaLabel` then becomes required. |
 | `ariaLabel` | `string` |  |  |
 | `disabled` | `boolean` |  |  |
+| `count` | `number | string` |  | A number after the label — how many rows the option would show. |
+| `alert` | `boolean` |  | Paint `count` in the danger tone (a queue that needs attention). |
 
 ### `SegmentedProps`
 
@@ -87,7 +89,7 @@ Segmented({
 
 Classes defined by `components/segmented/segmented.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.segmented`, `.segmented--block`, `.segmented--icon`, `.segmented--sm`, `.segmented__input`, `.segmented__item`, `.segmented__label`
+`.js`, `.segmented`, `.segmented--block`, `.segmented--icon`, `.segmented--sm`, `.segmented__count`, `.segmented__count--alert`, `.segmented__input`, `.segmented__item`, `.segmented__label`
 
 ## Behaviour
 

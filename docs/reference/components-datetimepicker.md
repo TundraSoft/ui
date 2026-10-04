@@ -86,6 +86,8 @@ Extends `TimePickerMessages`.
 | `disabled` | `boolean` |  |  |
 | `invalid` | `boolean` |  | Paint the error state (a server-side `RapidFormError` for this field). |
 | `align` | `"start" | "end"` |  | Which edge the floating panels align to. |
+| `clearable` | `boolean` |  | A Clear button beside the fields that empties both halves (an optional moment: an expiry, a schedule). Shown only with JS, and only while there is something to clear. |
+| `clearLabel` | `string` |  | The Clear button's text. @default "Clear" |
 | `messages` | `DateTimePickerMessages` |  |  |
 | `attrs` | `Attrs` |  | Extra attributes for the root (a caller's `class` is merged). |
 
@@ -1058,12 +1060,12 @@ DateTimePicker({ id: "log-from", name: "from", local: true, step: 60, today: "20
 
 Classes defined by `components/datetimepicker/datetimepicker.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.datepicker__trigger`, `.datetimepicker`, `.datetimepicker--invalid`, `.datetimepicker__fields`, `.datetimepicker__preset`, `.datetimepicker__presets`, `.js`
+`.datepicker__trigger`, `.datetimepicker`, `.datetimepicker--invalid`, `.datetimepicker__clear`, `.datetimepicker__fields`, `.datetimepicker__preset`, `.datetimepicker__presets`, `.js`
 
 ## Behaviour
 
 `components/datetimepicker/datetimepicker.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-datepicker`, `data-datepicker-max`, `data-datepicker-min`, `data-datepicker-start`, `data-datetime-preset`, `data-datetime-value`, `data-datetimepicker`, `data-datetimepicker-local`, `data-datetimepicker-max`, `data-datetimepicker-min`, `data-datetimepicker-ready`, `data-datetimepicker-required`, `data-datetimepicker-zone`, `data-msg-date`, `data-msg-required`, `data-segment`, `data-timepicker`, `data-timepicker-error`, `data-timepicker-max`, `data-timepicker-min`, `data-timepicker-value`.
+Attributes it reads or writes: `data-datepicker`, `data-datepicker-max`, `data-datepicker-min`, `data-datepicker-start`, `data-datetime-clear`, `data-datetime-preset`, `data-datetime-value`, `data-datetimepicker`, `data-datetimepicker-local`, `data-datetimepicker-max`, `data-datetimepicker-min`, `data-datetimepicker-ready`, `data-datetimepicker-required`, `data-datetimepicker-zone`, `data-msg-date`, `data-msg-required`, `data-segment`, `data-timepicker`, `data-timepicker-error`, `data-timepicker-max`, `data-timepicker-min`, `data-timepicker-value`.
 
 Events: `datepicker:refresh`, `rapid:swapped`, `timepicker:refresh`.

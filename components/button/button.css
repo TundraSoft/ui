@@ -233,3 +233,21 @@
     transform: rotate(360deg);
   }
 }
+
+/* CopyButton: the label and its "Copied" twin share one box; copy.js
+   marks the button `data-copied` for two seconds. */
+.btn--copy .btn__copy-label,
+.btn--copy .btn__copy-done {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.btn--copy .btn__copy-done,
+.btn--copy[data-copied] .btn__copy-label {
+  display: none;
+}
+
+.btn--copy[data-copied] .btn__copy-done {
+  display: inline-flex;
+}

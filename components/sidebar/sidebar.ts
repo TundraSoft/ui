@@ -21,7 +21,7 @@ export function Sidebar(props: SidebarProps): Html {
         aria-label="Collapse sidebar"><span class="sidebar__collapse-icon">&#8249;</span><span class="sidebar__collapse-label">Collapse</span></button>
     `;
 
-  return html`<aside${classAttrs("sidebar", { ...props.attrs, id: props.id })}>${
+  return html`<aside${classAttrs("sidebar", { ...props.attrs, id: props.id ?? props.attrs?.id })}>${
     props.brand && html`<div class="sidebar__brand">${props.brand}</div>`
   }<nav class="sidebar__nav" aria-label="Main">${
     Menu({ items: props.items, id: props.id ? `${props.id}-menu` : undefined })

@@ -35,7 +35,7 @@ Wizard(props: WizardProps): Html
 | --- | --- | --- | --- |
 | `id` | `string` |  |  |
 | `steps` | `WizardStep[]` | yes |  |
-| `content` | `Html` | yes |  |
+| `content` | `Html` |  | The current step's body. Leave it out to draw the step strip alone — a multi-page flow whose pages carry their own content. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -78,4 +78,4 @@ Wizard({
 
 Classes defined by `components/wizard/wizard.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.wizard__step`, `.wizard__step--active`, `.wizard__step--done`, `.wizard__step-index`, `.wizard__step-label`, `.wizard__steps`
+`.wizard--steps-only`, `.wizard__step`, `.wizard__step--active`, `.wizard__step--done`, `.wizard__step-index`, `.wizard__step-label`, `.wizard__steps`

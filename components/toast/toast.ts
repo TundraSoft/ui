@@ -66,7 +66,7 @@ export function Toast(props: ToastProps): Html {
   // live region inside a live region announces twice.
   const attrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     "data-dismissible": "",
     "data-toast-autodismiss": props.autoDismissMs ? String(props.autoDismissMs) : undefined,
   };

@@ -213,7 +213,9 @@ Input({
         <div class="combobox__anchor">
           <div class="combobox__field">
             <input type="hidden" value="acme.io" data-combobox-value>
-            <input class="combobox__input" id="work-email-domain" type="text" role="combobox" readonly autocomplete="off" value="acme.io" placeholder="" aria-expanded="false" aria-controls="work-email-domain-list" aria-autocomplete="none">
+            <button type="button" class="combobox__input select__button" id="work-email-domain" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="work-email-domain-list" aria-label="Email domain">
+              <span class="select__text" data-select-text>acme.io</span>
+            </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>
@@ -269,7 +271,9 @@ Input({
         <div class="combobox__anchor">
           <div class="combobox__field">
             <input type="hidden" value="+1" data-combobox-value>
-            <input class="combobox__input" id="phone-country" type="text" role="combobox" readonly autocomplete="off" value="+1 US" placeholder="" aria-expanded="false" aria-controls="phone-country-list" aria-autocomplete="none">
+            <button type="button" class="combobox__input select__button" id="phone-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-country-list" aria-label="Country code">
+              <span class="select__text" data-select-text>+1 US</span>
+            </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>
@@ -327,7 +331,9 @@ Input({ id: "phone-flags", name: "phone", type: "tel", countries: sampleCountrie
               <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
             </span>
             <input type="hidden" value="+33" data-combobox-value>
-            <input class="combobox__input" id="phone-flags-country" type="text" role="combobox" readonly autocomplete="off" value="+33 FR" placeholder="" aria-expanded="false" aria-controls="phone-flags-country-list" aria-autocomplete="none">
+            <button type="button" class="combobox__input select__button" id="phone-flags-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-flags-country-list" aria-label="Country code">
+              <span class="select__text" data-select-text>+33 FR</span>
+            </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>

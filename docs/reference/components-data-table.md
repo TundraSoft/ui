@@ -20,7 +20,8 @@ end (it covers the row's values while open, nothing moves, nothing
 floats), with a close button; Escape and an outside click close it and
 focus returns to the kebab. The same idiom as the bulk bar — one row
 gets a row strip, many rows get the header strip. Pass it as
-`DataTable.rowActions`.
+`DataTable.rowActions`. Items link (`href`), POST (`post`, optionally
+swapped with `target`) or are bare buttons; any may `confirm` first.
 
 ### `DataTable`
 
@@ -41,6 +42,25 @@ DataTable<T>(props: DataTableProps): Html
 | `mono` | `boolean` |  | Monospace + smaller: use for ids, shas, codes. |
 | `pinned` | `boolean` |  | Sticky first column. Only set this on one column. |
 | `render` | `(row: T) => Html | string` |  |  |
+| `headAttrs` | `Attrs` |  | Extra attributes on this column's header cell (`data-*`, `title`…); a `class` merges with the cell's own. |
+| `cellAttrs` | `Attrs | ((row: T) => Attrs)` |  | Extra attributes on every body cell of this column — fixed, or worked out from the row (a responsive role, a tooltip, a state hook). A `class` merges with the cell's own. This is the hook for re-laying a table out at another width (cards on a phone) from CSS alone. |
+
+### `DataTableSelectAll`
+
+"Select all N": once every row on the page is ticked, the bulk bar
+offers the whole result set the server matched, not just this page.
+Picking it sets a hidden `all=1` and the bar posts `fields` with it
+(the filter the total stands for), so the server chooses the rows —
+the page's checkboxes still post too. Unticking any row, or the same
+button again ("Clear selection"), goes back to the ticked rows.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `total` | `number` | yes | How many rows the server would act on (cap it yourself if it caps). |
+| `fields` | `Readonly` |  | Hidden fields the bulk form carries with `all=1` — the current filter. |
+| `label` | `string` |  | The offer. @default "Select all <total>" |
+| `selectedLabel` | `string` |  | The bar's count once taken. @default "All <total> selected" |
+| `clearLabel` | `string` |  | The button once taken. @default "Clear selection" |
 
 ### `DataTableProps`
 
@@ -52,12 +72,15 @@ DataTable<T>(props: DataTableProps): Html
 | `rows` | `T[]` | yes |  |
 | `rowKey` | `(row: T) => string` | yes |  |
 | `selectable` | `boolean` |  |  |
+| `rowSelectable` | `(row: T) => boolean` |  | With `selectable`: whether this row gets a checkbox (default every row). A row no bulk operation can act on keeps an empty cell, so the columns stay aligned; when no row on the page is selectable the table draws no selection column and no bulk bar at all. |
 | `selected` | `string[]` |  |  |
 | `selectName` | `string` |  | Form field name the row checkboxes submit under (default "selected"). |
 | `sort` | `{ key: string; dir: "asc" | "desc" }` |  |  |
 | `buildSortHref` | `(key: string, dir: "asc" | "desc") => string` |  | Sort links are rAPId swaps (`outer` into `#<id>`, history push) — implement with `withQuery()` (§7) so other params survive. |
 | `bulkActions` | `Html` |  | Bulk actions, shown only when `selected` is non-empty. With `bulkAction` set, make each one a submit button that names the operation — `Button({ type: "submit", attrs: { name: "op", value: "archive" } })` — and the server receives `op` plus one `selectName` entry per checked row. |
 | `bulkAction` | `string` |  | URL the selection posts to. When set, the bulk bar and the rows sit in a `<form method="post">` carrying `data-action` (a rAPId swap that replaces this table, `outer` into `#<id>`; a plain navigation without the runtime — answer with a redirect, PRG). The toolbar and footer stay outside the form, so a search box or a filter never submits it. Without it the bulk bar is a view concern only and its buttons need their own wiring. |
+| `selectAll` | `DataTableSelectAll` |  | Offer every row the server matched, not just this page — see {@link DataTableSelectAll}. |
+| `countLabels` | `{ one: string; other: string }` |  | The bar's count, `{n}` standing for the number. |
 | `toolbar` | `Html` |  |  |
 | `footer` | `Html` |  |  |
 | `rowActions` | `(row: T) => Html` |  |  |
@@ -71,7 +94,11 @@ DataTable<T>(props: DataTableProps): Html
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `label` | `string` | yes |  |
-| `href` | `string` |  | A link (GET). Without it the item is a `<button>` — give it `attrs` (a form's `formaction`, `data-action`, …). |
+| `href` | `string` |  | A link (GET). Without it (and without `post`) the item is a `<button>` — give it `attrs`. |
+| `post` | `string` |  | POST to this URL instead: the item is a submit button in its own small form, carrying the CSRF field (`RowActionsProps.csrfToken`) and `fields`. A plain POST (answer with a redirect, PRG) unless `target` makes it a rAPId swap. A destructive action is a POST, never a link. |
+| `fields` | `Readonly` |  | Hidden fields the POST carries (`op: "lock"`, `next: "list"`). |
+| `target` | `string` |  | With `post`: swap the reply `outer` into this selector (usually the table, `#<id>`) instead of navigating. |
+| `confirm` | `string` |  | Ask first: the question a confirmation dialog shows (modal.js, using the page's `ConfirmModal`; the browser's own `confirm()` without one). |
 | `danger` | `boolean` |  | The destructive one — rendered last, after a separator, in the danger colour. |
 | `attrs` | `Attrs` |  |  |
 
@@ -82,10 +109,135 @@ DataTable<T>(props: DataTableProps): Html
 | `id` | `string` | yes | Base id; the strip is `<id>-strip`. Derive it from the row key (§4). |
 | `label` | `string` | yes | Accessible name of the group, e.g. "Actions for INV-2048". |
 | `items` | `RowAction[]` | yes |  |
+| `csrfToken` | `string` |  | `view.csrfToken`, for the items that `post`. |
+| `csrfField` | `string` |  | The form field rAPId's `csrf()` middleware reads. @default "_csrf" |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### Members: per-row selection, select all, POST row actions, cells a phone layout can read
+
+`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `cellAttrs` marks cells for a CSS-only card layout below 768px.
+
+```ts
+DataTable<Invoice>({
+  id: "members",
+  selectable: true,
+  rowSelectable: (r) => r.client !== "Northwind",
+  selectAll: { total: 312, fields: { q: "north" } },
+  countLabels: { one: "1 member selected", other: "{n} members selected" },
+  bulkAction: "/members/bulk",
+  bulkActions: Button({ label: "Remove", size: "sm", type: "submit", attrs: { name: "op", value: "remove" } }),
+  columns: [
+    { key: "client", label: "Name", cellAttrs: { "data-card": "primary" } },
+    { key: "total", label: "Seats", numeric: true, cellAttrs: { "data-card": "meta" } },
+  ],
+  rows: invoices,
+  rowKey: (r) => r.id,
+  rowActions: (r) =>
+    RowActions({
+      id: `members-${r.id}`,
+      label: `Actions for ${r.client}`,
+      csrfToken: "masked-token",
+      items: [
+        { label: "Resend invite", post: `/members/${r.id}/resend`, target: "#members" },
+        { label: "Remove", post: `/members/${r.id}/remove`, danger: true, confirm: `Remove ${r.client}?` },
+      ],
+    }),
+})
+```
+
+```html
+<div class="data-table" id="members">
+  <form class="data-table__form" method="post" action="/members/bulk" data-action="/members/bulk" data-target="#members" data-swap="outer">
+    <div class="data-table__scroll">
+      <div class="data-table__bulk" hidden data-bulk-bar>
+        <span class="data-table__bulk-count" data-bulk-count data-one="1 member selected" data-other="{n} members selected">0 members selected</span>
+        <span class="data-table__bulk-all">
+          <input type="hidden" name="all" value="" data-bulk-all>
+          <input type="hidden" name="q" value="north">
+          <button type="button" class="data-table__bulk-all-button" data-bulk-select-all data-total="312" data-label="Select all 312" data-selected="All 312 selected" data-clear="Clear selection" hidden>Select all 312</button>
+        </span>
+        <span class="data-table__bulk-sep"></span>
+        <button type="submit" class="btn btn--sm" name="op" value="remove">Remove</button>
+      </div>
+      <table class="data-table__table">
+        <thead>
+          <tr>
+            <th class="data-table__select">
+              <input type="checkbox" aria-label="Select all rows" data-select-all>
+            </th>
+            <th class="">NAME</th>
+            <th class="data-table__num">SEATS</th>
+            <th class="data-table__actions">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="data-table__row" data-row-key="INV-2048">
+            <td class="data-table__select">
+              <input type="checkbox" name="selected" aria-label="Select row INV-2048" data-select-row value="INV-2048">
+            </td>
+            <td class="" data-card="primary">Northwind Traders</td>
+            <td class="data-table__num" data-card="meta">$12,400.00</td>
+            <td class="data-table__actions">
+              <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#members-INV-2048-strip" aria-expanded="false" aria-controls="members-INV-2048-strip">
+                <svg width="16" height="16" width="2" …>…</svg>
+                <span class="sr-only">Actions for Northwind Traders</span>
+              </button>
+              <div class="data-table__row-actions" id="members-INV-2048-strip" role="group" aria-label="Actions for Northwind Traders" hidden>
+                <form class="data-table__row-action-form" method="post" action="/members/INV-2048/resend" data-action="/members/INV-2048/resend" data-target="#members" data-swap="outer">
+                  <input type="hidden" name="_csrf" value="masked-token">
+                  <button type="submit" class="btn btn--sm">Resend invite</button>
+                </form>
+                <span class="data-table__row-actions-sep"></span>
+                <form class="data-table__row-action-form" method="post" action="/members/INV-2048/remove">
+                  <input type="hidden" name="_csrf" value="masked-token">
+                  <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Northwind Traders?">Remove</button>
+                </form>
+                <span class="data-table__row-actions-sep"></span>
+                <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="data-table__row" data-row-key="INV-2047">
+            <td class="data-table__select">
+              <input type="checkbox" name="selected" aria-label="Select row INV-2047" data-select-row value="INV-2047">
+            </td>
+            <td class="" data-card="primary">Contoso Ltd</td>
+            <td class="data-table__num" data-card="meta">$3,120.00</td>
+            <td class="data-table__actions">
+              <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#members-INV-2047-strip" aria-expanded="false" aria-controls="members-INV-2047-strip">
+                <svg width="16" height="16" width="2" …>…</svg>
+                <span class="sr-only">Actions for Contoso Ltd</span>
+              </button>
+              <div class="data-table__row-actions" id="members-INV-2047-strip" role="group" aria-label="Actions for Contoso Ltd" hidden>
+                <form class="data-table__row-action-form" method="post" action="/members/INV-2047/resend" data-action="/members/INV-2047/resend" data-target="#members" data-swap="outer">
+                  <input type="hidden" name="_csrf" value="masked-token">
+                  <button type="submit" class="btn btn--sm">Resend invite</button>
+                </form>
+                <span class="data-table__row-actions-sep"></span>
+                <form class="data-table__row-action-form" method="post" action="/members/INV-2047/remove">
+                  <input type="hidden" name="_csrf" value="masked-token">
+                  <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Contoso Ltd?">Remove</button>
+                </form>
+                <span class="data-table__row-actions-sep"></span>
+                <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>
+```
 
 ### Invoices: sortable, selectable, with bulk and row actions
 
@@ -282,12 +434,12 @@ DataTable<Invoice>({
 
 Classes defined by `components/data-table/data-table.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__mono`, `.data-table__num`, `.data-table__row--selected`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
+`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__mono`, `.data-table__num`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
 
 ## Behaviour
 
 `components/data-table/data-table.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-row-actions`, `data-row-actions-close`, `data-select-all`, `data-select-row`, `data-table`.
+Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-total`.
 
 Events: `rapid:swapped`.

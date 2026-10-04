@@ -11,7 +11,7 @@ Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/
 ### `Breadcrumb`
 
 ```ts
-Breadcrumb(props: { items: BreadcrumbItem[]; attrs?: Attrs }): Html
+Breadcrumb(props: BreadcrumbProps): Html
 ```
 
 ## Types
@@ -22,6 +22,14 @@ Breadcrumb(props: { items: BreadcrumbItem[]; attrs?: Attrs }): Html
 | --- | --- | --- | --- |
 | `label` | `string` | yes |  |
 | `href` | `string` |  |  |
+
+### `BreadcrumbProps`
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `items` | `BreadcrumbItem[]` | yes |  |
+| `collapse` | `boolean` |  | When the trail does not fit its container, fold the middle crumbs into a "…" disclosure listing them, keeping the first and the current page whole. A container query, no script: give the breadcrumb a width to measure (it is a block; in a flex row, let it grow). |
+| `attrs` | `Attrs` |  |  |
 
 ## Usage
 
@@ -48,4 +56,4 @@ Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-204
 
 Classes defined by `components/breadcrumb/breadcrumb.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.breadcrumb`, `.breadcrumb__item`, `.breadcrumb__link`
+`.breadcrumb`, `.breadcrumb-nav--collapse`, `.breadcrumb__item`, `.breadcrumb__item--mid`, `.breadcrumb__link`, `.breadcrumb__menu`, `.breadcrumb__menu-link`, `.breadcrumb__menu-list`, `.breadcrumb__more`, `.breadcrumb__more-button`

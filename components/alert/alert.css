@@ -103,3 +103,12 @@
   border-inline-start-color: var(--color-info);
   color: var(--color-info-soft-text);
 }
+
+/* What to do about it: buttons or links under the text. */
+.alert__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}

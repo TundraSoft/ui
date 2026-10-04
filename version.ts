@@ -20,20 +20,20 @@ export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1
 export const UI_CSS: UiAsset = {
   file: "ui.css",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.11.0/dist/ui.css", // x-release-please-version
-  integrity: "sha384-oEEjGKLuDZdBN4iM772hfxQZQGf4IPW/GDEVH+rfTa2bpcmwXRGS2CuJ/VbiPodD",
+  integrity: "sha384-bL87illwoYGj52rt55zUVzKz5QJNkSpwC+p9kohKiznfe+txCo7pqVz1wunqcCtM",
 };
 
 export const UI_JS: UiAsset = {
   file: "ui.js",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.11.0/dist/ui.js", // x-release-please-version
-  integrity: "sha384-qzvIz2188ZshlUXNJDKTrbYlDno9CKZgqYaWTv00IMh1eZpJTZArNcy0ChEXB6hR",
+  integrity: "sha384-Jo4Ow+y60yfhaxsFWY8Y4iBrWDUd0ddWINLyq5CsMkgA4GnP45CYlD9B8TSfzmDc",
 };
 
 /** The icon set as an SVG sprite (`<use href="…/icons.svg#icon-<name>">`, same-origin only). */
 export const UI_ICONS: UiAsset = {
   file: "icons.svg",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.11.0/dist/icons.svg", // x-release-please-version
-  integrity: "sha384-/0LWUw/lJPowwP79px9CF07PpnpumSzbKGSoNPfPdhjvnKQifI79mpdoBnesDZHf",
+  integrity: "sha384-d04P7ezS0zrG/ePVnAbwLGV9jueIdv7EIccnHcJb3Su+6tcBn/kS0bt08GdNUIZq",
 };
 
 /** Every distributable, in load order. */

@@ -54,3 +54,11 @@
     cursor: not-allowed;
   }
 }
+
+.datetimepicker__clear {
+  align-self: center;
+}
+
+.datetimepicker__clear[hidden] {
+  display: none;
+}

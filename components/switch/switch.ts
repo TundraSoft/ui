@@ -16,7 +16,7 @@ export type SwitchProps = {
 export function Switch(props: SwitchProps): Html {
   const attrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     name: props.name,
     value: props.value,
     checked: props.checked ? "" : undefined,

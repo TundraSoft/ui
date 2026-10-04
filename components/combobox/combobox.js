@@ -12,6 +12,10 @@
  * updated. (rAPId's own runtime only reacts to click/submit, so this is
  * the one place a component script triggers a swap programmatically.)
  *
+ * Select-only controls (the Select's `<button role="combobox">`, or a
+ * read-only input) open on click or Arrow, never on focus, and toggle
+ * like a native select; Space picks the highlighted option while open.
+ *
  * Value: single-select writes the picked option's `data-value` into the
  * hidden `[data-combobox-value]` input and its label into the visible
  * one; typing clears the hidden value until a new pick. Multi-select adds
@@ -23,7 +27,19 @@
   const X_ICON =
     '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
-  const inputOf = (root) => root.querySelector("input[role='combobox']");
+  const inputOf = (root) => root.querySelector("[role='combobox']");
+  /** A control that picks but is not typed into (Select's button, a read-only input). */
+  const selectOnly = (el) => el.tagName !== "INPUT" || el.readOnly;
+  /** Show a label in the control: an input's value, or a button's text slot. */
+  function showLabel(el, label) {
+    if (el.tagName === "INPUT") {
+      el.value = label;
+      return;
+    }
+    const slot = el.querySelector("[data-select-text]") ?? el;
+    slot.textContent = label;
+    slot.classList.remove("select__text--placeholder");
+  }
   const options = (root) => Array.from(root.querySelectorAll('[role="option"]')).filter((o) => !o.hidden);
 
   function activeIndex(root) {
@@ -127,7 +143,7 @@
     const input = inputOf(root);
     const hidden = root.querySelector("[data-combobox-value]");
     const label = (opt.querySelector(".combobox__option-label")?.textContent ?? opt.textContent).trim();
-    if (input) input.value = label;
+    if (input) showLabel(input, label);
     if (hidden) hidden.value = opt.getAttribute("data-value") ?? label;
     root.querySelectorAll('[role="option"]').forEach((o) => o.setAttribute("aria-selected", String(o === opt)));
     open(root, false);
@@ -184,6 +200,16 @@
       event.preventDefault();
       open(root, true);
       setActive(root, activeIndex(root) + (event.key === "ArrowDown" ? 1 : -1));
+    } else if (event.key === " " && selectOnly(event.target)) {
+      // Space on a select-only control: pick the highlighted option while
+      // open; otherwise the button's own click toggles the list.
+      const i = activeIndex(root);
+      const opts = options(root);
+      if (isOpen(root) && i >= 0 && opts[i]) {
+        event.preventDefault();
+        opts[i].click();
+        inputOf(root)?.focus();
+      }
     } else if (event.key === "Enter") {
       const i = activeIndex(root);
       const opts = options(root);
@@ -192,6 +218,7 @@
         // around the combobox still submits normally.
         event.preventDefault();
         opts[i].click();
+        if (selectOnly(event.target)) inputOf(root)?.focus();
       }
     } else if (event.key === "Escape") {
       // Only claim Escape while the list is open — otherwise it must
@@ -223,7 +250,7 @@
   // on open does not unfold it, and the first click is not a close.
   document.addEventListener("focusin", (event) => {
     const root = event.target.closest?.("[data-combobox]");
-    if (root && event.target.matches("input[role='combobox']") && !event.target.readOnly) open(root, true);
+    if (root && event.target.matches("[role='combobox']") && !selectOnly(event.target)) open(root, true);
   });
 
   // Focus leaving the control for another focusable element (Tab, a click
@@ -253,17 +280,17 @@
     // A click on the input: a read-only one (Select) toggles like a native
     // select; a typeable one opens (focusin does not fire again when the
     // input already had focus, e.g. after Escape closed the list).
-    const input = event.target.closest?.("[data-combobox] input[role='combobox']");
+    const input = event.target.closest?.("[data-combobox] [role='combobox']");
     if (input && !input.disabled) {
       const root = input.closest("[data-combobox]");
-      open(root, input.readOnly ? !isOpen(root) : true);
+      open(root, selectOnly(input) ? !isOpen(root) : true);
       return;
     }
 
     // A click on the field itself (the caret, the padding) — not on the
     // input or a token button — focuses the input and toggles the list.
     const field = event.target.closest?.("[data-combobox] .combobox__field");
-    if (field && !event.target.closest("input, button")) {
+    if (field && !event.target.closest("input, button, [role='combobox']")) {
       const root = field.closest("[data-combobox]");
       const input = inputOf(root);
       if (input && !input.disabled) {

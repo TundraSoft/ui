@@ -1,6 +1,7 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
+import { Icon } from "../../shared/icons.ts";
 
 export type ButtonVariant =
   | "primary"
@@ -60,7 +61,7 @@ export function Button(props: ButtonProps): Html {
   if (props.href && !props.disabled) {
     const attrs: Attrs = {
       ...props.attrs,
-      id: props.id,
+      id: props.id ?? props.attrs?.id,
       href: props.href,
     };
     return html`<a${classAttrs(className, attrs)}>${inner}</a>`;
@@ -68,7 +69,7 @@ export function Button(props: ButtonProps): Html {
 
   const attrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     disabled: props.disabled ? "" : undefined,
     "aria-busy": props.loading ? "true" : undefined,
   };
@@ -83,4 +84,51 @@ export function ButtonGroup(props: { buttons: Html[]; attrs?: Attrs }): Html {
   return html`
     <span class="btn-group" ${renderAttrs(props.attrs ?? {})}>${props.buttons}</span>
   `;
+}
+
+export type CopyButtonProps = {
+  id?: string;
+  /** The text copied. */
+  value: string;
+  /** @default "Copy" */
+  label?: string;
+  /** Shown for two seconds after a copy. @default "Copied" */
+  doneLabel?: string;
+  /** Leading icon. @default the copy icon */
+  icon?: Html | false;
+  variant?: ButtonVariant;
+  /** @default "sm" */
+  size?: ButtonSize;
+  /** Accessible name when the label alone is not enough ("Copy short link"). */
+  ariaLabel?: string;
+  attrs?: Attrs;
+};
+
+/**
+ * A button that copies `value` to the clipboard (shared/js/copy.js) and
+ * says so: its label turns into `doneLabel` with a check for two seconds,
+ * and the change is announced through the toast region. Without script
+ * it is an inert button — pair it with the visible text it copies.
+ */
+export function CopyButton(props: CopyButtonProps): Html {
+  const done = props.doneLabel ?? "Copied";
+  const label = html`
+    <span class="btn__copy-label" data-copy-label>${props.icon === false
+      ? ""
+      : props.icon ?? Icon("copy", { size: 14 })}${props.label ?? "Copy"}</span><span class="btn__copy-done"
+      data-copy-done>${Icon("check", { size: 14 })}${done}</span>
+  `;
+  return Button({
+    id: props.id,
+    label,
+    variant: props.variant ?? "outline",
+    size: props.size ?? "sm",
+    attrs: {
+      ...props.attrs,
+      class: cx("btn--copy", props.attrs?.class),
+      "data-copy": props.value,
+      "data-copy-announce": done,
+      "aria-label": props.ariaLabel,
+    },
+  });
 }

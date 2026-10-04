@@ -64,3 +64,14 @@
   padding: var(--space-4);
   border-top: var(--border-width) solid var(--color-border);
 }
+
+/* ConfirmModal: a question and two buttons, nothing to scroll. */
+.modal--confirm {
+  width: min(420px, calc(100vw - 2 * var(--space-4)));
+}
+
+.modal__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: var(--line-height-base);
+}

@@ -69,7 +69,7 @@ export function Pagination(props: PaginationProps): Html {
     );
 
   return html`
-    <nav aria-label="Pagination" ${classAttrs(undefined, { ...props.attrs, id: props.id })}>
+    <nav aria-label="Pagination" ${classAttrs(undefined, { ...props.attrs, id: props.id ?? props.attrs?.id })}>
       <ul class="pagination">${page <= 1
         ? disabled(html`&#8249;`, "Previous page")
         : link(page - 1, html`&#8249;`, "Previous page")}${pages}${page >= totalPages

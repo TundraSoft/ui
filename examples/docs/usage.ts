@@ -14,7 +14,7 @@ import { Alert, FormErrorAlert } from "../../components/alert/alert.ts";
 import { Avatar, AvatarGroup } from "../../components/avatar/avatar.ts";
 import { Badge, Chip } from "../../components/badge/badge.ts";
 import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
-import { Button, ButtonGroup } from "../../components/button/button.ts";
+import { Button, ButtonGroup, CopyButton } from "../../components/button/button.ts";
 import { Card } from "../../components/card/card.ts";
 import { flags, sampleCountries } from "../shared/flags.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
@@ -30,12 +30,12 @@ import { Dropdown } from "../../components/dropdown/dropdown.ts";
 import { Dropzone } from "../../components/dropzone/dropzone.ts";
 import { Editor } from "../../components/editor/editor.ts";
 import { Empty } from "../../components/empty/empty.ts";
-import { Form } from "../../components/form/form.ts";
+import { CsrfField, Form } from "../../components/form/form.ts";
 import { FormActions, FormField, FormGrid } from "../../components/form-field/form-field.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { FloatingInput, Input, InputGroup, InputIcon } from "../../components/input/input.ts";
 import { Menu } from "../../components/menu/menu.ts";
-import { Modal } from "../../components/modal/modal.ts";
+import { ConfirmModal, Modal } from "../../components/modal/modal.ts";
 import { Navbar } from "../../components/navbar/navbar.ts";
 import { Otp } from "../../components/otp/otp.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
@@ -49,7 +49,7 @@ import { SkeletonCard, SkeletonTable } from "../../components/skeleton/skeleton.
 import { Slider } from "../../components/slider/slider.ts";
 import { Stat } from "../../components/stat/stat.ts";
 import { Switch } from "../../components/switch/switch.ts";
-import { Tabs } from "../../components/tabs/tabs.ts";
+import { TabLinks, Tabs } from "../../components/tabs/tabs.ts";
 import { Textarea } from "../../components/textarea/textarea.ts";
 import { Timeline } from "../../components/timeline/timeline.ts";
 import { TimePicker } from "../../components/timepicker/timepicker.ts";
@@ -120,6 +120,10 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/button": [
+    {
+      title: "Copy a short link",
+      render: () => CopyButton({ value: "https://go.acme.com/spring", ariaLabel: "Copy short link" }),
+    },
     { title: "The primary action", render: () => Button({ label: "Save changes", type: "submit" }) },
     {
       title: "An icon button with an accessible name",
@@ -278,6 +282,37 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/data-table": [
+    {
+      title: "Members: per-row selection, select all, POST row actions, cells a phone layout can read",
+      note:
+        "`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `cellAttrs` marks cells for a CSS-only card layout below 768px.",
+      render: () =>
+        DataTable<Invoice>({
+          id: "members",
+          selectable: true,
+          rowSelectable: (r) => r.client !== "Northwind",
+          selectAll: { total: 312, fields: { q: "north" } },
+          countLabels: { one: "1 member selected", other: "{n} members selected" },
+          bulkAction: "/members/bulk",
+          bulkActions: Button({ label: "Remove", size: "sm", type: "submit", attrs: { name: "op", value: "remove" } }),
+          columns: [
+            { key: "client", label: "Name", cellAttrs: { "data-card": "primary" } },
+            { key: "total", label: "Seats", numeric: true, cellAttrs: { "data-card": "meta" } },
+          ],
+          rows: invoices,
+          rowKey: (r) => r.id,
+          rowActions: (r) =>
+            RowActions({
+              id: `members-${r.id}`,
+              label: `Actions for ${r.client}`,
+              csrfToken: "masked-token",
+              items: [
+                { label: "Resend invite", post: `/members/${r.id}/resend`, target: "#members" },
+                { label: "Remove", post: `/members/${r.id}/remove`, danger: true, confirm: `Remove ${r.client}?` },
+              ],
+            }),
+        }),
+    },
     {
       title: "Invoices: sortable, selectable, with bulk and row actions",
       note:
@@ -445,6 +480,30 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/form": [
+    {
+      title: "A filter bar that submits itself, and a POST with its CSRF field",
+      note:
+        "`autosubmit` submits on a pick or a radio, never on typing (Enter does that); with `data-action` the list swaps in place. `csrfToken` (`view.csrfToken`) renders the `_csrf` field a no-JS POST needs; `CsrfField` does the same for a form you build by hand.",
+      render: () =>
+        html`${
+          Form({
+            id: "filters",
+            action: "/links",
+            method: "get",
+            autosubmit: true,
+            attrs: { "data-action": "/links", "data-target": "#links", "data-swap": "outer", "data-push": "" },
+            content: html`${Input({ type: "search", name: "q", attrs: { "aria-label": "Search links" } })}${
+              Select({
+                name: "status",
+                options: [{ value: "", label: "Any status" }, { value: "active", label: "Active" }],
+                attrs: { "aria-label": "Status" },
+              })
+            }`,
+          })
+        }<form method="post" action="/keys/revoke">${CsrfField({ token: "masked-token" })}${
+          Button({ label: "Revoke", variant: "danger", type: "submit", attrs: { "data-confirm": "Revoke this key?" } })
+        }</form>`,
+    },
     {
       title: "Client-side validation, inline",
       note:
@@ -783,6 +842,31 @@ export const usage: Record<string, UsageExample[]> = {
   ],
   "components/modal": [
     {
+      title: "Ask before a destructive action",
+      note:
+        "Render `ConfirmModal` once per page (the core template does); then any link, button or submit button with `data-confirm` asks there first, and Confirm carries on with the same click — the same submitter, the same swap.",
+      render: () =>
+        html`${
+          Button({
+            label: "Delete project",
+            variant: "danger",
+            type: "submit",
+            attrs: { "data-confirm": "Delete the project and its 42 links?", "data-confirm-label": "Delete" },
+          })
+        }${ConfirmModal()}`,
+    },
+    {
+      title: "Reopen a modal after a failed submit",
+      note: "`open` shows it as soon as it is on the page, on load or when the form's swap brings it back.",
+      render: () =>
+        Modal({
+          id: "new-key",
+          title: "New API key",
+          open: true,
+          body: html`<p>Name the key so you can tell it apart later.</p>`,
+        }),
+    },
+    {
       title: "A confirmation dialog",
       note: 'A native `<dialog>`; any `[data-modal-open="#id"]` opens it, Escape and the backdrop close it.',
       render: () =>
@@ -998,6 +1082,19 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/tabs": [
+    {
+      title: "Tabs that are pages",
+      note:
+        'Each tab is a link to its own URL; the page below is that URL\'s. The current one is `aria-current="page"`.',
+      render: () =>
+        TabLinks({
+          label: "Analytics",
+          items: [
+            { label: "Clicks", href: "/analytics", current: true },
+            { label: "Conversions", href: "/conversions", count: 12 },
+          ],
+        }),
+    },
     {
       title: "Settings sections",
       note: "A `#tab-<id>` link deep-links to a tab, so a sidebar can point at `settings#tab-billing`.",

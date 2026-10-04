@@ -43,6 +43,7 @@ Builds an Alert straight from rAPId's `RapidFormError` shape (§6).
 | `items` | `string[]` |  | Plain list-style messages. |
 | `fields` | `Readonly` |  | Per-field messages, e.g. `RapidFormError.fields` — rendered name + message. |
 | `icon` | `string | Html | "false"` |  | Leading icon; status variants get one by default. Pass `false` to suppress. |
+| `actions` | `Html` |  | Buttons or links under the text — what to do about it. |
 | `dismissible` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
@@ -104,4 +105,4 @@ FormErrorAlert({
 
 Classes defined by `components/alert/alert.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.alert`, `.alert--danger`, `.alert--info`, `.alert--success`, `.alert--warning`, `.alert__body`, `.alert__close`, `.alert__field`, `.alert__field-name`, `.alert__icon`, `.alert__list`, `.alert__text`, `.alert__title`
+`.alert`, `.alert--danger`, `.alert--info`, `.alert--success`, `.alert--warning`, `.alert__actions`, `.alert__body`, `.alert__close`, `.alert__field`, `.alert__field-name`, `.alert__icon`, `.alert__list`, `.alert__text`, `.alert__title`

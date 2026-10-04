@@ -26,6 +26,8 @@ The title row at the top of a page: breadcrumb, h1, actions.
 | `subtitle` | `string | Html` |  |  |
 | `breadcrumb` | `Html` |  | Usually a `Breadcrumb`. |
 | `actions` | `Html` |  | Buttons, a Segmented, a search… |
+| `level` | `"1" | "2"` |  | The heading level: `1` for the page, `2` for a section's own header under the page's (a settings sub-page) — smaller, same layout. |
+| `badge` | `Html` |  | Beside the title: a status or plan `Badge`, a count. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -70,4 +72,4 @@ PageHeader({
 
 Classes defined by `components/page-header/page-header.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.page-header`, `.page-header__actions`, `.page-header__heading`, `.page-header__subtitle`, `.page-header__title`
+`.page-header`, `.page-header--sub`, `.page-header__actions`, `.page-header__heading`, `.page-header__subtitle`, `.page-header__title`, `.page-header__title-row`

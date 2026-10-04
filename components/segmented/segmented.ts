@@ -1,13 +1,19 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { cx } from "../../shared/classnames.ts";
 
 export type SegmentedOption = {
   value: string;
-  label?: string;
+  /** Text, or markup (an icon and words); escaped like any `Html`. */
+  label?: string | Html;
   /** Icon-only: `ariaLabel` then becomes required. */
   icon?: Html;
   ariaLabel?: string;
   disabled?: boolean;
+  /** A number after the label — how many rows the option would show. */
+  count?: number | string;
+  /** Paint `count` in the danger tone (a queue that needs attention). */
+  alert?: boolean;
 };
 
 export type SegmentedProps = {
@@ -54,7 +60,12 @@ export function Segmented(props: SegmentedProps): Html {
                   checked: opt.value === props.value ? "" : undefined,
                   disabled: opt.disabled ? "" : undefined,
                   "aria-label": opt.ariaLabel,
-                })}><label class="segmented__label" for="${optId}">${opt.icon ?? ""}${opt.label ?? ""}</label></span>
+                })}><label class="segmented__label" for="${optId}">${opt.icon ?? ""}${opt.label ??
+                ""}${opt.count === undefined
+                ? ""
+                : html`<span class="${cx("segmented__count", opt.alert && "segmented__count--alert")}">${
+                  String(opt.count)
+                }</span>`}</label></span>
           `;
         },
       )}</div>

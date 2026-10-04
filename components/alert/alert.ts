@@ -16,6 +16,8 @@ export type AlertProps = {
   fields?: Readonly<Record<string, string>>;
   /** Leading icon; status variants get one by default. Pass `false` to suppress. */
   icon?: string | Html | false;
+  /** Buttons or links under the text — what to do about it. */
+  actions?: Html;
   dismissible?: boolean;
   attrs?: Attrs;
 };
@@ -49,7 +51,7 @@ export function Alert(props: AlertProps): Html {
 
   const attrs: Attrs = {
     ...props.attrs,
-    id: props.id,
+    id: props.id ?? props.attrs?.id,
     role: "alert",
     "data-dismissible": props.dismissible ? "" : undefined,
   };
@@ -64,7 +66,7 @@ export function Alert(props: AlertProps): Html {
     icon && html`<span class="alert__icon">${icon}</span>`
   }<div class="alert__body">${props.title && html`<div class="alert__title">${props.title}</div>`}${
     props.body && html`<div class="alert__text">${props.body}</div>`
-  }${list}</div>${
+  }${list}${props.actions && html`<div class="alert__actions">${props.actions}</div>`}</div>${
     props.dismissible &&
     html`<button type="button" class="alert__close" data-dismiss aria-label="Dismiss">${
       Icon("x", { size: 16 })

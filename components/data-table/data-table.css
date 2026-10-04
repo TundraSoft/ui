@@ -98,6 +98,35 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* "Select all N" / "Clear selection": a text button in the bar's ink. */
+.data-table__bulk-all {
+  display: contents;
+}
+
+.data-table__bulk-all-button {
+  flex: none;
+  min-height: 24px;
+  padding: 0 var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.data-table__bulk-all-button[hidden] {
+  display: none;
+}
+
+.data-table__bulk-all-button:focus-visible {
+  outline: var(--ring-width) solid currentColor;
+  outline-offset: 1px;
+}
+
 .data-table__bulk-sep {
   flex: none;
   width: var(--border-width);
@@ -290,6 +319,11 @@ td.data-table__cell--pinned {
   background: var(--color-surface-inverse);
   color: var(--color-text-inverse);
   font-size: var(--font-size-sm);
+}
+
+/* A POST item is a one-button form; the button lays out like the rest. */
+.data-table__row-action-form {
+  display: contents;
 }
 
 .data-table__row-actions .btn {

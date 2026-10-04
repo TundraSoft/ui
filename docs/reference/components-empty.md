@@ -25,7 +25,7 @@ fixes it. An icon alone is not an empty state.
 | --- | --- | --- | --- |
 | `title` | `string` | yes |  |
 | `text` | `string` |  |  |
-| `icon` | `IconName` |  |  |
+| `icon` | `IconName | Html` |  | One of the library's icons by name, or your own markup (another icon set). |
 | `actions` | `Html` |  |  |
 | `variant` | `"card" | "inline" | "page"` |  | inline = inside a list/table region; page = a whole route. |
 | `tone` | `"default" | "error"` |  |  |

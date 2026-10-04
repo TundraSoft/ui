@@ -42,7 +42,7 @@ export function Accordion(props: AccordionProps): Html {
   return html`
     <div class="accordion" ${renderAttrs({
       ...props.attrs,
-      id: props.id,
+      id: props.id ?? props.attrs?.id,
       "data-accordion-group": "",
     })}>${panels}</div>
   `;

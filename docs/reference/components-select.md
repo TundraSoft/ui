@@ -15,7 +15,9 @@ Select(props: SelectProps): Html
 ```
 
 A single-choice select that looks and behaves like the Combobox (same
-field, caret, list, keyboard navigation) — minus free typing. Two
+field, caret, list, keyboard navigation) — minus free typing. Its
+visible control is a `<button role="combobox">`, so it never blocks a
+form's implicit submission (Enter in a search box beside it submits). Two
 controls, one value: a native `<select>` carries `name` and submits
 (and is what a no-JS page shows); the combobox UI is what an enhanced
 page shows, and select.js keeps the two in step both ways. Give it an
@@ -81,7 +83,9 @@ Select({
           <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
         </span>
         <input type="hidden" value="de" data-combobox-value>
-        <input class="combobox__input" id="market" type="text" role="combobox" readonly autocomplete="off" value="Germany" placeholder="" aria-expanded="false" aria-controls="market-list" aria-autocomplete="none">
+        <button type="button" class="combobox__input select__button" id="market" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-list">
+          <span class="select__text" data-select-text>Germany</span>
+        </button>
         <span class="combobox__caret">
           <svg width="15" height="15" width="2" …>…</svg>
         </span>
@@ -143,7 +147,9 @@ Select({
     <div class="combobox__anchor">
       <div class="combobox__field">
         <input type="hidden" value="team" data-combobox-value>
-        <input class="combobox__input" id="plan" type="text" role="combobox" readonly autocomplete="off" value="Team" placeholder="" aria-expanded="false" aria-controls="plan-list" aria-autocomplete="none">
+        <button type="button" class="combobox__input select__button" id="plan" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="plan-list">
+          <span class="select__text" data-select-text>Team</span>
+        </button>
         <span class="combobox__caret">
           <svg width="15" height="15" width="2" …>…</svg>
         </span>
@@ -182,12 +188,12 @@ Select({
 
 Classes defined by `components/select/select.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox__field`, `.combobox__hints`, `.combobox__input`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__lead`, `.select__native`, `.select__ui`
+`.combobox__field`, `.combobox__hints`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__button`, `.select__lead`, `.select__native`, `.select__text`, `.select__text--placeholder`, `.select__ui`
 
 ## Behaviour
 
 `components/select/select.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-combobox-value`, `data-select`, `data-select-lead`, `data-select-ui`, `data-value`.
+Attributes it reads or writes: `data-combobox-value`, `data-placeholder`, `data-select`, `data-select-lead`, `data-select-text`, `data-select-ui`, `data-value`.
 
 Events: `combobox:pick`.
