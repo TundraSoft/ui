@@ -711,17 +711,19 @@ really missing props; each became library surface, catalogued and asserted in `t
   `a.tabs__tab`); `Wizard` without `content` (`.wizard--steps-only`); `Alert({ actions })`; `Timeline` items `icon` /
   `tone` (`TimelineTone`) / `text`; `Breadcrumb({ collapse })` (container query on the nav at 480px folds the middle
   crumbs into a `<details>` "…" menu — no script); `DateTimePicker({ clearable })`; a `more` (horizontal dots) icon.
-- **Bug fixed on the way, then properly (second pass, same day)**: a component that built `{ ...props.attrs, own: maybe }` let any own
-  value that was `undefined` erase what the caller passed in `attrs` — `attrs.id` with no `id` prop first, then the
-  console found `RowAction.attrs["data-confirm"]` dropped when `confirm` was unset. `mergeAttrs(base, own)`
-  (`shared/attrs.ts`) is the fix: own values win only when defined. Every component and layout uses it; **never spread
-  `attrs` into an object that also sets keys a prop may leave undefined** — call `mergeAttrs` instead.
-- **Follow-up asks from the console (second pass)**: Segmented / TabLinks `count` takes `Html` plus `countTitle` (the exact
-  figure behind a compact one); `Empty` `text` takes `Html` and a `details` slot sits between text and actions; `Wizard`
-  marks the active step `aria-current="step"`, reads done steps as "Done: …" (`doneLabel`), names the list (`label`) and
-  takes `listAttrs`; `Timeline` and each `TimelineItem` take `attrs`; `CopyButton({ label: false })` is icon-only
-  (`ariaLabel` names it). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is actually cut, at
-  any width; the library's `collapse` is a 480px container query — different behaviour, the console keeps its own).
+- **Bug fixed on the way, then properly (second pass, same day)**: a component that built
+  `{ ...props.attrs, own: maybe }` let any own value that was `undefined` erase what the caller passed in `attrs` —
+  `attrs.id` with no `id` prop first, then the console found `RowAction.attrs["data-confirm"]` dropped when `confirm`
+  was unset. `mergeAttrs(base, own)` (`shared/attrs.ts`) is the fix: own values win only when defined. Every component
+  and layout uses it; **never spread `attrs` into an object that also sets keys a prop may leave undefined** — call
+  `mergeAttrs` instead.
+- **Follow-up asks from the console (second pass)**: Segmented / TabLinks `count` takes `Html` plus `countTitle` (the
+  exact figure behind a compact one); `Empty` `text` takes `Html` and a `details` slot sits between text and actions;
+  `Wizard` marks the active step `aria-current="step"`, reads done steps as "Done: …" (`doneLabel`), names the list
+  (`label`) and takes `listAttrs`; `Timeline` and each `TimelineItem` take `attrs`; `CopyButton({ label: false })` is
+  icon-only (`ariaLabel` names it). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is
+  actually cut, at any width; the library's `collapse` is a 480px container query — different behaviour, the console
+  keeps its own).
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
