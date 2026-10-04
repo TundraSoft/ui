@@ -2074,6 +2074,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           TabLinks({
             id: "cat-tablinks",
             label: "Analytics",
+            listAttrs: { class: "cat-tablinks-list", "data-kind": "links" },
             items: [
               { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
               { label: "Conversions", href: "#", count: html`<span>1.2k</span>`, countTitle: "1,204" },

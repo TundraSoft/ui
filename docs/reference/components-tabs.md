@@ -17,13 +17,8 @@ Tabs(props: TabsProps): Html
 ### `TabLinks`
 
 ```ts
-TabLinks(props: { items: TabLink[]; label?: string; id?: string; attrs?: Attrs }): Html
+TabLinks(props: TabLinksProps): Html
 ```
-
-Tabs that are pages: the same strip, but each tab is a link to its own
-URL and the content is whatever that page renders below — no panels,
-no script. The current one carries `aria-current="page"`. Use `Tabs`
-when the panels are all on this page.
 
 ## Types
 
@@ -56,6 +51,21 @@ when the panels are all on this page.
 | `countTitle` | `string` |  | The exact figure as a tooltip when `count` is rounded. |
 | `badge` | `Html` |  | After the label: a plan or status `Badge`. |
 | `attrs` | `Attrs` |  | Extra attributes on the link (`data-action` + `data-target` + `data-push` for a swap). |
+
+### `TabLinksProps`
+
+Tabs that are pages: the same strip, but each tab is a link to its own
+URL and the content is whatever that page renders below — no panels,
+no script. The current one carries `aria-current="page"`. Use `Tabs`
+when the panels are all on this page.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `items` | `TabLink[]` | yes |  |
+| `label` | `string` |  | The nav's accessible name. @default "Sections" |
+| `id` | `string` |  |  |
+| `listAttrs` | `Attrs` |  | Attributes on the strip (`.tabs__list`) itself — a class merges (a scroll fade, a sticky strip). |
+| `attrs` | `Attrs` |  |  |
 
 ## Usage
 

@@ -68,7 +68,17 @@ export type TabLink = {
  * no script. The current one carries `aria-current="page"`. Use `Tabs`
  * when the panels are all on this page.
  */
-export function TabLinks(props: { items: TabLink[]; label?: string; id?: string; attrs?: Attrs }): Html {
+export type TabLinksProps = {
+  items: TabLink[];
+  /** The nav's accessible name. @default "Sections" */
+  label?: string;
+  id?: string;
+  /** Attributes on the strip (`.tabs__list`) itself — a class merges (a scroll fade, a sticky strip). */
+  listAttrs?: Attrs;
+  attrs?: Attrs;
+};
+
+export function TabLinks(props: TabLinksProps): Html {
   const links = props.items.map((item) =>
     html`<a${
       classAttrs(
@@ -87,7 +97,7 @@ export function TabLinks(props: { items: TabLink[]; label?: string; id?: string;
     <nav${classAttrs("tabs tabs--links", mergeAttrs(props.attrs, { id: props.id }))}${renderAttrs({
       "aria-label": props.label ?? "Sections",
     })}>
-      <div class="tabs__list">${links}</div>
+      <div${classAttrs("tabs__list", props.listAttrs)}>${links}</div>
       </nav>
   `;
 }

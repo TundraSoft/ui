@@ -721,9 +721,10 @@ really missing props; each became library surface, catalogued and asserted in `t
   exact figure behind a compact one); `Empty` `text` takes `Html` and a `details` slot sits between text and actions;
   `Wizard` marks the active step `aria-current="step"`, reads done steps as "Done: …" (`doneLabel`), names the list
   (`label`) and takes `listAttrs`; `Timeline` and each `TimelineItem` take `attrs`; `CopyButton({ label: false })` is
-  icon-only (`ariaLabel` names it). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is
-  actually cut, at any width; the library's `collapse` is a 480px container query — different behaviour, the console
-  keeps its own).
+  icon-only (`ariaLabel` names it). `TabLinks({ listAttrs })` (attributes on the `.tabs__list` strip — the console's
+  sideways-scroll class) followed once the console had adopted the rest. Not taken: a measuring `Breadcrumb` (the
+  console folds only when the trail is actually cut, at any width; the library's `collapse` is a 480px container query —
+  different behaviour, the console keeps its own).
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.

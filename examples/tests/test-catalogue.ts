@@ -426,6 +426,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
         document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
       sub: !!document.querySelector(".page-header--sub h2.page-header__title"),
       tabTitle: document.querySelector("#cat-tablinks .tabs__count")?.getAttribute("title"),
+      tabList: !!document.querySelector("#cat-tablinks > .tabs__list.cat-tablinks-list[data-kind=links]"),
       wizard: (() => {
         const ol = document.querySelector("#cat-wz-steps ol")!;
         return `${ol.getAttribute("aria-label")}|${ol.classList.contains("cat-wz-list")}|${
@@ -436,7 +437,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     }));
     check(
       cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge &&
-        cards.tabTitle === "1,204" && cards.wizard === "Import steps|true|Columns|Done: ",
+        cards.tabTitle === "1,204" && cards.tabList && cards.wizard === "Import steps|true|Columns|Done: ",
       `cards: TabLinks / Wizard steps-only / PageHeader level 2 (${JSON.stringify(cards)})`,
     );
   }
