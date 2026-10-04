@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.0](https://github.com/TundraSoft/ui/compare/v0.11.0...v0.12.0) (2026-10-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Select's visible control is a `<button role="combobox">` (its label in `[data-select-text]`), not a read-only `<input>` — a read-only text input blocked a form's implicit submission. Read its `textContent`, not `.value`. A server-rendered `data-theme` on `<html>` now wins over the choice stored in the browser.
+
+### Features
+
+* the pieces the Brevily console had to build itself ([#37](https://github.com/TundraSoft/ui/issues/37)) ([01e4818](https://github.com/TundraSoft/ui/commit/01e48181e10f2ac9ba8ab28c0b4fc6062c2ec31d))
+
 ## [0.11.0](https://github.com/TundraSoft/ui/compare/v0.10.1...v0.11.0) (2026-10-01)
 
 
