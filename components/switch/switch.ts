@@ -1,4 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
+import { inline } from "../../shared/inline.ts";
 import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 
 export type SwitchProps = {
@@ -27,10 +28,10 @@ export function Switch(props: SwitchProps): Html {
     ? html`<span class="switch__text">${label}<span class="switch__hint">${props.hint}</span></span>`
     : label;
 
-  return html`
+  return inline(html`
     <label
       class="switch"><input type="checkbox" class="switch__input"${renderAttrs(
         attrs,
       )}><span class="switch__track"><span class="switch__thumb"></span></span>${text}</label>
-  `;
+  `);
 }

@@ -1,4 +1,5 @@
 import { type Html, html, raw } from "@tundralibs/rapid/ui";
+import { inline } from "./inline.ts";
 
 /**
  * A small, consistent line-icon set — 24x24, stroke-based, so `color`
@@ -131,12 +132,12 @@ export function Icon(
 ): Html {
   // Only the constant path data is raw(); size and class are escaped.
   const size = Number(opts.size ?? 20);
-  return html`
+  return inline(html`
     <svg${opts.className
       ? html`
         class="${opts.className}"
       `
       : ""} width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${raw(ICONS[name])}</svg>
-  `;
+  `);
 }

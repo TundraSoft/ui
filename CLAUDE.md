@@ -757,6 +757,17 @@ decorated `RapidModule` (TC39 decorators run under Deno, Node via tsx and Bun) m
 gained `aside` (beside the body: a badge, a link), `bodyAttrs` and `textTag: "p"` — the shapes the console's last
 hand-written alerts needed.
 
+**Inline components render tight (0.16.1).** `deno fmt` reflows a long
+`html\`…\``onto new lines, so a component
+whose template starts on a new line emits a leading`\n `and trailing`\n
+`— a visible gap wherever it sits
+inline (avatars in a stack, an icon in a label, a button beside text; the console's`bareAvatar`trimmed it by hand).
+Inline components return through`inline()`(`shared/inline.ts`:`raw(render(markup).trim())`, already-rendered Html
+only): Avatar, AvatarGroup, Button (+ CopyButton), ButtonGroup, Tooltip, Progress, Spinner, Switch, Icon.`test-catalogue.ts`renders each and fails on surrounding whitespace — add a new inline component to that list.
+Tooltip also merged its class the old way (second`class`attribute); fixed. On a phone (< 576px) an`Alert`aside that
+holds an action (`a`,`button`,`form`) wraps under the text, the close button staying on the first line (`:has()`,
+in rules of its own).
+
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 

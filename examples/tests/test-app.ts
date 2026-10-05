@@ -766,6 +766,9 @@ for (
     const h1 = broken.querySelector("h1");
     const actions = broken.querySelector(".error-page__actions");
     return {
+      // rAPId ≥ 0.11 names the part in the error data: ErrorTemplate draws a
+      // compact inline Empty; before, the page-shaped template is compacted by CSS.
+      compact: !!broken.querySelector(".empty.empty--inline.empty--error") && !h1,
       busy: document.querySelectorAll("[data-part][aria-busy=true]").length,
       brokenStatus: broken.getAttribute("data-status"),
       h1Size: h1 ? parseFloat(getComputedStyle(h1).fontSize) : 0,
@@ -775,8 +778,8 @@ for (
     };
   });
   ok(
-    after.busy === 0 && after.brokenStatus === "500" && after.h1Size <= after.bodySize + 1 &&
-      after.actions === "none" && after.overflow <= 0,
+    after.busy === 0 && after.brokenStatus === "500" && after.overflow <= 0 &&
+      (after.compact || (after.h1Size <= after.bodySize + 1 && after.actions === "none")),
     `compose: settled (${JSON.stringify(after)})`,
   );
   ok(partFetches.length === 1, `compose: deferred parts arrive in one request (${partFetches.length})`);

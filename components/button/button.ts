@@ -1,4 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
+import { inline } from "../../shared/inline.ts";
 import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
@@ -63,7 +64,7 @@ export function Button(props: ButtonProps): Html {
       id: props.id,
       href: props.href,
     });
-    return html`<a${classAttrs(className, attrs)}>${inner}</a>`;
+    return inline(html`<a${classAttrs(className, attrs)}>${inner}</a>`);
   }
 
   const attrs: Attrs = mergeAttrs(props.attrs, {
@@ -72,16 +73,16 @@ export function Button(props: ButtonProps): Html {
     "aria-busy": props.loading ? "true" : undefined,
   });
 
-  return html`
+  return inline(html`
     <button type="${props.type ?? "button"}" ${classAttrs(className, attrs)}>${inner}</button>
-  `;
+  `);
 }
 
 /** Buttons fused into one segmented control (e.g. "Export" + a caret). */
 export function ButtonGroup(props: { buttons: Html[]; attrs?: Attrs }): Html {
-  return html`
+  return inline(html`
     <span ${classAttrs("btn-group", props.attrs ?? {})}>${props.buttons}</span>
-  `;
+  `);
 }
 
 export type CopyButtonProps = {
