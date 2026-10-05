@@ -125,3 +125,19 @@
 p.alert__text {
   margin: 0;
 }
+
+/* On a phone, an aside that holds an action (a link, a button, a form)
+   wraps under the text instead of squeezing it into a column; the close
+   button stays on the first line. Its own rules: a selector list with
+   :has() in it is dropped whole by a browser that lacks it (which keeps
+   the aside beside the text — the desktop layout). */
+@media screen and (max-width: 575px) {
+  .alert:has(> .alert__aside > :is(a, button, form)) {
+    flex-wrap: wrap;
+  }
+
+  .alert:has(> .alert__aside > :is(a, button, form)) > .alert__aside {
+    order: 1;
+    flex-basis: 100%;
+  }
+}

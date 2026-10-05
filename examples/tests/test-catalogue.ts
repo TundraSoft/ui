@@ -65,6 +65,41 @@ for await (const dir of readDir("components", { includeFiles: false })) {
   }
 }
 
+/* ------------------------------------------------- inline whitespace */
+{
+  // Inline components sit in running text and in rows of their own kind:
+  // whitespace around their markup renders as a gap (shared/inline.ts).
+  const { render } = await import("@tundralibs/rapid/ui");
+  const { Avatar, AvatarGroup } = await import("../../components/avatar/avatar.ts");
+  const { Badge, Chip } = await import("../../components/badge/badge.ts");
+  const { Button, ButtonGroup, CopyButton } = await import("../../components/button/button.ts");
+  const { Tooltip } = await import("../../components/tooltip/tooltip.ts");
+  const { Progress, Spinner } = await import("../../components/progress/progress.ts");
+  const { Switch } = await import("../../components/switch/switch.ts");
+  const { Icon } = await import("../../shared/icons.ts");
+  const inlines = {
+    Avatar: Avatar({ initials: "AB" }),
+    AvatarGroup: AvatarGroup({ avatars: [] }),
+    Badge: Badge({ label: "x" }),
+    Chip: Chip({ label: "x" }),
+    Button: Button({ label: "x" }),
+    ButtonLink: Button({ label: "x", href: "#" }),
+    ButtonGroup: ButtonGroup({ buttons: [] }),
+    CopyButton: CopyButton({ value: "x" }),
+    Tooltip: Tooltip({ id: "t", trigger: "x", content: "y" }),
+    Progress: Progress({ value: 1 }),
+    Spinner: Spinner(),
+    Switch: Switch({ label: "x" }),
+    Icon: Icon("x"),
+  };
+  for (const [name, markup] of Object.entries(inlines)) {
+    const text = render(markup);
+    if (text !== text.trim()) fail(`inline: ${name}() emits whitespace around its markup`);
+  }
+  const tip = render(Tooltip({ id: "t2", trigger: "x", content: "y", attrs: { class: "own" } }));
+  if (!/^<span class="tooltip own"/.test(tip)) fail(`inline: Tooltip does not merge attrs.class (${tip.slice(0, 40)})`);
+}
+
 /* ------------------------------------------------------------ sprite */
 {
   const sprite = await readTextFile("dist/icons.svg");
@@ -400,6 +435,24 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     check(
       slots.beside && slots.badge && slots.link && slots.bodyAttrs && slots.prose === "P",
       `feedback: alert aside / bodyAttrs / textTag (${JSON.stringify(slots)})`,
+    );
+    // On a phone an aside holding an action wraps under the text; a badge stays beside it.
+    await page.setViewport({ width: 375, height: 800 });
+    await pause(200);
+    const phone = await page.$eval("#cat-alert-slots", (box) => {
+      const [deadline, billing] = [...box.querySelectorAll(":scope > .alert")];
+      const pos = (alert: Element) => {
+        const body = alert.querySelector(".alert__body")!.getBoundingClientRect();
+        const aside = alert.querySelector(".alert__aside")!.getBoundingClientRect();
+        return { under: aside.top >= body.bottom - 1, beside: aside.left >= body.right - 1 };
+      };
+      return { link: pos(billing), badge: pos(deadline), overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    await page.setViewport({ width: 1280, height: 900 });
+    await pause(200);
+    check(
+      phone.link.under && phone.badge.beside && phone.overflow <= 0,
+      `feedback: alert aside on a phone (${JSON.stringify(phone)})`,
     );
 
     // A modal rendered with `open` opens when a swap brings it in.
