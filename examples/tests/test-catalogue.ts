@@ -219,6 +219,32 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: datetimepicker Clear (${clearBefore}, ${JSON.stringify(cleared)})`,
     );
 
+    // A Segmented in a dialog that was closed at load is placed when it opens.
+    await page.$eval('[data-modal-open="#cat-seg-dialog"]', (el) => (el as HTMLElement).click());
+    await pause(400);
+    const segWidth = await page.$eval(
+      "#cat-seg-in-dialog",
+      (el) => parseFloat((el as HTMLElement).style.getPropertyValue("--segmented-w") || "0"),
+    );
+    check(segWidth > 20, `forms: segmented in a dialog not measured when opened (--segmented-w ${segWidth})`);
+    await page.$eval("#cat-seg-dialog [data-modal-close]", (el) => (el as HTMLElement).click());
+    await pause();
+
+    // Combobox({ loadOnFocus }): the first focus fetches once.
+    await page.$eval("#cat-cb-focus", (el) => el.scrollIntoView({ block: "center" }));
+    await page.focus("#cat-cb-focus");
+    await pause();
+    const focusLoad = await page.$eval("#cat-cb-focus", (el) => ({
+      attr: el.hasAttribute("data-combobox-load-on-focus"),
+      loaded: el.hasAttribute("data-combobox-loaded"),
+      open: !document.getElementById("cat-cb-focus-list")!.hasAttribute("hidden"),
+    }));
+    check(
+      focusLoad.attr && focusLoad.loaded && focusLoad.open,
+      `forms: combobox loadOnFocus (${JSON.stringify(focusLoad)})`,
+    );
+    await page.keyboard.press("Escape");
+
     // Segmented counts
     const counts = await page.$$eval(
       "#cat-seg-count .segmented__count",
@@ -319,6 +345,24 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       await page.click("h1");
     }
 
+    const grouped = await page.$eval("#cat-dt-groups", (t) => ({
+      headings: [...t.querySelectorAll("tr.data-table__group > th")].map((th) =>
+        `${th.textContent}:${th.getAttribute("colspan")}:${getComputedStyle(th).position}`
+      ).join(),
+      muted: t.querySelectorAll("tr.data-table__row.cat-row-muted[data-status=Paused][data-row-key='2']").length,
+      rows: t.querySelectorAll("tr.data-table__row").length,
+    }));
+    check(
+      grouped.headings === "Active:3:static,Paused:3:static,Active:3:static" && grouped.muted === 1 &&
+        grouped.rows === 3,
+      `data: rowGroup / rowAttrs (${JSON.stringify(grouped)})`,
+    );
+    const avatar = await page.evaluate(() => ({
+      icon: !!document.querySelector("#cat-avatar-icon.avatar.avatar--sm.cat-av > svg"),
+      group: !!document.querySelector(".avatar-group.cat-avg"),
+    }));
+    check(avatar.icon && avatar.group, `data: avatar markup initials / class merge (${JSON.stringify(avatar)})`);
+
     const misc = await page.evaluate(() => ({
       tones: document.querySelectorAll("#cat-tl-tones .timeline__item--danger .timeline__marker svg").length,
       text: !!document.querySelector("#cat-tl-tones .timeline__text"),
@@ -336,6 +380,12 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "feedback") {
+    const roles = await page.$$eval(
+      "#cat-alert-roles > .alert",
+      (els) => els.map((e) => e.getAttribute("role")).join(),
+    );
+    check(roles === "status,alert,alert,,note", `feedback: alert roles by variant / override / none / note (${roles})`);
+
     // A modal rendered with `open` opens when a swap brings it in.
     await clickIn("#cat-modal-open-trigger");
     await pause();
@@ -426,6 +476,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
         document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
       sub: !!document.querySelector(".page-header--sub h2.page-header__title"),
       tabTitle: document.querySelector("#cat-tablinks .tabs__count")?.getAttribute("title"),
+      tabList: !!document.querySelector("#cat-tablinks > .tabs__list.cat-tablinks-list[data-kind=links]"),
       wizard: (() => {
         const ol = document.querySelector("#cat-wz-steps ol")!;
         return `${ol.getAttribute("aria-label")}|${ol.classList.contains("cat-wz-list")}|${
@@ -436,7 +487,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     }));
     check(
       cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge &&
-        cards.tabTitle === "1,204" && cards.wizard === "Import steps|true|Columns|Done: ",
+        cards.tabTitle === "1,204" && cards.tabList && cards.wizard === "Import steps|true|Columns|Done: ",
       `cards: TabLinks / Wizard steps-only / PageHeader level 2 (${JSON.stringify(cards)})`,
     );
   }
@@ -468,6 +519,10 @@ for (const group of catalogueGroups) {
   const expected = entries.filter((e) => e.group === group.id);
   const html = await readTextFile(`demo/${file}`);
   if (/ style="/.test(html)) fail(`${file}: markup contains an inline style attribute (CSP §9)`);
+  // A second class attribute is silently dropped by the parser: a caller's
+  // attrs.class must merge (classAttrs), never follow the component's own.
+  const twoClasses = html.match(/<[a-z][a-z0-9-]*\s[^>]*?\bclass="[^"]*"[^>]*?\sclass="[^"]*"/g) ?? [];
+  if (twoClasses.length) fail(`${file}: ${twoClasses.length} tag(s) with two class attributes, e.g. ${twoClasses[0]}`);
 
   const onPage = await page.evaluate(() => ({
     sections: [...document.querySelectorAll("[data-catalogue]")].map((e) => e.getAttribute("data-catalogue")),

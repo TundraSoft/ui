@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
 export type AvatarSize = "sm" | "md" | "lg";
@@ -7,7 +7,8 @@ export type AvatarSize = "sm" | "md" | "lg";
 export type AvatarProps = {
   src?: string;
   alt?: string;
-  initials?: string;
+  /** Shown without `src`: initials, or markup (an icon for a pending invite, a removed person). */
+  initials?: string | Html;
   size?: AvatarSize;
   attrs?: Attrs;
 };
@@ -23,12 +24,12 @@ export function Avatar(props: AvatarProps): Html {
   const inner = props.src ? html`<img src="${props.src}" alt="${props.alt ?? ""}">` : (props.initials ?? "");
 
   return html`
-    <span class="${className}" ${renderAttrs(props.attrs ?? {})}>${inner}</span>
+    <span ${classAttrs(className, props.attrs ?? {})}>${inner}</span>
   `;
 }
 
 export function AvatarGroup(props: { avatars: Html[]; attrs?: Attrs }): Html {
   return html`
-    <div class="avatar-group" ${renderAttrs(props.attrs ?? {})}>${props.avatars}</div>
+    <div ${classAttrs("avatar-group", props.attrs ?? {})}>${props.avatars}</div>
   `;
 }

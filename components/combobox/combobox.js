@@ -11,6 +11,8 @@
  * are filtered client-side — non-matches and empty groups hidden, count
  * updated. (rAPId's own runtime only reacts to click/submit, so this is
  * the one place a component script triggers a swap programmatically.)
+ * `data-combobox-load-on-focus` (Combobox({ loadOnFocus })) makes the
+ * first focus fetch once with an empty query.
  *
  * Select-only controls (the Select's `<button role="combobox">`, or a
  * read-only input) open on click or Arrow, never on focus, and toggle
@@ -250,7 +252,13 @@
   // on open does not unfold it, and the first click is not a close.
   document.addEventListener("focusin", (event) => {
     const root = event.target.closest?.("[data-combobox]");
-    if (root && event.target.matches("[role='combobox']") && !selectOnly(event.target)) open(root, true);
+    if (!root || !event.target.matches("[role='combobox']") || selectOnly(event.target)) return;
+    const input = event.target;
+    if (input.hasAttribute("data-combobox-load-on-focus") && !input.hasAttribute("data-combobox-loaded")) {
+      input.setAttribute("data-combobox-loaded", "");
+      filter(root);
+    }
+    open(root, true);
   });
 
   // Focus leaving the control for another focusable element (Tab, a click

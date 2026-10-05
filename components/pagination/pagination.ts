@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 
 export type PaginationProps = {
   id?: string;
@@ -52,7 +52,7 @@ export function Pagination(props: PaginationProps): Html {
       "data-swap": target ? "outer" : undefined,
       "data-push": target ? "" : undefined,
     };
-    return html`<li><a class="pagination__link" href="${href}"${renderAttrs(attrs)}>${label}</a></li>`;
+    return html`<li><a href="${href}"${classAttrs("pagination__link", attrs)}>${label}</a></li>`;
   }
 
   // Disabled prev/next are not links at all — a focusable `href="#"`

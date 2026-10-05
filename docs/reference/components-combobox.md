@@ -50,6 +50,7 @@ Combobox(props: ComboboxProps): Html
 | `open` | `boolean` |  |  |
 | `multi` | `boolean` |  |  |
 | `action` | `string` |  | URL that returns a fresh `ComboboxList(...)` fragment for `?q=<text>`. combobox.js debounces `input` and calls `window.rapid.swap()` on it; without it (or without rAPId's runtime) the rendered options are filtered client-side instead. |
+| `loadOnFocus` | `boolean` |  | With `action`: fetch the list once when the field first gets focus, before anything is typed (`?q=` empty) — "the organisation's tags" rather than an empty box. Without it the first fetch waits for typing. |
 | `emptyText` | `string` |  |  |
 | `hint` | `string` |  |  |
 | `hints` | `boolean` |  | The keyboard-hint bar under the list ("↑↓ navigate · ↵ select · 12 matches"). Turn it off where the list reads as a dropdown, not a search. @default true |
@@ -157,6 +158,6 @@ Classes defined by `components/combobox/combobox.css` — structural, token-driv
 
 `components/combobox/combobox.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
+Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-load-on-focus`, `data-combobox-loaded`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
 
 Events: `combobox:pick`.

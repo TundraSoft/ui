@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export type CollapsibleProps = {
@@ -15,7 +15,7 @@ export function Collapsible(props: CollapsibleProps): Html {
   const open = Boolean(props.defaultOpen);
 
   return html`
-    <div class="collapsible" ${renderAttrs(props.attrs ?? {})}>
+    <div ${classAttrs("collapsible", props.attrs ?? {})}>
       <h3
         class="collapsible__heading"><button type="button" class="collapsible__trigger" data-toggle="#${panelId}" aria-expanded="${open
           ? "true"
@@ -40,9 +40,12 @@ export function Accordion(props: AccordionProps): Html {
   const panels = props.items.map((item, index) => Collapsible({ ...item, id: item.id ?? `${props.id}-${index}` }));
 
   return html`
-    <div class="accordion" ${renderAttrs(mergeAttrs(props.attrs, {
-      id: props.id,
-      "data-accordion-group": "",
-    }))}>${panels}</div>
+    <div ${classAttrs(
+      "accordion",
+      mergeAttrs(props.attrs, {
+        id: props.id,
+        "data-accordion-group": "",
+      }),
+    )}>${panels}</div>
   `;
 }

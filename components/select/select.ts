@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 import { ComboboxList } from "../combobox/combobox.ts";
@@ -92,7 +92,9 @@ export function Select(props: SelectProps): Html {
   // Enter in a sibling search box from submitting its form.
   return html`
     <div class="${wrapperClass}"
-      data-select><select class="select__native"${renderAttrs(
+      data-select>
+      <select${classAttrs(
+        "select__native",
         nativeAttrs,
       )}>${placeholderOption}${options}</select><div class="combobox select__ui" data-combobox data-select-ui><div class="combobox__anchor"><div class="combobox__field">${hasLeads
         ? html`<span class="select__lead" data-select-lead aria-hidden="true">${current?.lead ?? ""}</span>`

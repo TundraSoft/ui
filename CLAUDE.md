@@ -721,9 +721,19 @@ really missing props; each became library surface, catalogued and asserted in `t
   exact figure behind a compact one); `Empty` `text` takes `Html` and a `details` slot sits between text and actions;
   `Wizard` marks the active step `aria-current="step"`, reads done steps as "Done: …" (`doneLabel`), names the list
   (`label`) and takes `listAttrs`; `Timeline` and each `TimelineItem` take `attrs`; `CopyButton({ label: false })` is
-  icon-only (`ariaLabel` names it). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is
-  actually cut, at any width; the library's `collapse` is a 480px container query — different behaviour, the console
-  keeps its own).
+  icon-only (`ariaLabel` names it). `TabLinks({ listAttrs })` (attributes on the `.tabs__list` strip — the console's
+  sideways-scroll class) followed once the console had adopted the rest. `Alert({ role })` came the same way: the role
+  now defaults by variant — `alert` (interrupts) for warning/danger, `status` (polite) for neutral/success/info — and
+  `"none"` drops it; a "Saved." notice used to interrupt a screen reader. Its cleanup batches then surfaced: **a second
+  `class` attribute** wherever a component wrote `class="…" ${renderAttrs(attrs)}` (Avatar, AvatarGroup, Breadcrumb,
+  ButtonGroup, Collapsible/Accordion, Choice, InputGroup, Form, Navbar, Progress/Spinner, Pagination links, Select's
+  native control, Textarea, Toast action) — the parser drops the caller's class; all now use `classAttrs`, and
+  `test-catalogue.ts` fails any page with a tag carrying two `class` attributes. Plus `Alert({ role: "note" })`,
+  `Avatar` `initials` as Html, `Combobox({ loadOnFocus })` (first focus fetches once with an empty query), segmented.js
+  re-measures through a `ResizeObserver` (a control in a dialog closed at load measured 0 wide), and `DataTable`
+  `rowAttrs` + `rowGroup` (full-width `.data-table__group` heading rows — a `<th>`, so it undoes the sticky header-cell
+  styling). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is actually cut, at any width;
+  the library's `collapse` is a 480px container query — different behaviour, the console keeps its own).
 
 **rAPId 0.9 `layoutData` (2026-10-05).** rAPId used to hand a layout only `{ body, title }`, which is why the console
 regex-read its own rendered page for the breadcrumb and phone bar. The theming side drafted the request, TundraLibs
@@ -772,6 +782,13 @@ Rules that make them frames and keep them device-compatible:
   full-bleed on wide screens, navigation reachable (visible nav, or a drawer toggle that actually opens the sidebar
   on-screen and closes on Escape), rail is a full-width bottom bar on phones, split shows exactly one pane on phones,
   article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to the demo builder and this list.
+- **SidebarLayout 992–1199 is a grid, not a wrapping flex row (fixed 2026-10-05).** The range used `flex-wrap: wrap` so
+  the aside could drop below the content, but the content's `auto` basis (its own width; 100% when boxed) wrapped the
+  content itself onto a second line under the sticky sidebar, and a wrapped aside started at the row's edge, under the
+  sidebar too — open since 2026-09-18 because `test-layouts.ts` only checked "within the viewport". The body is now
+  `grid-template-columns: auto minmax(0, 1fr)` there (sidebar spans both rows; the column follows the full sidebar, the
+  collapsed rail, or nothing for the fixed drawer), and the suite asserts that `#main-content` and any aside start at
+  the sidebar's edge whenever an in-flow sidebar is visible.
 - `app-shell` and `auth-layout` were components in name only; they are now `layouts/sidebar` and `layouts/auth`
   (breaking rename, pre-publish).
 

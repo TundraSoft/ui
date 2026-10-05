@@ -467,7 +467,7 @@ export function InputIcon(props: InputIconProps): Html {
 
 export function InputGroup(props: InputGroupProps): Html {
   return html`
-    <div class="input-group" ${renderAttrs(props.attrs ?? {})}>${props.start !== undefined && props.start !== "" &&
+    <div ${classAttrs("input-group", props.attrs ?? {})}>${props.start !== undefined && props.start !== "" &&
       html`<span class="input-group__addon">${props.start}</span>`}${props.control}${props.end !== undefined &&
       props.end !== "" && html`<span class="input-group__addon">${props.end}</span>`}</div>
   `;

@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export type BreadcrumbItem = {
@@ -59,7 +59,7 @@ export function Breadcrumb(props: BreadcrumbProps): Html {
     <nav aria-label="Breadcrumb" ${renderAttrs({
       class: fold ? "breadcrumb-nav breadcrumb-nav--collapse" : undefined,
     })}>
-      <ol class="breadcrumb" ${renderAttrs(props.attrs ?? {})}>${items}</ol>
+      <ol ${classAttrs("breadcrumb", props.attrs ?? {})}>${items}</ol>
     </nav>
   `;
 }

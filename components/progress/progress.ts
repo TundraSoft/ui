@@ -1,14 +1,12 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 
 export function Progress(
   props: { value: number; max?: number; attrs?: Attrs },
 ): Html {
   const max = props.max ?? 100;
   return html`
-    <progress class="progress" value="${String(props.value)}" max="${String(max)}" ${renderAttrs(
-      props.attrs ?? {},
-    )}></progress>
+    <progress value="${String(props.value)}" max="${String(max)}" ${classAttrs("progress", props.attrs)}></progress>
   `;
 }
 
@@ -18,6 +16,6 @@ export function Spinner(props: { label?: string; attrs?: Attrs } = {}): Html {
     "aria-label": props.label ?? "Loading",
   });
   return html`
-    <span class="spinner" ${renderAttrs(attrs)}></span>
+    <span ${classAttrs("spinner", attrs)}></span>
   `;
 }
