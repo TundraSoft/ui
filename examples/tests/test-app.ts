@@ -731,6 +731,64 @@ for (
   await page.close();
 }
 
+/* ------------------------------------------------- compose → the kit */
+{
+  // rAPId compose (examples/app/parts.ts): `stats` renders with the page,
+  // `activity` is deferred (a skeleton placeholder, then ONE ?parts= fetch),
+  // `broken` fails and is drawn as a compact error inside its tile.
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 900 });
+  page.on("pageerror", (e) => fail(`/composed: pageerror ${e}`));
+  const partFetches: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("?parts=")) partFetches.push(r.url());
+  });
+  await page.goto(`${base}/composed`, { waitUntil: "domcontentloaded" });
+  const before = await page.evaluate(() => {
+    const ph = document.querySelector('[data-part="activity"]') as HTMLElement;
+    return {
+      placeholder: !!ph && ph.hasAttribute("data-compose") && ph.getAttribute("aria-busy") === "true" &&
+        ph.childElementCount === 0,
+      minHeight: ph ? parseFloat(getComputedStyle(ph).minHeight) : 0,
+      shimmer: ph ? getComputedStyle(ph, "::after").animationName : "",
+      stats: !!document.querySelector('[data-part="stats"][data-status="200"] .stat'),
+    };
+  });
+  ok(
+    before.placeholder && before.minHeight >= 48 && before.shimmer === "skeleton-shimmer" && before.stats,
+    `compose: first paint (${JSON.stringify(before)})`,
+  );
+  await page.waitForFunction(() => !!document.querySelector('[data-part="activity"][data-status="200"] .timeline'), {
+    timeout: 10000,
+  });
+  const after = await page.evaluate(() => {
+    const broken = document.querySelector('[data-part="broken"]')!;
+    const h1 = broken.querySelector("h1");
+    const actions = broken.querySelector(".error-page__actions");
+    return {
+      busy: document.querySelectorAll("[data-part][aria-busy=true]").length,
+      brokenStatus: broken.getAttribute("data-status"),
+      h1Size: h1 ? parseFloat(getComputedStyle(h1).fontSize) : 0,
+      bodySize: parseFloat(getComputedStyle(document.body).fontSize),
+      actions: actions ? getComputedStyle(actions).display : "absent",
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  });
+  ok(
+    after.busy === 0 && after.brokenStatus === "500" && after.h1Size <= after.bodySize + 1 &&
+      after.actions === "none" && after.overflow <= 0,
+    `compose: settled (${JSON.stringify(after)})`,
+  );
+  ok(partFetches.length === 1, `compose: deferred parts arrive in one request (${partFetches.length})`);
+  // Every swap rides a View Transition; let the cross-fade finish before the picture.
+  await page.evaluate(() =>
+    (document as unknown as { activeViewTransition?: { finished: Promise<void> } }).activeViewTransition?.finished
+      .catch(() => {})
+  );
+  await page.screenshot({ path: `${outDir}/composed.png` });
+  await page.close();
+}
+
 /* ---------------------------------------------------------- inline CSP */
 {
   // Every page: no inline style/script anywhere (the app must run under a strict CSP).
@@ -743,6 +801,7 @@ for (
       "/components/forms",
       "/components/charts",
       "/forms",
+      "/composed",
     ]
   ) {
     const res = await fetch(`${base}${path}`);

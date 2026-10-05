@@ -45,6 +45,9 @@ Builds an Alert straight from rAPId's `RapidFormError` shape (§6).
 | `icon` | `string | Html | "false"` |  | Leading icon; status variants get one by default. Pass `false` to suppress. |
 | `role` | `"alert" | "status" | "note" | "none"` |  | How a screen reader announces it. `"alert"` interrupts (an error, a warning); `"status"` waits its turn (a confirmation, a note); `"none"` renders no live role (a static notice that was on the page from the start); `"note"` marks a static aside (a callout, a tip) that is not announced. Defaults by variant: `alert` for warning and danger, `status` for neutral, success and info. |
 | `actions` | `Html` |  | Buttons or links under the text — what to do about it. |
+| `aside` | `Html` |  | Beside the body, at the alert's end: a badge ("3 days left"), a link ("Write to support"), a control. Sits before the dismiss button. |
+| `bodyAttrs` | `Attrs` |  | Attributes on the `.alert__body` element (a class merges) — a layout hook for rich bodies. |
+| `textTag` | `"div" | "p"` |  | The element `body` renders in: `"p"` for prose. @default "div" |
 | `dismissible` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |
 
@@ -106,4 +109,4 @@ FormErrorAlert({
 
 Classes defined by `components/alert/alert.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.alert`, `.alert--danger`, `.alert--info`, `.alert--success`, `.alert--warning`, `.alert__actions`, `.alert__body`, `.alert__close`, `.alert__field`, `.alert__field-name`, `.alert__icon`, `.alert__list`, `.alert__text`, `.alert__title`
+`.alert`, `.alert--danger`, `.alert--info`, `.alert--success`, `.alert--warning`, `.alert__actions`, `.alert__aside`, `.alert__body`, `.alert__close`, `.alert__field`, `.alert__field-name`, `.alert__icon`, `.alert__list`, `.alert__text`, `.alert__title`

@@ -1,5 +1,6 @@
 import { html, type RapidTemplate, template } from "@tundralibs/rapid/ui";
 import { Button } from "../components/button/button.ts";
+import { Empty } from "../components/empty/empty.ts";
 
 /** Mirrors rAPId's own internal `ErrorData` shape (ui/errorPage.ts) — not
  * exported by the package, so re-declared here structurally. */
@@ -11,6 +12,8 @@ type ErrorData = Record<string, unknown> & {
   mode?: string;
   details?: Record<string, unknown>;
   debug?: Record<string, unknown>;
+  /** The composed part this error stands in for, when rAPId names it (a denied or failed tile). */
+  part?: string;
 };
 
 function heading(status: number): string {
@@ -37,6 +40,19 @@ export const ErrorTemplate: RapidTemplate<Record<string, unknown>> = template<
   ErrorData
 >((e) => {
   const status = typeof e.status === "number" ? e.status : 500;
+
+  // A composed part: a compact notice inside its tile — no <main>, no
+  // second <h1>, no "go back" (the page is still there).
+  if (typeof e.part === "string") {
+    return Empty({
+      variant: "inline",
+      tone: "error",
+      icon: "warning",
+      title: heading(status),
+      text: e.message,
+      code: [String(status), e.requestId].filter(Boolean).join(" · "),
+    });
+  }
 
   return html`
     <main

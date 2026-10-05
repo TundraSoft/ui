@@ -196,3 +196,44 @@
     display: none;
   }
 }
+
+/* rAPId compose (rAPId ≥ 0.9): a deferred part arrives as an EMPTY
+   placeholder — `<div data-part="name" data-status="202" data-load
+   data-compose aria-busy="true">` — that the runtime replaces when the
+   page's one batched `?parts=` fetch lands. Until then it is a skeleton
+   block of `--part-min-height` (set it per part so the swap does not jump:
+   `[data-part="activity"] { --part-min-height: 12rem }`). A timed-out part
+   retrying once carries its error fragment while it waits: it dims. */
+[data-part][data-compose][aria-busy="true"]:empty {
+  position: relative;
+  display: block;
+  min-height: var(--part-min-height);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-border-subtle);
+}
+
+[data-part][data-compose][aria-busy="true"]:empty::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--color-surface-alt), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-border-subtle) 45%, var(--color-surface)),
+    transparent
+  );
+  animation: skeleton-shimmer 1.3s linear infinite;
+}
+
+[data-part][data-compose][aria-busy="true"]:not(:empty) {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-part][data-compose][aria-busy="true"]:empty::after {
+    display: none;
+  }
+}

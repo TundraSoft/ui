@@ -46,3 +46,32 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+/* rAPId compose: a denied (403) or failed (5xx, 504) part is the app's
+   error template inside the part's wrapper. Inside a tile it is a compact
+   notice — no page padding or width, no page-sized heading, no way "back"
+   (the page is still there). ErrorTemplate renders a compact Empty
+   instead when the payload names the part. */
+[data-part] > .error-page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}
+
+[data-part] > .error-page h1 {
+  margin: var(--space-1) 0;
+  font-size: var(--font-size-base);
+}
+
+[data-part] > .error-page .error-page__actions,
+[data-part] > .error-page .error-page__details,
+[data-part] > .error-page .error-page__debug {
+  display: none;
+}
+
+[data-part] > .error-page .error-page__request-id {
+  margin-top: var(--space-2);
+}

@@ -744,6 +744,19 @@ types the frame's `data` as `LayoutData<P>` (`page?: P`, default `LayoutPage`) a
 `.layout__crumbs`); `createLayoutTemplate` and the example app's shell use it, and `test-app.ts` checks the record and
 function forms, a route without it, and that a swap carries none.
 
+**rAPId compose support + Alert slots (2026-10-05).** rAPId 0.9's `compose` renders a deferred part as an EMPTY
+`<div data-part data-status="202" data-load data-compose aria-busy="true">` (utils/composer.ts `wrap`), fetched in one
+`?parts=a,b` request whose `[data-part]` elements replace the placeholders by name; a denied/failed part is the app's
+error template inside that wrapper. The library styles both without markup of its own: skeleton.css draws the empty
+placeholder as a shimmer block of `--part-min-height` (token, 6rem) and dims a retrying (504) one; error-page.css
+compacts `[data-part] > .error-page`; `ErrorTemplate` renders a compact inline `Empty` when the payload carries `part`
+(asked of TundraLibs — rapid passes no part name yet, so until then the CSS does the work and the `<h1>` stays).
+`test-contract.ts` asserts the runtime's `dataset.compose` / `[data-part="` / `aria-busy`; `examples/app/parts.ts` is a
+decorated `RapidModule` (TC39 decorators run under Deno, Node via tsx and Bun) mounted with `app.modules()`, and
+`test-app.ts` checks first paint, the single batched fetch, the settled parts and the compact error. Same day, `Alert`
+gained `aside` (beside the body: a badge, a link), `bodyAttrs` and `textTag: "p"` — the shapes the console's last
+hand-written alerts needed.
+
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 
