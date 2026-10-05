@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.0](https://github.com/TundraSoft/ui/compare/v0.17.0...v0.18.0) (2026-10-05)
+
+
+### Features
+
+* **deps:** require rAPId ^0.12.0 ([#53](https://github.com/TundraSoft/ui/issues/53)) ([df099d3](https://github.com/TundraSoft/ui/commit/df099d385e7bc27c82cd472b34e1bb22bb0c8234))
+
+
+### Bug Fixes
+
+* **alert:** on a phone a long message stays beside the icon when the aside wraps ([#52](https://github.com/TundraSoft/ui/issues/52)) ([fd9bd52](https://github.com/TundraSoft/ui/commit/fd9bd52a9ba647cea3ed673bb8dab9253bcd0e5e))
+
 ## [0.17.0](https://github.com/TundraSoft/ui/compare/v0.16.0...v0.17.0) (2026-10-05)
 
 
