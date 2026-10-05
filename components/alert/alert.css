@@ -149,10 +149,16 @@ p.alert__text {
     min-width: 0;
   }
 
-  /* The wrapped action lines up under the text, not under the icon.
-     `--alert-icon-size` is the default status icon's width; a theme whose
-     icons are larger (or drawn as a ::before) retunes it. */
-  .alert:has(> .alert__icon):has(> .alert__aside > :is(a, button, form)) > .alert__aside {
-    margin-inline-start: calc(var(--alert-icon-size) + var(--space-3));
+  /* The wrapped action lines up under the text, not under the icon, by
+     `--alert-aside-indent`. An alert with an `.alert__icon` element sets it
+     to the icon's width (`--alert-icon-size`) plus the gap; an alert
+     without one gets 0. A theme that draws its icon as a ::before (with
+     `icon: false`) sets `--alert-aside-indent` on its own variants. */
+  .alert:has(> .alert__aside > :is(a, button, form)) > .alert__aside {
+    margin-inline-start: var(--alert-aside-indent, 0);
+  }
+
+  .alert:has(> .alert__icon) {
+    --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3));
   }
 }

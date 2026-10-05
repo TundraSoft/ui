@@ -768,8 +768,11 @@ Tooltip also merged its class the old way (second`class`attribute); fixed. On a 
 holds an action (`a`,`button`,`form`) wraps under the text, the close button staying on the first line (`:has()`,
 in rules of its own). 0.17.1 fixed that rule: the body kept its`auto`basis, so a long message
 wrapped onto its own line under the icon; there the body is`flex:
-1 1 0`and the aside is indented by`--alert-icon-size` + gap so the action lines up with the text (the console found it
-at 390; the catalogue now checks a long message).
+1 1
+0`and the aside is indented by`--alert-aside-indent`(0.18.1: set to`--alert-icon-size`+ gap only on an alert with an`.alert__icon`element; a
+theme drawing a`::before`icon with`icon:
+false` sets the indent on its variants — 0.18.0 tied the indent to the icon element, so the token did nothing there) so
+the action lines up with the text (the console found it at 390; the catalogue now checks a long message).
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
