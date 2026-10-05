@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.0](https://github.com/TundraSoft/ui/compare/v0.16.0...v0.17.0) (2026-10-05)
+
+
+### Features
+
+* **deps:** require rAPId ^0.11.0 ([#51](https://github.com/TundraSoft/ui/issues/51)) ([959c4d8](https://github.com/TundraSoft/ui/commit/959c4d8af51960a1b7164e6b53f094370853ff12))
+
+
+### Bug Fixes
+
+* inline components render without surrounding whitespace; Alert aside wraps on phones ([#49](https://github.com/TundraSoft/ui/issues/49)) ([e31496f](https://github.com/TundraSoft/ui/commit/e31496faa56a16936cc40abd02d0cf43568dfb0f))
+
 ## [0.16.0](https://github.com/TundraSoft/ui/compare/v0.15.0...v0.16.0) (2026-10-05)
 
 
