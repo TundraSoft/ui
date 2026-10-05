@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.0](https://github.com/TundraSoft/ui/compare/v0.13.0...v0.14.0) (2026-10-05)
+
+
+### Features
+
+* **deps:** require rAPId ^0.9.0 ([#42](https://github.com/TundraSoft/ui/issues/42)) ([b947b84](https://github.com/TundraSoft/ui/commit/b947b8402b6227f3d65f051282e97b2e5c925a01))
+* TabLinks listAttrs, small console props; fix: SidebarLayout 992–1199px, Alert role, class merging ([#41](https://github.com/TundraSoft/ui/issues/41)) ([d047ec5](https://github.com/TundraSoft/ui/commit/d047ec520a8cb030554076211b5f3237b8ebd392))
+* **templates:** a route's layoutData reaches the frame; PageCrumbs ([#44](https://github.com/TundraSoft/ui/issues/44)) ([d3af40b](https://github.com/TundraSoft/ui/commit/d3af40b82f1f2e0b09743733fb123c2c50171892))
+
 ## [0.13.0](https://github.com/TundraSoft/ui/compare/v0.12.0...v0.13.0) (2026-10-04)
 
 
