@@ -166,6 +166,8 @@
   --layout-aside-width: 18rem;
   --layout-pane-width: 22rem;
   --layout-gutter: clamp(var(--space-4), 3vw, var(--space-8));
+  /* A deferred compose part's placeholder (skeleton.css) until it loads. */
+  --part-min-height: 6rem;
 
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;

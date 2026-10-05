@@ -250,6 +250,25 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>`,
         ),
         c(
+          "aside, bodyAttrs, textTag — a badge or link beside the body, a class on the body, prose text (#cat-alert-slots)",
+          html`<div class="stack stack--sm" id="cat-alert-slots">${
+            Alert({
+              variant: "warning",
+              title: "Choose which domains stay",
+              body: "Your plan includes 3 domains; you have 5.",
+              aside: Badge({ label: "3 days left", variant: "warning" }),
+            })
+          }${
+            Alert({
+              variant: "info",
+              role: "note",
+              body: "Payments are not set up yet. Until they are, plan changes go through support.",
+              aside: html`<a href="#">Write to support</a>`,
+              bodyAttrs: { class: "cat-alert-body", "data-kind": "billing" },
+            })
+          }${Alert({ variant: "neutral", role: "note", textTag: "p", body: "Every request carries a key." })}</div>`,
+        ),
+        c(
           "actions",
           Alert({
             variant: "warning",

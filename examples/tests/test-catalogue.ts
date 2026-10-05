@@ -385,6 +385,22 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       (els) => els.map((e) => e.getAttribute("role")).join(),
     );
     check(roles === "status,alert,alert,,note", `feedback: alert roles by variant / override / none / note (${roles})`);
+    const slots = await page.$eval("#cat-alert-slots", (box) => {
+      const [deadline, billing, prose] = [...box.querySelectorAll(":scope > .alert")];
+      const body = deadline.querySelector(".alert__body")!.getBoundingClientRect();
+      const aside = deadline.querySelector(".alert__aside")!.getBoundingClientRect();
+      return {
+        beside: aside.left >= body.right - 1 && aside.top < body.bottom,
+        badge: !!deadline.querySelector(".alert__aside > .badge"),
+        link: !!billing.querySelector(".alert__aside > a"),
+        bodyAttrs: !!billing.querySelector(".alert__body.cat-alert-body[data-kind=billing]"),
+        prose: prose.querySelector(".alert__text")?.tagName,
+      };
+    });
+    check(
+      slots.beside && slots.badge && slots.link && slots.bodyAttrs && slots.prose === "P",
+      `feedback: alert aside / bodyAttrs / textTag (${JSON.stringify(slots)})`,
+    );
 
     // A modal rendered with `open` opens when a swap brings it in.
     await clickIn("#cat-modal-open-trigger");

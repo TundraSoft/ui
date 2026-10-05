@@ -35,6 +35,11 @@ const runtime: Expectation[] = [
   // The public JS API combobox/command/editor call.
   { needle: "window.rapid", usedBy: "combobox.js, command.js, editor.js" },
   { needle: "refresh", usedBy: "window.rapid.refresh" },
+  // rAPId compose (≥ 0.9): deferred parts — skeleton.css styles the empty
+  // placeholder, error-page.css a failed part (examples/app/parts.ts).
+  { needle: "dataset.compose", usedBy: "compose placeholders ([data-part][data-compose] skeleton)" },
+  { needle: '[data-part="', usedBy: "deferred parts placed by name into [data-part] slots" },
+  { needle: "aria-busy", usedBy: "the placeholder skeleton shows while aria-busy=true" },
   // Swap modes DataTable/Pagination/toasts rely on.
   { needle: "'outer'", usedBy: "data-swap=outer" },
   { needle: "'append'", usedBy: "toasts appended into #toast-region" },

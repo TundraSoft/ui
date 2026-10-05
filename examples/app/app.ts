@@ -17,6 +17,7 @@ import { Application } from "@tundralibs/rapid";
 import { type Html, html, type RapidFormError, template } from "@tundralibs/rapid/ui";
 import { type CoreAssets, createCoreTemplate } from "../../templates/core.ts";
 import { asRapidLayout, PageCrumbs } from "../../templates/layout.ts";
+import { Parts } from "./parts.ts";
 import { errorTemplates } from "../../templates/errors.ts";
 import { uiAssetsDir } from "../../assets.ts";
 import { VERSION } from "../../version.ts";
@@ -792,6 +793,9 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
     { template: CommandsFragment },
     (ctx) => ({ content: { q: new URL(ctx.url).searchParams.get("q") ?? "" } }),
   );
+
+  // A composed page (rAPId compose): its parts are routes of a mounted module.
+  await app.modules({ modules: [{ Parts }] });
 
   return app;
 }

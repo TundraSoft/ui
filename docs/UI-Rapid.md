@@ -67,6 +67,20 @@ the `RapidTemplate<RapidLayoutData>` rAPId expects. A route's `layoutData` (on t
 `createLayoutTemplate()` does that for you. Set it app-wide, per module or per route (`layout: false` opts out — the
 example app does that for pages that are complete frames themselves).
 
+**Composed pages** (rAPId ≥ 0.9 `compose`): a page declares its tiles as parts, each a route with its own template, and
+places `d.parts.<name>?.html` wherever the tile goes. The library styles what rAPId emits, with no extra markup:
+
+- a **deferred** part's placeholder (an empty `[data-part][data-compose][aria-busy="true"]`) is a skeleton block of
+  `--part-min-height` until the page's one `?parts=` fetch replaces it — set the token per part so the swap does not
+  jump: `[data-part="activity"] { --part-min-height: 12rem }`;
+- a **timed-out** part retrying once dims while it waits;
+- a **denied or failed** part is your error template inside the part's wrapper: `[data-part] > .error-page` is drawn as
+  a compact notice (no page padding, no page-sized heading, no "go back"). When rAPId names the part in the error data
+  (`part`), `ErrorTemplate` renders a compact inline `Empty` instead of a page.
+
+`examples/app/parts.ts` is a working module (one immediate, one deferred and one failing part), and `test-app.ts` drives
+it.
+
 **Error pages**: `errorTemplates` (`default`, `4xx`, `5xx`) render rAPId's error payload (`status`, `code`, `message`,
 `requestId`, `details`, `debug`) on the library's tokens with no inline styles — a drop-in for the built-in
 `DefaultErrorPage`, which cannot run under a strict CSP.

@@ -27,6 +27,15 @@ export type AlertProps = {
   role?: "alert" | "status" | "note" | "none";
   /** Buttons or links under the text — what to do about it. */
   actions?: Html;
+  /**
+   * Beside the body, at the alert's end: a badge ("3 days left"), a link
+   * ("Write to support"), a control. Sits before the dismiss button.
+   */
+  aside?: Html;
+  /** Attributes on the `.alert__body` element (a class merges) — a layout hook for rich bodies. */
+  bodyAttrs?: Attrs;
+  /** The element `body` renders in: `"p"` for prose. @default "div" */
+  textTag?: "div" | "p";
   dismissible?: boolean;
   attrs?: Attrs;
 };
@@ -71,11 +80,16 @@ export function Alert(props: AlertProps): Html {
   );
   const list = items.length + fields.length > 0 ? html`<ul class="alert__list">${fields}${items}</ul>` : html``;
 
-  return html`<div${classAttrs(className, attrs)}>${
-    icon && html`<span class="alert__icon">${icon}</span>`
-  }<div class="alert__body">${props.title && html`<div class="alert__title">${props.title}</div>`}${
-    props.body && html`<div class="alert__text">${props.body}</div>`
+  return html`<div${classAttrs(className, attrs)}>${icon && html`<span class="alert__icon">${icon}</span>`}<div${
+    classAttrs("alert__body", props.bodyAttrs)
+  }>${props.title && html`<div class="alert__title">${props.title}</div>`}${
+    props.body &&
+    (props.textTag === "p"
+      ? html`<p class="alert__text">${props.body}</p>`
+      : html`<div class="alert__text">${props.body}</div>`)
   }${list}${props.actions && html`<div class="alert__actions">${props.actions}</div>`}</div>${
+    props.aside && html`<div class="alert__aside">${props.aside}</div>`
+  }${
     props.dismissible &&
     html`<button type="button" class="alert__close" data-dismiss aria-label="Dismiss">${
       Icon("x", { size: 16 })
