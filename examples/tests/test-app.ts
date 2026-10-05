@@ -706,6 +706,31 @@ for (
   await page.close();
 }
 
+/* --------------------------------------------- layoutData → the frame */
+{
+  // rAPId ≥ 0.9 hands a route's layoutData to the module layout as `page`;
+  // asRapidLayout passes it to the frame and PageCrumbs draws page.crumbs.
+  const crumbsOf = (text: string) =>
+    [...text.matchAll(/<div class="layout__crumbs">([\s\S]*?)<\/div>/g)].map((m) =>
+      m[1].replace(/<[^>]+>/g, "|").split("|").map((t) => t.trim()).filter((t) => t && t !== "…" && !/^\s*$/.test(t))
+    );
+  const forms = crumbsOf(await (await fetch(`${base}/forms`)).text());
+  const data = crumbsOf(await (await fetch(`${base}/components/data`)).text());
+  const none = crumbsOf(await (await fetch(`${base}/components`)).text());
+  const swap = await (await fetch(`${base}/components/data`, { headers: { "rapid-swap": "1" } })).text();
+  ok(forms.length === 1 && forms[0].join(">") === "Home>Forms", `layoutData record: ${JSON.stringify(forms)}`);
+  ok(
+    data.length === 1 && data[0].slice(0, 2).join(">") === "Home>Components" && data[0].at(-1) === "Data",
+    `layoutData function: ${JSON.stringify(data)}`,
+  );
+  ok(none.length === 0, `a route without layoutData draws no crumbs (${JSON.stringify(none)})`);
+  ok(!swap.includes("layout__crumbs"), "a swap never renders the layout, so no crumbs");
+  const page = await open("/components/data");
+  const current = await page.$eval(".layout__crumbs [aria-current=page]", (el) => el.textContent?.trim());
+  ok(current === "Data", `layoutData: current crumb in the browser (${current})`);
+  await page.close();
+}
+
 /* ---------------------------------------------------------- inline CSP */
 {
   // Every page: no inline style/script anywhere (the app must run under a strict CSP).

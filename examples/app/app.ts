@@ -16,7 +16,7 @@
 import { Application } from "@tundralibs/rapid";
 import { type Html, html, type RapidFormError, template } from "@tundralibs/rapid/ui";
 import { type CoreAssets, createCoreTemplate } from "../../templates/core.ts";
-import { asRapidLayout } from "../../templates/layout.ts";
+import { asRapidLayout, PageCrumbs } from "../../templates/layout.ts";
 import { errorTemplates } from "../../templates/errors.ts";
 import { uiAssetsDir } from "../../assets.ts";
 import { VERSION } from "../../version.ts";
@@ -102,7 +102,15 @@ const footer =
   html`<p>@tundralibs/ui ${VERSION} &middot; example app &middot; <a href="https://jsr.io/@tundralibs/rapid">rAPId</a></p>`;
 
 const shell = (active: string) =>
-  asRapidLayout((body) => StackedLayout({ header: nav(active), width: "boxed", content: body, footer }));
+  asRapidLayout((body, data) =>
+    StackedLayout({
+      header: nav(active),
+      width: "boxed",
+      // A route's `layoutData: { crumbs }` (rAPId ≥ 0.9) reaches the frame as `data.page`.
+      content: html`${PageCrumbs(data.page)}${body}`,
+      footer,
+    })
+  );
 
 /* ----------------------------------------------------------------- pages */
 
@@ -660,7 +668,16 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
   const invoiceEdits: Required<InvoiceEdits> = { deleted: [], assigned: [] };
   for (const group of catalogueGroups) {
     app.get(`/components/${group.id}`, {
-      template: { render: GroupPage, title: group.title },
+      template: {
+        render: GroupPage,
+        title: group.title,
+        // The function form: worked out from the handler's content.
+        layoutData: (d: unknown) => ({
+          crumbs: [{ label: "Home", href: "/" }, { label: "Components", href: "/components" }, {
+            label: catalogueGroups.find((g) => g.id === (d as GroupData).group)?.title ?? group.title,
+          }],
+        }),
+      },
       layout: shell("components"),
     }, (ctx) => ({
       content: groupData(group.id, ctx.url, ctx.isSwap, invoiceEdits),
@@ -688,7 +705,15 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
     },
   );
 
-  app.get("/forms", { template: { render: FormsPage, title: "Forms" }, layout: shell("forms") }, (ctx) => {
+  app.get("/forms", {
+    template: {
+      render: FormsPage,
+      title: "Forms",
+      // A fixed trail: the record form of layoutData.
+      layoutData: { crumbs: [{ label: "Home", href: "/" }, { label: "Forms" }] },
+    },
+    layout: shell("forms"),
+  }, (ctx) => {
     const q = new URL(ctx.url).searchParams;
     const name = q.get("welcome");
     return { content: name ? { state: "added", values: { name, email: q.get("email") ?? "" } } : { state: "clean" } };

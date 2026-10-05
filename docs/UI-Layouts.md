@@ -80,7 +80,27 @@ const shell = asRapidLayout((body) => StackedLayout({ header: nav, width: "boxed
 app.get("/", { template: Home, layout: shell }, handler);
 ```
 
-The frame is fixed at initialise time (it is not per-request data) — it is a closure, and only `body` flows through.
+The frame is fixed at initialise time (it is not per-request data) — it is a closure. Per page it receives the body, the
+route's `title`, and (rAPId ≥ 0.9) the route's `layoutData` as `data.page`. `PageCrumbs(data.page)` draws
+`layoutData.crumbs` as a breadcrumb; other keys are yours to define:
+
+```ts
+import { asRapidLayout, PageCrumbs } from "@tundralibs/ui/templates/layout";
+
+const shell = asRapidLayout((body, data) =>
+  StackedLayout({ header: nav, width: "boxed", content: html`${PageCrumbs(data.page)}${body}`, footer })
+);
+app.get("/links/:id", {
+  template: {
+    render: LinkView,
+    title: (d) => d.link.display,
+    layoutData: (d) => ({ crumbs: [{ label: "Links", href: "/links" }, { label: d.link.display }] }),
+  },
+  layout: shell,
+}, handler);
+```
+
+A swap never renders the layout, so `layoutData` only matters on a full page.
 `createLayoutTemplate({ brand, navLinks, navActions, sidebarItems })` is the config shortcut for a navbar (+ sidebar)
 frame.
 
