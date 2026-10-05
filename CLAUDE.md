@@ -766,7 +766,10 @@ Inline components return through`inline()`(`shared/inline.ts`:`raw(render(markup
 only): Avatar, AvatarGroup, Button (+ CopyButton), ButtonGroup, Tooltip, Progress, Spinner, Switch, Icon.`test-catalogue.ts`renders each and fails on surrounding whitespace — add a new inline component to that list.
 Tooltip also merged its class the old way (second`class`attribute); fixed. On a phone (< 576px) an`Alert`aside that
 holds an action (`a`,`button`,`form`) wraps under the text, the close button staying on the first line (`:has()`,
-in rules of its own).
+in rules of its own). 0.17.1 fixed that rule: the body kept its`auto`basis, so a long message
+wrapped onto its own line under the icon; there the body is`flex:
+1 1 0`and the aside is indented by`--alert-icon-size` + gap so the action lines up with the text (the console found it
+at 390; the catalogue now checks a long message).
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.

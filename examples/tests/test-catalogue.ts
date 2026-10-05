@@ -444,14 +444,23 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       const pos = (alert: Element) => {
         const body = alert.querySelector(".alert__body")!.getBoundingClientRect();
         const aside = alert.querySelector(".alert__aside")!.getBoundingClientRect();
-        return { under: aside.top >= body.bottom - 1, beside: aside.left >= body.right - 1 };
+        const icon = alert.querySelector(".alert__icon")?.getBoundingClientRect();
+        return {
+          under: aside.top >= body.bottom - 1,
+          beside: aside.left >= body.right - 1,
+          // A long body stays beside the icon (it used to wrap under it) and the
+          // wrapped action lines up with the text.
+          bodyBesideIcon: !icon || (body.left >= icon.right - 1 && body.top < icon.bottom),
+          alignedWithText: Math.abs(aside.left - body.left) <= 2,
+        };
       };
       return { link: pos(billing), badge: pos(deadline), overflow: document.documentElement.scrollWidth - innerWidth };
     });
     await page.setViewport({ width: 1280, height: 900 });
     await pause(200);
     check(
-      phone.link.under && phone.badge.beside && phone.overflow <= 0,
+      phone.link.under && phone.link.bodyBesideIcon && phone.link.alignedWithText && phone.badge.beside &&
+        phone.badge.bodyBesideIcon && phone.overflow <= 0,
       `feedback: alert aside on a phone (${JSON.stringify(phone)})`,
     );
 
