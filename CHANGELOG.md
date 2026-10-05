@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/TundraSoft/ui/compare/v0.15.0...v0.16.0) (2026-10-05)
+
+
+### Features
+
+* styles for rAPId composed parts; Alert aside, bodyAttrs, textTag ([#47](https://github.com/TundraSoft/ui/issues/47)) ([22a0932](https://github.com/TundraSoft/ui/commit/22a093265aaea7cbca53e7b1b5272e58635282ad))
+
 ## [0.15.0](https://github.com/TundraSoft/ui/compare/v0.14.0...v0.15.0) (2026-10-05)
 
 
