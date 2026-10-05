@@ -262,7 +262,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             Alert({
               variant: "info",
               role: "note",
-              body: "Payments are not set up yet. Until they are, plan changes go through support.",
+              body:
+                "Payments are not set up yet. Until they are, moving to a paid plan, changing it or cancelling goes through support; extras are paid in credits and work as usual.",
               aside: html`<a href="#">Write to support</a>`,
               bodyAttrs: { class: "cat-alert-body", "data-kind": "billing" },
             })

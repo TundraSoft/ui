@@ -140,4 +140,19 @@ p.alert__text {
     order: 1;
     flex-basis: 100%;
   }
+
+  /* The body keeps the first line beside the icon: an `auto` basis is its
+     text's own width, which for a long message no longer fits and wraps
+     the body itself onto a line under the icon. */
+  .alert:has(> .alert__aside > :is(a, button, form)) > .alert__body {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* The wrapped action lines up under the text, not under the icon.
+     `--alert-icon-size` is the default status icon's width; a theme whose
+     icons are larger (or drawn as a ::before) retunes it. */
+  .alert:has(> .alert__icon):has(> .alert__aside > :is(a, button, form)) > .alert__aside {
+    margin-inline-start: calc(var(--alert-icon-size) + var(--space-3));
+  }
 }

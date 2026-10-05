@@ -168,6 +168,8 @@
   --layout-gutter: clamp(var(--space-4), 3vw, var(--space-8));
   /* A deferred compose part's placeholder (skeleton.css) until it loads. */
   --part-min-height: 6rem;
+  /* The default Alert status icon's width: a wrapped aside on a phone lines up after it. */
+  --alert-icon-size: 17px;
 
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
