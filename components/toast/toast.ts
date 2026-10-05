@@ -75,7 +75,7 @@ export function Toast(props: ToastProps): Html {
   }<div class="toast__body">${props.body}${props.meta && html`<div class="toast__meta">${props.meta}</div>`}</div>${
     props.action &&
     html`
-      <button type="button" class="toast__action" ${renderAttrs(props.action.attrs ?? {})}>${props.action
+      <button type="button" ${classAttrs("toast__action", props.action.attrs ?? {})}>${props.action
         .label}</button>
     `
   }${

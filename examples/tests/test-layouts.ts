@@ -126,6 +126,34 @@ for (const name of layouts) {
       if (closed) fail(`${tag}: Escape did not close the drawer`);
     }
 
+    // An in-flow sidebar (not the phone/tablet drawer) shares the content's
+    // row: the content starts at the sidebar's edge, beside it, never on a
+    // line below it (992–1199 wrapped the content under it until 0.14).
+    {
+      const beside = await page.evaluate(() => {
+        const side = document.querySelector(".layout__body > .sidebar");
+        const main = document.getElementById("main-content");
+        if (!side || !main) return null;
+        const pos = getComputedStyle(side).position;
+        const s = side.getBoundingClientRect(), m = main.getBoundingClientRect();
+        if (pos === "fixed" || s.width === 0 || getComputedStyle(side).visibility === "hidden") return null;
+        const end = getComputedStyle(side.parentElement!).flexDirection === "row-reverse";
+        return {
+          ok: (end ? m.right <= s.left + 1 : m.left >= s.right - 1) && m.top < s.top + 40 &&
+            (() => {
+              // An aside, wherever it goes, never sits under the sidebar either.
+              const aside = document.querySelector(".layout__body > .layout__aside")?.getBoundingClientRect();
+              return !aside || (end ? aside.right <= s.left + 1 : aside.left >= s.right - 1);
+            })(),
+          side: [Math.round(s.left), Math.round(s.right), Math.round(s.top)],
+          main: [Math.round(m.left), Math.round(m.right), Math.round(m.top)],
+        };
+      });
+      if (beside && !beside.ok) {
+        fail(`${tag}: #main-content is not beside the sidebar (sidebar ${beside.side}, content ${beside.main})`);
+      }
+    }
+
     // Rail: bottom tab bar on phones must not cover the last content.
     if (name === "rail" && band.width < 768) {
       const ok = await page.evaluate(() => {

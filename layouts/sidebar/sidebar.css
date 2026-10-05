@@ -23,15 +23,51 @@
 }
 
 @media screen and (max-width: 1199px) {
-  /* The aside joins the content column before it squeezes it. */
+  /* The aside joins the content column, under the content and still
+     beside the sidebar. Flex wrapping cannot do that (a second flex line
+     starts at the row's edge, under the sidebar — and an `auto` basis
+     wrapped the content itself there), so this range is a two-column
+     grid: the sidebar spans both rows of its own column, which is as wide
+     as the sidebar is (full or collapsed rail; empty when it is the
+     fixed drawer). */
   .layout--sidebar .layout__body {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
   }
 
-  .layout__aside {
-    flex: 1 1 100%;
+  .layout--sidebar .layout__body > .sidebar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .layout--sidebar .layout__content,
+  .layout--sidebar .layout__aside {
+    grid-column: 2;
+  }
+
+  .layout--sidebar .layout__content {
+    grid-row: 1;
+  }
+
+  .layout--sidebar .layout__aside {
+    grid-row: 2;
     padding-inline-start: var(--layout-gutter);
     padding-top: 0;
+  }
+
+  .layout--sidebar-end .layout__body {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .layout--sidebar-end .layout__body > .sidebar {
+    grid-column: 2;
+  }
+
+  .layout--sidebar-end .layout__content,
+  .layout--sidebar-end .layout__aside {
+    grid-column: 1;
   }
 }
 

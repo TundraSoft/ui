@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { FormErrorAlert } from "../alert/alert.ts";
 
 export type FormProps = {
@@ -64,7 +64,7 @@ export function Form(props: FormProps): Html {
   });
 
   return html`
-    <form class="form" ${renderAttrs(attrs)}>${CsrfField({ token: props.csrfToken, name: props.csrfField })}${props
+    <form ${classAttrs("form", attrs)}>${CsrfField({ token: props.csrfToken, name: props.csrfField })}${props
       .error && FormErrorAlert(props.error)}${props.content}</form>
   `;
 }

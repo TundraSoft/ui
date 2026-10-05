@@ -109,4 +109,4 @@ SidebarLayout({
 
 Classes defined by `layouts/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.layout--sidebar`, `.layout--sidebar-end`, `.layout--static-header`, `.layout__aside`, `.layout__body`, `.sidebar`
+`.layout--sidebar`, `.layout--sidebar-end`, `.layout--static-header`, `.layout__aside`, `.layout__body`, `.layout__content`, `.sidebar`
