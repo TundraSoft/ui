@@ -20,7 +20,7 @@ export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.1
 export const UI_CSS: UiAsset = {
   file: "ui.css",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.13.0/dist/ui.css", // x-release-please-version
-  integrity: "sha384-yvS91DPZSac28btYukX74oqFudzN2cBYoDeZXe1KFzJf1AaaeCkNF0TwY2fHAGxn",
+  integrity: "sha384-Pa7uif8iZnrN9hLNYsBhweUuATMdZnIi0djhFQSkw6Ik+h/TScQ+7zjDeCL2Vyni",
 };
 
 export const UI_JS: UiAsset = {

@@ -86,3 +86,8 @@
 .layout__drawer-toggle {
   margin-inline-start: var(--space-3);
 }
+
+/* PageCrumbs (templates/layout.ts): a route's layoutData.crumbs, above the page. */
+.layout__crumbs {
+  margin-bottom: var(--space-4);
+}

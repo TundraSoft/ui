@@ -61,9 +61,11 @@ optional history/live modules, `ui.js`, and your own scripts — all `defer`red.
 | `lang`                   | `<html lang>`, default `en`.                                                                                                                  |
 
 **Layout** is the page frame. `createLayoutTemplate()` builds a navbar (+ sidebar) frame from config;
-`asRapidLayout(body => SomeLayout({ …, content: body }))` turns any of the eight [layouts](./UI-Layouts.md) into the
-`RapidTemplate<{ body, title? }>` rAPId expects. Set it app-wide, per module or per route (`layout: false` opts out —
-the example app does that for pages that are complete frames themselves).
+`asRapidLayout((body, data) => SomeLayout({ …, content: body }))` turns any of the eight [layouts](./UI-Layouts.md) into
+the `RapidTemplate<RapidLayoutData>` rAPId expects. A route's `layoutData` (on the object form of `template`, beside
+`title`; rAPId ≥ 0.9) reaches the frame as `data.page`, and `PageCrumbs(data.page)` draws its `crumbs`;
+`createLayoutTemplate()` does that for you. Set it app-wide, per module or per route (`layout: false` opts out — the
+example app does that for pages that are complete frames themselves).
 
 **Error pages**: `errorTemplates` (`default`, `4xx`, `5xx`) render rAPId's error payload (`status`, `code`, `message`,
 `requestId`, `details`, `debug`) on the library's tokens with no inline styles — a drop-in for the built-in

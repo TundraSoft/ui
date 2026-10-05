@@ -68,7 +68,7 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 
 - [core](reference/templates-core.md) — `createCoreTemplate`
 - [errors](reference/templates-errors.md)
-- [layout](reference/templates-layout.md) — `asRapidLayout`, `createLayoutTemplate`
+- [layout](reference/templates-layout.md) — `asRapidLayout`, `PageCrumbs`, `createLayoutTemplate`
 
 ## package
 

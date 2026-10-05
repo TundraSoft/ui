@@ -725,6 +725,15 @@ really missing props; each became library surface, catalogued and asserted in `t
   actually cut, at any width; the library's `collapse` is a 480px container query — different behaviour, the console
   keeps its own).
 
+**rAPId 0.9 `layoutData` (2026-10-05).** rAPId used to hand a layout only `{ body, title }`, which is why the console
+regex-read its own rendered page for the breadcrumb and phone bar. The theming side drafted the request, TundraLibs
+shipped it (#778, rapid 0.9.0): a route's object `template` takes `layoutData` (a record or a function of the content),
+and the module layout receives it as `page` (`RapidLayoutData`; never the core, never on a swap). `asRapidLayout<P>` now
+types the frame's `data` as `LayoutData<P>` (`page?: P`, default `LayoutPage`) and returns
+`RapidTemplate<RapidLayoutData>`; `PageCrumbs(page)` draws `page.crumbs` (a collapsing `Breadcrumb` in
+`.layout__crumbs`); `createLayoutTemplate` and the example app's shell use it, and `test-app.ts` checks the record and
+function forms, a route without it, and that a swap carries none.
+
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 
