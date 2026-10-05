@@ -1,5 +1,5 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
-import { type Attrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 import { attr, Counter, messageAttrs, type ValidationMessages } from "../input/input.ts";
 
@@ -54,7 +54,7 @@ export function Textarea(props: TextareaProps): Html {
     "aria-invalid": props.invalid ? "true" : undefined,
   });
 
-  const control = html`<textarea class="${className}" ${renderAttrs(attrs)}>${props.value ?? ""}</textarea>`;
+  const control = html`<textarea ${classAttrs(className, attrs)}>${props.value ?? ""}</textarea>`;
   if (props.counter && props.maxLength) {
     return html`${control}${Counter(props.id ?? props.name ?? "", props.maxLength, props.value?.length ?? 0)}`;
   }

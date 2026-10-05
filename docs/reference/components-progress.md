@@ -31,7 +31,7 @@ Progress({ value: 7.2, max: 10, attrs: { "aria-label": "Storage used, 7.2 of 10 
 ```
 
 ```html
-<progress class="progress" value="7.2" max="10" aria-label="Storage used, 7.2 of 10 GB"></progress>
+<progress value="7.2" max="10" class="progress" aria-label="Storage used, 7.2 of 10 GB"></progress>
 ```
 
 ### Something is loading

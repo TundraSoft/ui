@@ -43,7 +43,7 @@ Builds an Alert straight from rAPId's `RapidFormError` shape (§6).
 | `items` | `string[]` |  | Plain list-style messages. |
 | `fields` | `Readonly` |  | Per-field messages, e.g. `RapidFormError.fields` — rendered name + message. |
 | `icon` | `string | Html | "false"` |  | Leading icon; status variants get one by default. Pass `false` to suppress. |
-| `role` | `"alert" | "status" | "none"` |  | How a screen reader announces it. `"alert"` interrupts (an error, a warning); `"status"` waits its turn (a confirmation, a note); `"none"` renders no live role (a static notice that was on the page from the start). Defaults by variant: `alert` for warning and danger, `status` for neutral, success and info. |
+| `role` | `"alert" | "status" | "note" | "none"` |  | How a screen reader announces it. `"alert"` interrupts (an error, a warning); `"status"` waits its turn (a confirmation, a note); `"none"` renders no live role (a static notice that was on the page from the start); `"note"` marks a static aside (a callout, a tip) that is not announced. Defaults by variant: `alert` for warning and danger, `status` for neutral, success and info. |
 | `actions` | `Html` |  | Buttons or links under the text — what to do about it. |
 | `dismissible` | `boolean` |  |  |
 | `attrs` | `Attrs` |  |  |

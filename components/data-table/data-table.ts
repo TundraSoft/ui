@@ -64,6 +64,15 @@ export type DataTableProps<T> = {
    * draws no selection column and no bulk bar at all.
    */
   rowSelectable?: (row: T) => boolean;
+  /** Extra attributes on a row's `<tr>` (a class merges; `data-row-key` stays the table's). */
+  rowAttrs?: (row: T) => Attrs;
+  /**
+   * Group heading rows: when this returns a label different from the
+   * previous row's, a full-width heading row (`.data-table__group`, a
+   * `<th scope="colgroup">`) is drawn before the row — days in a click log,
+   * sections in a settings list. Rows are drawn in the order given.
+   */
+  rowGroup?: (row: T) => string | Html | undefined;
   selected?: string[];
   /** Form field name the row checkboxes submit under (default "selected"). */
   selectName?: string;
@@ -281,21 +290,37 @@ export function DataTable<T extends Record<string, unknown>>(
     props.rowActions ? html`<th class="data-table__actions"><span class="sr-only">Actions</span></th>` : ""
   }</tr>`;
 
-  const body = props.rows.map((row) => {
+  const span = props.columns.length + (selectable ? 1 : 0) + (props.rowActions ? 1 : 0);
+  let lastGroup: unknown;
+  const body = props.rows.map((row, index) => {
+    const group = props.rowGroup?.(row);
+    const groupKey = group === undefined ? undefined : typeof group === "string" ? group : String(group);
+    const heading = group !== undefined && (index === 0 || groupKey !== lastGroup)
+      ? html`
+        <tr class="data-table__group">
+          <th scope="colgroup" colspan="${String(span)}">${group}</th>
+        </tr>
+      `
+      : "";
+    lastGroup = groupKey;
     const key = props.rowKey(row);
     const isSelected = selected.has(key) && canSelect(row);
-    return html`<tr class="${cx("data-table__row", isSelected && "data-table__row--selected")}" data-row-key="${key}">${
-      !selectable ? "" : canSelect(row)
+    const own = props.rowAttrs?.(row) ?? {};
+    const { class: rowClass, ...rowRest } = own;
+    return html`
+      ${heading}<tr class="${cx("data-table__row", isSelected && "data-table__row--selected", rowClass)}" ${renderAttrs(
+        { ...rowRest, "data-row-key": undefined },
+      )} data-row-key="${key}">${!selectable ? "" : canSelect(row)
         ? html`
           <td
             class="data-table__select"><input type="checkbox" name="${selectName}" aria-label="Select row ${key}"${renderAttrs(
               { checked: isSelected ? "" : undefined },
             )} data-select-row value="${key}"></td>
         `
-        : html`<td class="data-table__select"></td>`
-    }${props.columns.map((col) => cellOf(col, row))}${
-      props.rowActions ? html`<td class="data-table__actions">${props.rowActions(row)}</td>` : ""
-    }</tr>`;
+        : html`<td class="data-table__select"></td>`}${props.columns.map((col) => cellOf(col, row))}${props.rowActions
+        ? html`<td class="data-table__actions">${props.rowActions(row)}</td>`
+        : ""}</tr>
+    `;
   });
 
   const labels = props.countLabels ?? { one: "1 row selected", other: "{n} rows selected" };

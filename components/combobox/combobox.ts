@@ -33,6 +33,12 @@ export type ComboboxProps = {
    * filtered client-side instead.
    */
   action?: string;
+  /**
+   * With `action`: fetch the list once when the field first gets focus,
+   * before anything is typed (`?q=` empty) — "the organisation's tags"
+   * rather than an empty box. Without it the first fetch waits for typing.
+   */
+  loadOnFocus?: boolean;
   emptyText?: string;
   hint?: string;
   /**
@@ -144,6 +150,7 @@ export function Combobox(props: ComboboxProps): Html {
         ? "true"
         : "false"}" aria-controls="${listId}" aria-autocomplete="list"${renderAttrs({
           "data-combobox-action": props.action,
+          "data-combobox-load-on-focus": props.action && props.loadOnFocus ? "" : undefined,
           "data-combobox-target": props.action ? `#${listId}` : undefined,
         })}><span class="combobox__caret">${Icon("chevronDown", {
           size: 15,

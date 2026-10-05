@@ -247,7 +247,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             Alert({ variant: "danger", body: "Could not save." })
           }${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${
             Alert({ variant: "neutral", role: "none", body: "A static note." })
-          }</div>`,
+          }${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>`,
         ),
         c(
           "actions",
@@ -265,6 +265,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "avatar",
       cases: [
+        c(
+          "initials as markup, attrs.class merges (#cat-avatar-icon)",
+          row(
+            Avatar({
+              initials: Icon("mail", { size: 14 }),
+              size: "sm",
+              attrs: { id: "cat-avatar-icon", class: "cat-av" },
+            }),
+            AvatarGroup({ avatars: [Avatar({ initials: "AB" })], attrs: { class: "cat-avg" } }),
+          ),
+        ),
         ...avatarSizes.map((size) =>
           c(`size ${size}`, row(Avatar({ initials: "AB", size }), Avatar({ src: img(7, 96, 96), alt: "Photo", size })))
         ),
@@ -497,6 +508,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "combobox",
       cases: [
+        c(
+          "loadOnFocus — with an action, the first focus fetches the list once (#cat-cb-focus)",
+          Combobox({
+            id: "cat-cb-focus",
+            name: "tag",
+            placeholder: "Tags",
+            action: routes.reviewers,
+            loadOnFocus: true,
+            options: [{ value: "spring", label: "spring-sale" }, { value: "q4", label: "q4-launch" }],
+          }),
+        ),
         c(
           "hints: false — reads as a dropdown (#cat-cb-nohints)",
           Combobox({
@@ -762,6 +784,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   },
                 ],
               }),
+          }),
+        ),
+        c(
+          "rowAttrs + rowGroup — per-row attributes and group heading rows (#cat-dt-groups)",
+          DataTable<Row>({
+            id: "cat-dt-groups",
+            selectable: true,
+            columns: [{ key: "name", label: "Name" }, { key: "amount", label: "Amount", numeric: true }],
+            rows,
+            rowKey: (r) => r.id,
+            rowAttrs: (r) => ({ class: r.status === "Paused" ? "cat-row-muted" : undefined, "data-status": r.status }),
+            rowGroup: (r) => r.status,
           }),
         ),
         c(
@@ -1878,6 +1912,23 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           )
         ),
         c(
+          "inside a dialog closed at load — placed when it opens (#cat-seg-dialog)",
+          html`${Button({ label: "Open", variant: "outline", attrs: { "data-modal-open": "#cat-seg-dialog" } })}${
+            Modal({
+              id: "cat-seg-dialog",
+              title: "Range",
+              body: Segmented({
+                id: "cat-seg-in-dialog",
+                name: "seg-dialog",
+                value: "30d",
+                legend: "Range",
+                options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
+              }),
+              footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
+            })
+          }`,
+        ),
+        c(
           "counts + Html label (#cat-seg-count)",
           Segmented({
             id: "cat-seg-count",
@@ -2291,5 +2342,6 @@ export const catalogueCss =
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
 .cat-narrow { max-width: 320px; }
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
+.cat-row-muted { color: var(--color-text-muted); }
 .cat-swatch { background: var(--color-surface-alt); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-2); text-align: center; font-size: var(--font-size-xs); }
 `;

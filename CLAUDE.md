@@ -724,9 +724,16 @@ really missing props; each became library surface, catalogued and asserted in `t
   icon-only (`ariaLabel` names it). `TabLinks({ listAttrs })` (attributes on the `.tabs__list` strip — the console's
   sideways-scroll class) followed once the console had adopted the rest. `Alert({ role })` came the same way: the role
   now defaults by variant — `alert` (interrupts) for warning/danger, `status` (polite) for neutral/success/info — and
-  `"none"` drops it; a "Saved." notice used to interrupt a screen reader. Not taken: a measuring `Breadcrumb` (the
-  console folds only when the trail is actually cut, at any width; the library's `collapse` is a 480px container query —
-  different behaviour, the console keeps its own).
+  `"none"` drops it; a "Saved." notice used to interrupt a screen reader. Its cleanup batches then surfaced: **a second
+  `class` attribute** wherever a component wrote `class="…" ${renderAttrs(attrs)}` (Avatar, AvatarGroup, Breadcrumb,
+  ButtonGroup, Collapsible/Accordion, Choice, InputGroup, Form, Navbar, Progress/Spinner, Pagination links, Select's
+  native control, Textarea, Toast action) — the parser drops the caller's class; all now use `classAttrs`, and
+  `test-catalogue.ts` fails any page with a tag carrying two `class` attributes. Plus `Alert({ role: "note" })`,
+  `Avatar` `initials` as Html, `Combobox({ loadOnFocus })` (first focus fetches once with an empty query), segmented.js
+  re-measures through a `ResizeObserver` (a control in a dialog closed at load measured 0 wide), and `DataTable`
+  `rowAttrs` + `rowGroup` (full-width `.data-table__group` heading rows — a `<th>`, so it undoes the sticky header-cell
+  styling). Not taken: a measuring `Breadcrumb` (the console folds only when the trail is actually cut, at any width;
+  the library's `collapse` is a 480px container query — different behaviour, the console keeps its own).
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.

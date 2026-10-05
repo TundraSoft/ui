@@ -46,28 +46,28 @@ Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, t
 <nav aria-label="Pagination">
   <ul class="pagination">
     <li>
-      <a class="pagination__link" href="/invoices?page=2" aria-label="Previous page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8249;</a>
+      <a href="/invoices?page=2" class="pagination__link" aria-label="Previous page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8249;</a>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=1" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
+      <a href="/invoices?page=1" class="pagination__link" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=2" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
+      <a href="/invoices?page=2" class="pagination__link" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=3" aria-current="page" aria-label="Page 3" data-action="/invoices?page=3" data-target="#invoices" data-swap="outer" data-push="">3</a>
+      <a href="/invoices?page=3" class="pagination__link" aria-current="page" aria-label="Page 3" data-action="/invoices?page=3" data-target="#invoices" data-swap="outer" data-push="">3</a>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=4" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
+      <a href="/invoices?page=4" class="pagination__link" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
     </li>
     <li>
       <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=12" aria-label="Page 12" data-action="/invoices?page=12" data-target="#invoices" data-swap="outer" data-push="">12</a>
+      <a href="/invoices?page=12" class="pagination__link" aria-label="Page 12" data-action="/invoices?page=12" data-target="#invoices" data-swap="outer" data-push="">12</a>
     </li>
     <li>
-      <a class="pagination__link" href="/invoices?page=4" aria-label="Next page" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
+      <a href="/invoices?page=4" class="pagination__link" aria-label="Next page" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
     </li>
   </ul>
 </nav>

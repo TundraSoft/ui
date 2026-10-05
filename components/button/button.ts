@@ -80,7 +80,7 @@ export function Button(props: ButtonProps): Html {
 /** Buttons fused into one segmented control (e.g. "Export" + a caret). */
 export function ButtonGroup(props: { buttons: Html[]; attrs?: Attrs }): Html {
   return html`
-    <span class="btn-group" ${renderAttrs(props.attrs ?? {})}>${props.buttons}</span>
+    <span ${classAttrs("btn-group", props.attrs ?? {})}>${props.buttons}</span>
   `;
 }
 

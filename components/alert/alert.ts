@@ -20,10 +20,11 @@ export type AlertProps = {
    * How a screen reader announces it. `"alert"` interrupts (an error, a
    * warning); `"status"` waits its turn (a confirmation, a note); `"none"`
    * renders no live role (a static notice that was on the page from the
-   * start). Defaults by variant: `alert` for warning and danger, `status`
+   * start); `"note"` marks a static aside (a callout, a tip) that is not
+   * announced. Defaults by variant: `alert` for warning and danger, `status`
    * for neutral, success and info.
    */
-  role?: "alert" | "status" | "none";
+  role?: "alert" | "status" | "note" | "none";
   /** Buttons or links under the text — what to do about it. */
   actions?: Html;
   dismissible?: boolean;

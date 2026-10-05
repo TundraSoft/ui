@@ -34,7 +34,7 @@ AvatarGroup(props: { avatars: Html[]; attrs?: Attrs }): Html
 | --- | --- | --- | --- |
 | `src` | `string` |  |  |
 | `alt` | `string` |  |  |
-| `initials` | `string` |  |  |
+| `initials` | `string | Html` |  | Shown without `src`: initials, or markup (an icon for a pending invite, a removed person). |
 | `size` | `AvatarSize` |  |  |
 | `attrs` | `Attrs` |  |  |
 

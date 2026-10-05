@@ -73,6 +73,8 @@ button again ("Clear selection"), goes back to the ticked rows.
 | `rowKey` | `(row: T) => string` | yes |  |
 | `selectable` | `boolean` |  |  |
 | `rowSelectable` | `(row: T) => boolean` |  | With `selectable`: whether this row gets a checkbox (default every row). A row no bulk operation can act on keeps an empty cell, so the columns stay aligned; when no row on the page is selectable the table draws no selection column and no bulk bar at all. |
+| `rowAttrs` | `(row: T) => Attrs` |  | Extra attributes on a row's `<tr>` (a class merges; `data-row-key` stays the table's). |
+| `rowGroup` | `(row: T) => string | Html | undefined` |  | Group heading rows: when this returns a label different from the previous row's, a full-width heading row (`.data-table__group`, a `<th scope="colgroup">`) is drawn before the row — days in a click log, sections in a settings list. Rows are drawn in the order given. |
 | `selected` | `string[]` |  |  |
 | `selectName` | `string` |  | Form field name the row checkboxes submit under (default "selected"). |
 | `sort` | `{ key: string; dir: "asc" | "desc" }` |  |  |
@@ -372,19 +374,19 @@ DataTable<Invoice>({
           <span class="pagination__link pagination__link--disabled" aria-disabled="true" aria-label="Previous page">&#8249;</span>
         </li>
         <li>
-          <a class="pagination__link" href="/invoices?page=1" aria-current="page" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
+          <a href="/invoices?page=1" class="pagination__link" aria-current="page" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
         </li>
         <li>
-          <a class="pagination__link" href="/invoices?page=2" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
+          <a href="/invoices?page=2" class="pagination__link" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
         </li>
         <li>
           <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
         </li>
         <li>
-          <a class="pagination__link" href="/invoices?page=4" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
+          <a href="/invoices?page=4" class="pagination__link" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
         </li>
         <li>
-          <a class="pagination__link" href="/invoices?page=2" aria-label="Next page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
+          <a href="/invoices?page=2" class="pagination__link" aria-label="Next page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
         </li>
       </ul>
     </nav>
@@ -434,7 +436,7 @@ DataTable<Invoice>({
 
 Classes defined by `components/data-table/data-table.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__mono`, `.data-table__num`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
+`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
 
 ## Behaviour
 

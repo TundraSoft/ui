@@ -2,7 +2,10 @@
  * still plain radios + labels (submits, works without JS); this only
  * measures the checked label and writes --segmented-x / --segmented-w
  * onto the root, which segmented.css turns into the moving surface.
- * Re-measured on change, on resize, after a rapid swap. */
+ * Re-measured on change, on resize, after a rapid swap, and whenever the
+ * control's own box changes size (a ResizeObserver) — so one inside a
+ * <dialog>, <details> or tab panel that was hidden at load (measured 0
+ * wide) is placed when it is shown. */
 (() => {
   function place(root) {
     const checked = root.querySelector(".segmented__input:checked");
@@ -20,7 +23,18 @@
     root.setAttribute("data-segmented-ready", "");
   }
 
-  const initAll = () => document.querySelectorAll("[data-segmented]").forEach(place);
+  const watched = new WeakSet();
+  const observer = typeof ResizeObserver === "function"
+    ? new ResizeObserver((entries) => entries.forEach((e) => place(e.target)))
+    : null;
+  const initAll = () =>
+    document.querySelectorAll("[data-segmented]").forEach((root) => {
+      place(root);
+      if (observer && !watched.has(root)) {
+        watched.add(root);
+        observer.observe(root);
+      }
+    });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initAll);
   else initAll();
   addEventListener("load", initAll);
