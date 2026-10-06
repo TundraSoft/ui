@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.0](https://github.com/TundraSoft/ui/compare/v0.18.1...v0.19.0) (2026-10-06)
+
+
+### Features
+
+* **deps:** require rAPId ^0.12.1 ([#58](https://github.com/TundraSoft/ui/issues/58)) ([be70306](https://github.com/TundraSoft/ui/commit/be70306883cef712f0f6960697d09a6c2b02c127))
+
+
+### Documentation
+
+* a composed page's template reads d.parts?.&lt;name&gt; ([#59](https://github.com/TundraSoft/ui/issues/59)) ([a515c03](https://github.com/TundraSoft/ui/commit/a515c03b8565ef2eefa0f0dcaf19bad414fa518d))
+
 ## [0.18.1](https://github.com/TundraSoft/ui/compare/v0.18.0...v0.18.1) (2026-10-06)
 
 
