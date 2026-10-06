@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.1](https://github.com/TundraSoft/ui/compare/v0.18.0...v0.18.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **alert:** a ::before-icon theme can line up a wrapped aside on a phone ([#55](https://github.com/TundraSoft/ui/issues/55)) ([b699a07](https://github.com/TundraSoft/ui/commit/b699a0728c144d4def3dcfc0e7121a8437567404))
+* **deps:** source-map-js 1.2.2 (GHSA-68fv-2mgg-jv7q) ([#57](https://github.com/TundraSoft/ui/issues/57)) ([e89bed5](https://github.com/TundraSoft/ui/commit/e89bed5215e7fa7f6b56b76ca4f1008aa32f9389))
+
 ## [0.18.0](https://github.com/TundraSoft/ui/compare/v0.17.0...v0.18.0) (2026-10-05)
 
 
