@@ -68,7 +68,8 @@ the `RapidTemplate<RapidLayoutData>` rAPId expects. A route's `layoutData` (on t
 example app does that for pages that are complete frames themselves).
 
 **Composed pages** (rAPId ≥ 0.9 `compose`): a page declares its tiles as parts, each a route with its own template, and
-places `d.parts.<name>?.html` wherever the tile goes. The library styles what rAPId emits, with no extra markup:
+places `d.parts?.<name>?.html` wherever the tile goes (`parts` is absent when the handler narrows the set to none with
+`compose: []`, rAPId ≥ 0.12.1). The library styles what rAPId emits, with no extra markup:
 
 - a **deferred** part's placeholder (an empty `[data-part][data-compose][aria-busy="true"]`) is a skeleton block of
   `--part-min-height` until the page's one `?parts=` fetch replaces it — set the token per part so the swap does not
