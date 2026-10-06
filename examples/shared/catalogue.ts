@@ -267,7 +267,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               aside: html`<a href="#">Write to support</a>`,
               bodyAttrs: { class: "cat-alert-body", "data-kind": "billing" },
             })
-          }${Alert({ variant: "neutral", role: "note", textTag: "p", body: "Every request carries a key." })}</div>`,
+          }${Alert({ variant: "neutral", role: "note", textTag: "p", body: "Every request carries a key." })}${
+            Alert({
+              variant: "info",
+              icon: false,
+              role: "note",
+              body:
+                "A theme that draws the icon as a ::before sets --alert-aside-indent on its variants; the action then lines up with the text on a phone.",
+              aside: html`<a href="#">Open settings</a>`,
+              attrs: { class: "cat-alert-before-icon" },
+            })
+          }</div>`,
         ),
         c(
           "actions",
@@ -2363,5 +2373,7 @@ export const catalogueCss =
 .cat-narrow { max-width: 320px; }
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-row-muted { color: var(--color-text-muted); }
+.cat-alert-before-icon { --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3)); }
+.cat-alert-before-icon::before { content: ""; flex: 0 0 var(--alert-icon-size); height: var(--alert-icon-size); border-radius: var(--radius-full); background: currentColor; opacity: 0.6; }
 .cat-swatch { background: var(--color-surface-alt); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-2); text-align: center; font-size: var(--font-size-xs); }
 `;

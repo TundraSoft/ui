@@ -454,13 +454,27 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
           alignedWithText: Math.abs(aside.left - body.left) <= 2,
         };
       };
-      return { link: pos(billing), badge: pos(deadline), overflow: document.documentElement.scrollWidth - innerWidth };
+      // icon: false + a theme ::before icon: the token alone lines the action up with the text.
+      const before = box.querySelector(".cat-alert-before-icon")!;
+      const beforeBody = before.querySelector(".alert__body")!.getBoundingClientRect();
+      const beforeAside = before.querySelector(".alert__aside")!.getBoundingClientRect();
+      const beforeIcon = {
+        under: beforeAside.top >= beforeBody.bottom - 1,
+        alignedWithText: Math.abs(beforeAside.left - beforeBody.left) <= 2,
+      };
+      return {
+        link: pos(billing),
+        badge: pos(deadline),
+        beforeIcon,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
     });
     await page.setViewport({ width: 1280, height: 900 });
     await pause(200);
     check(
       phone.link.under && phone.link.bodyBesideIcon && phone.link.alignedWithText && phone.badge.beside &&
-        phone.badge.bodyBesideIcon && phone.overflow <= 0,
+        phone.badge.bodyBesideIcon && phone.beforeIcon.under && phone.beforeIcon.alignedWithText &&
+        phone.overflow <= 0,
       `feedback: alert aside on a phone (${JSON.stringify(phone)})`,
     );
 
