@@ -21,7 +21,11 @@ import { Timeline } from "../../components/timeline/timeline.ts";
 
 type Stats = { links: number; clicks: number };
 type Activity = { items: { title: string; meta: string }[] };
-type ComposedPage = { title: string; parts: Record<string, RapidComposeSlot> };
+/**
+ * `parts` is absent when the handler ran none (it may reply `compose: []`,
+ * rAPId ≥ 0.12.1), so the template reads `d.parts?.<name>`.
+ */
+type ComposedPage = { title: string; parts?: Record<string, RapidComposeSlot> };
 
 const StatsPart = template<Stats>((d) =>
   html`<div class="stack stack--sm">${Stat({ label: "Links", value: String(d.links) })}${
@@ -40,9 +44,9 @@ const ComposedPageView = template<ComposedPage>((d) =>
   html`${PageHeader({ title: d.title, subtitle: "One request; each tile is its own route and template." })}${
     Grid({
       items: [
-        GridCol({ span: 4, content: Card({ title: "Stats", body: d.parts.stats?.html ?? "" }) }),
-        GridCol({ span: 4, content: Card({ title: "Activity (deferred)", body: d.parts.activity?.html ?? "" }) }),
-        GridCol({ span: 4, content: Card({ title: "Broken", body: d.parts.broken?.html ?? "" }) }),
+        GridCol({ span: 4, content: Card({ title: "Stats", body: d.parts?.stats?.html ?? "" }) }),
+        GridCol({ span: 4, content: Card({ title: "Activity (deferred)", body: d.parts?.activity?.html ?? "" }) }),
+        GridCol({ span: 4, content: Card({ title: "Broken", body: d.parts?.broken?.html ?? "" }) }),
       ],
     })
   }`
