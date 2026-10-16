@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/TundraSoft/ui/compare/v0.19.0...v0.20.0) (2026-10-16)
+
+
+### Features
+
+* searchable dropdowns, capped list height, required Select/Combobox validation ([#61](https://github.com/TundraSoft/ui/issues/61)) ([639c393](https://github.com/TundraSoft/ui/commit/639c393fadfdd6e4ba510f8800f2834936b094da))
+
 ## [0.19.0](https://github.com/TundraSoft/ui/compare/v0.18.1...v0.19.0) (2026-10-06)
 
 
