@@ -27,6 +27,19 @@ export type ComboboxProps = {
   open?: boolean;
   multi?: boolean;
   /**
+   * A pick is required: one option (single) or at least one token
+   * (`multi`). combobox.js keeps a custom validity on the input while
+   * nothing is picked — typed text that matches nothing does not count —
+   * so the browser (a plain form) or form.js (`Form({ validate })`)
+   * reports it like any rule. The server must check it too.
+   */
+  required?: boolean;
+  /**
+   * The message while nothing is picked.
+   * @default "Please select an item in the list." / "Please select at least one item."
+   */
+  requiredMessage?: string;
+  /**
    * URL that returns a fresh `ComboboxList(...)` fragment for `?q=<text>`.
    * combobox.js debounces `input` and calls `window.rapid.swap()` on it;
    * without it (or without rAPId's runtime) the rendered options are
@@ -152,6 +165,11 @@ export function Combobox(props: ComboboxProps): Html {
           "data-combobox-action": props.action,
           "data-combobox-load-on-focus": props.action && props.loadOnFocus ? "" : undefined,
           "data-combobox-target": props.action ? `#${listId}` : undefined,
+          "aria-required": props.required ? "true" : undefined,
+          "data-combobox-required": props.required
+            ? props.requiredMessage ??
+              (props.multi ? "Please select at least one item." : "Please select an item in the list.")
+            : undefined,
         })}><span class="combobox__caret">${Icon("chevronDown", {
           size: 15,
         })}</span></div><div class="combobox__list" id="${listId}" role="listbox"${props.open ? "" : html`

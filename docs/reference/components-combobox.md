@@ -49,6 +49,8 @@ Combobox(props: ComboboxProps): Html
 | `selected` | `string | string[]` |  |  |
 | `open` | `boolean` |  |  |
 | `multi` | `boolean` |  |  |
+| `required` | `boolean` |  | A pick is required: one option (single) or at least one token (`multi`). combobox.js keeps a custom validity on the input while nothing is picked — typed text that matches nothing does not count — so the browser (a plain form) or form.js (`Form({ validate })`) reports it like any rule. The server must check it too. |
+| `requiredMessage` | `string` |  | The message while nothing is picked. |
 | `action` | `string` |  | URL that returns a fresh `ComboboxList(...)` fragment for `?q=<text>`. combobox.js debounces `input` and calls `window.rapid.swap()` on it; without it (or without rAPId's runtime) the rendered options are filtered client-side instead. |
 | `loadOnFocus` | `boolean` |  | With `action`: fetch the list once when the field first gets focus, before anything is typed (`?q=` empty) — "the organisation's tags" rather than an empty box. Without it the first fetch waits for typing. |
 | `emptyText` | `string` |  |  |
@@ -152,12 +154,12 @@ ComboboxList({
 
 Classes defined by `components/combobox/combobox.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox`, `.combobox--multi`, `.combobox--no-hints`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
+`.combobox`, `.combobox--invalid`, `.combobox--multi`, `.combobox--no-hints`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__list--popup`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__options`, `.combobox__search`, `.combobox__search-input`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
 
 ## Behaviour
 
 `components/combobox/combobox.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-load-on-focus`, `data-combobox-loaded`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
+Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-empty`, `data-combobox-load-on-focus`, `data-combobox-loaded`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-required`, `data-combobox-search`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
 
-Events: `combobox:pick`.
+Events: `combobox:pick`, `rapid:swapped`.

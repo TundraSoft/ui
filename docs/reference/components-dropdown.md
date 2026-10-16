@@ -14,6 +14,10 @@ Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/
 Dropdown(props: DropdownProps): Html
 ```
 
+A trigger button and a floating panel. The panel caps at
+`--dropdown-max-height` and scrolls its content (the search box stays on
+top); every Dropdown is searchable unless `searchable: false`.
+
 ## Types
 
 ### `DropdownProps`
@@ -25,11 +29,84 @@ Dropdown(props: DropdownProps): Html
 | `content` | `Html` | yes |  |
 | `align` | `"start" | "end"` |  |  |
 | `triggerClass` | `string` |  | Extra classes on the trigger, e.g. `btn btn--outline btn--icon` to make it the caret half of a split button inside a `ButtonGroup`. |
+| `searchable` | `boolean` |  | A search box above the content that filters its items as you type — the `<li>`s of a `Menu` (a parent stays while any child matches) or any `[data-dropdown-item]`. dropdown.js hides the box when the panel holds nothing to filter (a notifications panel, a form). It belongs to no form and is unnamed, so it never submits. @default true |
+| `searchPlaceholder` | `string` |  | Placeholder of the search box. @default "Search…" |
+| `searchLabel` | `string` |  | Accessible name of the search box. @default "Search items" |
+| `emptyText` | `string` |  | Shown when nothing matches the search. @default "No matches." |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A long menu, searchable
+
+Every Dropdown has a search box (`searchable: false` drops it); the panel caps at `--dropdown-max-height` and scrolls.
+
+```ts
+Dropdown({
+  id: "jump",
+  trigger: "Jump to project",
+  searchPlaceholder: "Filter projects…",
+  emptyText: "No project matches.",
+  content: Menu({
+    items: ["Atlas", "Borealis", "Cirrus", "Dynamo", "Ember", "Fjord"].map((label) => ({
+      label,
+      href: `/projects/${label.toLowerCase()}`,
+    })),
+  }),
+})
+```
+
+```html
+<div class="dropdown" id="jump">
+  <button type="button" class="dropdown__trigger btn btn--outline" data-toggle="#jump-panel" aria-expanded="false" aria-controls="jump-panel">
+    Jump to project
+    <svg width="14" height="14" width="2" …>…</svg>
+  </button>
+  <div class="dropdown__panel" id="jump-panel" data-toggle-panel hidden>
+    <div class="dropdown__search">
+      <svg width="14" height="14" width="2" …>…</svg>
+      <input type="search" class="dropdown__search-input" id="jump-search" form="jump-search-scope" placeholder="Filter projects…" aria-label="Search items" aria-controls="jump-panel" autocomplete="off" spellcheck="false" data-dropdown-search data-validate-skip>
+    </div>
+    <div class="dropdown__body">
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link" href="/projects/atlas">
+            <span class="menu__link-label">Atlas</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/projects/borealis">
+            <span class="menu__link-label">Borealis</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/projects/cirrus">
+            <span class="menu__link-label">Cirrus</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/projects/dynamo">
+            <span class="menu__link-label">Dynamo</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/projects/ember">
+            <span class="menu__link-label">Ember</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/projects/fjord">
+            <span class="menu__link-label">Fjord</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <p class="dropdown__empty" data-dropdown-empty hidden>No project matches.</p>
+  </div>
+</div>
+```
 
 ### A user menu
 
@@ -54,23 +131,30 @@ Dropdown({
     <svg width="14" height="14" width="2" …>…</svg>
   </button>
   <div class="dropdown__panel dropdown__panel--end" id="user-menu-panel" data-toggle-panel hidden>
-    <ul class="menu__list">
-      <li>
-        <a class="menu__link" href="/me">
-          <span class="menu__link-label">Profile</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__link" href="/settings">
-          <span class="menu__link-label">Settings</span>
-        </a>
-      </li>
-      <li>
-        <a class="menu__link" href="/signout">
-          <span class="menu__link-label">Sign out</span>
-        </a>
-      </li>
-    </ul>
+    <div class="dropdown__search">
+      <svg width="14" height="14" width="2" …>…</svg>
+      <input type="search" class="dropdown__search-input" id="user-menu-search" form="user-menu-search-scope" placeholder="Search…" aria-label="Search items" aria-controls="user-menu-panel" autocomplete="off" spellcheck="false" data-dropdown-search data-validate-skip>
+    </div>
+    <div class="dropdown__body">
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link" href="/me">
+            <span class="menu__link-label">Profile</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/settings">
+            <span class="menu__link-label">Settings</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu__link" href="/signout">
+            <span class="menu__link-label">Sign out</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <p class="dropdown__empty" data-dropdown-empty hidden>No matches.</p>
   </div>
 </div>
 ```
@@ -79,12 +163,12 @@ Dropdown({
 
 Classes defined by `components/dropdown/dropdown.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.dropdown`, `.dropdown__panel`, `.dropdown__panel--end`, `.dropdown__panel--fixed`, `.dropdown__trigger`
+`.dropdown`, `.dropdown__body`, `.dropdown__empty`, `.dropdown__panel`, `.dropdown__panel--end`, `.dropdown__panel--fixed`, `.dropdown__search`, `.dropdown__search-input`, `.dropdown__trigger`, `.js`
 
 ## Behaviour
 
 `components/dropdown/dropdown.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-action`, `data-dropdown-clip`, `data-table`, `data-toggle`.
+Attributes it reads or writes: `data-action`, `data-dropdown-clip`, `data-dropdown-empty`, `data-dropdown-item`, `data-dropdown-opened`, `data-dropdown-search`, `data-table`, `data-toggle`.
 
 Events: `html:focus-within`.

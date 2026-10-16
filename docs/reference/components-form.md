@@ -77,8 +77,8 @@ html`${
     <input type="search" class="input" aria-label="Search links" id="q" name="q">
     <button type="button" class="input-clear__button js-only" data-input-clear-button aria-controls="q" aria-label="Clear" hidden>&times;</button>
   </span>
-  <div class="select" data-select>
-    <select class="select__native" aria-label="Status" id="select-status-native" name="status">
+  <div class="select" data-select data-validate-group>
+    <select class="select__native" aria-label="Status" id="select-status-native" name="status" data-validate-proxy="#select-status">
       <option value="">Any status</option>
       <option value="active">Active</option>
     </select>
@@ -86,30 +86,36 @@ html`${
       <div class="combobox__anchor">
         <div class="combobox__field">
           <input type="hidden" value="" data-combobox-value>
-          <button type="button" class="combobox__input select__button" id="select-status" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-status-list" aria-label="Status">
+          <button type="button" class="combobox__input select__button" id="select-status" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-status-listbox" aria-label="Status">
             <span class="select__text" data-select-text>Any status</span>
           </button>
           <span class="combobox__caret">
             <svg width="15" height="15" width="2" …>…</svg>
           </span>
         </div>
-        <div class="combobox__list" id="select-status-list" role="listbox" hidden>
-          <div class="combobox__option" role="option" id="select-status-opt-0" aria-selected="false" data-value="">
-            <span class="combobox__option-label">Any status</span>
-            <span class="combobox__check" aria-hidden="true">
-              <svg width="15" height="15" width="2" …>…</svg>
-            </span>
+        <div class="combobox__list combobox__list--popup" id="select-status-list" hidden>
+          <div class="combobox__search">
+            <svg width="14" height="14" width="2" …>…</svg>
+            <input type="search" class="combobox__search-input" id="select-status-search" form="select-status-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="select-status-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
           </div>
-          <div class="combobox__option" role="option" id="select-status-opt-1" aria-selected="false" data-value="active">
-            <span class="combobox__option-label">Active</span>
-            <span class="combobox__check" aria-hidden="true">
-              <svg width="15" height="15" width="2" …>…</svg>
-            </span>
-          </div>
-          <div class="combobox__hints">
-            <span>&uarr;&darr; navigate</span>
-            <span>&crarr; select</span>
-            <span class="combobox__count">2 matches</span>
+          <div class="combobox__options" id="select-status-listbox" role="listbox">
+            <div class="combobox__option" role="option" id="select-status-opt-0" aria-selected="false" data-value="">
+              <span class="combobox__option-label">Any status</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__option" role="option" id="select-status-opt-1" aria-selected="false" data-value="active">
+              <span class="combobox__option-label">Active</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__hints">
+              <span>&uarr;&darr; navigate</span>
+              <span>&crarr; select</span>
+              <span class="combobox__count">2 matches</span>
+            </div>
           </div>
         </div>
       </div>
@@ -247,6 +253,6 @@ Classes defined by `components/form/form.css` — structural, token-driven; over
 
 `components/form/form.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-dirty`, `data-guard`, `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`, `data-validate-action`, `data-validate-group`, `data-validate-skip`.
+Attributes it reads or writes: `data-combobox`, `data-dirty`, `data-guard`, `data-match`, `data-msg`, `data-msg-`, `data-msg-match`, `data-validate`, `data-validate-action`, `data-validate-group`, `data-validate-proxy`, `data-validate-skip`.
 
 Events: `rapid:swapped`.

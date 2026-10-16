@@ -18,8 +18,18 @@
  * edits that field. Without JS: native validation, unchanged.
  *
  * Composite controls: data-validate-skip keeps a part out of the checks
- * (one error slot has one owner — the TimePicker's minutes segment), and
- * focus moving inside a [data-validate-group] is not a blur.
+ * (one error slot has one owner — the TimePicker's minutes segment, a
+ * Select's or Dropdown's search box), and focus moving inside a
+ * [data-validate-group] is not a blur.
+ *
+ * Proxies: a hidden control with data-validate-proxy="#visible" (a
+ * Select's native <select>, behind its button) is checked like any other
+ * but reported on that visible element — aria-invalid, describedby, focus
+ * — with the error slot beside the control's own field; its blur is focus
+ * leaving its [data-validate-group]. In a plain form (no data-validate)
+ * the browser would find the hidden control invalid, fail to focus it and
+ * block the submit with no message at all, so its `invalid` event is
+ * taken over here and reported the same way.
  *
  * Async checks: a control with data-validate-action is, on blur and once
  * the native rules pass, POSTed (`name=value`, urlencoded, CSRF header
@@ -47,7 +57,17 @@
   ];
 
   const formOf = (el) => el.closest?.("form[data-validate]");
-  const visible = (control) => control.type === "checkbox" || control.type === "radio" || control.offsetParent !== null;
+  /** The visible element a hidden control reports on, if it has one. */
+  const proxyOf = (control) => {
+    const sel = control.getAttribute?.("data-validate-proxy");
+    return sel ? document.querySelector(sel) : null;
+  };
+  const shown = (el) => el.type === "checkbox" || el.type === "radio" || el.offsetParent !== null;
+  const visible = (control) => shown(proxyOf(control) ?? control);
+  /** An open combobox list: a press on an option blurs the field before the pick lands. */
+  const picking = (el, to) =>
+    !to &&
+    !!(el.closest?.(".combobox--open") || el.closest?.("[data-validate-group]")?.querySelector(".combobox--open"));
 
   /** Apply the rules the browser cannot express, then read the outcome. */
   function message(control) {
@@ -72,8 +92,11 @@
   const errorId = (control) => (control.id ? `${control.id}-error` : "");
 
   function render(control, text) {
-    const field = control.closest(".form-field") ?? control.parentElement;
-    const base = control.classList[0] || "input";
+    // A proxied control's error sits in its own field; the state goes on the stand-in.
+    const target = proxyOf(control) ?? control;
+    const field = control.closest(".form-field") ?? control.closest("[data-combobox]:not(.select__ui)") ??
+      control.parentElement;
+    const base = target.classList[0] || "input";
     let error = field.querySelector(":scope > .form-field__error");
     const help = field.querySelector(":scope > .form-field__help");
     if (text) {
@@ -86,21 +109,25 @@
       }
       error.textContent = text;
       if (help) help.hidden = true;
-      control.setAttribute("aria-invalid", "true");
-      control.classList.add(`${base}--invalid`);
-      const ids = (control.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
-      if (error.id && !ids.includes(error.id)) control.setAttribute("aria-describedby", [...ids, error.id].join(" "));
+      target.setAttribute("aria-invalid", "true");
+      target.classList.add(`${base}--invalid`);
+      target.closest("[data-combobox]")?.classList.add("combobox--invalid");
+      const ids = (target.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+      if (error.id && !ids.includes(error.id)) target.setAttribute("aria-describedby", [...ids, error.id].join(" "));
       control.dataset.validated = "invalid";
     } else {
       error?.remove();
       if (help) help.hidden = false;
-      control.removeAttribute("aria-invalid");
-      control.classList.remove(`${base}--invalid`);
-      const ids = (control.getAttribute("aria-describedby") || "").split(/\s+/).filter((id) =>
+      target.removeAttribute("aria-invalid");
+      if (target !== control) control.removeAttribute("aria-invalid");
+      target.classList.remove(`${base}--invalid`);
+      target.closest("[data-combobox]")?.classList.remove("combobox--invalid");
+      target.closest(".select--invalid")?.classList.remove("select--invalid"); // a server-rendered error, now edited
+      const ids = (target.getAttribute("aria-describedby") || "").split(/\s+/).filter((id) =>
         id && id !== errorId(control)
       );
-      if (ids.length) control.setAttribute("aria-describedby", ids.join(" "));
-      else control.removeAttribute("aria-describedby");
+      if (ids.length) target.setAttribute("aria-describedby", ids.join(" "));
+      else target.removeAttribute("aria-describedby");
       control.dataset.validated = "valid";
     }
   }
@@ -119,9 +146,41 @@
     // Moving between the parts of one control (a time picker's segments
     // and slot list) is not leaving it; the control reports its own blur.
     if (control.closest("[data-validate-group]")?.contains(event.relatedTarget)) return;
+    if (picking(control, event.relatedTarget)) return;
     control.dataset.touched = "";
     check(control);
   });
+
+  // A proxied control blurs when focus leaves its group (a Select: the
+  // button, its search box, its list).
+  document.addEventListener("focusout", (event) => {
+    const group = event.target.closest?.("[data-validate-group]");
+    if (!group || group.contains(event.relatedTarget) || !formOf(group)) return;
+    if (picking(event.target, event.relatedTarget)) return;
+    group.querySelectorAll("[data-validate-proxy]").forEach((control) => {
+      control.dataset.touched = "";
+      check(control);
+    });
+  });
+
+  // A plain form: the browser's own check reaches a hidden control it cannot
+  // focus or point at. Take that report over (the submit stays blocked).
+  document.addEventListener("invalid", (event) => {
+    const control = event.target;
+    const proxy = proxyOf(control);
+    if (!proxy || formOf(control)) return;
+    event.preventDefault();
+    control.dataset.touched = "";
+    render(control, message(control));
+    // Focus it when it is the form's first problem; a later native field
+    // that is also invalid is left to the browser (it focuses the first
+    // report it was not stopped from making).
+    const first = Array.from(control.form?.elements ?? []).find((el) => el.willValidate && !el.validity.valid);
+    if (first === control) {
+      proxy.scrollIntoView({ block: "center" });
+      proxy.focus();
+    }
+  }, true);
 
   document.addEventListener("input", (event) => {
     const control = event.target;
@@ -146,7 +205,9 @@
   });
   document.addEventListener("change", (event) => {
     const control = event.target;
-    if (control?.matches?.(CONTROLS) && formOf(control) && control.dataset.touched !== undefined) check(control);
+    if (!control?.matches?.(CONTROLS) || control.dataset.touched === undefined) return;
+    // A proxied control reported in a plain form clears the same way.
+    if (formOf(control) || (proxyOf(control) && control.dataset.validated)) check(control);
   });
 
   /* -------------------------------------------- async validation */
@@ -241,8 +302,9 @@
     }
     event.preventDefault();
     event.stopImmediatePropagation();
-    first.scrollIntoView({ block: "center" });
-    first.focus();
+    const focusable = proxyOf(first) ?? first;
+    focusable.scrollIntoView({ block: "center" });
+    focusable.focus();
   }, true);
   // A guarded form that submits natively (no data-validate) is not unsaved either.
   document.addEventListener("submit", (event) => {

@@ -89,8 +89,15 @@ Select({
 });
 ```
 
-Looks and behaves like the combobox (field, caret, list, arrow keys, type-ahead) minus free typing. A native `<select>`
-carries the name and is what submits — and what a no-JS page shows. Give it an `id` or `name`.
+Looks and behaves like the combobox (field, caret, list, arrow keys) minus free typing. A native `<select>` carries the
+name and is what submits — and what a no-JS page shows. Give it an `id` or `name`.
+
+Every Select is **searchable by default**: the open list has a search box on top that filters the options as you type
+(focus moves into it on open, Enter takes the first match, and typing on the closed field starts a search). The box is
+unnamed and belongs to no form, so it never posts and never stops Enter in a sibling field from submitting.
+`searchable: false` drops it and brings back the native-style type-ahead; `searchPlaceholder`, `searchLabel` and
+`emptyText` word it. The list caps at `--dropdown-max-height` (`min(20rem, 60vh)`) and scrolls, opening on the picked
+option.
 
 ### [Combobox](./reference/components-combobox.md)
 
@@ -115,7 +122,9 @@ Free text + a listbox. With `action`, every keystroke asks the server for a new 
 `ComboboxList({ id, options,
 query, selected })`; without it the rendered options filter client-side. The value travels
 in a hidden input (single) or one hidden input per token (multi; Backspace on an empty field pops the last). Keyboard:
-open on focus, arrows, Enter, Escape (only claimed while open).
+open on focus, arrows, Enter, Escape (only claimed while open). `required` asks for a pick — one option, or at least one
+token with `multi`; typed text that picks nothing does not count — reported by the browser in a plain form and inline by
+`Form({ validate: true })`, worded by `requiredMessage`.
 
 ### [DatePicker](./reference/components-datepicker.md)
 
@@ -345,8 +354,9 @@ replaces the browser's bubble with the same message rendered inline in the field
 error uses — on the field's first blur and on submit; an invalid submit is stopped before rAPId's runtime sees it and
 the first invalid field gets focus. The rules are the native constraint attributes plus `match` and a password's
 `strengthMin`; the wording is the browser's, or `messages` per rule. A server-rendered error stays until the user edits
-that field. Without JS the browser validates natively, and the server validates regardless — the client layer is
-feedback, never the gate.
+that field. A required `Select` is reported on its visible field in any form — its native `<select>` is hidden behind
+the UI, where a browser alone would block the submit without a word — and a required `Combobox` the same way. Without JS
+the browser validates natively, and the server validates regardless — the client layer is feedback, never the gate.
 
 `Form({ error })` renders rAPId's `RapidFormError` as a banner (`FormErrorAlert`), `FormField({ error })` wires
 `aria-describedby` and `aria-invalid` through the `control` callback, `FormGrid` is a 12-column field grid,
@@ -631,8 +641,12 @@ Tooltip({
 });
 ```
 
-Dropdowns close on pick, Escape and outside click, and switch to fixed positioning inside a scrolling table. Popovers
-restore focus and only claim Escape when open; `loadFrom` fetches content lazily. Tooltips are CSS-only.
+Dropdowns close on pick, Escape and outside click, and switch to fixed positioning inside a scrolling table. They are
+**searchable by default**: a search box above the content filters a `Menu`'s items (a parent stays, its sublist opened,
+while a child matches) or any `[data-dropdown-item]`s; ↓ moves into the items, Enter takes the first match, and closing
+clears it. A panel with nothing to filter (a notifications feed) hides the box — or pass `searchable: false`. The panel
+caps at `--dropdown-max-height` and scrolls under the box. Popovers restore focus and only claim Escape when open;
+`loadFrom` fetches content lazily. Tooltips are CSS-only.
 
 ---
 

@@ -159,18 +159,25 @@ ButtonGroup({
       <span class="sr-only">More export options</span>
     </button>
     <div class="dropdown__panel dropdown__panel--end" id="export-more-panel" data-toggle-panel hidden>
-      <ul class="menu__list">
-        <li>
-          <a class="menu__link" href="/export.csv">
-            <span class="menu__link-label">CSV</span>
-          </a>
-        </li>
-        <li>
-          <a class="menu__link" href="/export.pdf">
-            <span class="menu__link-label">PDF</span>
-          </a>
-        </li>
-      </ul>
+      <div class="dropdown__search">
+        <svg width="14" height="14" width="2" …>…</svg>
+        <input type="search" class="dropdown__search-input" id="export-more-search" form="export-more-search-scope" placeholder="Search…" aria-label="Search items" aria-controls="export-more-panel" autocomplete="off" spellcheck="false" data-dropdown-search data-validate-skip>
+      </div>
+      <div class="dropdown__body">
+        <ul class="menu__list">
+          <li>
+            <a class="menu__link" href="/export.csv">
+              <span class="menu__link-label">CSV</span>
+            </a>
+          </li>
+          <li>
+            <a class="menu__link" href="/export.pdf">
+              <span class="menu__link-label">PDF</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <p class="dropdown__empty" data-dropdown-empty hidden>No matches.</p>
     </div>
   </div>
 </span>

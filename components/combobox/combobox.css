@@ -34,6 +34,12 @@
   border-color: var(--color-primary);
 }
 
+/* Reported invalid by form.js (a required pick missing). The open frame
+   below still wins while the list is open. */
+.combobox--invalid .combobox__field {
+  border-color: var(--color-danger);
+}
+
 /* Open: field and list read as one box — the focus ring becomes a shared
    2px accent frame (border + 1px spread) instead of an outline around the
    field alone, and the list picks up the same frame minus its top edge. */
@@ -90,11 +96,67 @@
   border-end-end-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  /* A long list scrolls inside itself instead of running down the page;
+     overflow also keeps the rounded corners clipping the options. */
+  max-height: var(--dropdown-max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .combobox__list[hidden] {
   display: none;
+}
+
+/* Select's popup: a search box that stays put above a listbox that
+   scrolls. (combobox.js scrolls whichever of the two holds the options.) */
+.combobox__list--popup {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.combobox__options {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.combobox__search {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  color: var(--color-text-subtle);
+}
+
+.combobox__search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+
+  &::placeholder {
+    color: var(--color-text-subtle);
+  }
+
+  /* The browser's own clear button is off-palette; Escape closes instead. */
+  &::-webkit-search-cancel-button {
+    appearance: none;
+  }
+}
+
+/* The search box shows the focus inside the popup's frame, not around it. */
+.combobox__search:focus-within {
+  color: var(--color-text);
 }
 
 .combobox__group {
@@ -172,7 +234,10 @@
   color: var(--color-text-muted);
 }
 
+/* Sticky: in a long, scrolling list the bar stays at the bottom edge. */
 .combobox__hints {
+  position: sticky;
+  bottom: 0;
   display: flex;
   align-items: center;
   gap: var(--space-3);
