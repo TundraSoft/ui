@@ -171,6 +171,114 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   const clickIn = (selector: string) => page.$eval(selector, (el) => (el as HTMLElement).click());
 
   if (group === "forms") {
+    // Required, nothing picked. A plain form: the browser's check reaches the
+    // hidden native <select> it cannot focus — form.js takes the report over
+    // and shows it on the visible field (it used to block with no message).
+    const reqState = (id: string) =>
+      page.evaluate((id) => {
+        const ctl = document.getElementById(id)!;
+        const host = ctl.closest(".form-field") ?? ctl.closest("[data-combobox]")!;
+        return {
+          error: host.querySelector(".form-field__error")?.textContent ?? null,
+          invalid: ctl.getAttribute("aria-invalid"),
+          red: ctl.closest("[data-combobox]")!.classList.contains("combobox--invalid"),
+          focus: document.activeElement?.id,
+          message: (ctl as HTMLInputElement).validationMessage ?? "",
+        };
+      }, id);
+    await trapSubmits("#cat-req-plain");
+    await page.$eval("#cat-req-plain", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await clickIn("#cat-req-plain-go");
+    await pause();
+    const plainBlocked = { subs: (await submits()).length, ...(await reqState("cat-req-plain-sel")) };
+    await page.click("#cat-req-plain-sel");
+    await pause();
+    await clickIn("#cat-req-plain-sel-list [data-value=accra]");
+    await pause();
+    const plainFixed = await reqState("cat-req-plain-sel");
+    await clickIn("#cat-req-plain-go");
+    await pause();
+    const plainSent = await submits();
+    check(
+      plainBlocked.subs === 0 && plainBlocked.error === "Please select an item in the list." &&
+        plainBlocked.invalid === "true" && plainBlocked.red && plainBlocked.focus === "cat-req-plain-sel" &&
+        plainFixed.error === null && plainFixed.invalid === null && !plainFixed.red &&
+        plainSent.length === 1 && plainSent[0].endsWith("|city=accra"),
+      `forms: required Select in a plain form (${JSON.stringify({ plainBlocked, plainFixed, plainSent })})`,
+    );
+    // Form({ validate }): reported with requiredMessage, cleared live by a search pick.
+    await trapSubmits("#cat-req-val");
+    await clickIn("#cat-req-val-go");
+    await pause();
+    const valBlocked = { subs: (await submits()).length, ...(await reqState("cat-req-val-sel")) };
+    await page.keyboard.press("Space");
+    await pause();
+    await page.keyboard.type("ath");
+    await page.keyboard.press("Enter");
+    await pause();
+    const valFixed = await reqState("cat-req-val-sel");
+    await clickIn("#cat-req-val-go");
+    await pause();
+    const valSent = await submits();
+    check(
+      valBlocked.subs === 0 && valBlocked.error === "Choose the city you are based in." &&
+        valBlocked.focus === "cat-req-val-sel" && valBlocked.red && valFixed.error === null &&
+        valFixed.focus === "cat-req-val-sel" && valSent.length === 1 && valSent[0].endsWith("|city=athens"),
+      `forms: required Select in Form({ validate }) (${JSON.stringify({ valBlocked, valFixed, valSent })})`,
+    );
+
+    // Required Combobox, single and multi: typed text is not a pick; removing
+    // the last token makes the multi invalid again.
+    await trapSubmits("#cat-req-cb");
+    await page.$eval("#cat-req-cb", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.focus("#cat-req-cb-one");
+    await page.keyboard.type("Acc");
+    await page.keyboard.press("Escape");
+    await clickIn("#cat-req-cb-go");
+    await pause();
+    const cbBlocked = {
+      subs: (await submits()).length,
+      one: await reqState("cat-req-cb-one"),
+      many: await reqState("cat-req-cb-many"),
+    };
+    await clickIn("#cat-req-cb-one-list [data-value=accra]");
+    await clickIn("#cat-req-cb-many-list [data-value=amsterdam]");
+    await pause();
+    const cbFixed = { one: await reqState("cat-req-cb-one"), many: await reqState("cat-req-cb-many") };
+    await clickIn("#cat-req-cb [data-combobox-remove=amsterdam]");
+    await pause();
+    const cbEmptied = await reqState("cat-req-cb-many");
+    await clickIn("#cat-req-cb-many-list [data-value=athens]");
+    await page.keyboard.press("Escape");
+    await clickIn("#cat-req-cb-go");
+    await pause();
+    const cbSent = await submits();
+    check(
+      cbBlocked.subs === 0 && cbBlocked.one.error === "Please select an item in the list." &&
+        cbBlocked.one.focus === "cat-req-cb-one" && cbBlocked.one.red &&
+        cbBlocked.many.error === "Add at least one region." && cbBlocked.many.invalid === "true" &&
+        cbFixed.one.error === null && cbFixed.many.error === null && !cbFixed.many.red &&
+        cbEmptied.error === "Add at least one region." && cbSent.length === 1 &&
+        cbSent[0].endsWith("|owner=accra&regions=athens"),
+      `forms: required Combobox single + multi (${JSON.stringify({ cbBlocked, cbFixed, cbEmptied, cbSent })})`,
+    );
+    // A plain form: the browser's own bubble, on the visible input.
+    await trapSubmits("#cat-req-cb-plain");
+    await clickIn("#cat-req-cb-plain-go");
+    await pause();
+    const cbPlain = { subs: (await submits()).length, ...(await reqState("cat-req-cb-plain-many")) };
+    await clickIn("#cat-req-cb-plain-many-list [data-value=auckland]");
+    await page.keyboard.press("Escape");
+    await clickIn("#cat-req-cb-plain-go");
+    await pause();
+    const cbPlainSent = await submits();
+    check(
+      cbPlain.subs === 0 && cbPlain.message === "Please select at least one item." &&
+        cbPlain.focus === "cat-req-cb-plain-many" && cbPlainSent.length === 1 &&
+        cbPlainSent[0].endsWith("|regions=auckland"),
+      `forms: required multi Combobox in a plain form (${JSON.stringify({ cbPlain, cbPlainSent })})`,
+    );
+
     // A Select's control is a button: Enter in the search box beside it submits.
     await trapSubmits("#cat-autosubmit");
     await page.$eval("#cat-autosubmit input[type=search]", (el) => el.scrollIntoView({ block: "center" }));
@@ -521,6 +629,65 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "actions") {
+    // A long Dropdown: capped and scrolling, search focused on open, a parent
+    // kept (and its sublist opened) for a matching child, restored on close.
+    await page.$eval("#cat-dd-long", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.click("#cat-dd-long .dropdown__trigger");
+    await pause();
+    const ddOpen = await page.evaluate(() => {
+      const panel = document.getElementById("cat-dd-long-panel")!;
+      const body = panel.querySelector(".dropdown__body")!;
+      const cap = parseFloat(getComputedStyle(panel).maxHeight);
+      const search = document.getElementById("cat-dd-long-search") as HTMLInputElement;
+      return {
+        capped: cap > 0 && panel.getBoundingClientRect().height <= cap + 1,
+        scrolls: body.scrollHeight > body.clientHeight,
+        focus: document.activeElement?.id,
+        formless: search.form === null && !search.name,
+      };
+    });
+    await page.keyboard.type("holm");
+    await pause();
+    const ddFiltered = await page.evaluate(() => {
+      const panel = document.getElementById("cat-dd-long-panel")!;
+      const shown = [...panel.querySelectorAll(".dropdown__body li")].filter((li) => li.getClientRects().length)
+        .map((li) =>
+          li.querySelector(":scope > a .menu__link-label, :scope > button .menu__link-label")!.textContent!.trim()
+        );
+      const parent = panel.querySelector("[data-toggle='#cat-dd-long-menu-sub-0']")!;
+      return { shown: shown.join(), expanded: parent.getAttribute("aria-expanded") };
+    });
+    await page.keyboard.press("ArrowDown");
+    const firstItem = await page.evaluate(() =>
+      document.activeElement?.querySelector(".menu__link-label")?.textContent?.trim()
+    );
+    await page.focus("#cat-dd-long-search");
+    await page.$eval("#cat-dd-long-search", (el) => ((el as HTMLInputElement).value = ""));
+    await page.keyboard.type("xyz");
+    await pause();
+    const ddEmpty = await page.$eval(
+      "#cat-dd-long-panel [data-dropdown-empty]",
+      (el) => (el as HTMLElement).hidden ? null : el.textContent,
+    );
+    await page.keyboard.press("Escape");
+    await pause();
+    const ddClosed = await page.evaluate(() => ({
+      closed: document.getElementById("cat-dd-long-panel")!.hidden,
+      focus: document.activeElement?.closest(".dropdown")?.id,
+      search: (document.getElementById("cat-dd-long-search") as HTMLInputElement).value,
+      sublist: (document.getElementById("cat-dd-long-menu-sub-0") as HTMLElement).hidden,
+      allBack: [...document.querySelectorAll("#cat-dd-long-panel li")].every((li) => !(li as HTMLElement).hidden),
+    }));
+    check(
+      ddOpen.capped && ddOpen.scrolls && ddOpen.focus === "cat-dd-long-search" && ddOpen.formless &&
+        ddFiltered.shown === "Nordics,Stockholm,Stockholm" && ddFiltered.expanded === "true" &&
+        firstItem === "Nordics" && ddEmpty === "No city matches." && ddClosed.closed &&
+        ddClosed.focus === "cat-dd-long" && ddClosed.search === "" && ddClosed.sublist && ddClosed.allBack,
+      `actions: long searchable dropdown (${JSON.stringify({ ddOpen, ddFiltered, firstItem, ddEmpty, ddClosed })})`,
+    );
+    const noSearch = await page.$eval("#cat-dd-plain", (el) => !el.querySelector("[data-dropdown-search]"));
+    check(noSearch, "actions: Dropdown({ searchable: false }) still renders a search box");
+
     await page.evaluate(() => {
       const w = globalThis as unknown as { __copied?: string };
       Object.defineProperty(navigator, "clipboard", {
@@ -785,6 +952,106 @@ for (const group of catalogueGroups) {
         JSON.stringify({ fieldOpens, fieldCloses, tabCloses, labelOpens, labelCloses })
       })`,
     );
+    // A long Select: capped and scrolling, opens on its pick with focus in
+    // the search box, filters as you type, Enter takes the first match.
+    await page.$eval("#cat-sel-long", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.click("#cat-sel-long");
+    await pause();
+    const longOpen = await page.evaluate(() => {
+      const list = document.getElementById("cat-sel-long-list")!;
+      const box = document.getElementById("cat-sel-long-listbox")!;
+      const cap = parseFloat(getComputedStyle(list).maxHeight);
+      const pick = box.querySelector("[data-value=tokyo]")!.getBoundingClientRect();
+      const view = box.getBoundingClientRect();
+      const search = document.getElementById("cat-sel-long-search") as HTMLInputElement;
+      return {
+        capped: cap > 0 && list.getBoundingClientRect().height <= cap + 1,
+        scrolls: box.scrollHeight > box.clientHeight,
+        pickInView: pick.top >= view.top - 1 && pick.bottom <= view.bottom + 1,
+        focus: document.activeElement?.id,
+        formless: search.form === null && !search.name,
+        role: box.getAttribute("role"),
+      };
+    });
+    await page.keyboard.type("par");
+    await pause();
+    const filtered = await page.evaluate(() => {
+      const opts = [...document.querySelectorAll("#cat-sel-long-listbox [role=option]")] as HTMLElement[];
+      return {
+        shown: opts.filter((o) => !o.hidden).map((o) => o.getAttribute("data-value")).join(),
+        active: document.querySelector("#cat-sel-long-listbox [data-active]")?.getAttribute("data-value"),
+      };
+    });
+    await page.keyboard.press("Enter");
+    await pause();
+    const longPicked = await page.evaluate(() => ({
+      native: (document.getElementById("cat-sel-long-native") as HTMLSelectElement).value,
+      text: document.getElementById("cat-sel-long")!.textContent!.trim(),
+      closed: document.getElementById("cat-sel-long-list")!.hidden,
+      focus: document.activeElement?.id,
+    }));
+    check(
+      longOpen.capped && longOpen.scrolls && longOpen.pickInView && longOpen.focus === "cat-sel-long-search" &&
+        longOpen.formless && longOpen.role === "listbox" && filtered.shown === "paris" &&
+        filtered.active === "paris" && longPicked.native === "paris" && longPicked.text === "Paris" &&
+        longPicked.closed && longPicked.focus === "cat-sel-long",
+      `forms: long searchable select (${JSON.stringify({ longOpen, filtered, longPicked })})`,
+    );
+    // Typing on the closed field starts a search; no match shows emptyText;
+    // Escape closes back to the field and the next open starts clean.
+    await page.keyboard.type("qq");
+    await pause();
+    const typedOpen = await page.evaluate(() => ({
+      open: !document.getElementById("cat-sel-long-list")!.hidden,
+      value: (document.getElementById("cat-sel-long-search") as HTMLInputElement).value,
+      empty: (() => {
+        const e = document.querySelector("#cat-sel-long-listbox .combobox__empty") as HTMLElement | null;
+        return e && !e.hidden ? e.textContent : null;
+      })(),
+    }));
+    await page.keyboard.press("Escape");
+    await pause();
+    const escaped = await page.evaluate(() => ({
+      closed: document.getElementById("cat-sel-long-list")!.hidden,
+      focus: document.activeElement?.id,
+    }));
+    // Opens on Paris (the pick); 12 more rows is well past the visible window.
+    for (let i = 0; i < 13; i++) await page.keyboard.press("ArrowDown");
+    await pause();
+    const walked = await page.evaluate(() => {
+      const box = document.getElementById("cat-sel-long-listbox")!;
+      const active = box.querySelector("[data-active]") as HTMLElement | null;
+      const r = active?.getBoundingClientRect();
+      const v = box.getBoundingClientRect();
+      return {
+        search: (document.getElementById("cat-sel-long-search") as HTMLInputElement).value,
+        all: [...box.querySelectorAll("[role=option]")].every((o) => !(o as HTMLElement).hidden),
+        inView: !!r && r.top >= v.top - 1 && r.bottom <= v.bottom + 1,
+        scrolled: box.scrollTop > 0,
+        active: active?.getAttribute("data-value"),
+      };
+    });
+    await page.keyboard.press("Escape");
+    check(
+      typedOpen.open && typedOpen.value === "qq" && typedOpen.empty === "No city matches." && escaped.closed &&
+        escaped.focus === "cat-sel-long" && walked.search === "" && walked.all && walked.inView && walked.scrolled &&
+        walked.active === "taipei",
+      `forms: select type-to-search / Escape / arrow walk (${JSON.stringify({ typedOpen, escaped, walked })})`,
+    );
+    // searchable: false keeps the native-style type-ahead.
+    await page.$eval("#cat-sel-plain", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.focus("#cat-sel-plain");
+    await page.keyboard.type("b");
+    await pause();
+    const plainSel = await page.evaluate(() => ({
+      search: !!document.querySelector("#cat-sel-plain-list [data-combobox-search]"),
+      native: (document.getElementById("cat-sel-plain-native") as HTMLSelectElement).value,
+    }));
+    check(
+      !plainSel.search && plainSel.native === "baghdad",
+      `forms: Select({ searchable: false }) (${JSON.stringify(plainSel)})`,
+    );
+
     // A searchable combobox keeps its list open on a click into its input.
     await page.$eval("#reviewer", (el) => el.scrollIntoView({ block: "center" }));
     await page.click("#reviewer");

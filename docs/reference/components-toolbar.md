@@ -52,8 +52,8 @@ Toolbar({
     <input type="search" class="input input--sm" data-table-search="" id="search" placeholder="Search invoices">
     <button type="button" class="input-clear__button js-only" data-input-clear-button aria-controls="search" aria-label="Clear" hidden>&times;</button>
   </span>
-  <div class="select" data-select>
-    <select class="select__native" id="select-native">
+  <div class="select" data-select data-validate-group>
+    <select class="select__native" id="select-native" data-validate-proxy="#select">
       <option value="" disabled selected>All statuses</option>
       <option value="open">Open</option>
       <option value="paid">Paid</option>
@@ -62,30 +62,36 @@ Toolbar({
       <div class="combobox__anchor">
         <div class="combobox__field">
           <input type="hidden" value="" data-combobox-value>
-          <button type="button" class="combobox__input select__button" id="select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-list" data-placeholder="All statuses">
+          <button type="button" class="combobox__input select__button" id="select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-listbox" data-placeholder="All statuses">
             <span class="select__text select__text--placeholder" data-select-text>All statuses</span>
           </button>
           <span class="combobox__caret">
             <svg width="15" height="15" width="2" …>…</svg>
           </span>
         </div>
-        <div class="combobox__list" id="select-list" role="listbox" hidden>
-          <div class="combobox__option" role="option" id="select-opt-0" aria-selected="false" data-value="open">
-            <span class="combobox__option-label">Open</span>
-            <span class="combobox__check" aria-hidden="true">
-              <svg width="15" height="15" width="2" …>…</svg>
-            </span>
+        <div class="combobox__list combobox__list--popup" id="select-list" hidden>
+          <div class="combobox__search">
+            <svg width="14" height="14" width="2" …>…</svg>
+            <input type="search" class="combobox__search-input" id="select-search" form="select-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="select-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
           </div>
-          <div class="combobox__option" role="option" id="select-opt-1" aria-selected="false" data-value="paid">
-            <span class="combobox__option-label">Paid</span>
-            <span class="combobox__check" aria-hidden="true">
-              <svg width="15" height="15" width="2" …>…</svg>
-            </span>
-          </div>
-          <div class="combobox__hints">
-            <span>&uarr;&darr; navigate</span>
-            <span>&crarr; select</span>
-            <span class="combobox__count">2 matches</span>
+          <div class="combobox__options" id="select-listbox" role="listbox">
+            <div class="combobox__option" role="option" id="select-opt-0" aria-selected="false" data-value="open">
+              <span class="combobox__option-label">Open</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__option" role="option" id="select-opt-1" aria-selected="false" data-value="paid">
+              <span class="combobox__option-label">Paid</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__hints">
+              <span>&uarr;&darr; navigate</span>
+              <span>&crarr; select</span>
+              <span class="combobox__count">2 matches</span>
+            </div>
           </div>
         </div>
       </div>

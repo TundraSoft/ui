@@ -21,7 +21,9 @@ form's implicit submission (Enter in a search box beside it submits). Two
 controls, one value: a native `<select>` carries `name` and submits
 (and is what a no-JS page shows); the combobox UI is what an enhanced
 page shows, and select.js keeps the two in step both ways. Give it an
-`id` or `name` so the list and options get stable ids.
+`id` or `name` so the list and options get stable ids. The open list
+caps at `--dropdown-max-height` and scrolls, with a search box on top
+unless `searchable: false`.
 
 ## Types
 
@@ -45,13 +47,109 @@ page shows, and select.js keeps the two in step both ways. Give it an
 | `options` | `SelectOption[]` | yes |  |
 | `disabled` | `boolean` |  |  |
 | `required` | `boolean` |  |  |
+| `requiredMessage` | `string` |  | The message for a missing required value (`data-msg-required`). Shown on the visible field — by form.js in a `Form({ validate })`, and in a plain form too, where the browser cannot show its own bubble on a hidden native control. @default the browser's text |
 | `invalid` | `boolean` |  |  |
+| `searchable` | `boolean` |  | A search box at the top of the open list that filters the options as you type (and typing on the closed field starts a search). It is unnamed and belongs to no form, so it never submits and never stops Enter in a sibling field from submitting. @default true |
+| `searchPlaceholder` | `string` |  | Placeholder of the search box. @default "Search…" |
+| `searchLabel` | `string` |  | Accessible name of the search box. @default "Search options" |
+| `emptyText` | `string` |  | Shown when nothing matches the search. @default "No matches." |
 | `extraClass` | `string` |  |  |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A long list, searchable
+
+Search is on by default: typing filters the options and Enter takes the first match. `searchable: false` keeps a plain type-ahead.
+
+```ts
+Select({
+  id: "timezone",
+  name: "timezone",
+  value: "Europe/Berlin",
+  searchPlaceholder: "Search time zones…",
+  options: ["America/New_York", "Asia/Kolkata", "Asia/Tokyo", "Europe/Berlin", "Europe/London", "UTC"].map((
+    zone,
+  ) => ({ value: zone, label: zone.replace("_", " ") })),
+})
+```
+
+```html
+<div class="select" data-select data-validate-group>
+  <select class="select__native" id="timezone-native" name="timezone" data-validate-proxy="#timezone">
+    <option value="America/New_York">America/New York</option>
+    <option value="Asia/Kolkata">Asia/Kolkata</option>
+    <option value="Asia/Tokyo">Asia/Tokyo</option>
+    <option value="Europe/Berlin" selected>Europe/Berlin</option>
+    <option value="Europe/London">Europe/London</option>
+    <option value="UTC">UTC</option>
+  </select>
+  <div class="combobox select__ui" data-combobox data-select-ui>
+    <div class="combobox__anchor">
+      <div class="combobox__field">
+        <input type="hidden" value="Europe/Berlin" data-combobox-value>
+        <button type="button" class="combobox__input select__button" id="timezone" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="timezone-listbox">
+          <span class="select__text" data-select-text>Europe/Berlin</span>
+        </button>
+        <span class="combobox__caret">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </div>
+      <div class="combobox__list combobox__list--popup" id="timezone-list" hidden>
+        <div class="combobox__search">
+          <svg width="14" height="14" width="2" …>…</svg>
+          <input type="search" class="combobox__search-input" id="timezone-search" form="timezone-search-scope" placeholder="Search time zones…" aria-label="Search options" aria-controls="timezone-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
+        </div>
+        <div class="combobox__options" id="timezone-listbox" role="listbox">
+          <div class="combobox__option" role="option" id="timezone-opt-0" aria-selected="false" data-value="America/New_York">
+            <span class="combobox__option-label">America/New York</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="timezone-opt-1" aria-selected="false" data-value="Asia/Kolkata">
+            <span class="combobox__option-label">Asia/Kolkata</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="timezone-opt-2" aria-selected="false" data-value="Asia/Tokyo">
+            <span class="combobox__option-label">Asia/Tokyo</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="timezone-opt-3" aria-selected="true" data-value="Europe/Berlin">
+            <span class="combobox__option-label">Europe/Berlin</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="timezone-opt-4" aria-selected="false" data-value="Europe/London">
+            <span class="combobox__option-label">Europe/London</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="timezone-opt-5" aria-selected="false" data-value="UTC">
+            <span class="combobox__option-label">UTC</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__hints">
+            <span>&uarr;&darr; navigate</span>
+            <span>&crarr; select</span>
+            <span class="combobox__count">6 matches</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 ### Options with a lead
 
@@ -71,8 +169,8 @@ Select({
 ```
 
 ```html
-<div class="select" data-select>
-  <select class="select__native" id="market-native" name="market">
+<div class="select" data-select data-validate-group>
+  <select class="select__native" id="market-native" name="market" data-validate-proxy="#market">
     <option value="fr">France</option>
     <option value="de" selected>Germany</option>
   </select>
@@ -83,36 +181,42 @@ Select({
           <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
         </span>
         <input type="hidden" value="de" data-combobox-value>
-        <button type="button" class="combobox__input select__button" id="market" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-list">
+        <button type="button" class="combobox__input select__button" id="market" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-listbox">
           <span class="select__text" data-select-text>Germany</span>
         </button>
         <span class="combobox__caret">
           <svg width="15" height="15" width="2" …>…</svg>
         </span>
       </div>
-      <div class="combobox__list" id="market-list" role="listbox" hidden>
-        <div class="combobox__option" role="option" id="market-opt-0" aria-selected="false" data-value="fr">
-          <span class="combobox__option-lead">
-            <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
-          </span>
-          <span class="combobox__option-label">France</span>
-          <span class="combobox__check" aria-hidden="true">
-            <svg width="15" height="15" width="2" …>…</svg>
-          </span>
+      <div class="combobox__list combobox__list--popup" id="market-list" hidden>
+        <div class="combobox__search">
+          <svg width="14" height="14" width="2" …>…</svg>
+          <input type="search" class="combobox__search-input" id="market-search" form="market-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="market-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
         </div>
-        <div class="combobox__option" role="option" id="market-opt-1" aria-selected="true" data-value="de">
-          <span class="combobox__option-lead">
-            <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
-          </span>
-          <span class="combobox__option-label">Germany</span>
-          <span class="combobox__check" aria-hidden="true">
-            <svg width="15" height="15" width="2" …>…</svg>
-          </span>
-        </div>
-        <div class="combobox__hints">
-          <span>&uarr;&darr; navigate</span>
-          <span>&crarr; select</span>
-          <span class="combobox__count">2 matches</span>
+        <div class="combobox__options" id="market-listbox" role="listbox">
+          <div class="combobox__option" role="option" id="market-opt-0" aria-selected="false" data-value="fr">
+            <span class="combobox__option-lead">
+              <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+            </span>
+            <span class="combobox__option-label">France</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="market-opt-1" aria-selected="true" data-value="de">
+            <span class="combobox__option-lead">
+              <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
+            </span>
+            <span class="combobox__option-label">Germany</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__hints">
+            <span>&uarr;&darr; navigate</span>
+            <span>&crarr; select</span>
+            <span class="combobox__count">2 matches</span>
+          </div>
         </div>
       </div>
     </div>
@@ -137,8 +241,8 @@ Select({
 ```
 
 ```html
-<div class="select" data-select>
-  <select class="select__native" id="plan-native" name="plan">
+<div class="select" data-select data-validate-group>
+  <select class="select__native" id="plan-native" name="plan" data-validate-proxy="#plan">
     <option value="free">Free</option>
     <option value="team" selected>Team</option>
     <option value="enterprise">Enterprise</option>
@@ -147,36 +251,42 @@ Select({
     <div class="combobox__anchor">
       <div class="combobox__field">
         <input type="hidden" value="team" data-combobox-value>
-        <button type="button" class="combobox__input select__button" id="plan" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="plan-list">
+        <button type="button" class="combobox__input select__button" id="plan" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="plan-listbox">
           <span class="select__text" data-select-text>Team</span>
         </button>
         <span class="combobox__caret">
           <svg width="15" height="15" width="2" …>…</svg>
         </span>
       </div>
-      <div class="combobox__list" id="plan-list" role="listbox" hidden>
-        <div class="combobox__option" role="option" id="plan-opt-0" aria-selected="false" data-value="free">
-          <span class="combobox__option-label">Free</span>
-          <span class="combobox__check" aria-hidden="true">
-            <svg width="15" height="15" width="2" …>…</svg>
-          </span>
+      <div class="combobox__list combobox__list--popup" id="plan-list" hidden>
+        <div class="combobox__search">
+          <svg width="14" height="14" width="2" …>…</svg>
+          <input type="search" class="combobox__search-input" id="plan-search" form="plan-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="plan-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
         </div>
-        <div class="combobox__option" role="option" id="plan-opt-1" aria-selected="true" data-value="team">
-          <span class="combobox__option-label">Team</span>
-          <span class="combobox__check" aria-hidden="true">
-            <svg width="15" height="15" width="2" …>…</svg>
-          </span>
-        </div>
-        <div class="combobox__option" role="option" id="plan-opt-2" aria-selected="false" data-value="enterprise">
-          <span class="combobox__option-label">Enterprise</span>
-          <span class="combobox__check" aria-hidden="true">
-            <svg width="15" height="15" width="2" …>…</svg>
-          </span>
-        </div>
-        <div class="combobox__hints">
-          <span>&uarr;&darr; navigate</span>
-          <span>&crarr; select</span>
-          <span class="combobox__count">3 matches</span>
+        <div class="combobox__options" id="plan-listbox" role="listbox">
+          <div class="combobox__option" role="option" id="plan-opt-0" aria-selected="false" data-value="free">
+            <span class="combobox__option-label">Free</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="plan-opt-1" aria-selected="true" data-value="team">
+            <span class="combobox__option-label">Team</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__option" role="option" id="plan-opt-2" aria-selected="false" data-value="enterprise">
+            <span class="combobox__option-label">Enterprise</span>
+            <span class="combobox__check" aria-hidden="true">
+              <svg width="15" height="15" width="2" …>…</svg>
+            </span>
+          </div>
+          <div class="combobox__hints">
+            <span>&uarr;&darr; navigate</span>
+            <span>&crarr; select</span>
+            <span class="combobox__count">3 matches</span>
+          </div>
         </div>
       </div>
     </div>
@@ -194,6 +304,6 @@ Classes defined by `components/select/select.css` — structural, token-driven; 
 
 `components/select/select.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-combobox-value`, `data-placeholder`, `data-select`, `data-select-lead`, `data-select-text`, `data-select-ui`, `data-value`.
+Attributes it reads or writes: `data-combobox-search`, `data-combobox-value`, `data-placeholder`, `data-select`, `data-select-lead`, `data-select-text`, `data-select-ui`, `data-value`.
 
 Events: `combobox:pick`.

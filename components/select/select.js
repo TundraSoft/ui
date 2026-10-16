@@ -3,8 +3,10 @@
  * native value and fires `change` on it, so anything listening to the
  * native control (filter.js, a form's own script) sees a normal select;
  * a programmatic/autofill change on the native control repaints the UI.
- * Typing on the closed button jumps to the first option starting with
- * those letters, like a native select does. An option's `lead` (a flag,
+ * Typing on the button starts a search: it opens the list and sends the
+ * keys to its search box (combobox.js filters). With `searchable: false`
+ * it jumps to the first option starting with those letters instead, like
+ * a native select does. An option's `lead` (a flag,
  * an avatar) is cloned from the list into the closed field so the field
  * shows what the list showed. */
 (() => {
@@ -66,6 +68,17 @@
     if (!input.matches?.("[data-select-ui] [role='combobox']")) return;
     if (event.defaultPrevented) return;
     if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return;
+    const search = input.closest("[data-select-ui]").querySelector("[data-combobox-search]");
+    if (search) {
+      // Space still opens/toggles (the button's own click).
+      if (event.key === " ") return;
+      event.preventDefault();
+      if (input.getAttribute("aria-expanded") !== "true") input.click(); // opens, clears the box
+      search.focus({ preventScroll: true });
+      search.value += event.key;
+      search.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
+    }
     const now = Date.now();
     // A space starts nothing: it opens the list (the button's own click).
     if (event.key === " " && now - lastKey > 600) return;

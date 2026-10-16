@@ -465,21 +465,22 @@ absent, `aria-invalid` + `aria-describedby` wired, help hidden while an error sh
 submit. The submit veto is a **capture-phase** listener with `stopImmediatePropagation`: rAPId's runtime registers its
 bubbling submit listener before ui.js loads, so bubbling would be too late; capture at `document` runs first and stops
 the event from ever reaching the runtime, busy.js or dropzone.js. `data-match` is checked with `setCustomValidity`, and
-a confirm field is re-checked when the field it matches changes. Hidden controls (`Select`'s native `<select>`) are
-skipped. `components/password/` (`PasswordInput`) wraps `Input({ type: "password" })` with a Show/Hide button
-(`.js-only`, text labels — the icon set has no eye), an optional four-segment strength bar (`data-strength-level` 0–4 on
-the root; password.js scores length vs `minlength`, character classes, repeats, sequences and a 30-entry common list)
-and `strengthMin`, which password.js enforces through `setCustomValidity` so form.js reports it like any rule;
-password.js listens to `input` in the **capture** phase so the validity is fresh when form.js reads it on the same
-keystroke. The server must enforce every rule too — the client layer is feedback, never the gate (docs say so). Same
-day: **`Input({ type: "password" })` delegates to `PasswordInput`** the way `type: "date"` delegates to `DatePicker` —
-the toggle by default; `strength`/`strengthMin`/`reveal` are password-only props on `Input`; `reveal: false` is the bare
-control (and what `PasswordInput` itself passes when it calls `Input`, which is how the two modules import each other
-without recursing). Every existing `type: "password"` call site gained the toggle with no other change; the docs and
-usage examples teach the `Input` form, the separate `PasswordInput` export lasted one release (0.7.0): the user asked
-whether it was still needed, and it was not — `components/password/` is gone, the template is `PasswordField()` inside
-`input.ts`, its CSS is in `input.css` (class names `.password*` kept) and its script is `input.js`;
-`PasswordStrength`/`PasswordLabels` (`passwordLabels` prop) are exported from `input`.
+a confirm field is re-checked when the field it matches changes. Hidden controls are skipped — except a proxied one
+(`data-validate-proxy`, 2026-10-16: see "Long lists and default search"). `components/password/` (`PasswordInput`) wraps
+`Input({ type: "password" })` with a Show/Hide button (`.js-only`, text labels — the icon set has no eye), an optional
+four-segment strength bar (`data-strength-level` 0–4 on the root; password.js scores length vs `minlength`, character
+classes, repeats, sequences and a 30-entry common list) and `strengthMin`, which password.js enforces through
+`setCustomValidity` so form.js reports it like any rule; password.js listens to `input` in the **capture** phase so the
+validity is fresh when form.js reads it on the same keystroke. The server must enforce every rule too — the client layer
+is feedback, never the gate (docs say so). Same day: **`Input({ type: "password" })` delegates to `PasswordInput`** the
+way `type: "date"` delegates to `DatePicker` — the toggle by default; `strength`/`strengthMin`/`reveal` are
+password-only props on `Input`; `reveal: false` is the bare control (and what `PasswordInput` itself passes when it
+calls `Input`, which is how the two modules import each other without recursing). Every existing `type: "password"` call
+site gained the toggle with no other change; the docs and usage examples teach the `Input` form, the separate
+`PasswordInput` export lasted one release (0.7.0): the user asked whether it was still needed, and it was not —
+`components/password/` is gone, the template is `PasswordField()` inside `input.ts`, its CSS is in `input.css` (class
+names `.password*` kept) and its script is `input.js`; `PasswordStrength`/`PasswordLabels` (`passwordLabels` prop) are
+exported from `input`.
 
 **The forms batch (2026-09-22, same day, one PR).** Everything below is progressive (native attributes and plain fields
 first, script on top) and lives in `components/input/input.{ts,css,js}` unless said otherwise. `Input` is now a
@@ -773,6 +774,41 @@ wrapped onto its own line under the icon; there the body is`flex:
 theme drawing a`::before`icon with`icon:
 false` sets the indent on its variants — 0.18.0 tied the indent to the icon element, so the token did nothing there) so
 the action lines up with the text (the console found it at 390; the catalogue now checks a long message).
+
+**Long lists and default search (2026-10-16).** A Select with 418 options opened a 14,840px list and a 40-item Dropdown
+a 1,714px panel — nothing capped either. `--dropdown-max-height` (`min(20rem, 60vh)`, tokens/default.css) now caps
+`.combobox__list` (which scrolls, its hints bar sticky at the bottom) and `.dropdown__panel` (a flex column whose
+`.dropdown__body` scrolls). The user then asked that **dropdowns be searchable by default**: `Select({ searchable })`
+and `Dropdown({ searchable })` default to true (`searchPlaceholder`, `searchLabel`, `emptyText` word them). A Select's
+popup is now `#<id>-list.combobox__list--popup` (what opens/closes — the id tests and the console use is unchanged)
+holding a `.combobox__search` box and `#<id>-listbox.combobox__options[role=listbox]` (the button's `aria-controls`);
+combobox.js filters locally off `[data-combobox-search]`, opens a select on its pick (highlighted, scrolled into view),
+moves focus into the box (not on a touch tap — the phone keyboard would cover the list), highlights the first match as
+you type so Enter takes it, mirrors `aria-activedescendant` onto the box, and returns focus to the button on close;
+select.js sends a printable key on the button into the box (native type-ahead stays for `searchable: false`). Dropdown
+renders `.dropdown__search` + `.dropdown__body` + `[data-dropdown-empty]`; dropdown.js filters `[data-dropdown-item]`s
+else the body's `<li>`s by their own label (a parent stays while a child matches and its sublist opens for the search,
+restored after), hides the box when there is nothing to filter, ↓/↑ walk the visible items, Enter in the box takes the
+first non-toggle match, close clears it. Both boxes carry `form="<id>-search-scope"` (no such form): no form owner, so
+the box is not a field that blocks implicit submission — the autosubmit "Enter beside a Select submits" check proves it.
+The admin notifications Dropdown passes `searchable: false` (a feed, not choices). Asked next: a required Select with
+nothing picked was broken in both kinds of form — the user found it by asking what a no-match search does in a required
+dropdown. The native `<select>` is `display: none`, so a plain form's browser check failed to focus it and blocked the
+submit with only a console error ("not focusable"), and form.js skipped hidden controls, so `Form({ validate })` posted
+it empty. Now the native control carries `data-validate-proxy="#<button id>"` and the `.select` wrapper is a
+`[data-validate-group]`: form.js checks a proxied control even though hidden, reports on the stand-in
+(aria-invalid/describedby/focus on the button, `.combobox--invalid` on the UI root, the error slot in the control's own
+field), treats focus leaving the group as its blur, and in a plain form takes over the control's `invalid` event
+(preventDefault, render, focus it when it is the form's first problem — the submit stays blocked) and re-checks it on
+`change`. `Select({ requiredMessage })` → `data-msg-required`. The search boxes are `data-validate-skip` (otherwise
+form.js "validated" them valid and wiped the Select's error slot). The user asked to check multi select too: `Combobox`
+had no `required` at all — it has `required` + `requiredMessage` now (single: a pick, typed text alone never counts;
+multi: at least one token); combobox.js holds the message in `data-combobox-required` and keeps it as a custom validity
+on the input, updated on pick / token add / remove / an un-picking keystroke and announced with `change`, so a plain
+form gets the browser's bubble and form.js reports it like any rule. A press on an open list's option blurs the field
+before the pick lands, so form.js skips the blur check then (`picking`). Harness lesson: two more catalogue cases above
+a test lengthened a `scrollIntoView` enough that the `html:focus-within` smooth scroll was still running at the click —
+scroll with `behavior: "instant"` before a click.
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.

@@ -413,6 +413,24 @@ export const usage: Record<string, UsageExample[]> = {
   ],
   "components/dropdown": [
     {
+      title: "A long menu, searchable",
+      note:
+        "Every Dropdown has a search box (`searchable: false` drops it); the panel caps at `--dropdown-max-height` and scrolls.",
+      render: () =>
+        Dropdown({
+          id: "jump",
+          trigger: "Jump to project",
+          searchPlaceholder: "Filter projects…",
+          emptyText: "No project matches.",
+          content: Menu({
+            items: ["Atlas", "Borealis", "Cirrus", "Dynamo", "Ember", "Fjord"].map((label) => ({
+              label,
+              href: `/projects/${label.toLowerCase()}`,
+            })),
+          }),
+        }),
+    },
+    {
       title: "A user menu",
       render: () =>
         Dropdown({
@@ -985,6 +1003,21 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
   "components/select": [
+    {
+      title: "A long list, searchable",
+      note:
+        "Search is on by default: typing filters the options and Enter takes the first match. `searchable: false` keeps a plain type-ahead.",
+      render: () =>
+        Select({
+          id: "timezone",
+          name: "timezone",
+          value: "Europe/Berlin",
+          searchPlaceholder: "Search time zones…",
+          options: ["America/New_York", "Asia/Kolkata", "Asia/Tokyo", "Europe/Berlin", "Europe/London", "UTC"].map((
+            zone,
+          ) => ({ value: zone, label: zone.replace("_", " ") })),
+        }),
+    },
     {
       title: "Options with a lead",
       note:

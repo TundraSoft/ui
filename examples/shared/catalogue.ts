@@ -167,6 +167,95 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
 
 const c = (label: string, html: Html): CatalogueCase => ({ label, html });
 const row = (...items: Html[]) => html`<div class="cat-row">${items}</div>`;
+
+/** A list long enough to need the search box and the height cap. */
+const cities = [
+  "Accra",
+  "Addis Ababa",
+  "Amsterdam",
+  "Anchorage",
+  "Athens",
+  "Auckland",
+  "Baghdad",
+  "Bangkok",
+  "Barcelona",
+  "Beijing",
+  "Berlin",
+  "Bogotá",
+  "Boston",
+  "Brussels",
+  "Budapest",
+  "Buenos Aires",
+  "Cairo",
+  "Cape Town",
+  "Caracas",
+  "Casablanca",
+  "Chicago",
+  "Copenhagen",
+  "Dakar",
+  "Delhi",
+  "Denver",
+  "Dhaka",
+  "Dubai",
+  "Dublin",
+  "Edinburgh",
+  "Helsinki",
+  "Ho Chi Minh City",
+  "Hong Kong",
+  "Honolulu",
+  "Istanbul",
+  "Jakarta",
+  "Johannesburg",
+  "Karachi",
+  "Kathmandu",
+  "Kyiv",
+  "Lagos",
+  "Lima",
+  "Lisbon",
+  "London",
+  "Los Angeles",
+  "Madrid",
+  "Manila",
+  "Melbourne",
+  "Mexico City",
+  "Montréal",
+  "Moscow",
+  "Mumbai",
+  "Nairobi",
+  "New York",
+  "Oslo",
+  "Paris",
+  "Perth",
+  "Prague",
+  "Reykjavík",
+  "Riyadh",
+  "Rome",
+  "San Francisco",
+  "Santiago",
+  "São Paulo",
+  "Seoul",
+  "Singapore",
+  "Stockholm",
+  "Sydney",
+  "Taipei",
+  "Tehran",
+  "Tokyo",
+  "Toronto",
+  "Vancouver",
+  "Vienna",
+  "Warsaw",
+  "Zürich",
+];
+const cityOptions = cities.map((label) => ({ value: label.toLowerCase().replace(/[^a-z]+/g, "-"), label }));
+
+/** One required-field form: plain (the browser checks) or Form({ validate }). */
+const requiredForm = (id: string, validate: boolean, fields: Html) =>
+  Form({
+    id,
+    action: "?required",
+    validate,
+    content: html`${fields}${Button({ label: "Save", type: "submit", attrs: { id: `${id}-go` } })}`,
+  });
 const lorem = html`<p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>`;
 const img = (seed: number, w = 600, h = 338) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
@@ -538,6 +627,46 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "combobox",
       cases: [
+        c(
+          "required — single needs a pick (typed text alone does not count), multi at least one token; in Form({ validate }) (#cat-req-cb) and a plain form (#cat-req-cb-plain)",
+          row(
+            requiredForm(
+              "cat-req-cb",
+              true,
+              html`${
+                Combobox({
+                  id: "cat-req-cb-one",
+                  name: "owner",
+                  label: "Owner",
+                  required: true,
+                  options: cityOptions.slice(0, 6),
+                })
+              }${
+                Combobox({
+                  id: "cat-req-cb-many",
+                  name: "regions",
+                  label: "Regions",
+                  multi: true,
+                  required: true,
+                  requiredMessage: "Add at least one region.",
+                  options: cityOptions.slice(0, 6),
+                })
+              }`,
+            ),
+            requiredForm(
+              "cat-req-cb-plain",
+              false,
+              Combobox({
+                id: "cat-req-cb-plain-many",
+                name: "regions",
+                label: "Regions (plain form)",
+                multi: true,
+                required: true,
+                options: cityOptions.slice(0, 6),
+              }),
+            ),
+          ),
+        ),
         c(
           "loadOnFocus — with an action, the first focus fetches the list once (#cat-cb-focus)",
           Combobox({
@@ -1093,6 +1222,37 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 content: Menu({ items: [{ label: "PDF", href: "#" }, { label: "CSV", href: "#" }] }),
               }),
             ],
+          }),
+        ),
+        c(
+          "a long menu: the panel caps at --dropdown-max-height and scrolls; the search box (on by default) filters items, keeping a parent whose child matches",
+          Dropdown({
+            id: "cat-dd-long",
+            trigger: "Jump to a city",
+            searchPlaceholder: "Filter cities…",
+            emptyText: "No city matches.",
+            content: Menu({
+              id: "cat-dd-long-menu",
+              items: [
+                {
+                  label: "Nordics",
+                  children: ["Copenhagen", "Helsinki", "Oslo", "Reykjavík", "Stockholm"].map((label) => ({
+                    label,
+                    href: "#",
+                  })),
+                },
+                ...cities.map((label) => ({ label, href: "#" })),
+              ],
+            }),
+          }),
+        ),
+        c(
+          "searchable: false",
+          Dropdown({
+            id: "cat-dd-plain",
+            trigger: "No search",
+            searchable: false,
+            content: Menu({ items: [{ label: "Rename", href: "#" }, { label: "Archive", href: "#" }] }),
           }),
         ),
       ]),
@@ -2006,6 +2166,55 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               { value: "se", label: "Sweden", lead: flags.se },
             ],
           }),
+        ),
+        c(
+          "a long list: the search box (on by default) filters as you type, the list caps at --dropdown-max-height and opens scrolled to the pick",
+          Select({
+            id: "cat-sel-long",
+            name: "city",
+            value: "tokyo",
+            options: cityOptions,
+            searchPlaceholder: "Search cities…",
+            emptyText: "No city matches.",
+          }),
+        ),
+        c(
+          "required — nothing picked is reported on the visible field, in a plain form (#cat-req-plain: the browser cannot point at the hidden native control) and in Form({ validate }) (#cat-req-val)",
+          row(
+            requiredForm(
+              "cat-req-plain",
+              false,
+              FormField({
+                label: "City (plain form)",
+                control: Select({
+                  id: "cat-req-plain-sel",
+                  name: "city",
+                  required: true,
+                  placeholder: "Pick a city",
+                  options: cityOptions.slice(0, 12),
+                }),
+              }),
+            ),
+            requiredForm(
+              "cat-req-val",
+              true,
+              FormField({
+                label: "City (validated)",
+                control: Select({
+                  id: "cat-req-val-sel",
+                  name: "city",
+                  required: true,
+                  requiredMessage: "Choose the city you are based in.",
+                  placeholder: "Pick a city",
+                  options: cityOptions.slice(0, 12),
+                }),
+              }),
+            ),
+          ),
+        ),
+        c(
+          "searchable: false — typing on the field jumps to the first option starting with it",
+          Select({ id: "cat-sel-plain", searchable: false, options: cityOptions.slice(0, 8) }),
         ),
         c(
           "plain / placeholder / value",

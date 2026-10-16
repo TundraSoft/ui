@@ -182,6 +182,8 @@ function adminNavbar() {
       Dropdown({
         id: "admin-notifications",
         align: "end",
+        // A feed, not a list of choices: nothing to search.
+        searchable: false,
         trigger: Icon("bell", { size: 18 }),
         content: html`<div class="notif-list"><p class="text-sm text-semibold">Notifications</p>${
           Timeline({ items: notifications })

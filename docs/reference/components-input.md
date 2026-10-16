@@ -204,8 +204,8 @@ Input({
   <input type="text" class="input input-group__control" inputmode="email" data-email-local="" id="work-email" name="email" value="ada" required="" pattern="[^@\s]+" autocomplete="off">
   <span class="input-group__addon input-group__at" aria-hidden="true">@</span>
   <span class="input-group__addon">
-    <div class="select" data-select>
-      <select class="select__native" aria-label="Email domain" id="work-email-domain-native" name="email-domain">
+    <div class="select" data-select data-validate-group>
+      <select class="select__native" aria-label="Email domain" id="work-email-domain-native" name="email-domain" data-validate-proxy="#work-email-domain">
         <option value="acme.com">acme.com</option>
         <option value="acme.io" selected>acme.io</option>
       </select>
@@ -213,30 +213,36 @@ Input({
         <div class="combobox__anchor">
           <div class="combobox__field">
             <input type="hidden" value="acme.io" data-combobox-value>
-            <button type="button" class="combobox__input select__button" id="work-email-domain" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="work-email-domain-list" aria-label="Email domain">
+            <button type="button" class="combobox__input select__button" id="work-email-domain" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="work-email-domain-listbox" aria-label="Email domain">
               <span class="select__text" data-select-text>acme.io</span>
             </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>
           </div>
-          <div class="combobox__list" id="work-email-domain-list" role="listbox" hidden>
-            <div class="combobox__option" role="option" id="work-email-domain-opt-0" aria-selected="false" data-value="acme.com">
-              <span class="combobox__option-label">acme.com</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
+          <div class="combobox__list combobox__list--popup" id="work-email-domain-list" hidden>
+            <div class="combobox__search">
+              <svg width="14" height="14" width="2" …>…</svg>
+              <input type="search" class="combobox__search-input" id="work-email-domain-search" form="work-email-domain-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="work-email-domain-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
             </div>
-            <div class="combobox__option" role="option" id="work-email-domain-opt-1" aria-selected="true" data-value="acme.io">
-              <span class="combobox__option-label">acme.io</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__hints">
-              <span>&uarr;&darr; navigate</span>
-              <span>&crarr; select</span>
-              <span class="combobox__count">2 matches</span>
+            <div class="combobox__options" id="work-email-domain-listbox" role="listbox">
+              <div class="combobox__option" role="option" id="work-email-domain-opt-0" aria-selected="false" data-value="acme.com">
+                <span class="combobox__option-label">acme.com</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="work-email-domain-opt-1" aria-selected="true" data-value="acme.io">
+                <span class="combobox__option-label">acme.io</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__hints">
+                <span>&uarr;&darr; navigate</span>
+                <span>&crarr; select</span>
+                <span class="combobox__count">2 matches</span>
+              </div>
             </div>
           </div>
         </div>
@@ -262,8 +268,8 @@ Input({
 ```html
 <div class="input-group input-group--tel" data-tel-countries>
   <span class="input-group__addon">
-    <div class="select" data-select>
-      <select class="select__native" aria-label="Country code" autocomplete="tel-country-code" id="phone-country-native" name="phone-country">
+    <div class="select" data-select data-validate-group>
+      <select class="select__native" aria-label="Country code" autocomplete="tel-country-code" id="phone-country-native" name="phone-country" data-validate-proxy="#phone-country">
         <option value="+1" selected>+1 US</option>
         <option value="+44">+44 UK</option>
       </select>
@@ -271,30 +277,36 @@ Input({
         <div class="combobox__anchor">
           <div class="combobox__field">
             <input type="hidden" value="+1" data-combobox-value>
-            <button type="button" class="combobox__input select__button" id="phone-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-country-list" aria-label="Country code">
+            <button type="button" class="combobox__input select__button" id="phone-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-country-listbox" aria-label="Country code">
               <span class="select__text" data-select-text>+1 US</span>
             </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>
           </div>
-          <div class="combobox__list" id="phone-country-list" role="listbox" hidden>
-            <div class="combobox__option" role="option" id="phone-country-opt-0" aria-selected="true" data-value="+1">
-              <span class="combobox__option-label">+1 US</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
+          <div class="combobox__list combobox__list--popup" id="phone-country-list" hidden>
+            <div class="combobox__search">
+              <svg width="14" height="14" width="2" …>…</svg>
+              <input type="search" class="combobox__search-input" id="phone-country-search" form="phone-country-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="phone-country-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
             </div>
-            <div class="combobox__option" role="option" id="phone-country-opt-1" aria-selected="false" data-value="+44">
-              <span class="combobox__option-label">+44 UK</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__hints">
-              <span>&uarr;&darr; navigate</span>
-              <span>&crarr; select</span>
-              <span class="combobox__count">2 matches</span>
+            <div class="combobox__options" id="phone-country-listbox" role="listbox">
+              <div class="combobox__option" role="option" id="phone-country-opt-0" aria-selected="true" data-value="+1">
+                <span class="combobox__option-label">+1 US</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="phone-country-opt-1" aria-selected="false" data-value="+44">
+                <span class="combobox__option-label">+44 UK</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__hints">
+                <span>&uarr;&darr; navigate</span>
+                <span>&crarr; select</span>
+                <span class="combobox__count">2 matches</span>
+              </div>
             </div>
           </div>
         </div>
@@ -316,8 +328,8 @@ Input({ id: "phone-flags", name: "phone", type: "tel", countries: sampleCountrie
 ```html
 <div class="input-group input-group--tel" data-tel-countries>
   <span class="input-group__addon">
-    <div class="select" data-select>
-      <select class="select__native" aria-label="Country code" autocomplete="tel-country-code" id="phone-flags-country-native" name="phone-country">
+    <div class="select" data-select data-validate-group>
+      <select class="select__native" aria-label="Country code" autocomplete="tel-country-code" id="phone-flags-country-native" name="phone-country" data-validate-proxy="#phone-flags-country">
         <option value="+33" selected>+33 FR</option>
         <option value="+49">+49 DE</option>
         <option value="+39">+39 IT</option>
@@ -331,63 +343,69 @@ Input({ id: "phone-flags", name: "phone", type: "tel", countries: sampleCountrie
               <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
             </span>
             <input type="hidden" value="+33" data-combobox-value>
-            <button type="button" class="combobox__input select__button" id="phone-flags-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-flags-country-list" aria-label="Country code">
+            <button type="button" class="combobox__input select__button" id="phone-flags-country" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="phone-flags-country-listbox" aria-label="Country code">
               <span class="select__text" data-select-text>+33 FR</span>
             </button>
             <span class="combobox__caret">
               <svg width="15" height="15" width="2" …>…</svg>
             </span>
           </div>
-          <div class="combobox__list" id="phone-flags-country-list" role="listbox" hidden>
-            <div class="combobox__option" role="option" id="phone-flags-country-opt-0" aria-selected="true" data-value="+33">
-              <span class="combobox__option-lead">
-                <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
-              </span>
-              <span class="combobox__option-label">+33 FR</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
+          <div class="combobox__list combobox__list--popup" id="phone-flags-country-list" hidden>
+            <div class="combobox__search">
+              <svg width="14" height="14" width="2" …>…</svg>
+              <input type="search" class="combobox__search-input" id="phone-flags-country-search" form="phone-flags-country-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="phone-flags-country-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
             </div>
-            <div class="combobox__option" role="option" id="phone-flags-country-opt-1" aria-selected="false" data-value="+49">
-              <span class="combobox__option-lead">
-                <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
-              </span>
-              <span class="combobox__option-label">+49 DE</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__option" role="option" id="phone-flags-country-opt-2" aria-selected="false" data-value="+39">
-              <span class="combobox__option-lead">
-                <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
-              </span>
-              <span class="combobox__option-label">+39 IT</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__option" role="option" id="phone-flags-country-opt-3" aria-selected="false" data-value="+81">
-              <span class="combobox__option-lead">
-                <svg width="20" height="14" width="24" height="16" …>…</svg>
-              </span>
-              <span class="combobox__option-label">+81 JP</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__option" role="option" id="phone-flags-country-opt-4" aria-selected="false" data-value="+46">
-              <span class="combobox__option-lead">
-                <svg width="20" height="14" width="24" height="16" width="24" height="16" width="3" height="16" width="24" height="3" …>…</svg>
-              </span>
-              <span class="combobox__option-label">+46 SE</span>
-              <span class="combobox__check" aria-hidden="true">
-                <svg width="15" height="15" width="2" …>…</svg>
-              </span>
-            </div>
-            <div class="combobox__hints">
-              <span>&uarr;&darr; navigate</span>
-              <span>&crarr; select</span>
-              <span class="combobox__count">5 matches</span>
+            <div class="combobox__options" id="phone-flags-country-listbox" role="listbox">
+              <div class="combobox__option" role="option" id="phone-flags-country-opt-0" aria-selected="true" data-value="+33">
+                <span class="combobox__option-lead">
+                  <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+                </span>
+                <span class="combobox__option-label">+33 FR</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="phone-flags-country-opt-1" aria-selected="false" data-value="+49">
+                <span class="combobox__option-lead">
+                  <svg width="20" height="14" width="24" height="16" width="24" width="24" width="24" …>…</svg>
+                </span>
+                <span class="combobox__option-label">+49 DE</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="phone-flags-country-opt-2" aria-selected="false" data-value="+39">
+                <span class="combobox__option-lead">
+                  <svg width="20" height="14" width="24" height="16" width="8" height="16" width="8" height="16" …>…</svg>
+                </span>
+                <span class="combobox__option-label">+39 IT</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="phone-flags-country-opt-3" aria-selected="false" data-value="+81">
+                <span class="combobox__option-lead">
+                  <svg width="20" height="14" width="24" height="16" …>…</svg>
+                </span>
+                <span class="combobox__option-label">+81 JP</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__option" role="option" id="phone-flags-country-opt-4" aria-selected="false" data-value="+46">
+                <span class="combobox__option-lead">
+                  <svg width="20" height="14" width="24" height="16" width="24" height="16" width="3" height="16" width="24" height="3" …>…</svg>
+                </span>
+                <span class="combobox__option-label">+46 SE</span>
+                <span class="combobox__check" aria-hidden="true">
+                  <svg width="15" height="15" width="2" …>…</svg>
+                </span>
+              </div>
+              <div class="combobox__hints">
+                <span>&uarr;&darr; navigate</span>
+                <span>&crarr; select</span>
+                <span class="combobox__count">5 matches</span>
+              </div>
             </div>
           </div>
         </div>

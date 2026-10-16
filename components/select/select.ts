@@ -25,7 +25,27 @@ export type SelectProps = {
   options: SelectOption[];
   disabled?: boolean;
   required?: boolean;
+  /**
+   * The message for a missing required value (`data-msg-required`).
+   * Shown on the visible field — by form.js in a `Form({ validate })`, and
+   * in a plain form too, where the browser cannot show its own bubble on a
+   * hidden native control. @default the browser's text
+   */
+  requiredMessage?: string;
   invalid?: boolean;
+  /**
+   * A search box at the top of the open list that filters the options as
+   * you type (and typing on the closed field starts a search). It is
+   * unnamed and belongs to no form, so it never submits and never stops
+   * Enter in a sibling field from submitting. @default true
+   */
+  searchable?: boolean;
+  /** Placeholder of the search box. @default "Search…" */
+  searchPlaceholder?: string;
+  /** Accessible name of the search box. @default "Search options" */
+  searchLabel?: string;
+  /** Shown when nothing matches the search. @default "No matches." */
+  emptyText?: string;
   extraClass?: string;
   attrs?: Attrs;
 };
@@ -38,11 +58,17 @@ export type SelectProps = {
  * controls, one value: a native `<select>` carries `name` and submits
  * (and is what a no-JS page shows); the combobox UI is what an enhanced
  * page shows, and select.js keeps the two in step both ways. Give it an
- * `id` or `name` so the list and options get stable ids.
+ * `id` or `name` so the list and options get stable ids. The open list
+ * caps at `--dropdown-max-height` and scrolls, with a search box on top
+ * unless `searchable: false`.
  */
 export function Select(props: SelectProps): Html {
   const base = props.id ?? (props.name ? `select-${props.name}` : "select");
+  // `<base>-list` is the popup (what opens and closes), `<base>-listbox`
+  // the scrolling listbox inside it, under the search box.
   const listId = `${base}-list`;
+  const listboxId = `${base}-listbox`;
+  const searchable = props.searchable !== false;
   // Like a native select: with no value and no placeholder, the first
   // option is the selection (and what submits).
   const current = props.options.find((o) => o.value === props.value) ??
@@ -60,6 +86,9 @@ export function Select(props: SelectProps): Html {
     disabled: props.disabled ? "" : undefined,
     required: props.required ? "" : undefined,
     "aria-invalid": props.invalid ? "true" : undefined,
+    "data-msg-required": props.requiredMessage,
+    // Hidden behind the UI, so its errors are reported on the button.
+    "data-validate-proxy": `#${base}`,
   });
 
   const placeholderOption = props.placeholder
@@ -87,12 +116,26 @@ export function Select(props: SelectProps): Html {
 
   const hasLeads = props.options.some((o) => o.lead);
 
+  // `form` names no form, so the box has no form owner: it is not a field
+  // that blocks implicit submission (a search box beside this Select still
+  // submits on Enter), and it is unnamed, so it never posts.
+  const search = searchable
+    ? html`
+      <div
+        class="combobox__search">${Icon("search", {
+          size: 14,
+        })}<input type="search" class="combobox__search-input" id="${base}-search" form="${base}-search-scope" placeholder="${props
+          .searchPlaceholder ?? "Search…"}" aria-label="${props.searchLabel ??
+          "Search options"}" aria-controls="${listboxId}" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip></div>
+    `
+    : "";
+
   // The visible control is a button (the APG "select-only combobox"): a
   // read-only text input would count as a second text field and stop
   // Enter in a sibling search box from submitting its form.
   return html`
     <div class="${wrapperClass}"
-      data-select>
+      data-select data-validate-group>
       <select${classAttrs(
         "select__native",
         nativeAttrs,
@@ -100,7 +143,7 @@ export function Select(props: SelectProps): Html {
         ? html`<span class="select__lead" data-select-lead aria-hidden="true">${current?.lead ?? ""}</span>`
         : ""}<input type="hidden" value="${current
         ?.value ??
-        ""}" data-combobox-value><button type="button" class="combobox__input select__button" id="${base}" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="${listId}"${renderAttrs(
+        ""}" data-combobox-value><button type="button" class="combobox__input select__button" id="${base}" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="${listboxId}"${renderAttrs(
           {
             disabled: props.disabled ? "" : undefined,
             "aria-invalid": props.invalid ? "true" : undefined,
@@ -113,10 +156,13 @@ export function Select(props: SelectProps): Html {
         )}><span class="${cx("select__text", !current && "select__text--placeholder")}" data-select-text>${current
         ?.label ?? props.placeholder ?? ""}</span></button><span class="combobox__caret">${Icon("chevronDown", {
           size: 15,
-        })}</span></div><div class="combobox__list" id="${listId}" role="listbox" hidden>${ComboboxList({
+        })}</span></div><div class="combobox__list combobox__list--popup" id="${listId}" hidden>${search}<div class="combobox__options" id="${listboxId}" role="listbox"${renderAttrs(
+          { "data-combobox-empty": props.emptyText },
+        )}>${ComboboxList({
           id: base,
           options: props.options,
           selected: current?.value,
-        })}</div></div></div></div>
+          emptyText: props.emptyText,
+        })}</div></div></div></div></div>
   `;
 }
