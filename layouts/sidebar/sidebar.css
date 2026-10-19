@@ -85,3 +85,14 @@
     height: 100vh;
   }
 }
+
+/* Print / PDF: the sticky sidebar is one viewport tall, so a long page
+   printed (or saved as PDF) showed canvas under it from the second
+   screen down. In print it is an ordinary column the page's height. */
+@media print {
+  .layout--sidebar .layout__body > .sidebar {
+    position: static;
+    height: auto;
+    align-self: stretch;
+  }
+}

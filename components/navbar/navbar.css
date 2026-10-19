@@ -34,6 +34,9 @@
   color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
   padding-block: var(--space-2);
+  /* "How it works" stays one link, not three stacked words, when the bar
+     is tight; the collapsed phone menu below lets it wrap again. */
+  white-space: nowrap;
 
   &:hover {
     color: var(--color-primary);
@@ -61,6 +64,11 @@
   /* Never shrink below the buttons; the brand (min-width: 0, ellipsis)
      is what gives way on narrow screens. */
   flex-shrink: 0;
+}
+
+/* Phone-menu controls (menuActions): only inside the collapsed menu. */
+.navbar__menu-actions {
+  display: none;
 }
 
 .navbar__toggle {
@@ -120,9 +128,19 @@
 
   .navbar__link {
     padding-block: var(--space-3);
+    white-space: normal;
   }
 
   .navbar__toggle {
     display: inline-flex;
+  }
+
+  .navbar__menu-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-top: var(--border-width) solid var(--color-border);
   }
 }

@@ -32,6 +32,7 @@ Navbar(props: NavbarProps): Html
 | `brand` | `string | Html` |  |  |
 | `links` | `NavbarLink[]` |  |  |
 | `actions` | `string | Html` |  | Extra content pinned to the end, e.g. a user menu or theme switch. |
+| `menuActions` | `Html` |  | Controls that move into the collapsed phone menu (below 768px), after the links — where `actions` has run out of room. Hidden on wider screens. The usual pairing: the same control in `actions` carries `hide-md`, so each width shows it exactly once. Renders the menu toggle even when there are no `links`. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -71,4 +72,4 @@ Navbar({
 
 Classes defined by `components/navbar/navbar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.navbar`, `.navbar__actions`, `.navbar__brand`, `.navbar__link`, `.navbar__link--active`, `.navbar__nav`, `.navbar__spacer`, `.navbar__toggle`, `.navbar__toggle--sidebar`
+`.js`, `.navbar`, `.navbar__actions`, `.navbar__brand`, `.navbar__link`, `.navbar__link--active`, `.navbar__menu-actions`, `.navbar__nav`, `.navbar__spacer`, `.navbar__toggle`, `.navbar__toggle--sidebar`

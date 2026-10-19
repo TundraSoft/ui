@@ -22,6 +22,7 @@ import { Chart, ChartScript } from "../../components/chart/chart.ts";
 import { Checkbox, ChoiceGroup, Radio } from "../../components/choice/choice.ts";
 import { Accordion, Collapsible } from "../../components/collapsible/collapsible.ts";
 import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
+import { ConsentBanner } from "../../components/consent/consent.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker } from "../../components/datepicker/datepicker.ts";
@@ -181,6 +182,19 @@ export const usage: Record<string, UsageExample[]> = {
           })
         }`,
     },
+    {
+      title: "Money on the value axis",
+      note:
+        "Options travel to the page as JSON, so a formatter function cannot: `format` names the number format instead.",
+      render: () =>
+        Chart({
+          id: "equity",
+          type: "line",
+          format: "currency:USD",
+          series: [{ name: "Equity", data: [12000, 12450.5, 12210, 12890] }],
+          categories: ["Q1", "Q2", "Q3", "Q4"],
+        }),
+    },
   ],
   "components/choice": [
     {
@@ -250,6 +264,25 @@ export const usage: Record<string, UsageExample[]> = {
           query: "gr",
           options: [{ value: "grace", label: "Grace Hopper", meta: "Ops" }],
         }),
+    },
+  ],
+  "components/consent": [
+    {
+      title: "Analytics only after Accept",
+      note:
+        "Rendered hidden: consent.js shows it to a visitor who has not chosen and loads the scripts only after Accept. A `[data-consent-open]` link anywhere reopens it.",
+      render: () =>
+        html`${
+          ConsentBanner({
+            title: "Cookies for analytics?",
+            body: html`We would use Google Analytics to see which pages help. <a href="/privacy">Privacy notice</a>`,
+            loaders: [
+              { src: "https://www.googletagmanager.com/gtag/js?id=G-XXXX", async: true },
+              { src: "/public/ga.js", attrs: { "data-id": "G-XXXX" } },
+            ],
+            storageKey: "acme-consent",
+          })
+        }<a href="#" data-consent-open>Cookie settings</a>`,
     },
   ],
   "components/command": [
@@ -1095,6 +1128,15 @@ export const usage: Record<string, UsageExample[]> = {
           unitOne: "worker",
         }),
     },
+    {
+      title: "In a FormField, value without a second label",
+      render: () =>
+        FormField({
+          label: "Position size",
+          id: "size",
+          control: Slider({ id: "size", name: "size", showValue: true, min: 0, max: 500, step: 50, value: 150 }),
+        }),
+    },
   ],
   "components/stat": [
     {
@@ -1112,6 +1154,11 @@ export const usage: Record<string, UsageExample[]> = {
           hint: "Required for admins from 1 Oct.",
           checked: true,
         }),
+    },
+    {
+      title: "A word that follows the state",
+      note: "Both words are rendered; CSS shows the one matching the checkbox, so no script swaps the text.",
+      render: () => Switch({ name: "analytics", checked: true, labels: { on: "On", off: "Off" } }),
     },
   ],
   "components/tabs": [
@@ -1415,6 +1462,24 @@ export const usage: Record<string, UsageExample[]> = {
           }),
           content: html`<h1>Invoices your customers pay on time</h1>`,
           footer: html`<p>© Acme</p>`,
+        }),
+    },
+    {
+      title: "Full-width bands under an announcement strip",
+      note:
+        "`bleed` drops the column's padding so each section spans the page; `subheader` is a row of its own under the navbar.",
+      render: () =>
+        StackedLayout({
+          width: "bleed",
+          header: Navbar({ brand: "Acme", links: [{ href: "/how", label: "How it works" }] }),
+          subheader: html`<p class="text-sm">Markets close early on Friday.</p>`,
+          content: html`
+            <section class="hero">
+              <div class="container">
+                <h1>Trade the open</h1>
+              </div>
+            </section>
+          `,
         }),
     },
   ],

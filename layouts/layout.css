@@ -33,6 +33,25 @@
   position: static;
 }
 
+/* With a subheader the header wraps: its row first, then the strip on a
+   line of its own. The row's navbar takes a zero basis so it is never the
+   item that wraps (an auto basis is its full width, which on a phone is
+   wider than the header). */
+.layout__header--sub {
+  flex-wrap: wrap;
+}
+
+.layout__header--sub > .navbar {
+  flex-basis: 0;
+}
+
+.layout__subheader {
+  flex: 1 0 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
 .layout--static-header .layout__header {
   position: static;
 }

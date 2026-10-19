@@ -23,6 +23,7 @@ A reading column with an optional aside.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `header` | `Html` |  |  |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `content` | `Html` | yes |  |
 | `aside` | `Html` |  | Table of contents, related posts, author card… |
 | `asideSide` | `"start" | "end"` |  |  |

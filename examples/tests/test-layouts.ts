@@ -85,6 +85,49 @@ for (const name of layouts) {
       }
     }
 
+    // 2b. StackedLayout (issues #68, #69). The subheader is a row of its
+    // own under the navbar, as wide as the header, at every band; a centred
+    // wrapper (max-width + auto margins) fills up to its cap instead of
+    // shrinking to its content; width: "bleed" drops the column padding.
+    if (name === "stacked") {
+      const frame = await page.evaluate(() => {
+        const header = document.querySelector(".layout__header")!.getBoundingClientRect();
+        const nav = document.querySelector(".layout__header > .navbar")!.getBoundingClientRect();
+        const sub = document.querySelector(".layout__subheader")!.getBoundingClientRect();
+        const content = document.getElementById("main-content")!;
+        const wrap = document.createElement("div");
+        wrap.className = "probe-wrap";
+        wrap.textContent = "x";
+        const sheet = document.createElement("style");
+        sheet.textContent = ".probe-wrap { max-width: 600px; margin-inline: auto; }";
+        document.head.append(sheet);
+        content.append(wrap);
+        const inner = content.clientWidth - parseFloat(getComputedStyle(content).paddingLeft) -
+          parseFloat(getComputedStyle(content).paddingRight);
+        const wrapWidth = wrap.getBoundingClientRect().width;
+        wrap.remove();
+        const layout = document.querySelector(".layout")!;
+        layout.classList.add("layout--bleed");
+        const bleed = getComputedStyle(content).paddingLeft;
+        layout.classList.remove("layout--bleed");
+        return {
+          rowBelow: sub.top >= nav.bottom - 1,
+          fullWidth: Math.abs(sub.width - header.width) < 1,
+          navOneRow: nav.height < 80,
+          wrap: Math.round(wrapWidth),
+          expected: Math.round(Math.min(600, inner)),
+          bleed,
+        };
+      });
+      if (!frame.rowBelow || !frame.fullWidth || !frame.navOneRow) {
+        fail(`${tag}: the subheader is not a full-width row under the navbar (${JSON.stringify(frame)})`);
+      }
+      if (Math.abs(frame.wrap - frame.expected) > 1) {
+        fail(`${tag}: a centred wrapper shrinks to its content (${frame.wrap}px, expected ${frame.expected}px)`);
+      }
+      if (frame.bleed !== "0px") fail(`${tag}: layout--bleed keeps the column padding (${frame.bleed})`);
+    }
+
     // 3. Navigation reachable.
     const nav = await page.evaluate(() => {
       const visible = (el: Element | null) => {

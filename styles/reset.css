@@ -8,10 +8,11 @@
   margin: 0;
 }
 
+/* font-family, line-height and the body's colour, ground and size live
+   in styles/page.css, outside every layer, so a host page's unlayered
+   defaults cannot override them. */
 html {
   -webkit-text-size-adjust: 100%;
-  font-family: var(--font-family-base);
-  line-height: var(--line-height-base);
   /* Keep fragment targets (#tab-…) clear of a sticky navbar. */
   scroll-padding-top: var(--scroll-padding-top);
 }
@@ -20,13 +21,6 @@ html {
    a #fragment should land instantly, not animate 200px on load. */
 html:focus-within {
   scroll-behavior: smooth;
-}
-
-body {
-  min-height: 100vh;
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-  background: var(--color-canvas);
 }
 
 /* Component lists (every one carries a class) lose bullets AND the UA's

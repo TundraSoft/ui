@@ -105,6 +105,15 @@ too, with no `!important`.
 
 If your theme itself wants layers, declare them after the bundle's; an unlayered rule still wins over both.
 
+The one exception is the handful of page-level declarations everything inherits from —
+`html { font-family;
+line-height }`, `body { margin; min-height; font-size; color; background }` and `color-scheme`
+(`styles/page.css`). They are **unlayered**, because a host that injects its own unlayered page defaults (an embedding
+frame, a preview iframe, a CMS: `body { font: 14px system-ui; color: #000; background: #fff }`) would otherwise beat a
+layered reset — black text on a dark theme's cards and the system font instead of yours. They use plain `html` / `body`
+selectors, so they compete on the host's terms (the later stylesheet wins) and a theme's own `body { … }`, loaded after
+`ui.css`, still overrides them. Do not restate them in a theme to "fix" a host; load `ui.css` after the host's styles.
+
 ---
 
 ## Custom partials
@@ -131,8 +140,34 @@ sidebar in light mode, stat chips, invoice totals — all partials, no base edit
 persists it in `localStorage`. It runs after first paint, so a stored dark preference can flash light for one frame; the
 CSP-clean fix is to set `data-theme` server-side from a cookie — a rAPId app's job, not the library's.
 
+Who decides, in order: an explicit `data-theme` on `<html>` (the person's choice — rendered by the server or stored by
+the toggle), then **`data-theme-default`** on `<html>` (the site's default for someone who has not chosen), then the
+system's `prefers-color-scheme`. The tokens honour that order in CSS, so `<html data-theme-default="dark">` paints dark
+with no script and no flash, and the toggle reads the same order, so its first click always flips what is on screen. The
+default is never stored. `createCoreTemplate({ htmlAttrs: { "data-theme-default": "dark" } })` renders it in a rAPId
+app. `color-scheme` follows too, so native controls and scrollbars match the palette.
+
+A theme that wants dark mode adds its two dark blocks with the same selectors as `tokens/default.css`:
+
+```css
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme-default="light"]) {
+    /* dark palette */
+  }
+}
+:root[data-theme="dark"],
+:root[data-theme-default="dark"]:not([data-theme="light"]) {
+  /* the same dark palette */
+}
+```
+
+A theme with no dark blocks is light-only; add `:root { color-scheme: light }` to it so native controls and scrollbars
+stay light when the visitor's system is dark (the library's own system-preference rule has no specificity, so that one
+line wins).
+
 A dark-first theme (Console) can make `:root` _and_ `[data-theme="dark"]` the dark palette and only
-`[data-theme="light"]` different; the first toggle from unset to dark is then a legitimate no-op.
+`[data-theme="light"]` different. Render `data-theme-default="dark"` with it: without it the toggle reads the system's
+light preference and its first click is a no-op.
 
 ---
 

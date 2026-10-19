@@ -1,0 +1,81 @@
+/*
+ * Consent banner: a card fixed to the viewport's foot, above the
+ * safe-area inset. The full-width strip it sits in lets clicks through;
+ * only the card takes them. Accept and Reject are the same button.
+ */
+.consent {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  /* The toasts' level: the core template renders the banner after the
+     toast region, so it paints above a toast — nothing may sit on its
+     Reject button. */
+  z-index: var(--z-toast);
+  padding: var(--space-4);
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.consent[hidden] {
+  display: none;
+}
+
+.consent__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  max-width: var(--consent-max-width);
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+
+.consent__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.consent__title {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.consent__body {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.consent__body a {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.consent__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+}
+
+/* Phone: text above, the two buttons sharing the row half and half. */
+@media screen and (max-width: 575px) {
+  .consent {
+    padding: var(--space-2);
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  }
+
+  .consent__card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-4);
+  }
+
+  .consent__actions > * {
+    flex: 1 1 0;
+  }
+}

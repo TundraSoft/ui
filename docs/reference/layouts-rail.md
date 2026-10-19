@@ -35,6 +35,7 @@ Icon rail + content; the rail becomes a bottom tab bar on phones.
 | `items` | `RailItem[]` | yes |  |
 | `end` | `Html` |  | Pinned to the rail's end (settings, avatar). Hidden on mobile. |
 | `header` | `Html` |  |  |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `content` | `Html` | yes |  |
 | `width` | `"fluid" | "boxed"` |  |  |
 | `contentId` | `string` |  |  |

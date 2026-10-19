@@ -45,6 +45,12 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* A value with no label beside it (showValue in a FormField) sits at the
+   end of the row, where it would be with one. */
+.slider__value:only-child {
+  margin-inline-start: auto;
+}
+
 .slider__value {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);

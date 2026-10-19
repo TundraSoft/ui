@@ -73,7 +73,13 @@
   border-bottom-right-radius: var(--radius-md);
 }
 
-/* The heading is only a landmark around the trigger — no rhythm of its own. */
+/* The heading is only a landmark around the trigger — no rhythm and no
+   type of its own. Without the font reset it took the global h3 rules
+   (display family, --font-size-2xl, tight tracking), and the trigger's
+   `font: inherit` passed them on: FAQ rows at heading size. */
 .collapsible__heading {
   margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }

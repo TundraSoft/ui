@@ -48,7 +48,17 @@ export type DemoRoutes = {
   month: (year: number, month: number) => string;
   day: (iso: string) => string;
   preset: (name: string) => string;
+  /** A stand-in analytics loader the consent banner runs after Accept (`consentSampleScript`). */
+  consentLoader: string;
 };
+
+/**
+ * The consent banner's sample loader — what a tracker's loader would be.
+ * It only counts its runs (`window.consentSample`,
+ * `<html data-consent-sample>`) so a test can tell it ran, and how often.
+ */
+export const consentSampleScript =
+  `window.consentSample = (window.consentSample || 0) + 1;\ndocument.documentElement.dataset.consentSample = String(window.consentSample);\n`;
 
 /** Inert links for a static page: they render, but go nowhere. */
 export const staticRoutes: DemoRoutes = {
@@ -66,6 +76,7 @@ export const staticRoutes: DemoRoutes = {
   month: (y, m) => `?month=${y}-${String(m + 1).padStart(2, "0")}`,
   day: (iso) => `?day=${iso}`,
   preset: (name) => `?preset=${name}`,
+  consentLoader: "consent-sample.js",
 };
 
 /** Case-insensitive contains — what a server would do with `?q=`. */

@@ -23,6 +23,7 @@ Header + side navigation + content. The app frame.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `header` | `Html` |  | Usually a `Navbar`. The drawer toggle is added in front of it. |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `sidebar` | `Html` | yes | A `Sidebar` component whose `id` equals `sidebarId`. |
 | `sidebarId` | `string` | yes |  |
 | `content` | `Html` | yes |  |

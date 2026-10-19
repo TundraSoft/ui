@@ -15,6 +15,7 @@
     "./choice": "./components/choice/choice.ts",
     "./collapsible": "./components/collapsible/collapsible.ts",
     "./combobox": "./components/combobox/combobox.ts",
+    "./consent": "./components/consent/consent.ts",
     "./command": "./components/command/command.ts",
     "./data-table": "./components/data-table/data-table.ts",
     "./datepicker": "./components/datepicker/datepicker.ts",

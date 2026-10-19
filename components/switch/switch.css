@@ -70,3 +70,18 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+
+/* State words (labels: { on, off }): both rendered, the one that does not
+   match the checkbox hidden — display: none also drops it from the
+   accessible name, so a word-only switch is named by its current state. */
+.switch__input:checked ~ * .switch__state--off,
+.switch__input:not(:checked) ~ * .switch__state--on {
+  display: none;
+}
+
+/* Beside a label the word is a quieter echo after it. */
+.switch__label > .switch__states {
+  margin-inline-start: var(--space-2);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}

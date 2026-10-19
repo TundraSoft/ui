@@ -7,6 +7,7 @@ import {
   raw,
   template,
 } from "@tundralibs/rapid/ui";
+import { ConsentBanner, type ConsentBannerProps } from "../components/consent/consent.ts";
 import { ConfirmModal } from "../components/modal/modal.ts";
 import { ToastRegion } from "../components/toast/toast.ts";
 import { type Attrs, renderAttrs } from "../shared/attrs.ts";
@@ -75,6 +76,11 @@ export type CoreOptions = {
    * @default true
    */
   confirmDialog?: boolean;
+  /**
+   * Render a `ConsentBanner` on every page (hidden until consent.js finds
+   * no stored choice) — the analytics loaders run only after Accept.
+   */
+  consent?: ConsentBannerProps;
 };
 
 const HISTORY_PATH = "/__rapid/history.js";
@@ -165,7 +171,7 @@ export function createCoreTemplate(options: CoreOptions = {}): RapidTemplate<Rap
         ${raw('<a class="skip-link" href="#main-content">Skip to content</a>')}${data
           .body}${options.toastRegion === false ? "" : ToastRegion()}${options.confirmDialog === false
           ? ""
-          : ConfirmModal()}<script src="${view.runtimePath}"
+          : ConfirmModal()}${options.consent ? ConsentBanner(options.consent) : ""}<script src="${view.runtimePath}"
           defer></script>${options.history ? html`<script src="${HISTORY_PATH}" defer></script>` : ""}${options.live
             ? html`<script src="${LIVE_PATH}" defer></script>`
             : ""}${js}${extraJs.map((s) =>

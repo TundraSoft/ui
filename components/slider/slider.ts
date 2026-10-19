@@ -5,7 +5,15 @@ import { cx } from "../../shared/classnames.ts";
 export type SliderProps = {
   id: string;
   name: string;
+  /** The slider's own label; it also turns on the live value readout. */
   label?: string;
+  /**
+   * Show the live value without a label of the slider's own — for a
+   * Slider inside a `FormField`, whose label already names it. The value
+   * sits at the end of the row above the track. @default true when
+   * `label` is set
+   */
+  showValue?: boolean;
   min?: number;
   max?: number;
   step?: number;
@@ -58,12 +66,12 @@ export function Slider(props: SliderProps): Html {
         "data-slider-unit": props.unit,
         "data-slider-unit-one": props.unitOne,
         "data-slider-labels": stepped ? JSON.stringify(props.scale) : undefined,
-      })}>${props.label
+      })}>${props.label || props.showValue
         ? html`
-          <div
-            class="slider__head"><label class="slider__label" for="${props.id}">${props
-              .label}</label><output class="slider__value" for="${props
-              .id}" data-slider-output>${initial}</output></div>
+          <div class="slider__head">${props.label &&
+            html`<label class="slider__label" for="${props.id}">${props.label}</label>`}${props.showValue === false
+            ? ""
+            : html`<output class="slider__value" for="${props.id}" data-slider-output>${initial}</output>`}</div>
         `
         : ""}<div class="slider__control"><input class="slider__input" id="${props.id}" name="${props
         .name}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"${renderAttrs({

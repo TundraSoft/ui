@@ -26,6 +26,7 @@ Switch(props: SwitchProps): Html
 | `checked` | `boolean` |  |  |
 | `disabled` | `boolean` |  |  |
 | `label` | `string | Html` |  |  |
+| `labels` | `{ on: string | Html; off: string | Html }` |  | Words that follow the checked state ("On" / "Off", "Shown" / "Hidden"): both are rendered and CSS shows the one that matches, so the word agrees with the control at every moment with no script and no re-render. Alone, the word is the switch's label. Beside a `label`, the label stays the switch's name and the word is a visual echo of the state (hidden from assistive tech, which announces checked/unchecked). |
 | `hint` | `string | Html` |  | Secondary line under the label explaining the consequence. |
 | `attrs` | `Attrs` |  |  |
 
@@ -57,8 +58,29 @@ Switch({
 </label>
 ```
 
+### A word that follows the state
+
+Both words are rendered; CSS shows the one matching the checkbox, so no script swaps the text.
+
+```ts
+Switch({ name: "analytics", checked: true, labels: { on: "On", off: "Off" } })
+```
+
+```html
+<label class="switch">
+  <input type="checkbox" class="switch__input" name="analytics" checked="">
+  <span class="switch__track">
+    <span class="switch__thumb"></span>
+  </span>
+  <span class="switch__label switch__states">
+    <span class="switch__state switch__state--on">On</span>
+    <span class="switch__state switch__state--off">Off</span>
+  </span>
+</label>
+```
+
 ## CSS hooks
 
 Classes defined by `components/switch/switch.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.switch`, `.switch__hint`, `.switch__input`, `.switch__label`, `.switch__text`, `.switch__thumb`, `.switch__track`
+`.switch`, `.switch__hint`, `.switch__input`, `.switch__label`, `.switch__state--off`, `.switch__state--on`, `.switch__states`, `.switch__text`, `.switch__thumb`, `.switch__track`

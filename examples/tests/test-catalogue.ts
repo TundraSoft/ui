@@ -100,6 +100,32 @@ for await (const dir of readDir("components", { includeFiles: false })) {
   if (!/^<span class="tooltip own"/.test(tip)) fail(`inline: Tooltip does not merge attrs.class (${tip.slice(0, 40)})`);
 }
 
+/* --------------------------------------------- chart: JSON-only options */
+{
+  // A function in Chart options cannot reach the page (JSON); Chart says so
+  // on the server, naming the path, instead of the chart silently losing it.
+  const { render } = await import("@tundralibs/rapid/ui");
+  const { Chart } = await import("../../components/chart/chart.ts");
+  const warns: string[] = [];
+  const warn = console.warn;
+  console.warn = (...args: unknown[]) => void warns.push(args.join(" "));
+  const out = render(
+    Chart({
+      id: "fn-probe",
+      type: "line",
+      series: [{ data: [1, 2] }],
+      format: "currency:EUR",
+      options: { yaxis: { labels: { formatter: (v: number) => `$${v}` } } },
+    }),
+  );
+  console.warn = warn;
+  check(
+    warns.some((w) => w.includes("fn-probe options.yaxis.labels.formatter")),
+    `chart: a function in options is not reported (${warns})`,
+  );
+  check(/data-chart-format="[^"]*currency:EUR/.test(out), "chart: format does not reach data-chart-format");
+}
+
 /* ------------------------------------------------------------ sprite */
 {
   const sprite = await readTextFile("dist/icons.svg");
@@ -132,6 +158,361 @@ async function openPage(file: string): Promise<Page> {
   await page.evaluateOnNewDocument(() => localStorage.clear());
   await page.goto(`file://${root}/${file}`, { waitUntil: "networkidle0", timeout: 30000 });
   return page;
+}
+
+/**
+ * The fixes from the Outsmart Markets rebuild and the Brevily asks
+ * (issues #63–#72, 2026-10-19): page rules a host cannot override,
+ * data-theme-default, the search InputIcon, a Segmented that scrolls
+ * inside itself, the accordion's type, chart number formats, Slider
+ * showValue, Navbar menuActions, Switch state words and the consent
+ * banner. One block per page.
+ */
+async function outsmartFixes(page: Page, group: string, file: string): Promise<void> {
+  const fresh = async (seed?: Record<string, string>, width = 1280) => {
+    const p = await browser.newPage();
+    await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+    await p.setViewport({ width, height: 800 });
+    p.on("pageerror", (e) => fail(`${file} (fresh): pageerror: ${e}`));
+    await p.evaluateOnNewDocument((seed) => {
+      localStorage.clear();
+      for (const [k, v] of Object.entries(seed ?? {})) localStorage.setItem(k, v);
+    }, seed ?? {});
+    await p.goto(`file://${root}/${file}`, { waitUntil: "networkidle0", timeout: 30000 });
+    return p;
+  };
+
+  if (group === "forms") {
+    // #66: the glyph paints above the search control's .input-clear wrapper.
+    // Hit-testing follows paint order, so let the glyph take the hit for a
+    // moment and ask what is on top at its centre.
+    const glyph = await page.$eval("#cat-input-icon-search", (host) => {
+      host.scrollIntoView({ block: "center", behavior: "instant" });
+      const g = host.querySelector(".input-icon__glyph") as HTMLElement;
+      g.style.pointerEvents = "auto";
+      const r = g.getBoundingClientRect();
+      const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      g.style.pointerEvents = "";
+      const clear = host.querySelector(".input-clear")!.getBoundingClientRect();
+      return {
+        onTop: !!at && g.contains(at),
+        cls: host.className,
+        fill: clear.width / host.getBoundingClientRect().width,
+      };
+    });
+    check(glyph.onTop, "forms: the search InputIcon's glyph is painted under the clear-button wrapper");
+    check(glyph.fill > 0.99, `forms: the search InputIcon's control does not fill the row (${glyph.fill.toFixed(2)})`);
+    check(glyph.cls === "input-icon cat-own-class", `forms: InputIcon does not merge attrs.class (${glyph.cls})`);
+
+    // #67: as wide as its options inside a FormField, not the field.
+    const segWide = await page.$eval("#cat-seg-long", (el) => {
+      const seg = el.closest(".segmented")!;
+      return {
+        seg: seg.getBoundingClientRect().width,
+        field: seg.closest(".form-field")!.getBoundingClientRect().width,
+      };
+    });
+    check(segWide.seg < segWide.field - 1, `forms: Segmented stretches to its FormField (${JSON.stringify(segWide)})`);
+
+    // #72: Slider showValue — a value without a label of its own.
+    const slider = await page.$eval("#cat-sl-field", (input) => {
+      const root = input.closest(".slider")!;
+      const out = root.querySelector(".slider__value")!;
+      const before = out.textContent;
+      (input as HTMLInputElement).value = "250";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      const head = out.parentElement!.getBoundingClientRect();
+      const o = out.getBoundingClientRect();
+      return {
+        label: !!root.querySelector(".slider__label"),
+        before,
+        after: out.textContent,
+        end: head.right - o.right,
+      };
+    });
+    check(!slider.label, "forms: Slider showValue renders a label of its own");
+    check(
+      slider.before === "150 shares" && slider.after === "250 shares",
+      `forms: Slider showValue output (${slider.before} → ${slider.after})`,
+    );
+    check(Math.abs(slider.end) < 1, `forms: Slider showValue output is not at the row's end (${slider.end}px)`);
+
+    // #64: the state word follows the checkbox, with no script.
+    const word = (id: string) => page.$eval(`#${id}`, (el) => (el.closest("label") as HTMLElement).innerText.trim());
+    const wordBefore = await word("cat-sw-state");
+    await page.$eval("#cat-sw-state", (el) => (el as HTMLInputElement).click());
+    const wordAfter = await word("cat-sw-state");
+    check(
+      wordBefore === "Off" && wordAfter === "On",
+      `forms: Switch labels did not follow (${wordBefore} → ${wordAfter})`,
+    );
+    const labelled = await page.$eval("#cat-sw-state-label", (el) => {
+      const label = el.closest("label")!;
+      return {
+        name: label.querySelector(".switch__label")!.firstChild?.textContent,
+        text: (label.querySelector(".switch__states") as HTMLElement).innerText.trim(),
+        hidden: label.querySelector(".switch__states")!.getAttribute("aria-hidden"),
+      };
+    });
+    check(
+      labelled.name === "Profile" && labelled.text === "Shown" && labelled.hidden === "true",
+      `forms: Switch label + labels (${JSON.stringify(labelled)})`,
+    );
+
+    // #67 on a phone: scrolls inside, never widens the page; the thumb
+    // stays on the checked option however far the control is scrolled.
+    const phone = await fresh(undefined, 375);
+    const thumb = () =>
+      phone.$eval("#cat-seg-long", (el) => {
+        const seg = el.closest(".segmented") as HTMLElement;
+        const label = seg.querySelector(".segmented__input:checked + .segmented__label")!.getBoundingClientRect();
+        const r = seg.getBoundingClientRect();
+        const x = parseFloat(getComputedStyle(seg).getPropertyValue("--segmented-x"));
+        const left = r.left + seg.clientLeft + 3 + x - seg.scrollLeft;
+        return {
+          scrolls: seg.scrollWidth > seg.clientWidth,
+          off: Math.abs(left - label.left),
+          shown: label.left >= r.left - 1 && label.right <= r.right + 1,
+          page: document.documentElement.scrollWidth - innerWidth,
+        };
+      });
+    const atLoad = await thumb();
+    check(atLoad.page <= 0, `forms@375: a long Segmented widens the page by ${atLoad.page}px`);
+    check(atLoad.scrolls, "forms@375: the long Segmented does not scroll inside itself");
+    check(
+      atLoad.shown && atLoad.off < 1,
+      `forms@375: Segmented thumb/checked option at load (${JSON.stringify(atLoad)})`,
+    );
+    for (const value of ["conservative", "custom"]) {
+      await phone.$eval(`#cat-seg-long input[value="${value}"]`, (el) => (el as HTMLInputElement).click());
+      await pause(350);
+      const after = await thumb();
+      check(
+        after.shown && after.off < 1,
+        `forms@375: Segmented thumb after picking ${value} (${JSON.stringify(after)})`,
+      );
+    }
+    await phone.close();
+  }
+
+  if (group === "cards") {
+    // #70: an accordion row reads at body size, not h3 size.
+    const acc = await page.$eval("#cat-acc .collapsible__trigger", (t) => {
+      const cs = getComputedStyle(t);
+      const body = getComputedStyle(t.closest(".collapsible")!);
+      return { size: cs.fontSize, body: body.fontSize, family: cs.fontFamily === body.fontFamily };
+    });
+    check(
+      acc.size === acc.body && acc.family,
+      `cards: accordion trigger type is not the body's (${JSON.stringify(acc)})`,
+    );
+
+    // #65: a host's unlayered page defaults (an embedding frame's) placed
+    // ahead of the bundle must not beat the library's page rules.
+    const host = await fresh();
+    const page65 = await host.evaluate(() => {
+      const style = document.createElement("style");
+      style.textContent =
+        'body{margin:0;padding:0;font:14px "Host Sans",serif;background:#fff;color:#000}:root{color-scheme:light}';
+      document.head.prepend(style);
+      document.documentElement.dataset.theme = "dark";
+      const root = getComputedStyle(document.documentElement);
+      const probe = document.createElement("span");
+      probe.style.color = "var(--color-text)";
+      probe.style.backgroundColor = "var(--color-canvas)";
+      document.body.append(probe);
+      const want = getComputedStyle(probe);
+      const body = getComputedStyle(document.body);
+      const title = getComputedStyle(document.querySelector(".card__title")!);
+      const out = {
+        color: body.color === want.color,
+        bg: body.backgroundColor === want.backgroundColor,
+        font: body.fontFamily === root.fontFamily && !/Host Sans/.test(body.fontFamily),
+        size: body.fontSize !== "14px",
+        title: title.color !== "rgb(0, 0, 0)",
+        scheme: root.colorScheme,
+      };
+      probe.remove();
+      return out;
+    });
+    check(
+      page65.color && page65.bg && page65.font && page65.size && page65.title && page65.scheme === "dark",
+      `cards: a host's unlayered page defaults beat the library's page rules (${JSON.stringify(page65)})`,
+    );
+    await host.close();
+
+    // #72: data-theme-default — the site's default replaces the system's,
+    // in CSS (no script needed) and for the toggle's first click.
+    const def = await fresh();
+    const bgs = await def.evaluate(() => {
+      const root = document.documentElement;
+      const bg = () => getComputedStyle(document.body).backgroundColor;
+      const light = bg();
+      root.dataset.theme = "dark";
+      const dark = bg();
+      delete root.dataset.theme;
+      root.dataset.themeDefault = "dark";
+      return { light, dark, byDefault: bg(), scheme: getComputedStyle(root).colorScheme };
+    });
+    check(
+      bgs.byDefault === bgs.dark && bgs.dark !== bgs.light && bgs.scheme === "dark",
+      `cards: data-theme-default="dark" does not paint dark (${JSON.stringify(bgs)})`,
+    );
+    await def.click("[data-theme-toggle]");
+    await pause(300);
+    const flipped = await def.evaluate(() => ({
+      theme: document.documentElement.dataset.theme,
+      stored: localStorage.getItem("ui-theme"),
+    }));
+    check(
+      flipped.theme === "light" && flipped.stored === "light",
+      `cards: the toggle's first click under data-theme-default="dark" (${JSON.stringify(flipped)})`,
+    );
+    await def.close();
+  }
+
+  if (group === "charts") {
+    // #71: number formats as data. Labels carry a <title> twin, so read the
+    // first text node's tspan.
+    const labels = (sel: string) =>
+      page.$$eval(sel, (els) => els.map((e) => e.querySelector("tspan")?.textContent ?? e.textContent ?? ""));
+    const y = await labels("#cat-chart-format .apexcharts-yaxis-label");
+    check(
+      y.length > 0 && y.every((t) => /^\$\d{1,3}(,\d{3})*\.\d{2}$/.test(t)),
+      `charts: currency:USD y labels (${y})`,
+    );
+    const x = await page.$$eval("#cat-chart-format .apexcharts-xaxis-label", (els) => ({
+      n: els.filter((e) => e.textContent).length,
+      rotated: els.some((e) => /rotate\(-/.test(e.getAttribute("transform") ?? "")),
+    }));
+    check(
+      x.n > 1 && x.n < 30 && !x.rotated,
+      `charts: a long category axis is not thinned and level (${JSON.stringify(x)})`,
+    );
+    const h = await labels("#cat-chart-hformat .apexcharts-xaxis-label");
+    check(h.length > 0 && h.every((t) => / ms$/.test(t)), `charts: horizontal bar value axis unit:millisecond (${h})`);
+    const sx = await labels("#cat-chart-xformat .apexcharts-xaxis-label");
+    check(sx.some((t) => /K$/.test(t)), `charts: scatter xFormat compact (${sx})`);
+    const sy = await labels("#cat-chart-xformat .apexcharts-yaxis-label");
+    check(sy.length > 0 && sy.every((t) => / sh$/.test(t)), `charts: object format with suffix (${sy})`);
+    const iy = await labels("#cat-chart-iformat .apexcharts-yaxis-label");
+    check(iy.length > 0 && iy.every((t) => /^\d{1,3}(,\d{3})*$/.test(t)), `charts: integer y labels (${iy})`);
+    const cy = await labels("#cat-chart-cformat .apexcharts-yaxis-label");
+    check(cy.some((t) => /M$/.test(t)), `charts: compact y labels (${cy})`);
+    const pie = await labels(
+      "#cat-chart-pformat .apexcharts-datalabel-value, #cat-chart-pformat .apexcharts-datalabels text",
+    );
+    check(pie.some((t) => /%$/.test(t)), `charts: donut percent (${pie})`);
+    // The default value format: no axis on the page prints a float tail.
+    const tails = await page.$$eval(
+      ".apexcharts-yaxis-label, .apexcharts-xaxis-label",
+      (els) => els.map((e) => e.textContent ?? "").filter((t) => /\.\d{4,}/.test(t)),
+    );
+    check(tails.length === 0, `charts: axis labels with float tails (${tails.slice(0, 3)})`);
+  }
+
+  if (group === "navigation") {
+    // #72: Navbar menuActions — the phone menu carries what the bar drops.
+    const bar = await page.$eval("#cat-nav-menu", (n) => ({
+      menu: getComputedStyle(n.querySelector(".navbar__menu-actions")!).display,
+      twin: getComputedStyle(n.querySelector(".navbar__actions .hide-md")!).display,
+      wrap: getComputedStyle(n.querySelector(".navbar__link")!).whiteSpace,
+    }));
+    check(
+      bar.menu === "none" && bar.twin !== "none" && bar.wrap === "nowrap",
+      `navigation@1280: menuActions / hide-md / nowrap links (${JSON.stringify(bar)})`,
+    );
+    const phone = await fresh(undefined, 375);
+    const state = () =>
+      phone.$eval("#cat-nav-menu", (n) => ({
+        menu: (n.querySelector(".navbar__menu-actions") as HTMLElement).offsetParent !== null,
+        twin: getComputedStyle(n.querySelector(".navbar__actions .hide-md")!).display,
+        page: document.documentElement.scrollWidth - innerWidth,
+      }));
+    const closed = await state();
+    await phone.$eval("#cat-nav-menu .navbar__toggle", (el) => (el as HTMLElement).click());
+    await pause();
+    const open = await state();
+    check(
+      !closed.menu && open.menu && open.twin === "none" && open.page <= 0,
+      `navigation@375: menuActions in the phone menu (${JSON.stringify({ closed, open })})`,
+    );
+    await phone.close();
+  }
+
+  if (group === "feedback") {
+    // #63: the consent banner. Every check starts from a page whose
+    // storage holds exactly the seed.
+    type Consent = { hidden: boolean; sample: number; stored: string | null; focus: string; events: string[] };
+    const consent = (p: Page) =>
+      p.evaluate(() => {
+        const w = globalThis as unknown as { consentSample?: number; __consent?: string[] };
+        return {
+          hidden: (document.getElementById("cat-consent-banner") as HTMLElement).hidden,
+          sample: w.consentSample ?? 0,
+          stored: localStorage.getItem("cat-consent"),
+          focus: (document.activeElement as HTMLElement | null)?.textContent?.trim() ?? "",
+          events: w.__consent ?? [],
+        };
+      }) as Promise<Consent>;
+    const listen = (p: Page) =>
+      p.evaluate(() => {
+        const w = globalThis as unknown as { __consent: string[]; gtag: unknown; clarity: unknown };
+        w.__consent = [];
+        document.addEventListener("consent:change", (e) => w.__consent.push((e as CustomEvent).detail.state));
+        w.gtag = (...a: unknown[]) => w.__consent.push(`gtag:${JSON.stringify(a)}`);
+        w.clarity = (...a: unknown[]) => w.__consent.push(`clarity:${JSON.stringify(a)}`);
+      });
+
+    const first = await fresh();
+    await listen(first);
+    const asked = await consent(first);
+    check(
+      !asked.hidden && asked.sample === 0,
+      `feedback: a first visit is asked, nothing loads (${JSON.stringify(asked)})`,
+    );
+    await first.$eval("#cat-consent-banner [data-consent-accept]", (el) => (el as HTMLElement).click());
+    await pause();
+    const accepted = await consent(first);
+    check(
+      accepted.hidden && accepted.sample === 1 && accepted.stored === "granted" && accepted.events.includes("granted"),
+      `feedback: Accept stores granted, loads the loader once, fires consent:change (${JSON.stringify(accepted)})`,
+    );
+    const loader = await first.$eval('script[src$="consent-sample.js"]', (s) => s.getAttribute("data-id"));
+    check(loader === "sample", `feedback: the loader carries its attrs (${loader})`);
+    await first.$eval("[data-consent-open]", (el) => (el as HTMLElement).click());
+    await pause();
+    const reopened = await consent(first);
+    check(
+      !reopened.hidden && reopened.focus === "Accept",
+      `feedback: data-consent-open shows the banner with focus on its first button (${JSON.stringify(reopened)})`,
+    );
+    await first.$eval("#cat-consent-banner [data-consent-reject]", (el) => (el as HTMLElement).click());
+    await pause();
+    const rejected = await consent(first);
+    check(
+      rejected.hidden && rejected.stored === "denied" && rejected.focus === "Cookie settings" &&
+        rejected.events.includes('gtag:["consent","update",{"analytics_storage":"denied"}]') &&
+        rejected.events.includes('clarity:["consent",false]') && rejected.events.at(-1) === "denied",
+      `feedback: Reject stores denied, withdraws, returns focus (${JSON.stringify(rejected)})`,
+    );
+    await first.close();
+
+    const granted = await fresh({ "cat-consent": "granted" });
+    const later = await consent(granted);
+    check(
+      later.hidden && later.sample === 1,
+      `feedback: a later visit after Accept loads without asking (${JSON.stringify(later)})`,
+    );
+    await granted.close();
+    const denied = await fresh({ "cat-consent": "denied" });
+    const no = await consent(denied);
+    check(
+      no.hidden && no.sample === 0,
+      `feedback: a later visit after Reject neither asks nor loads (${JSON.stringify(no)})`,
+    );
+    await denied.close();
+  }
 }
 
 /**
@@ -1981,6 +2362,7 @@ for (const group of catalogueGroups) {
   }
 
   await consoleGaps(page, group.id);
+  await outsmartFixes(page, group.id, file);
 
   /* ---------------------------------------------------------- dark */
   await page.screenshot({ path: `${outDir}/${group.id}-light.png`, fullPage: true });

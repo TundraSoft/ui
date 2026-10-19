@@ -60,6 +60,7 @@ runtime's `<body data-*>` overrides, a page class.
 | `htmlAttrs` | `DocumentAttrs` |  | Attributes on `<html>` (besides `lang`), see {@link DocumentAttrs}. |
 | `bodyAttrs` | `DocumentAttrs` |  | Attributes on `<body>`, see {@link DocumentAttrs}. |
 | `confirmDialog` | `boolean` |  | Render the page's `ConfirmModal`, which every `data-confirm` trigger asks in (without it modal.js uses the browser's `confirm()`). |
+| `consent` | `ConsentBannerProps` |  | Render a `ConsentBanner` on every page (hidden until consent.js finds no stored choice) — the analytics loaders run only after Accept. |
 
 ## Constants
 

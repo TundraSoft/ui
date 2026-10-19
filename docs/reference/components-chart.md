@@ -81,6 +81,44 @@ gauge, waffle) take a plain number array plus `labels`.
 - `typeOperator`
 - `typeOperator`
 
+### `ChartFormat`
+
+A number format for a chart, as data. A chart's options reach the page
+as JSON, and JSON has no functions — an ApexCharts `formatter` passed in
+`options` is dropped on the way (Chart warns on the server when it sees
+one). chart.js turns these specs into formatters in the browser, with
+`Intl.NumberFormat` and the page's `<html lang>`:
+
+- `"number"` — grouped, at most 2 decimals (12,000.5). The default for
+  the value axis, so a float never prints as `12000.000001`.
+- `"integer"` — grouped, rounded (12,001).
+- `"compact"` — 12K, 3.4M.
+- `"percent"` — a ratio as a percentage (0.25 → 25%).
+- `"currency:USD"` — any ISO 4217 code ($12,000.00).
+- `"unit:kilobyte"` — any `Intl` unit (12 kB, 30 ms with `unit:millisecond`).
+- `{ intl, prefix, suffix }` — `Intl.NumberFormatOptions` verbatim plus
+  text around the number (`{ intl: { maximumFractionDigits: 0 }, suffix: " sh" }`).
+
+Anything that is not a number (a category name) is shown as it is.
+
+- `"number"`
+- `"integer"`
+- `"compact"`
+- `"percent"`
+- `currency:${string}`
+- `unit:${string}`
+- `ChartFormatOptions`
+
+### `ChartFormatOptions`
+
+The object form of a {@link ChartFormat}.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `intl` | `Intl.NumberFormatOptions` |  | `Intl.NumberFormat` options, e.g. `{ style: "currency", currency: "EUR", maximumFractionDigits: 0 }`. |
+| `prefix` | `string` |  | Text before the formatted number. |
+| `suffix` | `string` |  | Text after the formatted number (`" sh"`, `"¢"`). |
+
 ### `ChartProps`
 
 | Prop | Type | Required | Description |
@@ -96,7 +134,9 @@ gauge, waffle) take a plain number array plus `labels`.
 | `horizontal` | `boolean` |  | Horizontal bars. |
 | `sparkline` | `boolean` |  | Sparkline: no axes, grid, legend or toolbar — for a Stat tile. |
 | `toolbar` | `boolean` |  | ApexCharts' zoom/export toolbar. @default false |
-| `options` | `Readonly` |  | Anything else, verbatim ApexCharts options (apexcharts.com/docs/ options) — deep-merged over what the props above produce, so a key here always wins. Colours, fonts and light/dark mode come from the library's tokens (chart.css maps `--apx-*` to them) and should not normally be set. |
+| `format` | `ChartFormat` |  | How values read: the value axis (the y axis; the x axis of horizontal bars), the tooltip and the data labels; for a circular chart, the tooltip and a donut's centre value. Without it the value axis still uses `"number"`. See {@link ChartFormat}. |
+| `xFormat` | `ChartFormat` |  | How a numeric x axis reads (scatter, bubble, histogram) — its labels and the tooltip's x. |
+| `options` | `Readonly` |  | Anything else, verbatim ApexCharts options (apexcharts.com/docs/ options) — deep-merged over what the props above produce, so a key here always wins. Colours, fonts and light/dark mode come from the library's tokens (chart.css maps `--apx-*` to them) and should not normally be set. JSON only: a function (an ApexCharts `formatter`, an event handler) cannot reach the page and is dropped, with a warning — use `format` / `xFormat` for numbers. |
 | `attrs` | `Attrs` |  |  |
 
 ## Constants
@@ -128,6 +168,24 @@ html`${ChartScript()}${
 <div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;area&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Revenue&quot;,&quot;data&quot;:[12,19,14,22,28]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;]}}" data-chart-type="area" id="revenue"></div>
 ```
 
+### Money on the value axis
+
+Options travel to the page as JSON, so a formatter function cannot: `format` names the number format instead.
+
+```ts
+Chart({
+  id: "equity",
+  type: "line",
+  format: "currency:USD",
+  series: [{ name: "Equity", data: [12000, 12450.5, 12210, 12890] }],
+  categories: ["Q1", "Q2", "Q3", "Q4"],
+})
+```
+
+```html
+<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;line&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Equity&quot;,&quot;data&quot;:[12000,12450.5,12210,12890]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;Q1&quot;,&quot;Q2&quot;,&quot;Q3&quot;,&quot;Q4&quot;]}}" data-chart-type="line" id="equity" data-chart-format="{&quot;value&quot;:&quot;currency:USD&quot;}"></div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/chart/chart.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
@@ -138,6 +196,6 @@ Classes defined by `components/chart/chart.css` — structural, token-driven; ov
 
 `components/chart/chart.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-chart`, `data-chart-initialized`, `data-theme`.
+Attributes it reads or writes: `data-chart`, `data-chart-format`, `data-chart-initialized`, `data-theme`, `data-theme-default`.
 
 Events: `rapid:swapped`.

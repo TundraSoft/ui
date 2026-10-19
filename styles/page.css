@@ -1,0 +1,60 @@
+/*
+ * Page-level rules, deliberately OUTSIDE every cascade layer.
+ *
+ * Everything else in the bundle is layered, and an unlayered rule beats
+ * any layered one. A host that injects its own unlayered page defaults
+ * (an embedding frame, a CMS, an iframe preview: `body { font: 14px
+ * system-ui; color: #000; background: #fff }`, `:root { color-scheme:
+ * light }`) would therefore win over a layered reset: black text on a
+ * dark theme's cards, the system font instead of the theme's. These few
+ * declarations are the ones every element inherits from, so they compete
+ * on the host's own terms: same plain selectors, same (zero) layer, and
+ * the stylesheet loaded later wins.
+ *
+ * A theme is unlayered too and loads after ui.css, so it still overrides
+ * any of this with a plain `body { … }` — nothing here raises
+ * specificity. Every value is a token; this file sets no palette.
+ */
+html {
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: inherit;
+  color: var(--color-text);
+  background: var(--color-canvas);
+}
+
+/* Native controls, scrollbars and form autofill follow the palette. The
+   selectors mirror the token file's dark blocks (tokens/default.css):
+   an explicit data-theme wins, then data-theme-default, then the system.
+
+   The light default and the system-preference case carry no specificity
+   (:where), so a theme without dark blocks keeps its light page under a
+   dark OS with one plain `:root { color-scheme: light }`, and a host that
+   insists on light wins too. A choice made on <html> (data-theme,
+   data-theme-default) outranks both. */
+:where(:root) {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :where(:root:not([data-theme="light"]):not([data-theme-default="light"])) {
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"],
+:root[data-theme-default="dark"]:not([data-theme="light"]) {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"],
+:root[data-theme-default="light"]:not([data-theme="dark"]) {
+  color-scheme: light;
+}

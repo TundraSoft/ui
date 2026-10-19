@@ -28,6 +28,7 @@ import { FormActions, FormField } from "../../components/form-field/form-field.t
 import { Wizard } from "../../components/wizard/wizard.ts";
 import { Menu } from "../../components/menu/menu.ts";
 import { Timeline } from "../../components/timeline/timeline.ts";
+import { TabLinks } from "../../components/tabs/tabs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export const layoutNames = ["stacked", "sidebar", "rail", "split", "article", "docs", "auth", "focus"] as const;
@@ -79,6 +80,15 @@ export function layoutSamples(hrefs: LayoutHrefs = staticHrefs): Record<LayoutNa
   return {
     stacked: StackedLayout({
       header: navbar("stacked-nav", hrefs),
+      subheader: TabLinks({
+        id: "stacked-sections",
+        label: "Sections",
+        items: ["Overview", "Markets", "How it works", "Pricing", "Changelog", "Status"].map((label, i) => ({
+          label,
+          href: "#",
+          current: i === 0,
+        })),
+      }),
       width: "boxed",
       footer,
       content: html`${PageHeader({ title: "Stacked", subtitle: "Header → content → footer. Boxed at 1400px." })}${
