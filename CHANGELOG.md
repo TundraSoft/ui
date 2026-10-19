@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/TundraSoft/ui/compare/v0.20.0...v0.21.0) (2026-10-19)
+
+
+### Features
+
+* ConsentBanner, Switch state words, chart number formats, layout subheader; page rules a host cannot override ([#73](https://github.com/TundraSoft/ui/issues/73)) ([711df01](https://github.com/TundraSoft/ui/commit/711df01c6ebabaee7d361e2590fd45575b391494))
+
 ## [0.20.0](https://github.com/TundraSoft/ui/compare/v0.19.0...v0.20.0) (2026-10-16)
 
 
