@@ -28,7 +28,8 @@ value is never misrepresented.
 | --- | --- | --- | --- |
 | `id` | `string` | yes |  |
 | `name` | `string` | yes |  |
-| `label` | `string` |  |  |
+| `label` | `string` |  | The slider's own label; it also turns on the live value readout. |
+| `showValue` | `boolean` |  | Show the live value without a label of the slider's own — for a Slider inside a `FormField`, whose label already names it. The value sits at the end of the row above the track. @default true when `label` is set |
 | `min` | `number` |  |  |
 | `max` | `number` |  |  |
 | `step` | `number` |  |  |
@@ -73,6 +74,37 @@ Slider({
   <div class="slider__scale">
     <span>1</span>
     <span>32</span>
+  </div>
+</div>
+```
+
+### In a FormField, value without a second label
+
+```ts
+FormField({
+  label: "Position size",
+  id: "size",
+  control: Slider({ id: "size", name: "size", showValue: true, min: 0, max: 500, step: 50, value: 150 }),
+})
+```
+
+```html
+<div class="form-field">
+  <label class="form-field__label" for="size">Position size</label>
+  <div class="slider" data-slider>
+    <div class="slider__head">
+      <output class="slider__value" for="size" data-slider-output>150</output>
+    </div>
+    <div class="slider__control">
+      <input class="slider__input" id="size" name="size" type="range" min="0" max="500" step="50" value="150">
+      <span class="slider__track"></span>
+      <span class="slider__fill"></span>
+      <span class="slider__thumb"></span>
+    </div>
+    <div class="slider__scale">
+      <span>0</span>
+      <span>500</span>
+    </div>
   </div>
 </div>
 ```

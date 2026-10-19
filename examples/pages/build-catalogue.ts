@@ -31,6 +31,7 @@ import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { Icon, type IconName, iconNames } from "../../shared/icons.ts";
 import { catalogue, catalogueCss, type CatalogueGroup, catalogueGroups, catalogueHtml } from "../shared/catalogue.ts";
 import { layoutNames } from "../shared/layout-samples.ts";
+import { consentSampleScript } from "../shared/data.ts";
 
 const all = catalogue();
 const totalCases = all.reduce((n, e) => n + e.cases.length, 0);
@@ -311,6 +312,7 @@ const index = html`
     })}
 `;
 await writeTextFile("demo/index.html", render(doc("@tundralibs/ui demos", frame(index))));
+await writeTextFile("demo/consent-sample.js", consentSampleScript);
 
 await writeTextFile(
   "demo/catalogue.css",

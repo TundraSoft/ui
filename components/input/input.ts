@@ -459,9 +459,12 @@ export type InputIconProps = {
 /** An input with an inset icon (search, mail…). The glyph is decorative. */
 export function InputIcon(props: InputIconProps): Html {
   return html`
-    <span class="${cx("input-icon", props.end && "input-icon--end")}"
-      ${renderAttrs(props.attrs ?? {})}><span class="input-icon__glyph" aria-hidden="true">${props.icon}</span>${props
-        .control}</span>
+    <span${classAttrs(
+      "input-icon",
+      props.attrs ?? {},
+      props.end && "input-icon--end",
+    )}><span class="input-icon__glyph" aria-hidden="true">${props.icon}</span>${props
+      .control}</span>
   `;
 }
 

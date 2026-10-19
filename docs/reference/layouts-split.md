@@ -23,6 +23,7 @@ Master/detail two-pane frame; one pane at a time on phones.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `header` | `Html` |  |  |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `pane` | `Html` | yes | The master pane (a list). Gets a stable id so it can be swapped. |
 | `paneId` | `string` |  |  |
 | `content` | `Html` | yes | The detail. |

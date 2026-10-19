@@ -203,6 +203,7 @@ control.
 
 ```ts
 Switch({ id: "deploy", name: "deploy", label: "Deploy on merge", hint: "Pushes to main ship.", checked: true });
+Switch({ name: "analytics", checked, labels: { on: "On", off: "Off" } }); // the word follows the state, no script
 Checkbox({ name: "opt", label: "Option A", checked: true });
 Radio({ name: "size", value: "m", label: "Medium" });
 ChoiceGroup({ inline: true, items: [Checkbox({ label: "A" }), Checkbox({ label: "B" })] });
@@ -226,12 +227,20 @@ Slider({
   unitOne: "worker",
 });
 Slider({ id: "tier", name: "tier", label: "Size", min: 0, max: 3, value: 1, scale: ["S", "M", "L", "XL"] });
+FormField({ label: "Position size", id: "size", control: Slider({ id: "size", name: "size", showValue: true }) });
 ```
 
-`Segmented` is a real radiogroup (it submits; a thumb glides to the checked option). To submit on change through rAPId,
-wrap it in a `<form
-data-action data-target method="get">`. `Slider` keeps a live `<output>` and paints its track from a
-custom property set by the script.
+`Segmented` is a real radiogroup (it submits; a thumb glides to the checked option). It is as wide as its options and
+never wider than its container: on a phone a long set scrolls sideways inside the control, the thumb with it (`block`
+fills the row instead). To submit on change through rAPId, wrap it in a `<form
+data-action data-target method="get">`.
+`Slider` keeps a live `<output>` and paints its track from a custom property set by the script; its own `label` turns
+the output on, and inside a `FormField` (whose label already names it) `showValue: true` shows the value without a
+second label.
+
+`Switch({ labels: { on, off } })` renders both words and CSS shows the one matching the checkbox, so the word is right
+at every moment without a script or a re-render. Alone, the word is the switch's label; beside a `label` it is a quiet
+echo after it, hidden from assistive tech (which announces checked / unchecked itself).
 
 ### [Dropzone](./reference/components-dropzone.md)
 
@@ -538,7 +547,8 @@ Wizard({
 ```
 
 Tabs have roving tabindex, Home/End, and a `#tab-<id>` deep link that activates the tab on load (blurring it, so a
-sidebar link does not paint a focus ring).
+sidebar link does not paint a focus ring). A collapsible's `<h3>` is a landmark only: its trigger reads in the
+surrounding text's type (an FAQ row, not a heading), so set the size on the container if a row should be larger.
 
 ---
 
@@ -551,7 +561,11 @@ Navbar({
   id: "top",
   brand: "Acme",
   links: [{ href: "/", label: "Home", active: true }],
-  actions: Button({ label: "Sign in", size: "sm" }),
+  actions: html`${Button({ label: "Theme", variant: "ghost", attrs: { "data-theme-toggle": "", class: "hide-md" } })}${
+    Button({ label: "Sign in", size: "sm" })
+  }`,
+  // Below 768px the bar has no room: this goes into the phone menu, after the links.
+  menuActions: Button({ label: "Theme", variant: "ghost", attrs: { "data-theme-toggle": "" } }),
 });
 Sidebar({
   id: "nav",
@@ -574,7 +588,10 @@ Menu({ id: "m", items });
 Breadcrumb({ items: [{ label: "Home", href: "/" }, { label: "Settings", href: "/settings" }, { label: "Profile" }] });
 ```
 
-The navbar collapses to a toggle on phones. The sidebar is the drawer / collapsible rail the `SidebarLayout` manages;
+The navbar collapses to a toggle on phones, and links stay on one line (`white-space: nowrap`) while the bar is
+horizontal. `actions` never wrap or shrink, so a long set overflows a phone: move the extras into `menuActions` (shown
+inside the phone menu, hidden from 768px) and mark their twins in `actions` `hide-md` (hidden below 768px; `hide-sm`
+hides below 576px). The sidebar is the drawer / collapsible rail the `SidebarLayout` manages;
 `SidebarToggle({ targetId })` is the button it renders. Menus nest to any depth; the script marks the link matching the
 full URL (path + hash) current and opens its parents.
 
@@ -675,6 +692,33 @@ Modal({
 
 Toasts append into the region (`data-swap="append"` from the server, or `[data-toast-open="#template"]` client-side) and
 auto-dismiss. Modals are native `<dialog>`s: centred, backdrop click closes, Escape closes, focus returns.
+
+### [ConsentBanner](./reference/components-consent.md)
+
+```ts
+ConsentBanner({
+  title: "Cookies for analytics?",
+  body:
+    html`We would use Google Analytics and Microsoft Clarity to see which pages help. <a href="/privacy">Privacy</a>`,
+  loaders: [
+    { src: "https://www.googletagmanager.com/gtag/js?id=G-XXXX", async: true },
+    { src: "/public/ga.js", attrs: { "data-id": "G-XXXX" } },
+    { src: "/public/clarity.js", attrs: { "data-id": "abcd" } },
+  ],
+  storageKey: "acme-consent",
+});
+html`<a href="#" data-consent-open>Cookie settings</a>`; // anywhere: shows it again
+```
+
+Asks once, and runs analytics only after a yes. The banner renders `hidden`; consent.js shows it to a visitor with no
+stored choice, appends the `loaders` as script elements (in order, `async` opting out) on Accept and on every later
+visit while the choice stands, and on Reject calls `gtag("consent", "update", { analytics_storage: "denied" })` and
+`clarity("consent", false)` when present and expires the trackers' cookies (`cookies`, default `_ga*`, `_gid`, `_gat*`,
+`_clck`, `_clsk`) on the host and its parent domains. Accept and Reject are the same button, nothing is pre-ticked, the
+choice lives in the browser (`storageKey`, `granted` | `denied`) so cached pages stay identical for everyone, and every
+choice fires `consent:change` (`detail: { state, key }`). Without a script nothing loads and nothing is asked. No inline
+script anywhere: under a strict CSP add the trackers' origins to `script-src` (a nonce on the bundle's own `<script>` is
+copied onto the loaders). In a rAPId app pass the props to `createCoreTemplate({ consent })` and every page carries it.
 
 ---
 

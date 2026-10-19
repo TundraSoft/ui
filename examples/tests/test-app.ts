@@ -579,6 +579,28 @@ for (
   await page.close();
 }
 
+/* --------------------------------------------- consent: cookies (#63) */
+{
+  // Cookies need an http origin, which the file:// catalogue suite lacks.
+  // Reject expires the banner's cookie list on the host (and would on its
+  // parent domains); a cookie outside the list stays. Accept loads the
+  // loader the app serves.
+  const page = await open("/components/feedback");
+  await page.evaluate(() => {
+    for (const c of ["_ga=1", "_ga_ABC123=2", "_gid=3", "cat_seen=4", "keep=5"]) document.cookie = `${c}; path=/`;
+  });
+  await page.$eval("[data-consent-open]", (el) => (el as HTMLElement).click());
+  await page.$eval("#cat-consent-banner [data-consent-reject]", (el) => (el as HTMLElement).click());
+  const left = await page.evaluate(() => document.cookie.split("; ").sort().join(" "));
+  ok(left === "keep=5", `consent: Reject left these cookies: ${left}`);
+  await page.$eval("[data-consent-open]", (el) => (el as HTMLElement).click());
+  await page.$eval("#cat-consent-banner [data-consent-accept]", (el) => (el as HTMLElement).click());
+  await page.waitForFunction(() => document.documentElement.dataset.consentSample === "1", { timeout: 5000 })
+    .catch(() => fail("consent: Accept did not run the app's /consent-sample.js"));
+  await page.evaluate(() => localStorage.removeItem("cat-consent"));
+  await page.close();
+}
+
 /* --------------------------------------------------------------- forms */
 {
   const page = await open("/forms");

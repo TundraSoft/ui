@@ -12,10 +12,28 @@
   gap: var(--space-6);
 }
 
+/* A flex column stretches its children only while their inline margins
+   are not auto, so the usual centred container (max-width + margin-inline:
+   auto) shrank to its content. Every child takes the full column instead;
+   its own max-width still caps it and the auto margins still centre it.
+   Components (a later layer) and a theme's unlayered CSS keep any width
+   they set; out-of-flow children (a dialog, a popover, the toast region,
+   the consent banner) keep their own shrink-to-fit width. */
+.layout--stacked .layout__content > :not(dialog, [popover], .toast-region, .consent) {
+  inline-size: 100%;
+}
+
+/* Bleed: no column padding or gap — each section is a full-width band
+   that sets its own inner container. */
+.layout--bleed .layout__content {
+  padding: 0;
+  gap: 0;
+}
+
 /* Fluid on very wide screens: keep text runs readable by capping the
    *inner* column even though the frame is full-width. */
 @media screen and (min-width: 1400px) {
-  .layout--stacked:not(.layout--boxed) .layout__content {
+  .layout--stacked:not(.layout--boxed, .layout--bleed) .layout__content {
     padding-inline: max(var(--layout-gutter), calc((100% - var(--layout-max-width)) / 2));
   }
 }

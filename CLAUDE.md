@@ -159,7 +159,7 @@ card, button, switch, choice (checkbox/radio), input (+ floating-label and prefi
 sidebar (+ optional desktop "collapse to icons" mini-sidebar mode, see below), app-shell, auth-layout, grid (12-col,
 collapses to 1 col below md), tabs, collapsible/accordion, dropdown, wizard, pagination, modal (native `<dialog>`),
 toast, badge/chip, avatar, breadcrumb, tooltip (CSS-only), progress/spinner, timepicker, datetimepicker, chart
-(ApexCharts only — see "Charts" below).
+(ApexCharts only — see "Charts" below), consent (analytics consent banner, 2026-10-19).
 
 **v2 additions (2026-09-14, migrated from a design-agent revamp):** data-table (dense, sticky header, selection + bulk
 bar, pinned/numeric/ mono columns), combobox (single/multi, server-swapped listbox, keyboard nav), datepicker
@@ -809,6 +809,75 @@ form gets the browser's bubble and form.js reports it like any rule. A press on 
 before the pick lands, so form.js skips the blur check then (`picking`). Harness lesson: two more catalogue cases above
 a test lengthened a `scrollIntoView` enough that the `html:focus-within` smooth scroll was still running at the click —
 scroll with `behavior: "instant"` before a click.
+
+**Outsmart rebuild + Brevily asks (2026-10-19, issues #63–#72, one PR).** Found rebuilding the Outsmart Markets design
+on 0.19.0 and re-checked against 0.20.0 (none had been fixed). What changed, and the rules that fell out of it:
+
+- **Page-level rules are unlayered** (`styles/page.css`, imported without `layer()`):
+  `html { font-family; line-height }`,
+  `body { margin; min-height; font-family: inherit; font-size; line-height; color; background }`. A host that injects
+  unlayered page defaults (claude.ai artifacts wrap pages in `body{font:14px …;color:#000;
+  background:#fff}`) beat
+  every layered rule — black text on dark cards. Plain `html`/`body` selectors on purpose: equal specificity with the
+  host, so the later sheet wins, and a theme's `body {…}` still overrides. Do not move them back into a layer, and do
+  not raise their specificity (a theme would lose). `color-scheme` follows the palette: the light default and the
+  system-preference case are `:where()` (zero specificity, so a light-only theme's `:root { color-scheme: light }` and a
+  host's win), an explicit `data-theme` / `data-theme-default` outranks both.
+- **`data-theme-default` on `<html>`** is the site's default for someone who has not chosen: it replaces the system
+  preference, below an explicit `data-theme`. The tokens' two dark blocks carry it
+  (`:root:not([data-theme="light"])
+  :not([data-theme-default="light"])` in the media block;
+  `:root[data-theme="dark"],
+  :root[data-theme-default="dark"]:not([data-theme="light"])`), so do page.css's
+  `color-scheme`, theme-toggle.js (current = theme ‖ default ‖ system; the default is never stored) and chart.js's
+  `mode()`. The four light-default example themes use the same selectors; Console sets `color-scheme` itself. A theme's
+  dark blocks must copy them.
+- **InputIcon + search**: `.input-icon__glyph` has `z-index: 1` — a later positioned sibling (`.input-clear`) painted
+  over it — and `.input-icon > .input-clear` fills the row. InputIcon merges `attrs.class` (it wrote a second `class`).
+- **Segmented** is `width: max-content; max-width: 100%; overflow-x: auto` (no visible scrollbar): as wide as its
+  options, never wider than its container. The thumb is absolutely positioned inside the scroll box, so segmented.js
+  adds `scrollLeft` to its measurement (RTL: scrollLeft runs negative) and scrolls the checked option into view on load
+  and change — by setting `scrollLeft`, never `scrollIntoView`, which would move the page. `--block` fills again.
+- **StackedLayout**: every content child is `inline-size: 100%` (a flex column does not stretch a child with auto inline
+  margins, so `max-width + margin-inline: auto` shrank to its content); `width: "bleed"` drops the column's padding and
+  gap (and the ≥1400 cap). **`subheader`** on every layout with a header except Focus, through `layouts/header.ts`
+  `frameHeader()` (internal, not exported): `.layout__header--sub` wraps, the navbar takes a 0 basis so it is never the
+  item that wraps, `.layout__subheader` is `flex: 1 0 100%; min-width: 0; overflow-x: auto` with `data-dropdown-clip`.
+  Without a subheader the header markup is unchanged. `.navbar__link` is `nowrap` while the bar is horizontal.
+- **Collapsible**: `.collapsible__heading` resets `font`, `letter-spacing`, `color` to inherit — the global `h3` rules
+  reached the trigger through its `font: inherit`.
+- **Chart options are JSON**, so functions are dropped: `Chart` warns once per id+path on the server. `format`/`xFormat`
+  (`ChartFormat`: `number`, `integer`, `compact`, `percent`, `currency:XXX`, `unit:<intl unit>`, or
+  `{ intl, prefix, suffix }`) go out as `data-chart-format` and chart.js builds `Intl.NumberFormat` formatters
+  (`<html
+  lang>`); non-numbers pass through (a horizontal bar's category axis). Value format → y labels (x on
+  horizontal bars), tooltip, data labels; circular charts → tooltip + donut value only. The value axis always formats as
+  `number` (the engine printed `16000.0000000000`). Line/area/rangeArea with more categories than fit get `tickAmount` +
+  `rotate: 0` (computed from the element's width); `trim` turned labels into dots and bars ignore `tickAmount`, so
+  neither is used.
+- **Slider `showValue`** renders the `<output>` without a label (for a FormField); **Navbar `menuActions`** go into the
+  phone menu (hidden ≥ 768) and pair with **`.hide-md`** (< 768) on the twin in `actions`; the menu toggle renders for
+  `menuActions` alone. **SidebarLayout** prints its sidebar static, full height; full-page screenshots are a docs note.
+- **`Switch({ labels: { on, off } })`**: both words rendered, `.switch__input:checked ~ * .switch__state--off` /
+  `:not(:checked) ~ * …--on` hide the other — no script. Alone the word is the label; beside `label` it is an
+  `aria-hidden` echo.
+- **`ConsentBanner`** (`components/consent/`, `createCoreTemplate({ consent })`): rendered `hidden`; consent.js shows it
+  with no stored choice (`data-consent-key`, default `ui-consent`, values `granted`/`denied`, in-memory fallback without
+  storage), appends `data-consent-loaders` in order on Accept and on later visits (attrs copied, `on*` refused, the
+  bundle script's nonce copied), and on Reject calls gtag/clarity consent and expires `data-consent-cookies` on the host
+  and each parent domain. `[data-consent-open]` reopens with focus on the first button and returns focus after; Escape
+  closes only a reopened banner. Same button for Accept and Reject; `z-index: var(--z-toast)` and rendered after the
+  toast region so no toast covers Reject. `consent:change` on every choice. Catalogue case id is `cat-consent-banner` —
+  **`cat-<component>` is the catalogue's own section id**, so a case element named that collides (the first probe
+  "found" a banner that would not hide; it was the section). Cookie expiry is asserted in `test-app.ts` (file:// has no
+  cookies); the loader is `consentSampleScript` (`demo/consent-sample.js`, app route `/consent-sample.js`,
+  `DemoRoutes.consentLoader`).
+
+`test-catalogue.ts` `outsmartFixes()` pins all of it (host defaults injected ahead of the bundle, data-theme-default in
+CSS and on the toggle's first click, glyph hit-test, Segmented at 375 incl. thumb alignment after scrolling picks,
+accordion type, every chart format's rendered labels and no float tails anywhere, menuActions at 375/1280, switch words,
+the consent lifecycle across seeded storage); `test-layouts.ts` checks the stacked subheader row, a centred probe
+wrapper and `bleed` at every band; each was verified to fail with its fix removed from `dist/ui.css`.
 
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.

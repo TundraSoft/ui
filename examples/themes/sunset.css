@@ -38,7 +38,7 @@
    the base's layered dark-mode block regardless of data-theme, so the
    theme must carry its own dark values too — see CLAUDE.md. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"]):not([data-theme-default="light"]) {
     --color-primary: #fb923c;
     --color-primary-strong: #fdba74;
     --color-primary-contrast: #1f1410;
@@ -69,7 +69,8 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:root[data-theme-default="dark"]:not([data-theme="light"]) {
   --color-primary: #fb923c;
   --color-primary-strong: #fdba74;
   --color-primary-contrast: #1f1410;

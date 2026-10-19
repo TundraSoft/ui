@@ -58,7 +58,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"]):not([data-theme-default="light"]) {
     --color-primary: #f0e9dc;
     --color-primary-strong: #ffffff;
     --color-primary-contrast: #1a1713;
@@ -101,7 +101,8 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:root[data-theme-default="dark"]:not([data-theme="light"]) {
   --color-primary: #f0e9dc;
   --color-primary-strong: #ffffff;
   --color-primary-contrast: #1a1713;

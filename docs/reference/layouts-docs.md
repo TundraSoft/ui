@@ -23,6 +23,7 @@ Nav · content · table of contents.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `header` | `Html` |  |  |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `nav` | `Html` | yes | A `Sidebar` component whose `id` equals `navId`. |
 | `navId` | `string` | yes |  |
 | `content` | `Html` | yes |  |

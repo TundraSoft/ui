@@ -66,6 +66,10 @@
 
 .input-icon__glyph {
   position: absolute;
+  /* Above a positioned sibling that comes later in the DOM: a search
+     Input wraps its control in .input-clear (position: relative), which
+     would otherwise paint over the icon. */
+  z-index: 1;
   inset-inline-start: var(--space-3);
   display: inline-flex;
   color: var(--color-text-subtle);
@@ -79,6 +83,13 @@
 
 .input-icon .input {
   padding-inline-start: var(--space-8);
+}
+
+/* A search Input arrives wrapped in .input-clear; the wrapper, not the
+   control, is the flex item, so it is what has to fill the row. */
+.input-icon > .input-clear {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .input-icon--end .input {

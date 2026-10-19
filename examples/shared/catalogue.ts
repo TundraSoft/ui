@@ -18,6 +18,7 @@ import { Chart, chartTypes } from "../../components/chart/chart.ts";
 import { Checkbox, Choice, ChoiceGroup, Radio } from "../../components/choice/choice.ts";
 import { Accordion, Collapsible } from "../../components/collapsible/collapsible.ts";
 import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
+import { ConsentBanner } from "../../components/consent/consent.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
 import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
@@ -163,6 +164,7 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   alert: "feedback",
   toast: "feedback",
   modal: "feedback",
+  consent: "feedback",
 };
 
 const c = (label: string, html: Html): CatalogueCase => ({ label, html });
@@ -577,6 +579,64 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               categories: ["x", "y", "z"],
             }),
           ),
+        ),
+        c(
+          "format / xFormat — number formats as data (functions cannot cross JSON); a long category axis thins (#cat-chart-format, #cat-chart-hformat, #cat-chart-xformat, #cat-chart-pformat)",
+          html`<div class="stack">${
+            Chart({
+              id: "cat-chart-format",
+              type: "line",
+              height: 200,
+              format: "currency:USD",
+              series: [{ name: "Equity", data: Array.from({ length: 30 }, (_, i) => 12000 + i * 137.000001) }],
+              categories: Array.from({ length: 30 }, (_, i) => `Oct ${String(i + 1).padStart(2, "0")}`),
+            })
+          }${
+            row(
+              Chart({
+                id: "cat-chart-hformat",
+                type: "bar",
+                horizontal: true,
+                height: 200,
+                format: "unit:millisecond",
+                series: [{ name: "p95", data: [120.4, 86.25, 240.125] }],
+                categories: ["Auth", "Search", "Upload"],
+              }),
+              Chart({
+                id: "cat-chart-xformat",
+                type: "scatter",
+                height: 200,
+                xFormat: "compact",
+                format: { intl: { maximumFractionDigits: 0 }, suffix: " sh" },
+                series: [{ name: "Fills", data: [[1200, 50], [15500, 120], [240000, 250]] }],
+              }),
+              Chart({
+                id: "cat-chart-pformat",
+                type: "donut",
+                height: 200,
+                format: "percent",
+                series: [0.42, 0.33, 0.25],
+                labels: ["Stocks", "Bonds", "Cash"],
+              }),
+              Chart({
+                id: "cat-chart-iformat",
+                type: "area",
+                height: 200,
+                format: "integer",
+                series: [{ name: "Visits", data: [1200.4, 1350.6, 1290.2] }],
+                categories: ["Mon", "Tue", "Wed"],
+              }),
+              Chart({
+                id: "cat-chart-cformat",
+                type: "bar",
+                height: 200,
+                format: "compact",
+                xFormat: "number",
+                series: [{ name: "Revenue", data: [1250000, 2300000, 1800000] }],
+                categories: ["Q1", "Q2", "Q3"],
+              }),
+            )
+          }</div>`,
         ),
       ]),
     },
@@ -1670,6 +1730,20 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           ),
         ),
         c(
+          "InputIcon + a search Input — the glyph stays above the clear-button wrapper (#cat-input-icon-search)",
+          InputIcon({
+            icon: Icon("search", { size: 16 }),
+            attrs: { id: "cat-input-icon-search", class: "cat-own-class" },
+            control: Input({
+              type: "search",
+              id: "cat-input-search",
+              name: "q",
+              placeholder: "Search projects",
+              value: "dash",
+            }),
+          }),
+        ),
+        c(
           "InputGroup start / end / both / select",
           row(
             InputGroup({ start: "$", control: Input({ extraClass: "input-group__control" }) }),
@@ -1872,6 +1946,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
+        c(
+          "menuActions — a control that moves into the phone menu; its twin in actions is hide-md (#cat-nav-menu)",
+          Navbar({
+            id: "cat-nav-menu",
+            brand: "Acme",
+            links: [{ href: "#", label: "How it works", active: true }, { href: "#", label: "Pricing" }],
+            actions: html`${
+              Button({ label: "Status: all systems go", size: "sm", variant: "ghost", attrs: { class: "hide-md" } })
+            }${Button({ label: "Sign in", size: "sm" })}`,
+            menuActions: Button({ label: "Status: all systems go", size: "sm", variant: "ghost" }),
+          }),
+        ),
       ],
     },
     {
@@ -2119,6 +2205,25 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }`,
         ),
         c(
+          "long options in a FormField — as wide as its options, scrolls inside on a phone, never widens the page (#cat-seg-long)",
+          FormField({
+            label: "Preset",
+            id: "cat-seg-long",
+            control: Segmented({
+              id: "cat-seg-long",
+              name: "seg-long",
+              value: "aggressive",
+              legend: "Preset",
+              options: [
+                { value: "conservative", label: "Conservative · 50 sh · stop 30¢" },
+                { value: "balanced", label: "Balanced · 100 sh · stop 20¢" },
+                { value: "aggressive", label: "Aggressive · 250 sh · stop 10¢" },
+                { value: "custom", label: "Custom" },
+              ],
+            }),
+          }),
+        ),
+        c(
           "counts + Html label (#cat-seg-count)",
           Segmented({
             id: "cat-seg-count",
@@ -2264,6 +2369,24 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "slider",
       cases: [
         c(
+          "showValue in a FormField — the field's label names it, the slider shows its value (#cat-sl-field)",
+          FormField({
+            label: "Position size",
+            id: "cat-sl-field",
+            control: Slider({
+              id: "cat-sl-field",
+              name: "size",
+              showValue: true,
+              min: 0,
+              max: 500,
+              step: 50,
+              value: 150,
+              unit: "shares",
+              unitOne: "share",
+            }),
+          }),
+        ),
+        c(
           "unit / unitOne (#concurrency)",
           Slider({
             id: "concurrency",
@@ -2345,6 +2468,20 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             Switch({ label: "On", checked: true }),
             Switch({ label: "Disabled", disabled: true }),
             Switch({ label: "Disabled on", checked: true, disabled: true }),
+          ),
+        ),
+        c(
+          "labels — a word that follows the state, alone (#cat-sw-state) and beside a label (#cat-sw-state-label)",
+          row(
+            Switch({ id: "cat-sw-state", name: "analytics", labels: { on: "On", off: "Off" } }),
+            Switch({
+              id: "cat-sw-state-label",
+              name: "visible",
+              checked: true,
+              label: "Profile",
+              labels: { on: "Shown", off: "Hidden" },
+              hint: "Others can find you by name.",
+            }),
           ),
         ),
         c(
@@ -2484,6 +2621,36 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "ToastRegion with max",
           ToastRegion({ id: "cat-toast-region", max: 3, toasts: [Toast({ body: "In a region" })] }),
+        ),
+      ],
+    },
+    {
+      name: "consent",
+      cases: [
+        c(
+          "ConsentBanner + a Cookie settings link — shown until a choice is stored, loads its loader on Accept (#cat-consent-banner)",
+          html`${
+            Button({
+              label: "Cookie settings",
+              variant: "outline",
+              attrs: { "data-consent-open": "#cat-consent-banner" },
+            })
+          }${
+            ConsentBanner({
+              id: "cat-consent-banner",
+              title: "Cookies for analytics?",
+              body: html`
+                Acme would use a sample analytics script to count visits. Nothing loads unless you accept. <a
+                  href="#">Privacy notice</a>
+              `,
+              accept: "Accept",
+              reject: "Reject",
+              variant: "outline",
+              storageKey: "cat-consent",
+              loaders: [{ src: routes.consentLoader, attrs: { "data-id": "sample" } }],
+              cookies: ["_ga*", "_gid", "cat_*"],
+            })
+          }`,
         ),
       ],
     },

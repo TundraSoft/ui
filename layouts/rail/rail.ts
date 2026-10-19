@@ -1,5 +1,6 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { frameHeader } from "../header.ts";
 
 export type RailItem = {
   href: string;
@@ -16,6 +17,12 @@ export type RailLayoutProps = {
   /** Pinned to the rail's end (settings, avatar). Hidden on mobile. */
   end?: Html;
   header?: Html;
+  /**
+   * A full-width second row under the header: an announcement or ticker
+   * strip, a secondary nav. Content wider than the screen scrolls inside
+   * the strip instead of widening the page.
+   */
+  subheader?: Html;
   content: Html;
   width?: "fluid" | "boxed";
   contentId?: string;
@@ -25,7 +32,7 @@ export type RailLayoutProps = {
 /** Icon rail + content; the rail becomes a bottom tab bar on phones. */
 export function RailLayout(props: RailLayoutProps): Html {
   return html`<div${classAttrs("layout layout--rail", props.attrs, props.width === "boxed" && "layout--boxed")}>${
-    props.header && html`<header class="layout__header">${props.header}</header>`
+    frameHeader(props.header, props.subheader)
   }<div class="layout__body"><nav class="layout__rail" aria-label="Main">${
     props.brand && html`<span class="layout__rail-brand">${props.brand}</span>`
   }${

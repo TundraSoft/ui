@@ -173,6 +173,8 @@
   /* The tallest an open list gets (Select, Combobox, Dropdown) before it
      scrolls inside itself; a short viewport caps it further. */
   --dropdown-max-height: min(20rem, 60vh);
+  /* The consent banner's card at the foot of the viewport. */
+  --consent-max-width: 56rem;
 
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
@@ -192,12 +194,18 @@
  * over it in either direction. The block is intentionally duplicated —
  * that's the standard pattern for this, not a mistake to DRY up.
  *
+ * `data-theme-default` on <html> is the site's default for a person who
+ * has not chosen: it replaces the system preference (a dark-first site
+ * renders `data-theme-default="dark"` and paints dark with no script),
+ * and an explicit `data-theme` still beats it. theme-toggle.js reads the
+ * same order, so its first click always flips what is on screen.
+ *
  * Note --color-primary inverts to near-white: a primary button in dark
  * mode is light-on-ink, not ink-on-ink. Accent lightens so it keeps
  * 4.5:1 as text on the dark surface.
  */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"]):not([data-theme-default="light"]) {
     --color-primary: #f2efe9;
     --color-primary-strong: #ffffff;
     --color-primary-contrast: #14130f;
@@ -255,7 +263,8 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:root[data-theme-default="dark"]:not([data-theme="light"]) {
   --color-primary: #f2efe9;
   --color-primary-strong: #ffffff;
   --color-primary-contrast: #14130f;

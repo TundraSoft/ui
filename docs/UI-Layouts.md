@@ -55,21 +55,29 @@ const page = SidebarLayout({
 
 Props per layout (see the [reference](./Reference.md#layouts) for types):
 
-- **StackedLayout** — `header?`, `content`, `footer?`, `width?: "fluid" | "boxed"`, `stickyHeader?`, `contentId?`,
-  `attrs?`.
-- **SidebarLayout** — `header?`, `sidebar`, `sidebarId`, `content`, `aside?`, `footer?`, `side?`, `width?`,
-  `stickyHeader?`, `drawerToggle?`, `contentId?`, `attrs?`. Renders a `SidebarToggle` (class-only, so the sidebar never
-  gets `hidden` and survives a resize) and a backdrop.
-- **RailLayout** — `brand?`, `items: RailItem[]` (`href`, `label`, `icon`, `active`), `end?`, `header?`, `content`,
-  `width?`, `contentId?`.
-- **SplitLayout** — `header?`, `pane`, `paneId?`, `content`, `contentId?`, `mobileView?: "pane" | "detail"` (a route
-  decision on phones), `stickyHeader?`.
-- **ArticleLayout** — `header?`, `content`, `aside?`, `asideSide?`, `footer?`, `measure?: "reading" | "wide"`,
-  `stickyHeader?`, `contentId?`.
-- **DocsLayout** — `header?`, `nav`, `navId`, `content`, `toc?`, `footer?`, `stickyHeader?`, `contentId?`. The TOC is a
-  disclosure below 1200.
+- **StackedLayout** — `header?`, `subheader?`, `content`, `footer?`, `width?: "fluid" | "boxed" | "bleed"`,
+  `stickyHeader?`, `contentId?`, `attrs?`. Every child of the content column takes its full width, so the usual centred
+  container (`max-width` + `margin-inline: auto`) fills up to its cap instead of shrinking to its content. From 1400px
+  `fluid` pads the column to `--layout-max-width`; `bleed` drops the column's padding and gap altogether, for a
+  marketing page of full-width bands that each set their own inner width.
+- **SidebarLayout** — `header?`, `subheader?`, `sidebar`, `sidebarId`, `content`, `aside?`, `footer?`, `side?`,
+  `width?`, `stickyHeader?`, `drawerToggle?`, `contentId?`, `attrs?`. Renders a `SidebarToggle` (class-only, so the
+  sidebar never gets `hidden` and survives a resize) and a backdrop.
+- **RailLayout** — `brand?`, `items: RailItem[]` (`href`, `label`, `icon`, `active`), `end?`, `header?`, `subheader?`,
+  `content`, `width?`, `contentId?`.
+- **SplitLayout** — `header?`, `subheader?`, `pane`, `paneId?`, `content`, `contentId?`,
+  `mobileView?: "pane" | "detail"` (a route decision on phones), `stickyHeader?`.
+- **ArticleLayout** — `header?`, `subheader?`, `content`, `aside?`, `asideSide?`, `footer?`,
+  `measure?: "reading" | "wide"`, `stickyHeader?`, `contentId?`.
+- **DocsLayout** — `header?`, `subheader?`, `nav`, `navId`, `content`, `toc?`, `footer?`, `stickyHeader?`, `contentId?`.
+  The TOC is a disclosure below 1200.
 - **AuthLayout** — `brand?`, `content`, `narrative?`, `split?`, `contentId?`.
 - **FocusLayout** — `header?`, `content`, `footer?`, `width?: "narrow" | "wide"`, `contentId?`.
+
+`subheader` is a full-width second row under the header — an announcement or ticker strip, section tabs. Pass it instead
+of putting a strip in `header` beside the navbar (the header row is a flex row: the two would sit side by side and
+squeeze the navbar's links). Content wider than the screen scrolls inside the strip rather than widening the page, and a
+`Dropdown` in it floats out of the strip.
 
 ### In rAPId
 
@@ -118,6 +126,13 @@ The class vocabulary is the template's output: `.layout.layout--stacked`, `.layo
 `--scroll-padding-top` (default 4.5rem) is both the `scroll-padding-top` on `html` — so a `#tab-…` deep link lands below
 a sticky header — and the offset every sticky sidebar, aside and TOC sits under. Retune it together with the navbar
 height in a theme.
+
+A `SidebarLayout`'s sidebar is sticky and one viewport tall, which is invisible in use but shows in a full-page capture:
+a screenshot tool that stitches the page under a fixed viewport (Puppeteer's `fullPage`, Playwright's `fullPage`) draws
+the sidebar once, then canvas beneath it. Print and PDF are handled — under `@media print` the sidebar is an ordinary
+column the page's height. For a full-page screenshot, size the viewport to the page first
+(`setViewport({ height:
+document.documentElement.scrollHeight })`) or capture with print media emulated.
 
 ---
 

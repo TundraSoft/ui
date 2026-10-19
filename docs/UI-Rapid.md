@@ -59,6 +59,8 @@ optional history/live modules, `ui.js`, and your own scripts — all `defer`red.
 | `history`, `live`        | Also load `/__rapid/history.js` / `/__rapid/live.js`. Pair with `ui.history` / `ui.live`.                                                     |
 | `toastRegion`            | `false` to leave the toast region out.                                                                                                        |
 | `lang`                   | `<html lang>`, default `en`.                                                                                                                  |
+| `htmlAttrs`, `bodyAttrs` | Attributes on `<html>` / `<body>`, fixed or `(data, view) => Attrs` — a saved `data-theme`, a site's `data-theme-default`, `<body data-*>`.   |
+| `consent`                | `ConsentBannerProps`: every page carries the [consent banner](./UI-Components.md#consentbanner); analytics load only after Accept.            |
 
 **Layout** is the page frame. `createLayoutTemplate()` builds a navbar (+ sidebar) frame from config;
 `asRapidLayout((body, data) => SomeLayout({ …, content: body }))` turns any of the eight [layouts](./UI-Layouts.md) into

@@ -23,9 +23,10 @@ Header → content → footer. The simplest frame.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `header` | `Html` |  | Usually a `Navbar`. |
+| `subheader` | `Html` |  | A full-width second row under the header: an announcement or ticker strip, a secondary nav. Content wider than the screen scrolls inside the strip instead of widening the page. |
 | `content` | `Html` | yes |  |
 | `footer` | `Html` |  |  |
-| `width` | `"fluid" | "boxed"` |  | `boxed` caps and centres the content column; `fluid` (default) fills. |
+| `width` | `"fluid" | "boxed" | "bleed"` |  | `fluid` (default) fills the frame, its content column padded by the gutter (and, from 1400px, capped at `--layout-max-width`); `boxed` caps and centres the column; `bleed` drops the column's padding and gap so each section spans the viewport and sets its own inner width — a marketing page of full-width bands. |
 | `stickyHeader` | `boolean` |  | Header is sticky by default. |
 | `contentId` | `string` |  | Stable id for the swap/push region (§4). Default `main-content`. |
 | `attrs` | `Attrs` |  |  |
@@ -70,8 +71,52 @@ StackedLayout({
 </div>
 ```
 
+### Full-width bands under an announcement strip
+
+`bleed` drops the column's padding so each section spans the page; `subheader` is a row of its own under the navbar.
+
+```ts
+StackedLayout({
+  width: "bleed",
+  header: Navbar({ brand: "Acme", links: [{ href: "/how", label: "How it works" }] }),
+  subheader: html`<p class="text-sm">Markets close early on Friday.</p>`,
+  content: html`
+    <section class="hero">
+      <div class="container">
+        <h1>Trade the open</h1>
+      </div>
+    </section>
+  `,
+})
+```
+
+```html
+<div class="layout layout--stacked layout--bleed">
+  <header class="layout__header layout__header--sub">
+    <nav class="navbar">
+      <div class="navbar__brand">Acme</div>
+      <button type="button" class="navbar__toggle js-only" data-toggle="#navbar-nav" aria-expanded="false" aria-controls="navbar-nav" aria-label="Toggle navigation">&#9776;</button>
+      <div class="navbar__nav" id="navbar-nav">
+        <a class="navbar__link" href="/how">How it works</a>
+      </div>
+      <div class="navbar__spacer"></div>
+    </nav>
+    <div class="layout__subheader" data-dropdown-clip>
+      <p class="text-sm">Markets close early on Friday.</p>
+    </div>
+  </header>
+  <main class="layout__content" id="main-content">
+    <section class="hero">
+      <div class="container">
+        <h1>Trade the open</h1>
+      </div>
+    </section>
+  </main>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `layouts/stacked/stacked.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.layout--boxed`, `.layout--stacked`, `.layout__content`
+`.consent`, `.layout--bleed`, `.layout--boxed`, `.layout--stacked`, `.layout__content`, `.toast-region`

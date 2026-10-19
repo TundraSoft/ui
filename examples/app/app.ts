@@ -49,6 +49,7 @@ import { layoutIndex, type LayoutName, layoutNames, layoutSamples } from "../sha
 import { catalogue, catalogueCss, type CatalogueGroup, catalogueGroups, catalogueHtml } from "../shared/catalogue.ts";
 import {
   commandItems,
+  consentSampleScript,
   type DemoRoutes,
   type Dir,
   inviteForm,
@@ -186,6 +187,7 @@ const appRoutes = (period: PeriodState): DemoRoutes => {
     month: (y, m) => `/components/forms?month=${y}-${String(m + 1).padStart(2, "0")}${range}`,
     day: (iso) => `/components/forms?day=${iso}${range}`,
     preset: (name) => `/components/forms?preset=${name}`,
+    consentLoader: "/consent-sample.js",
   };
 };
 const GroupPage = template<GroupData>((data) => {
@@ -639,6 +641,10 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
   });
 
   app.get("/app.css", () => ({ content: css, headers: { "content-type": "text/css; charset=utf-8" } }));
+  app.get("/consent-sample.js", () => ({
+    content: consentSampleScript,
+    headers: { "content-type": "text/javascript; charset=utf-8" },
+  }));
   app.get("/favicon.svg", () => ({ content: favicon, headers: { "content-type": "image/svg+xml" } }));
 
   app.get(

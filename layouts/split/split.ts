@@ -1,8 +1,15 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs } from "../../shared/attrs.ts";
+import { frameHeader } from "../header.ts";
 
 export type SplitLayoutProps = {
   header?: Html;
+  /**
+   * A full-width second row under the header: an announcement or ticker
+   * strip, a secondary nav. Content wider than the screen scrolls inside
+   * the strip instead of widening the page.
+   */
+  subheader?: Html;
   /** The master pane (a list). Gets a stable id so it can be swapped. */
   pane: Html;
   paneId?: string;
@@ -27,9 +34,7 @@ export function SplitLayout(props: SplitLayoutProps): Html {
       props.mobileView === "detail" && "layout--show-detail",
       props.stickyHeader === false && "layout--static-header",
     )
-  }>${
-    props.header && html`<header class="layout__header">${props.header}</header>`
-  }<div class="layout__body"><section class="layout__pane" id="${
+  }>${frameHeader(props.header, props.subheader)}<div class="layout__body"><section class="layout__pane" id="${
     props.paneId ?? "pane"
   }">${props.pane}</section><main class="layout__content" id="${
     props.contentId ?? "main-content"

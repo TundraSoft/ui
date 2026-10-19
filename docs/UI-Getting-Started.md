@@ -122,9 +122,12 @@ and [Recipes](./UI-Recipes.md) walks through complete pages in both flavours.
   variants.
 - **reset** — a modern reset (box-sizing, margins, `dialog` centring, list padding for class-carrying lists).
 - **base** — typography and the handful of utilities (`.stack`, `.container`, `.sr-only`, `.skip-link`, `.js-only`,
-  `.mt-*`, `.hide-sm`, text helpers).
+  `.mt-*`, `.hide-sm` / `.hide-md`, text helpers).
 - **layouts** — the eight page frames.
 - **components** — every component's structural CSS, token-driven only.
+
+Plus one small unlayered block: the page-level `html` / `body` rules (font, line height, text colour, canvas,
+`color-scheme`), so a host page's own unlayered defaults cannot override them (see [Theming](./UI-Theming.md)).
 
 Anything you write _outside_ a layer wins over all of it regardless of specificity, which is how
 [themes](./UI-Theming.md) work with no `!important`.
@@ -138,7 +141,8 @@ by a rAPId swap or your own code — works without re-wiring. Scripts re-run the
 
 ## Dark mode
 
-`data-theme="dark"` on `<html>` forces dark, `data-theme="light"` forces light, nothing set follows the OS. Any element
+`data-theme="dark"` on `<html>` forces dark, `data-theme="light"` forces light, nothing set follows the OS — or the
+site's `data-theme-default` when it carries one (a dark-first site renders `data-theme-default="dark"`). Any element
 with `data-theme-toggle` flips it and persists the choice in `localStorage`. Every token file ships both a
 `prefers-color-scheme: dark` block and a `[data-theme="dark"]` block so an explicit choice always wins.
 

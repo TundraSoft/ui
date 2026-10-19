@@ -5,7 +5,13 @@
  * Re-measured on change, on resize, after a rapid swap, and whenever the
  * control's own box changes size (a ResizeObserver) — so one inside a
  * <dialog>, <details> or tab panel that was hidden at load (measured 0
- * wide) is placed when it is shown. */
+ * wide) is placed when it is shown.
+ *
+ * On a narrow screen the control scrolls sideways inside itself
+ * (segmented.css caps it at its container). The thumb is positioned in the
+ * scroll box's content, so the measurement adds the scroll offset, and the
+ * checked option is scrolled into view on load and on change — without
+ * moving the page, which scrollIntoView would. */
 (() => {
   function place(root) {
     const checked = root.querySelector(".segmented__input:checked");
@@ -17,10 +23,26 @@
     const r = root.getBoundingClientRect();
     const l = label.getBoundingClientRect();
     const rtl = getComputedStyle(root).direction === "rtl";
-    const x = rtl ? r.right - root.clientLeft - 3 - l.right : l.left - r.left - root.clientLeft - 3;
+    // scrollLeft is 0 → negative in RTL, 0 → positive in LTR; adding it
+    // turns the label's on-screen edge into its edge in the content.
+    const x = rtl
+      ? r.right - root.clientLeft - 3 - l.right - root.scrollLeft
+      : l.left - r.left - root.clientLeft - 3 + root.scrollLeft;
     root.style.setProperty("--segmented-x", `${rtl ? -x : x}px`);
     root.style.setProperty("--segmented-w", `${l.width}px`);
     root.setAttribute("data-segmented-ready", "");
+  }
+
+  /** Scroll the control (only the control) so its checked label shows. */
+  function reveal(root) {
+    if (root.scrollWidth <= root.clientWidth) return;
+    const label = root.querySelector(".segmented__input:checked")?.nextElementSibling;
+    if (!label) return;
+    const r = root.getBoundingClientRect();
+    const l = label.getBoundingClientRect();
+    const pad = 8;
+    if (l.left < r.left + pad) root.scrollLeft -= r.left + pad - l.left;
+    else if (l.right > r.right - pad) root.scrollLeft += l.right - (r.right - pad);
   }
 
   const watched = new WeakSet();
@@ -29,6 +51,7 @@
     : null;
   const initAll = () =>
     document.querySelectorAll("[data-segmented]").forEach((root) => {
+      reveal(root);
       place(root);
       if (observer && !watched.has(root)) {
         watched.add(root);
@@ -42,6 +65,8 @@
   document.addEventListener("rapid:swapped", initAll);
   document.addEventListener("change", (event) => {
     const root = event.target.closest?.("[data-segmented]");
-    if (root) place(root);
+    if (!root) return;
+    reveal(root);
+    place(root);
   });
 })();

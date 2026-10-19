@@ -7,7 +7,11 @@
  * (`createCoreTemplate({ htmlAttrs })`, from the person's saved
  * preference) wins, and is stored so a page the server does not render
  * follows it; otherwise the choice stored in this browser applies;
- * otherwise the system's. A toggle dispatches `theme:change`
+ * otherwise the site's default, `data-theme-default` on <html> (a
+ * dark-first theme renders `data-theme-default="dark"`; the tokens honour
+ * it in CSS, so it paints right with no script); otherwise the system's.
+ * The default is never stored — it is not the person's choice. A toggle
+ * dispatches `theme:change`
  * (`detail: { theme }`) on <html> — the hook an app uses to save the
  * choice to the person's profile, so every device follows.
  */
@@ -33,11 +37,12 @@
     const trigger = event.target.closest("[data-theme-toggle]");
     if (!trigger) return;
 
-    const systemDark = matchMedia("(prefers-color-scheme: dark)").matches;
-    const current = root.dataset.theme === "dark" ||
-        (root.dataset.theme !== "light" && systemDark)
+    const fallback = valid(root.dataset.themeDefault)
+      ? root.dataset.themeDefault
+      : matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
+    const current = valid(root.dataset.theme) ? root.dataset.theme : fallback;
     const next = current === "dark" ? "light" : "dark";
 
     root.dataset.theme = next;

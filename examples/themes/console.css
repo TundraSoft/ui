@@ -8,8 +8,12 @@
  * Layout composition (mini icon rail + sticky topbar + dense grid) is
  * this theme's own job; the base ships no fixed layouts.
  */
+/* Dark-first: pages using this theme render `data-theme-default="dark"`
+   on <html> so the toggle knows the default; the palette needs no
+   selector for it, since `:root` already is the dark one. */
 :root,
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --color-primary: #7ee0c0;
   --color-primary-strong: #96e8cd;
   --color-primary-contrast: #0f1115;
@@ -77,6 +81,7 @@
  * theme toggle is not a dead control.
  */
 :root[data-theme="light"] {
+  color-scheme: light;
   --color-primary: #0f6b52;
   --color-primary-strong: #0b573f;
   --color-primary-contrast: #f4fbf8;
