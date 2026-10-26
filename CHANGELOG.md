@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://github.com/TundraSoft/ui/compare/v0.22.0...v0.22.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** puppeteer-core 25.16.0 for zod 4.6.7 (GHSA-mrhx-c7xc-m3w5) ([#78](https://github.com/TundraSoft/ui/issues/78)) ([592da3c](https://github.com/TundraSoft/ui/commit/592da3c40b441cdbd5281d1c9ad9ccb8806c1015))
+
 ## [0.22.0](https://github.com/TundraSoft/ui/compare/v0.21.0...v0.22.0) (2026-10-20)
 
 
