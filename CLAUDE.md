@@ -810,6 +810,18 @@ before the pick lands, so form.js skips the blur check then (`picking`). Harness
 a test lengthened a `scrollIntoView` enough that the `html:focus-within` smooth scroll was still running at the click —
 scroll with `behavior: "instant"` before a click.
 
+**Combobox for large sets (2026-10-27).** A multi list is `aria-multiselectable`. `hideSelected` (multi default):
+combobox.js tucks picked options away (`data-combobox-tucked`, CSS `display: none` — kept apart from `hidden`, which is
+the search filter's) on each open and each search, never on the pick itself, so the rows under the pointer do not move;
+a search finding only picks shows the `[data-combobox-note]` "Already selected." Re-picking a ticked row stays a no-op
+(the token's × removes). `openOn: "type"` + `minChars` (default 1): shut on focus/click/arrows until enough is typed,
+with an action the list opens only once the fragment landed (`rapid.swap` resolves `false` when a newer keystroke
+aborted it — skip then), a pick clears the text and shuts it; `caret` defaults to `false` there. After every server swap
+the picks are re-applied to the new rows (`markPicks` — the route only saw `q`, so ticks used to vanish).
+`ComboboxList({ total, moreText })` ends a capped page with `.combobox__more` and pins the hints count
+(`data-combobox-total`, which `refresh()` leaves alone); `selectedOptions` labels picks the page does not hold.
+Scroll-to-load-more pages were discussed and deferred until a screen needs browsing rather than searching.
+
 **Outsmart rebuild + Brevily asks (2026-10-19, issues #63–#72, one PR).** Found rebuilding the Outsmart Markets design
 on 0.19.0 and re-checked against 0.20.0 (none had been fixed). What changed, and the rules that fell out of it:
 
