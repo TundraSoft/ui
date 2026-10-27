@@ -669,6 +669,122 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: multi Combobox listbox is aria-multiselectable (${JSON.stringify(multiselectable)})`,
     );
 
+    // hideSelected: a pick keeps its row while the list is open, leaves it on
+    // the next open; a search that finds only picks says so; removing a
+    // token brings the option back.
+    const cbList = (id: string) =>
+      page.evaluate((id) => {
+        const root = document.getElementById(id)!.closest("[data-combobox]")!;
+        const list = document.getElementById(`${id}-list`)!;
+        const seen = (el: Element | null) => !!el && (el as HTMLElement).offsetParent !== null;
+        return {
+          open: !list.hidden,
+          rows: Array.from(list.querySelectorAll('[role="option"]')).filter(seen).map((o) =>
+            o.getAttribute("data-value")
+          ),
+          empty: seen(list.querySelector(".combobox__empty:not([data-combobox-note])")),
+          note: seen(list.querySelector("[data-combobox-note]"))
+            ? list.querySelector("[data-combobox-note]")!.textContent
+            : null,
+          tokens: Array.from(root.querySelectorAll(".combobox__token")).map((t) => t.textContent!.trim()),
+          caret: !!root.querySelector(".combobox__caret"),
+          value: (document.getElementById(id) as HTMLInputElement).value,
+        };
+      }, id);
+    await page.$eval("#cat-cb-hide", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.focus("#cat-cb-hide");
+    await pause();
+    const hideFirst = await cbList("cat-cb-hide");
+    await clickIn("#cat-cb-hide-list [data-value=amsterdam]");
+    await pause();
+    const hidePicked = await cbList("cat-cb-hide");
+    await page.keyboard.press("Escape");
+    await clickIn("#cat-cb-hide");
+    await pause();
+    const hideReopen = await cbList("cat-cb-hide");
+    await page.keyboard.type("acc");
+    await pause();
+    const hideOnlyPicks = await cbList("cat-cb-hide");
+    await page.$eval("#cat-cb-hide", (el) => {
+      (el as HTMLInputElement).value = "";
+    });
+    await page.keyboard.type("zzz");
+    await pause();
+    const hideNone = await cbList("cat-cb-hide");
+    await page.$eval("#cat-cb-hide", (el) => {
+      (el as HTMLInputElement).value = "";
+    });
+    await page.keyboard.type("a");
+    await page.$eval(
+      "#cat-cb-hide-list",
+      (list) => (list.closest("[data-combobox]")!.querySelector("[data-combobox-remove=accra]") as HTMLElement).click(),
+    );
+    await pause();
+    const hideRemoved = await cbList("cat-cb-hide");
+    await page.keyboard.press("Escape");
+    check(
+      hideFirst.open && !hideFirst.rows.includes("accra") && hideFirst.rows.length === 5 &&
+        hidePicked.rows.includes("amsterdam") && hidePicked.rows.length === 5 &&
+        hidePicked.tokens.join() === "Accra,Amsterdam" &&
+        hideReopen.open && !hideReopen.rows.includes("amsterdam") && hideReopen.rows.length === 4 &&
+        hideOnlyPicks.rows.length === 0 && hideOnlyPicks.note === "Already selected." && !hideOnlyPicks.empty &&
+        hideNone.rows.length === 0 && hideNone.note === null && hideNone.empty &&
+        hideRemoved.rows.includes("accra") && hideRemoved.tokens.join() === "Amsterdam",
+      `forms: multi Combobox hides picks on reopen (${
+        JSON.stringify({ hideFirst, hidePicked, hideReopen, hideOnlyPicks, hideNone, hideRemoved })
+      })`,
+    );
+
+    // openOn: "type" + minChars: 2 — shut on focus, click and ArrowDown;
+    // opens from two characters, shuts below them; a pick clears and shuts.
+    await page.$eval("#cat-cb-type", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.focus("#cat-cb-type");
+    await clickIn("#cat-cb-type");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.type("a");
+    await pause();
+    const typeShort = await cbList("cat-cb-type");
+    await page.keyboard.type("m");
+    await pause();
+    const typeOpen = await cbList("cat-cb-type");
+    await page.keyboard.press("Backspace");
+    await pause();
+    const typeBack = await cbList("cat-cb-type");
+    await page.keyboard.type("ms");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await pause();
+    const typePicked = await cbList("cat-cb-type");
+    const typeFocus = await page.evaluate(() => document.activeElement?.id);
+    check(
+      !typeShort.open && !typeShort.caret && typeOpen.open && typeOpen.rows.join() === "amsterdam" && !typeBack.open &&
+        !typePicked.open && typePicked.tokens.join() === "Amsterdam" && typePicked.value === "" &&
+        typeFocus === "cat-cb-type",
+      `forms: Combobox openOn "type" (${JSON.stringify({ typeShort, typeOpen, typeBack, typePicked, typeFocus })})`,
+    );
+
+    // caret: false, total, selectedOptions.
+    const cbExtras = await page.evaluate(() => ({
+      caretHide: !!document.querySelector("#cat-cb-hide-list")?.closest("[data-combobox]")?.querySelector(
+        ".combobox__caret",
+      ),
+      caretOff: !!document.querySelector("#cat-cb-nocaret-list")?.closest("[data-combobox]")?.querySelector(
+        ".combobox__caret",
+      ),
+      more: document.querySelector("#cat-cb-total-list .combobox__more")?.textContent,
+      count: document.querySelector("#cat-cb-total-list .combobox__count")?.textContent,
+      tokens: Array.from(
+        document.querySelector("#cat-cb-selopts-list")!.closest("[data-combobox]")!.querySelectorAll(
+          ".combobox__token",
+        ),
+      ).map((t) => t.textContent!.trim()),
+    }));
+    check(
+      cbExtras.caretHide && !cbExtras.caretOff && cbExtras.more === "Showing 5 of 9,812. Keep typing to narrow." &&
+        cbExtras.count === "9,812 matches" && cbExtras.tokens.join() === "Grace Hopper,Accra",
+      `forms: Combobox caret / total / selectedOptions (${JSON.stringify(cbExtras)})`,
+    );
+
     // A Select's control is a button: Enter in the search box beside it submits.
     await trapSubmits("#cat-autosubmit");
     await page.$eval("#cat-autosubmit input[type=search]", (el) => el.scrollIntoView({ block: "center" }));

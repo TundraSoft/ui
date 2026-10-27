@@ -36,6 +36,13 @@ Combobox(props: ComboboxProps): Html
 | `disabled` | `boolean` |  | Rendered and announced, but not pickable. |
 | `lead` | `Html` |  | Rendered before the label — an avatar or badge. |
 
+### `ComboboxOpenOn`
+
+When the list opens: on focus (the whole list at once) or only once something is typed.
+
+- `"focus"`
+- `"type"`
+
 ### `ComboboxProps`
 
 | Prop | Type | Required | Description |
@@ -47,12 +54,20 @@ Combobox(props: ComboboxProps): Html
 | `query` | `string` |  | Current text in the input (what the server matched against). |
 | `options` | `ComboboxOption[]` | yes |  |
 | `selected` | `string | string[]` |  |  |
+| `selectedOptions` | `ComboboxOption[]` |  | Options for picked values that `options` does not hold — with a server-searched list the first page rarely contains them, and a token (or a single combobox's text) would otherwise show the raw value. Used for labels only; never rendered in the list. |
 | `open` | `boolean` |  |  |
 | `multi` | `boolean` |  |  |
 | `required` | `boolean` |  | A pick is required: one option (single) or at least one token (`multi`). combobox.js keeps a custom validity on the input while nothing is picked — typed text that matches nothing does not count — so the browser (a plain form) or form.js (`Form({ validate })`) reports it like any rule. The server must check it too. |
 | `requiredMessage` | `string` |  | The message while nothing is picked. |
 | `action` | `string` |  | URL that returns a fresh `ComboboxList(...)` fragment for `?q=<text>`. combobox.js debounces `input` and calls `window.rapid.swap()` on it; without it (or without rAPId's runtime) the rendered options are filtered client-side instead. |
 | `loadOnFocus` | `boolean` |  | With `action`: fetch the list once when the field first gets focus, before anything is typed (`?q=` empty) — "the organisation's tags" rather than an empty box. Without it the first fetch waits for typing. |
+| `openOn` | `ComboboxOpenOn` |  | When the list opens. `"type"` keeps it shut on focus and click, and opens it (fetching first, with `action`) only once `minChars` characters are typed — nothing loads for someone who only tabs past. |
+| `minChars` | `number` |  | With `openOn: "type"`: characters needed before the list opens. @default 1 |
+| `caret` | `boolean` |  | The chevron at the end of the field (a click on it toggles the list). |
+| `hideSelected` | `boolean` |  | `multi` only: options already picked (shown as tokens) are left out of the list each time it opens or is searched. While it stays open a pick keeps its row, ticked, so the rows under the pointer do not move. |
+| `selectedText` | `string` |  | Shown when a search matches only options that are already picked. @default "Already selected." |
+| `total` | `number` |  | How many options match in all, when `options` is one page of them (a server-searched list capped at, say, 50). Above `options.length` the list ends with a note — `moreText` — and the hints count shows it. |
+| `moreText` | `string` |  | The note under a capped list; `{shown}` and `{total}` are filled in. |
 | `emptyText` | `string` |  |  |
 | `hint` | `string` |  |  |
 | `hints` | `boolean` |  | The keyboard-hint bar under the list ("↑↓ navigate · ↵ select · 12 matches"). Turn it off where the list reads as a dropdown, not a search. @default true |
@@ -150,16 +165,61 @@ ComboboxList({
 </div>
 ```
 
+### Many picks from a large directory
+
+Nothing loads until two characters are typed; the route answers with one page (`ComboboxList({ total })` ends it with "Showing 50 of 9,812"). Picks leave the list on the next open, and `selectedOptions` labels the ones the page does not hold.
+
+```ts
+Combobox({
+  id: "watchers",
+  name: "watchers",
+  label: "Watchers",
+  multi: true,
+  openOn: "type",
+  minChars: 2,
+  action: "/fragments/people",
+  options: [],
+  selected: ["u_8812"],
+  selectedOptions: [{ value: "u_8812", label: "Grace Hopper" }],
+})
+```
+
+```html
+<div class="combobox combobox--multi" data-combobox data-combobox-name="watchers" data-combobox-hide-selected="">
+  <label class="form-field__label" for="watchers">Watchers</label>
+  <div class="combobox__anchor">
+    <div class="combobox__field">
+      <span class="combobox__token">
+        Grace Hopper
+        <button type="button" class="combobox__token-remove" aria-label="Remove Grace Hopper" data-combobox-remove="u_8812">
+          <svg width="11" height="11" width="2" …>…</svg>
+        </button>
+        <input type="hidden" name="watchers" value="u_8812">
+      </span>
+      <input class="combobox__input" id="watchers" type="text" role="combobox" autocomplete="off" value="" placeholder="" aria-expanded="false" aria-controls="watchers-list" aria-autocomplete="list" data-combobox-action="/fragments/people" data-combobox-open-on="type" data-combobox-min-chars="2" data-combobox-target="#watchers-list">
+    </div>
+    <div class="combobox__list" id="watchers-list" role="listbox" aria-multiselectable="true" hidden>
+      <div class="combobox__empty">No matches.</div>
+      <div class="combobox__hints">
+        <span>&uarr;&darr; navigate</span>
+        <span>&crarr; select</span>
+        <span class="combobox__count">0 matches</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/combobox/combobox.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox`, `.combobox--invalid`, `.combobox--multi`, `.combobox--no-hints`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__list--popup`, `.combobox__match`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__options`, `.combobox__search`, `.combobox__search-input`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
+`.combobox`, `.combobox--invalid`, `.combobox--multi`, `.combobox--no-hints`, `.combobox--open`, `.combobox__anchor`, `.combobox__caret`, `.combobox__check`, `.combobox__count`, `.combobox__empty`, `.combobox__field`, `.combobox__group`, `.combobox__hints`, `.combobox__input`, `.combobox__list`, `.combobox__list--popup`, `.combobox__match`, `.combobox__more`, `.combobox__option`, `.combobox__option-label`, `.combobox__option-lead`, `.combobox__option-meta`, `.combobox__options`, `.combobox__search`, `.combobox__search-input`, `.combobox__token`, `.combobox__token-remove`, `.form-field__help`
 
 ## Behaviour
 
 `components/combobox/combobox.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-empty`, `data-combobox-load-on-focus`, `data-combobox-loaded`, `data-combobox-name`, `data-combobox-remove`, `data-combobox-required`, `data-combobox-search`, `data-combobox-target`, `data-combobox-value`, `data-select-text`, `data-value`.
+Attributes it reads or writes: `data-active`, `data-combobox`, `data-combobox-action`, `data-combobox-empty`, `data-combobox-hide-selected`, `data-combobox-load-on-focus`, `data-combobox-loaded`, `data-combobox-min-chars`, `data-combobox-name`, `data-combobox-note`, `data-combobox-open-on`, `data-combobox-remove`, `data-combobox-required`, `data-combobox-search`, `data-combobox-selected-text`, `data-combobox-target`, `data-combobox-total`, `data-combobox-tucked`, `data-combobox-value`, `data-select-text`, `data-value`.
 
 Events: `combobox:pick`, `rapid:swapped`.

@@ -126,6 +126,14 @@ open on focus, arrows, Enter, Escape (only claimed while open). `required` asks 
 token with `multi`; typed text that picks nothing does not count — reported by the browser in a plain form and inline by
 `Form({ validate: true })`, worded by `requiredMessage`.
 
+A multi combobox leaves its picks out of the list each time it opens or is searched (`hideSelected: false` keeps them,
+ticked); a pick made while the list is open keeps its row until then, so nothing moves under the pointer, and a search
+that finds only picks says "Already selected." (`selectedText`). For a large, server-searched set: `openOn: "type"` with
+`minChars` keeps the list shut — and unfetched — until enough is typed (it also drops the chevron; `caret` overrides);
+the route returns one page as `ComboboxList({ …, total })`, which ends with "Showing 50 of 9,812. Keep typing to
+narrow." (`moreText`); and `selectedOptions` gives the labels of picks that page does not hold, so a token never shows a
+raw id.
+
 ### [DatePicker](./reference/components-datepicker.md)
 
 ```ts

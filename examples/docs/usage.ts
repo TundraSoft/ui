@@ -265,6 +265,24 @@ export const usage: Record<string, UsageExample[]> = {
           options: [{ value: "grace", label: "Grace Hopper", meta: "Ops" }],
         }),
     },
+    {
+      title: "Many picks from a large directory",
+      note:
+        'Nothing loads until two characters are typed; the route answers with one page (`ComboboxList({ total })` ends it with "Showing 50 of 9,812"). Picks leave the list on the next open, and `selectedOptions` labels the ones the page does not hold.',
+      render: () =>
+        Combobox({
+          id: "watchers",
+          name: "watchers",
+          label: "Watchers",
+          multi: true,
+          openOn: "type",
+          minChars: 2,
+          action: "/fragments/people",
+          options: [],
+          selected: ["u_8812"],
+          selectedOptions: [{ value: "u_8812", label: "Grace Hopper" }],
+        }),
+    },
   ],
   "components/consent": [
     {

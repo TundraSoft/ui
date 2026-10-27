@@ -739,6 +739,64 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "multi, hideSelected (the default) — picks leave the list on the next open or search; a search that finds only picks says so (#cat-cb-hide)",
+          Combobox({
+            id: "cat-cb-hide",
+            name: "regions",
+            label: "Regions",
+            multi: true,
+            selected: ["accra"],
+            options: cityOptions.slice(0, 6),
+          }),
+        ),
+        c(
+          'openOn: "type" + minChars: 2 — shut on focus, opens (and, with an action, loads) from two characters; no caret by default (#cat-cb-type)',
+          Combobox({
+            id: "cat-cb-type",
+            name: "city",
+            label: "City",
+            placeholder: "Type two letters…",
+            multi: true,
+            openOn: "type",
+            minChars: 2,
+            options: cityOptions,
+          }),
+        ),
+        c(
+          'openOn: "focus" (the default) with caret: false (#cat-cb-nocaret)',
+          Combobox({
+            id: "cat-cb-nocaret",
+            name: "owner",
+            placeholder: "Owner",
+            openOn: "focus",
+            caret: false,
+            options: cityOptions.slice(0, 4),
+          }),
+        ),
+        c(
+          "total — one page of a larger result set ends with a note (#cat-cb-total)",
+          Combobox({
+            id: "cat-cb-total",
+            name: "office",
+            label: "Office",
+            open: true,
+            total: 9812,
+            options: cityOptions.slice(0, 5),
+          }),
+        ),
+        c(
+          "selectedOptions — a pick the page of options does not hold keeps its label (#cat-cb-selopts)",
+          Combobox({
+            id: "cat-cb-selopts",
+            name: "watchers",
+            label: "Watchers",
+            multi: true,
+            selected: ["u_8812", "accra"],
+            selectedOptions: [{ value: "u_8812", label: "Grace Hopper" }],
+            options: cityOptions.slice(0, 3),
+          }),
+        ),
+        c(
           "hints: false — reads as a dropdown (#cat-cb-nohints)",
           Combobox({
             id: "cat-cb-nohints",

@@ -12,7 +12,22 @@
  * updated. (rAPId's own runtime only reacts to click/submit, so this is
  * the one place a component script triggers a swap programmatically.)
  * `data-combobox-load-on-focus` (Combobox({ loadOnFocus })) makes the
- * first focus fetch once with an empty query.
+ * first focus fetch once with an empty query. After a swap the picks are
+ * re-applied to the new rows (the server only saw `q`).
+ *
+ * Opening on typing (Combobox({ openOn: "type" })): `data-combobox-open-on`
+ * + `data-combobox-min-chars` (default 1) on the input. Focus, a click and
+ * the arrows leave the list shut until that much is typed; with an action
+ * the list opens once the fragment for the text has landed. Dropping below
+ * the minimum (or a pick, which clears the text) closes it again.
+ *
+ * Hiding picks (`data-combobox-hide-selected`, a multi Combobox's default):
+ * each time the list opens, and on every search, options already picked
+ * are tucked away (`data-combobox-tucked`). A pick made while the list is
+ * open keeps its row, ticked, until the next open or search — the rows
+ * under the pointer never move. A search that only finds picked options
+ * says so (`data-combobox-selected-text` on the list, "Already selected.").
+ * Removing a token brings its option back.
  *
  * Select-only controls (the Select's `<button role="combobox">`, or a
  * read-only input) open on click or Arrow, never on focus, and toggle
@@ -41,6 +56,7 @@
  */
 (() => {
   const ACTIVE = "data-active";
+  const TUCKED = "data-combobox-tucked";
   const X_ICON =
     '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
@@ -60,7 +76,27 @@
     slot.textContent = label;
     slot.classList.remove("select__text--placeholder");
   }
-  const options = (root) => Array.from(root.querySelectorAll('[role="option"]')).filter((o) => !o.hidden);
+  const shown = (o) => !o.hidden && !o.hasAttribute(TUCKED);
+  const options = (root) => Array.from(root.querySelectorAll('[role="option"]')).filter(shown);
+
+  const hidesPicks = (root) => root.hasAttribute("data-combobox-hide-selected");
+  const typeOnly = (input) => input?.getAttribute("data-combobox-open-on") === "type";
+  /** May the list open now? Always — unless it opens on typing and too little is typed. */
+  function mayOpen(root) {
+    const input = inputOf(root);
+    if (!typeOnly(input)) return true;
+    const min = Number(input.getAttribute("data-combobox-min-chars") ?? 1);
+    return input.value.trim().length >= min;
+  }
+
+  /** The picked values: a multi's tokens, or a single's hidden value. */
+  function pickedValues(root) {
+    if (root.classList.contains("combobox--multi")) {
+      return new Set(Array.from(root.querySelectorAll(".combobox__field .combobox__token input"), (h) => h.value));
+    }
+    const value = root.querySelector("[data-combobox-value]")?.value;
+    return new Set(value ? [value] : []);
+  }
 
   function activeIndex(root) {
     return options(root).findIndex((o) => o.hasAttribute(ACTIVE));
@@ -125,6 +161,10 @@
       if (was && search && search === document.activeElement) input?.focus();
       return;
     }
+    if (!was && hidesPicks(root)) {
+      tuckPicks(root);
+      refresh(root);
+    }
     if (was || !(search || (input && selectOnly(input)))) return;
     // A select opens fresh: the whole list, the picked option highlighted
     // and in view (a 400-option list must not open at the top).
@@ -146,20 +186,48 @@
     if (!input || !list) return;
     const q = input.value.trim().toLowerCase();
 
-    let visible = 0;
     root.querySelectorAll('[role="option"]').forEach((o) => {
       const label = o.querySelector(".combobox__option-label")?.textContent ?? o.textContent;
-      const hit = !q || label.toLowerCase().includes(q);
-      o.hidden = !hit;
-      if (hit) visible++;
+      o.hidden = !!q && !label.toLowerCase().includes(q);
     });
     clearActive(root);
+    // A search is a new list: picked options leave it (hideSelected).
+    if (hidesPicks(root)) tuckPicks(root);
+    refresh(root);
+  }
+
+  /** Tuck every picked option away — or bring it back once un-picked. */
+  function tuckPicks(root) {
+    root.querySelectorAll('[role="option"]').forEach((o) =>
+      o.toggleAttribute(TUCKED, o.getAttribute("aria-selected") === "true")
+    );
+  }
+
+  /** A swapped-in list knows only `q`: tick what is picked on the new rows. */
+  function markPicks(root) {
+    const picked = pickedValues(root);
+    root.querySelectorAll('[role="option"]').forEach((o) =>
+      o.setAttribute("aria-selected", String(picked.has(o.getAttribute("data-value") ?? "")))
+    );
+  }
+
+  /** Groups, count and the empty / "already selected" notes, from what is shown. */
+  function refresh(root) {
+    const list = scrollerOf(root);
+    if (!list) return;
+    let visible = 0;
+    let tucked = 0;
+    root.querySelectorAll('[role="option"]').forEach((o) => {
+      if (o.hidden) return;
+      if (o.hasAttribute(TUCKED)) tucked++;
+      else visible++;
+    });
 
     root.querySelectorAll(".combobox__group").forEach((group) => {
       let el = group.nextElementSibling;
       let any = false;
       while (el && !el.classList.contains("combobox__group") && !el.classList.contains("combobox__hints")) {
-        if (el.matches('[role="option"]') && !el.hidden) {
+        if (el.matches('[role="option"]') && shown(el)) {
           any = true;
           break;
         }
@@ -168,21 +236,34 @@
       group.hidden = !any;
     });
 
+    // A server count of the whole result set (ComboboxList({ total })) stays.
     const count = root.querySelector(".combobox__count");
-    if (count) count.textContent = visible === 1 ? "1 match" : `${visible} matches`;
-
-    let empty = list.querySelector(".combobox__empty");
-    if (!empty) {
-      empty = document.createElement("div");
-      empty.className = "combobox__empty";
-      empty.textContent = list.getAttribute("data-combobox-empty") ?? "No matches.";
-      list.insertBefore(empty, list.querySelector(".combobox__hints"));
+    if (count && !count.hasAttribute("data-combobox-total")) {
+      count.textContent = visible === 1 ? "1 match" : `${visible} matches`;
     }
-    empty.hidden = visible > 0;
+
+    const note = (selector, attr, fallback) => {
+      let el = list.querySelector(selector);
+      if (!el) {
+        el = document.createElement("div");
+        el.className = "combobox__empty";
+        if (attr === "data-combobox-selected-text") el.setAttribute("data-combobox-note", "");
+        el.textContent = list.getAttribute(attr) ?? fallback;
+        list.insertBefore(el, list.querySelector(".combobox__more, .combobox__hints"));
+      }
+      return el;
+    };
+    note(".combobox__empty:not([data-combobox-note])", "data-combobox-empty", "No matches.").hidden = visible > 0 ||
+      tucked > 0;
+    if (tucked > 0 || list.querySelector("[data-combobox-note]")) {
+      note("[data-combobox-note]", "data-combobox-selected-text", "Already selected.").hidden = visible > 0 ||
+        tucked === 0;
+    }
   }
 
   const timers = new WeakMap();
-  function filter(root) {
+  /** Filter the list for the input's text; `reveal` opens it once the result is in. */
+  function filter(root, reveal = false) {
     const input = inputOf(root);
     const action = input?.getAttribute("data-combobox-action");
     const target = input?.getAttribute("data-combobox-target");
@@ -192,12 +273,20 @@
         root,
         setTimeout(() => {
           const url = `${action}${action.includes("?") ? "&" : "?"}q=${encodeURIComponent(input.value.trim())}`;
-          globalThis.rapid.swap(url, target).then(() => clearActive(root));
+          globalThis.rapid.swap(url, target).then((ok) => {
+            clearActive(root);
+            if (ok === false) return; // superseded by a newer keystroke, or failed
+            markPicks(root);
+            if (hidesPicks(root)) tuckPicks(root);
+            refresh(root);
+            if (reveal && document.activeElement === input && mayOpen(root)) open(root, true);
+          });
         }, 150),
       );
       return;
     }
     filterLocal(root);
+    if (reveal) open(root, true);
   }
 
   function pickSingle(root, opt) {
@@ -246,8 +335,15 @@
     field.insertBefore(token, input);
 
     opt.setAttribute("aria-selected", "true");
+    // The text did its job. A list that opens on typing closes with it;
+    // otherwise a search widens back to the whole list (with nothing
+    // typed there is no search to undo, and the rows stay put).
+    const typed = input.value.trim();
     input.value = "";
-    filter(root);
+    if (typeOnly(input)) {
+      clearTimeout(timers.get(root));
+      open(root, false);
+    } else if (typed) filter(root);
     input.focus();
     syncValidity(root, true);
   }
@@ -256,8 +352,11 @@
     root.querySelectorAll(".combobox__token").forEach((t) => {
       if (t.querySelector("input")?.value === value) t.remove();
     });
-    root.querySelectorAll(`[role="option"][data-value="${CSS.escape(value)}"]`)
-      .forEach((o) => o.setAttribute("aria-selected", "false"));
+    root.querySelectorAll(`[role="option"][data-value="${CSS.escape(value)}"]`).forEach((o) => {
+      o.setAttribute("aria-selected", "false");
+      o.removeAttribute(TUCKED);
+    });
+    if (hidesPicks(root)) refresh(root);
     syncValidity(root, true);
   }
 
@@ -266,6 +365,7 @@
     if (!root) return;
 
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (!isOpen(root) && !mayOpen(root)) return;
       event.preventDefault();
       open(root, true);
       setActive(root, activeIndex(root) + (event.key === "ArrowDown" ? 1 : -1));
@@ -319,8 +419,14 @@
     const hidden = root.querySelector("[data-combobox-value]");
     if (hidden) hidden.value = ""; // typing un-picks; a pick sets it again
     syncValidity(root, false); // form.js hears this same input event
-    filter(root);
-    open(root, true);
+    if (!mayOpen(root)) {
+      clearTimeout(timers.get(root));
+      open(root, false);
+    } else if (typeOnly(event.target)) filter(root, true);
+    else {
+      filter(root);
+      open(root, true);
+    }
   });
 
   // Focus opens a typeable list; a read-only one (Select) stays shut until
@@ -330,6 +436,7 @@
     const root = event.target.closest?.("[data-combobox]");
     if (!root || !event.target.matches("[role='combobox']") || selectOnly(event.target)) return;
     const input = event.target;
+    if (typeOnly(input)) return;
     if (input.hasAttribute("data-combobox-load-on-focus") && !input.hasAttribute("data-combobox-loaded")) {
       input.setAttribute("data-combobox-loaded", "");
       filter(root);
@@ -370,7 +477,7 @@
     const input = event.target.closest?.("[data-combobox] [role='combobox']");
     if (input && !input.disabled) {
       const root = input.closest("[data-combobox]");
-      open(root, selectOnly(input) ? !isOpen(root) : true, { focusSearch });
+      open(root, selectOnly(input) ? !isOpen(root) : isOpen(root) || mayOpen(root), { focusSearch });
       return;
     }
 
@@ -384,7 +491,7 @@
         if (isOpen(root)) open(root, false);
         else {
           input.focus();
-          open(root, true, { focusSearch });
+          if (mayOpen(root)) open(root, true, { focusSearch });
         }
       }
       return;
