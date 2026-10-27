@@ -172,7 +172,9 @@ export function Combobox(props: ComboboxProps): Html {
             : undefined,
         })}><span class="combobox__caret">${Icon("chevronDown", {
           size: 15,
-        })}</span></div><div class="combobox__list" id="${listId}" role="listbox"${props.open ? "" : html`
+        })}</span></div><div class="combobox__list" id="${listId}" role="listbox"${renderAttrs({
+          "aria-multiselectable": props.multi ? "true" : undefined,
+        })}${props.open ? "" : html`
         hidden
       `}>${ComboboxList(props)}</div></div>${props.hint
         ? html`<span class="form-field__help">${props.hint}</span>`

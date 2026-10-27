@@ -659,6 +659,15 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
         cbPlainSent[0].endsWith("|regions=auckland"),
       `forms: required multi Combobox in a plain form (${JSON.stringify({ cbPlain, cbPlainSent })})`,
     );
+    // A multi list says so to a screen reader; a single one does not.
+    const multiselectable = await page.evaluate(() => ({
+      many: document.getElementById("cat-req-cb-many-list")?.getAttribute("aria-multiselectable"),
+      one: document.getElementById("cat-req-cb-one-list")?.getAttribute("aria-multiselectable"),
+    }));
+    check(
+      multiselectable.many === "true" && multiselectable.one === null,
+      `forms: multi Combobox listbox is aria-multiselectable (${JSON.stringify(multiselectable)})`,
+    );
 
     // A Select's control is a button: Enter in the search box beside it submits.
     await trapSubmits("#cat-autosubmit");
