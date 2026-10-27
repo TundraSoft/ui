@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/TundraSoft/ui/compare/v0.23.0...v0.24.0) (2026-10-27)
+
+
+### Features
+
+* **combobox:** hide picks, open on typing, capped pages, labels for off-page picks ([#81](https://github.com/TundraSoft/ui/issues/81)) ([38194ba](https://github.com/TundraSoft/ui/commit/38194bab0e94a1243a67f1ecdf52c587924d9e3d))
+
 ## [0.23.0](https://github.com/TundraSoft/ui/compare/v0.22.1...v0.23.0) (2026-10-26)
 
 
