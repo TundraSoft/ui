@@ -48,6 +48,8 @@
 }
 
 .dropdown__panel--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
   transform-origin: top right;
 }
 
@@ -116,11 +118,6 @@ html:not(.js) .dropdown__search {
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-}
-
-.dropdown__panel--end {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
 }
 
 /* dropdown.js switches a panel to fixed positioning (top/left set from

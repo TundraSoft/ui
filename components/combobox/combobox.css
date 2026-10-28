@@ -101,16 +101,13 @@
   max-height: var(--dropdown-max-height);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Enter from the field's edge; leave the same way (combobox.js). */
+  transform-origin: top center;
+  animation: ui-drop-in var(--duration-enter) var(--ease-out);
 }
 
 .combobox__list[hidden] {
   display: none;
-}
-
-/* Enter from the field's edge; leave the same way (combobox.js). */
-.combobox__list {
-  transform-origin: top center;
-  animation: ui-drop-in var(--duration-enter) var(--ease-out);
 }
 
 .combobox__list.is-closing {

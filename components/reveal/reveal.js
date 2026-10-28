@@ -35,7 +35,7 @@
  *    `[data-scroll-step-media]`.
  */
 (() => {
-  const reduced = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => globalThis.uiMotion.reduced(); // shared/js/motion.js
   const coarse = () => typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
   const hasIO = typeof IntersectionObserver === "function";
 

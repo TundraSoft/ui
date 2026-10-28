@@ -9,7 +9,7 @@
  * while the region is hovered or holds focus, and while it is off screen.
  */
 (() => {
-  const reduced = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => globalThis.uiMotion.reduced(); // shared/js/motion.js
   const state = new WeakMap();
 
   const slidesOf = (root) => Array.from(root.querySelectorAll("[data-carousel-slide]"));

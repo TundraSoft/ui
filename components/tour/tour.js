@@ -13,9 +13,7 @@
   const SPOT_PAD = 6;
   const running = new Map(); // root → { index, starter, stop }
 
-  const reduced = () =>
-    globalThis.uiMotion?.reduced?.() ??
-      (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const reduced = () => globalThis.uiMotion.reduced(); // shared/js/motion.js
   const steps = (root) => [...root.querySelectorAll("[data-tour-step]")];
   const card = (root) => root.querySelector(".tour__card");
   const spot = (root) => root.querySelector(".tour__spot");

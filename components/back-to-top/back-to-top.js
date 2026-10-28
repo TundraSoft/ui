@@ -9,7 +9,7 @@
  */
 (() => {
   const buttons = () => document.querySelectorAll("[data-back-to-top][data-back-to-top-threshold]");
-  const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = () => globalThis.uiMotion.reduced(); // shared/js/motion.js
 
   function sync(button) {
     const threshold = Number(button.getAttribute("data-back-to-top-threshold")) || 600;

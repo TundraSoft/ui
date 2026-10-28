@@ -25,6 +25,8 @@
      static — an inline panel must not outrank a sibling's floating one. */
   z-index: auto;
   margin-top: var(--space-3);
+  /* An inline panel is always there: nothing to animate. */
+  animation: none;
 }
 
 /* Client mode without JS: the native date field is the control (the
@@ -51,11 +53,6 @@ html:not(.js) .datepicker--client .datepicker__panel {
 
 .datepicker:not(.datepicker--inline) .datepicker__panel.is-closing {
   animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
-}
-
-/* An inline panel is always there: nothing to animate. */
-.datepicker--inline .datepicker__panel {
-  animation: none;
 }
 
 .datepicker__trigger:disabled {
