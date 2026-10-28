@@ -1,0 +1,44 @@
+/** Usage examples for components/hero — merged into examples/docs/usage.ts. */
+import { html } from "@tundralibs/rapid/ui";
+import { Button } from "../../../components/button/button.ts";
+import { Hero } from "../../../components/hero/hero.ts";
+import type { UsageExample } from "../usage.ts";
+
+export const usage: Record<string, UsageExample[]> = {
+  "components/hero": [
+    {
+      title: "A landing page's opening band",
+      note: 'Put it in `StackedLayout({ width: "bleed" })`; its own `.container` keeps the text on the page column.',
+      render: () =>
+        Hero({
+          eyebrow: "Invoicing for small teams",
+          title: "Get paid on time, every time.",
+          text: "Send invoices your customers can pay in one click, and let the reminders chase the late ones.",
+          actions: html`
+            ${Button({ label: "Start free", size: "lg", href: "/signup" })}${Button({
+              label: "See a demo",
+              size: "lg",
+              variant: "outline",
+              href: "/demo",
+            })}
+          `,
+          media: html`
+            <img src="/img/app.png" width="960" height="640" alt="The invoices screen" loading="eager">
+          `,
+          layout: "split",
+          parallax: true,
+        }),
+    },
+    {
+      title: "A centred statement on the inverse ground",
+      render: () =>
+        Hero({
+          title: "One place for every invoice",
+          text: "A calmer month end.",
+          align: "center",
+          tone: "inverse",
+          size: "md",
+        }),
+    },
+  ],
+};

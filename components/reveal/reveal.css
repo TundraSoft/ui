@@ -1,0 +1,71 @@
+/*
+ * Scroll effects. A reveal block is hidden only under `html.js`
+ * (shared/js/enhance.js): a page without the script shows everything, a
+ * page with it reveals each block as reveal.js sees it enter the
+ * viewport. The transition is one of the motion tokens; reset.css zeroes
+ * it under reduced motion, and reveal.js then reveals everything at once.
+ */
+.js .reveal[data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+.js .reveal[data-reveal="rise"]:not(.is-revealed) {
+  transform: translateY(var(--space-5));
+}
+
+.js .reveal[data-reveal="scale"]:not(.is-revealed) {
+  transform: scale(0.96);
+}
+
+.js .reveal[data-reveal="blur"]:not(.is-revealed) {
+  filter: blur(6px);
+}
+
+.js .reveal[data-reveal] {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
+  transition-delay: calc(var(--reveal-step, 80ms) * var(--reveal-index, 0));
+  will-change: opacity, transform;
+}
+
+.js .reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Fixed delays (steps of 80 ms), for a block that follows a sibling. */
+.reveal--delay-1 {
+  --reveal-index: 1;
+}
+
+.reveal--delay-2 {
+  --reveal-index: 2;
+}
+
+.reveal--delay-3 {
+  --reveal-index: 3;
+}
+
+.reveal-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.reveal-group > .reveal {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+/* A parallax block: reveal.js writes the transform through the CSSOM; the
+   stylesheet only promises the browser it will move. */
+.parallax {
+  will-change: transform;
+}
+
+.lazy-section {
+  min-height: var(--part-min-height);
+}
