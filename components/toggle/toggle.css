@@ -1,1 +1,145 @@
-/* toggle — placeholder, replaced by the component work. */
+/*
+ * Toggle: a button with a pressed state. Subtle by default (sunken ground
+ * when pressed), outline for toolbars on a white surface. A group joins
+ * the edges like .btn-group.
+ */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast),
+    transform var(--transition-fast);
+
+  &:hover {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  &[aria-pressed="true"] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+
+  &:disabled {
+    color: var(--color-disabled-text);
+    background: transparent;
+    cursor: not-allowed;
+  }
+
+  &:disabled[aria-pressed="true"] {
+    background: var(--color-disabled);
+    border-color: transparent;
+  }
+}
+
+.toggle--outline {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-border-strong);
+  }
+}
+
+.toggle--sm {
+  height: var(--control-height-sm);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.toggle--icon {
+  width: var(--control-height-md);
+  padding-inline: 0;
+}
+
+.toggle--sm.toggle--icon {
+  width: var(--control-height-sm);
+}
+
+.toggle__icon {
+  display: inline-flex;
+}
+
+/* Group: edges joined, inner corners squared, borders overlapping. */
+.toggle-group {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+}
+
+.toggle-group > .toggle {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.toggle-group > .toggle:first-child {
+  border-start-start-radius: var(--radius-md);
+  border-end-start-radius: var(--radius-md);
+}
+
+.toggle-group > .toggle:last-child {
+  border-start-end-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+}
+
+.toggle-group > .toggle + .toggle {
+  margin-inline-start: calc(var(--border-width) * -1);
+}
+
+.toggle-group > .toggle:focus-visible,
+.toggle-group > .toggle[aria-pressed="true"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* A subtle group sits on one sunken tray, the way a segmented control does. */
+.toggle-group--subtle {
+  padding: 3px;
+  gap: 2px;
+  background: var(--color-surface-sunken);
+}
+
+.toggle-group--subtle > .toggle {
+  border-radius: var(--radius-sm);
+}
+
+.toggle-group--subtle > .toggle + .toggle {
+  margin-inline-start: 0;
+}
+
+.toggle-group--subtle > .toggle:hover {
+  background: var(--color-border);
+}
+
+.toggle-group--subtle > .toggle[aria-pressed="true"] {
+  background: var(--color-surface);
+  border-color: transparent;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}

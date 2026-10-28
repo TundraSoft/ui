@@ -1,1 +1,114 @@
-/* rating — placeholder, replaced by the component work. */
+/*
+ * Rating: radios + star labels, reversed in the DOM and laid out
+ * row-reverse, so the sibling combinator fills every star up to the
+ * picked one (and up to the hovered one) with no script.
+ */
+.rating {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--color-border-strong);
+}
+
+.rating--readonly {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.rating__label {
+  display: inline-flex;
+  min-width: 24px;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: inherit;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.rating__star {
+  display: inline-flex;
+  position: relative;
+}
+
+.rating__star svg {
+  fill: transparent;
+  transition: fill var(--transition-fast);
+}
+
+/* Filled: the picked star and every later sibling (= every lower star). */
+.rating__input:checked ~ .rating__label .rating__star svg,
+.rating__input:checked ~ .rating__label .rating__star,
+.rating:not(.rating--disabled) .rating__label:hover .rating__star,
+.rating:not(.rating--disabled) .rating__label:hover ~ .rating__label .rating__star {
+  color: var(--color-warning);
+}
+
+.rating__input:checked ~ .rating__label .rating__star svg,
+.rating:not(.rating--disabled) .rating__label:hover .rating__star svg,
+.rating:not(.rating--disabled) .rating__label:hover ~ .rating__label .rating__star svg {
+  fill: currentColor;
+}
+
+.rating:not(.rating--disabled) .rating__label:hover .rating__star {
+  transform: scale(1.1);
+}
+
+.rating__input:focus-visible + .rating__label {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.rating--disabled .rating__label {
+  cursor: not-allowed;
+}
+
+.rating--disabled {
+  color: var(--color-disabled);
+}
+
+/* Read-only: full, half (a clipped second star over an empty one), empty. */
+.rating__star--full {
+  color: var(--color-warning);
+}
+
+.rating__star--full svg {
+  fill: currentColor;
+}
+
+.rating__star--half .rating__half {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+  color: var(--color-warning);
+  display: inline-flex;
+}
+
+.rating__star--half .rating__half svg {
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+[dir="rtl"] .rating__star--half .rating__half {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.rating--sm {
+  gap: 0;
+}
+
+.rating--sm .rating__label {
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.rating--lg {
+  gap: var(--space-2);
+}

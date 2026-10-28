@@ -1,1 +1,61 @@
-/* separator — placeholder, replaced by the component work. */
+/* Separator: a rule, with room around it; a label splits it in two. */
+.separator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+  border: none;
+  color: var(--color-text-muted);
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1 1 auto;
+  height: var(--border-width);
+  background: var(--color-border);
+}
+
+.separator:not(.separator--labelled)::after {
+  display: none;
+}
+
+.separator__label {
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.separator--sm {
+  margin-block: var(--space-2);
+}
+
+.separator--lg {
+  margin-block: var(--space-8);
+}
+
+.separator--vertical {
+  display: inline-flex;
+  align-self: stretch;
+  width: var(--border-width);
+  min-height: 1em;
+  margin-block: 0;
+  margin-inline: var(--space-2);
+  background: var(--color-border);
+}
+
+.separator--vertical::before,
+.separator--vertical::after {
+  display: none;
+}
+
+.separator--vertical.separator--sm {
+  margin-inline: var(--space-1);
+}
+
+.separator--vertical.separator--lg {
+  margin-inline: var(--space-4);
+}

@@ -1,1 +1,37 @@
-/* kbd — placeholder, replaced by the component work. */
+/* Keycaps: mono, sunken, a thicker bottom edge so they read as keys. */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--color-text-muted);
+}
+
+.kbd__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  padding: 0.25em 0.45em;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-bottom-width: var(--border-width-thick);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font: inherit;
+  font-family: var(--font-family-mono);
+  white-space: nowrap;
+}
+
+.kbd__plus {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-2xs);
+}
+
+.kbd--sm {
+  font-size: var(--font-size-2xs);
+}

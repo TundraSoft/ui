@@ -1,1 +1,62 @@
-/* figure — placeholder, replaced by the component work. */
+/* Figure: rounded media with a small muted caption underneath. */
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  max-width: 100%;
+}
+
+.figure__media {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.figure__media > img,
+.figure__media > video,
+.figure__media > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure__media > .ratio {
+  border-radius: 0;
+}
+
+.figure__caption {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+.figure--center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.figure--end {
+  margin-inline-start: auto;
+}
+
+.figure--wide {
+  width: 100%;
+  max-width: none;
+}
+
+.figure--wide .figure__media {
+  border-radius: 0;
+}
+
+.figure--sm {
+  max-width: 20rem;
+}
+
+.figure--md {
+  max-width: 32rem;
+}
+
+.figure--lg {
+  max-width: 48rem;
+}
