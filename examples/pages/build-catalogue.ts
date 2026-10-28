@@ -130,6 +130,7 @@ function sidebar(active?: CatalogueGroup): Html {
     })),
     { label: "Layouts", href: "layouts/index.html", icon: Icon("folder", { size: 18 }) },
     { label: "Admin sample", href: "admin/dashboard.html", icon: Icon("users", { size: 18 }) },
+    { label: "Theme builder", href: "theme-builder.html", icon: Icon("palette", { size: 18 }) },
   ];
   return Sidebar({
     id: "cat-sidebar",

@@ -62,19 +62,25 @@ export function Carousel(props: CarouselProps): Html {
   const dots = props.dots !== false &&
     html`
       <div class="carousel__dots" data-carousel-dots>${props.items.map((_, i) =>
-        html`<button type="button" class="carousel__dot" data-carousel-to="${String(i)}" aria-label="Go to slide ${
-          String(i + 1)
-        }"${renderAttrs({ "aria-current": i === 0 ? "true" : undefined })}></button>`
+        html`
+          <button type="button" class="carousel__dot" data-carousel-to="${String(i)}" aria-label="Go to slide ${String(
+            i + 1,
+          )}"
+            ${renderAttrs({ "aria-current": i === 0 ? "true" : undefined })}></button>
+        `
       )}</div>
     `;
   return html`
     <section${classAttrs(cls, attrs)}>
       <div class="carousel__track" data-carousel-track tabindex="0">${props.items.map((item, i) =>
-        html`<div class="carousel__slide" role="group" aria-roledescription="slide" aria-label="${String(i + 1)} of ${
-          String(props.items.length)
-        }" data-carousel-slide>${item}</div>`
+        html`
+          <div class="carousel__slide" role="group" aria-roledescription="slide" aria-label="${String(
+            i + 1,
+          )} of ${String(props.items.length)}"
+            data-carousel-slide>${item}</div>
+        `
       )}</div>
       <div class="carousel__bar">${dots}${controls}</div>
-    </section>
+      </section>
   `;
 }

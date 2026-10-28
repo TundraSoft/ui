@@ -24,6 +24,7 @@ const pages = [
   { path: "navigation.html", darkMode: true },
   { path: "actions.html", darkMode: true },
   { path: "feedback.html", darkMode: true },
+  { path: "theme-builder.html", darkMode: true },
   { path: "admin/dashboard.html", darkMode: true },
   { path: "admin/projects.html", darkMode: true },
   { path: "admin/team.html", darkMode: true },

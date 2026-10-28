@@ -132,11 +132,23 @@
   --border-width: 1px;
   --border-width-thick: 2px;
 
+  /* Density: one factor every control height below is multiplied by.
+     `data-density="compact" | "comfortable"` on any ancestor (styles/
+     base.css) sets 0.85 / 1.15 and re-derives the heights there — a
+     custom property resolves its var()s where it is declared, so a
+     factor changed on a descendant alone would change nothing. A theme
+     retunes the `-base` sizes (density keeps working) or sets a height to
+     a plain px value (that height opts out of density). */
+  --density: 1;
+  --control-height-sm-base: 30px;
+  --control-height-md-base: 36px;
+  --control-height-lg-base: 44px;
+
   /* Fixed control heights: padding-derived heights never aligned an input
      to a button. Everything that sits on a form row uses these. */
-  --control-height-sm: 30px;
-  --control-height-md: 36px;
-  --control-height-lg: 44px;
+  --control-height-sm: calc(var(--control-height-sm-base) * var(--density));
+  --control-height-md: calc(var(--control-height-md-base) * var(--density));
+  --control-height-lg: calc(var(--control-height-lg-base) * var(--density));
 
   --ring-color: var(--color-accent, var(--color-primary));
   --ring-width: 2px;

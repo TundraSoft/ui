@@ -115,7 +115,8 @@
     "puppeteer-core": "npm:puppeteer-core@^25.16.0",
     "@tundralibs/rapid": "jsr:@tundralibs/rapid@^0.14.0",
     "@tundralibs/compat/path": "jsr:@tundralibs/compat@^2.7.2/path",
-    "esbuild": "npm:esbuild@0.25.12"
+    "esbuild": "npm:esbuild@0.25.12",
+    "axe-core": "npm:axe-core@4.10.2"
   },
   "publish": {
     "include": [
@@ -150,10 +151,13 @@
     "build:js": "deno run -A scripts/build-js.ts",
     "build": "deno task build:css && deno task build:js && deno task build:icons && deno task build:manifest",
     "build:admin-theme": "deno run -A examples/pages/build-admin-theme.ts",
-    "build:demos": "deno task build:admin-theme && deno task build:layouts && deno task build:catalogue",
+    "build:demos": "deno task build:admin-theme && deno task build:layouts && deno task build:catalogue && deno task build:theme-builder",
+    "build:theme-builder": "deno run -A examples/pages/build-theme-builder.ts",
     "test:admin": "deno run -A examples/tests/test-admin.ts",
     "test:all": "deno run -A examples/tests/test-all-pages.ts",
-    "test": "deno task build && deno task build:demos && deno task test:contract && deno task test:catalogue && deno task test:layouts && deno task test:all && deno task test:admin && deno task test:app",
+    "test:visual": "deno run -A examples/tests/test-visual.ts",
+    "test:visual:update": "deno run -A examples/tests/test-visual.ts --update",
+    "test": "deno task build && deno task build:demos && deno task test:contract && deno task test:catalogue && deno task test:layouts && deno task test:all && deno task test:visual && deno task test:admin && deno task test:app",
     "perf": "deno run -A examples/tests/perf-audit.ts",
     "build:layouts": "deno run -A examples/pages/build-layouts.ts",
     "test:layouts": "deno run -A examples/tests/test-layouts.ts",

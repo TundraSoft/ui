@@ -92,3 +92,26 @@
 .stack--lg {
   gap: var(--space-6);
 }
+
+/* Density — compact rows and controls for dense screens, roomier ones
+   for touch. Only the control heights read --density (tokens/default.css);
+   spacing tokens are left alone so a theme's rhythm survives. The heights
+   are re-derived here because a custom property's var()s resolve where it
+   is declared: the :root calc already baked :root's factor in. */
+[data-density] {
+  --control-height-sm: calc(var(--control-height-sm-base) * var(--density));
+  --control-height-md: calc(var(--control-height-md-base) * var(--density));
+  --control-height-lg: calc(var(--control-height-lg-base) * var(--density));
+}
+
+[data-density="compact"] {
+  --density: 0.85;
+}
+
+[data-density="comfortable"] {
+  --density: 1.15;
+}
+
+[data-density="default"] {
+  --density: 1;
+}

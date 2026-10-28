@@ -145,6 +145,51 @@ await ensureDir(outDir);
 const root = await realPath("demo");
 const browser = await launch();
 
+/* ------------------------------------------------------------- axe */
+// axe-core runs once per catalogue page, on the untouched light render,
+// WCAG 2.0/2.1 A + AA. serious and critical violations fail the suite
+// unless examples/tests/axe-allowlist.json names the rule + a selector
+// pattern with a reason — an allowlist entry is a known gap with an owner,
+// never a way to make the suite quiet.
+const axeSource = await readTextFile(decodeURIComponent(new URL(import.meta.resolve("axe-core/axe.min.js")).pathname));
+type AxeAllow = { rule: string; target: string; reason: string };
+const axeAllow: AxeAllow[] = JSON.parse(await readTextFile("examples/tests/axe-allowlist.json"));
+const axeAllowed = (rule: string, target: string) =>
+  axeAllow.find((a) => a.rule === rule && new RegExp(a.target).test(target));
+type AxeViolation = { id: string; impact: string; help: string; nodes: { target: string[] }[] };
+
+async function axePass(page: Page, file: string): Promise<void> {
+  await page.addScriptTag({ content: axeSource });
+  const violations = await page.evaluate(async () => {
+    // deno-lint-ignore no-explicit-any
+    const axe = (globalThis as any).axe;
+    const result = await axe.run(document, {
+      // preload fetches every stylesheet over XHR, which file:// forbids (CORS noise, no value here)
+      preload: false,
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+      rules: { "color-contrast": { enabled: true } },
+      resultTypes: ["violations"],
+    });
+    return (result.violations as AxeViolation[]).map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      help: v.help,
+      nodes: v.nodes.map((n) => ({ target: n.target.map(String) })),
+    }));
+  });
+  axeReport[file] = violations;
+  for (const v of violations) {
+    if (v.impact !== "serious" && v.impact !== "critical") continue;
+    const open = v.nodes.filter((n) => !axeAllowed(v.id, n.target.join(" ")));
+    if (!open.length) continue;
+    const targets = open.slice(0, 3).map((n) => n.target.join(" ")).join(" | ");
+    fail(`${file}: axe ${v.id} (${v.impact}) — ${v.help}: ${open.length} node(s), e.g. ${targets}`);
+  }
+}
+// Every violation (allowlisted ones included, moderate and minor too) lands
+// in .test-output/catalogue/axe.json for anyone working the allowlist down.
+const axeReport: Record<string, AxeViolation[]> = {};
+
 async function openPage(file: string): Promise<Page> {
   const page = await browser.newPage();
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
@@ -1356,6 +1401,7 @@ for (const group of catalogueGroups) {
   check(onPage.emptyCases.length === 0, `${file}: empty cases: ${onPage.emptyCases.join(", ")}`);
   check(onPage.charts === onPage.chartEls, `${file}: ${onPage.chartEls - onPage.charts} chart(s) did not draw`);
   check(onPage.overflow <= 0, `${file}: page overflows horizontally by ${onPage.overflow}px`);
+  await axePass(page, file);
 
   /* ------------------------------------------------ behaviour, per page */
   if (group.id === "forms") {
@@ -2561,6 +2607,7 @@ for (const group of catalogueGroups) {
 }
 
 await browser.close();
+await writeTextFile(`${outDir}/axe.json`, JSON.stringify(axeReport, null, 2));
 const total = entries.reduce((n, e) => n + e.cases.length, 0);
 console.log(
   `\n${issues.length} issue(s). ${entries.length} components, ${total} cases across ${catalogueGroups.length} pages. Screenshots in ${outDir}/`,

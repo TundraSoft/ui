@@ -1311,6 +1311,48 @@ out of it:
   IntersectionObserver + rAF and inert under reduced motion, a lazy section calls `window.rapid.swap` only when the
   runtime exists and otherwise shows what it carries.
 
+**Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
+
+- **`demo/theme-builder.html`** (`examples/shared/theme-builder.ts` + `examples/pages/build-theme-builder.ts`,
+  `deno task build:theme-builder`, in `build:demos`, linked from the catalogue sidebar, swept by `test:all` and
+  `test:visual`): colour pickers + hex fields for ten colour tokens, sliders for radius / control height / type size /
+  motion (derived tokens computed from the one slider), two font selects, a Light/Dark palette switch deciding which
+  palette the colours edit, a preview of real components, Export (changed tokens only, `:root` + the two dark blocks
+  with the tokens file's exact selectors) + Copy + Reset, state in localStorage and the URL hash. All through the CSSOM
+  (`documentElement.style.setProperty`) — no inline style attribute, so the catalogue's CSP check still holds. Two
+  lessons: `getComputedStyle(root).getPropertyValue("--color-x")` returns whatever syntax the sheet used (hex, `rgb()`,
+  `color-mix()`), so the builder resolves a token to rgb through a hidden probe span's `color`; and reflecting a slider
+  dispatches `input` (slider.js repaints its track from it), which the builder's own `input` listener must ignore
+  (`reflecting` flag) or the reflected default lands in the exported theme.
+- **axe-core in `test-catalogue.ts`** (`npm:axe-core@4.10.2`, injected from the package file with `page.addScriptTag`,
+  `preload: false` because axe otherwise XHRs every stylesheet, which `file://` refuses): WCAG 2.0/2.1 A + AA on each
+  catalogue page's untouched light render, serious + critical fail, `examples/tests/
+  axe-allowlist.json`
+  (`{ rule, target: <regex>, reason }`) names the known gaps with an owner file in the reason; the whole report goes to
+  `.test-output/catalogue/axe.json`. An allowlist entry is a to-do, not a silencer — work the file down.
+- **`examples/tests/test-visual.ts`** (`deno task test:visual`, after `test:all` in `test`; `test:visual:update`
+  rewrites): every demo page × {1440, 375} × {light, dark} under `prefers-reduced-motion: reduce` (reveal/parallax stay
+  inert, charts get 1.5 s), full-page screenshot → 16-column block-average hash (rows follow the aspect, 16–96) →
+  `examples/tests/visual-baseline.json`, keyed by `navigator.platform` so a macOS run never compares with a Linux
+  baseline (no baseline for the platform = pass with a note). A cell is one hex digit of grey (16 levels), changed when
+  it moved ≥ 2 levels — not an above-the-mean bit: a mostly white page sits at its mean everywhere and a hairline would
+  flip half the bits. Fails above 5% changed cells (`VISUAL_TOLERANCE`) or on a row-count change, **after one fresh
+  re-render of that page** (a first capture once landed with every inline command list collapsed, identically never
+  again — a one-off state is not a drift), saving the screenshot to `.test-output/visual/`. `VISUAL_PAGES=a,b` limits a
+  run or an update (which then merges) to matching paths, `VISUAL_SAVE=1` keeps every screenshot. **Any intended visual
+  change updates the baseline in the same PR**: run `deno task test:visual:update` on the platform the baseline carries
+  (CI's Linux Chrome is the committed one) and commit the JSON. A drift on a page nobody touched that repeats
+  identically across runs is a baseline captured mid-state: update it.
+- **Density**: `--control-height-{sm,md,lg}` are `calc(var(--control-height-<size>-base) * var(--density))` (bases
+  30/36/44, factor 1); `[data-density="compact|comfortable|default"]` (0.85 / 1.15 / 1, styles/base.css) on any ancestor
+  retunes the controls inside. **A custom property resolves its `var()`s where it is declared**, so the `:root` calc
+  bakes `:root`'s factor in and a factor changed on a descendant alone does nothing — `[data-density]` re-derives the
+  three heights from the bases, and a theme region doing its own density must do the same (`examples/themes/admin.css`
+  `#forms-density[data-view]` is the example; the first version set only `--density` and measured 36px in Compact). A
+  theme that sets a height to a plain px value opts that height out of density (portal.css does today — switch it to the
+  `-base` tokens if density should work there). The admin Forms page's Density segmented writes its value to
+  `#forms-density[data-view]` through `view-switch.js`; Compact gives a 36px control 30.6px.
+
 ## Thinking ahead: rAPId's UI surface will grow
 
 rAPId's own docs describe this contract as intentionally minimal (§0) so that a component library — this one — has

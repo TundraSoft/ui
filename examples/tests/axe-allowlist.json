@@ -1,0 +1,107 @@
+[
+  {
+    "rule": "aria-required-parent",
+    "target": "^#cat-cb-\\d+-opt-",
+    "reason": "ComboboxList fragment catalogued on its own: role=option rows outside a listbox. Owner: examples/shared/catalogue/combobox.ts (wrap the fragment case in a role=listbox) / components/combobox/combobox.ts"
+  },
+  {
+    "rule": "button-name",
+    "target": "select__button|^#cat-sel|-sel$|^#select$|data-placeholder=",
+    "reason": "A Select with a placeholder and no <label for> has no accessible name on its role=combobox button. Owner: components/select/select.ts — fall back to aria-label from placeholder/attrs when nothing labels the button"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "editor__count",
+    "reason": "Editor character counter is below 4.5:1 in the base palette. Owner: components/editor/editor.css — use --color-text-muted, not --color-text-subtle on a tinted ground"
+  },
+  {
+    "rule": "aria-required-children",
+    "target": "cat-cal-|calendar",
+    "reason": "Calendar grid: role=gridcell days sit in .calendar__days without role=row parents. Owner: components/calendar/calendar.ts — wrap each week in role=row or drop the grid roles for a plain table"
+  },
+  {
+    "rule": "aria-required-parent",
+    "target": "cat-cal-|calendar__day",
+    "reason": "Same calendar grid structure as above. Owner: components/calendar/calendar.ts"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "calendar__time",
+    "reason": "Event time text on the accent event chip is below 4.5:1. Owner: components/calendar/calendar.css"
+  },
+  {
+    "rule": "scrollable-region-focusable",
+    "target": "data-table__scroll",
+    "reason": "A DataTable with maxHeight scrolls but its box is not focusable. Owner: components/data-table/data-table.ts — tabindex=0 on .data-table__scroll when maxHeight is set"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "ratio__placeholder",
+    "reason": "Ratio placeholder label is decorative sample text below 4.5:1. Owner: components/ratio/ratio.css — darken or mark aria-hidden"
+  },
+  {
+    "rule": "nested-interactive",
+    "target": "card--clickable|card--selected",
+    "reason": "A role=button Card wrapping a real button. Owner: components/card/card.ts / examples/shared/catalogue/card.ts — a clickable card must not hold other controls"
+  },
+  {
+    "rule": "scrollable-region-focusable",
+    "target": "code__pre",
+    "reason": "Code block scrolls horizontally without being focusable. Owner: components/code/code.ts — tabindex=0 on .code__pre"
+  },
+  {
+    "rule": "aria-required-children",
+    "target": "^#cat-cmd-\\d+-list",
+    "reason": "Command palette listbox rendered empty (empty-state case). Owner: components/command/command.ts — drop role=listbox or render the empty message outside it"
+  },
+  {
+    "rule": "aria-required-parent",
+    "target": "^#cat-cmd-\\d+-item-",
+    "reason": "Command item inside a group whose wrapper lacks role=group. Owner: components/command/command.ts"
+  },
+  {
+    "rule": "scrollable-region-focusable",
+    "target": "cat-banner-scroll",
+    "reason": "Catalogue harness scroll box for the sticky banner demo. Owner: examples/shared/catalogue/banner.ts — tabindex=0"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "hero--inverse.*btn--outline",
+    "reason": "Outline button on the inverse hero reads --color-text on the dark ground. Owner: components/hero/hero.css — set the outline button's colour to --color-on-media inside .hero--inverse"
+  },
+  {
+    "rule": "aria-allowed-attr",
+    "target": "^a\\[href=\"\\?day=",
+    "reason": "Server-mode DatePicker day links carry aria-pressed, which a link may not. Owner: components/datepicker/datepicker.ts — aria-current only on <a>, aria-pressed only on the client-mode <button>"
+  },
+  {
+    "rule": "aria-input-field-name",
+    "target": "editor__surface|data-placeholder=",
+    "reason": "Editor html-mode surface (role=textbox) has no accessible name. Owner: components/editor/editor.ts — aria-labelledby the field label or aria-label from the textarea"
+  },
+  {
+    "rule": "aria-required-children",
+    "target": "^#cat-cb-\\d+-list",
+    "reason": "Combobox listbox rendered with no options (empty-state case). Owner: components/combobox/combobox.ts — render the empty note outside the listbox or drop the role while empty"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "transfer-.*-title",
+    "reason": "Disabled transfer list titles are below 4.5:1. Owner: components/transfer/transfer.css"
+  },
+  {
+    "rule": "color-contrast",
+    "target": "\\.tok-|\\.token|diff__no",
+    "reason": "Code highlight tokens (comments, keywords) and diff line numbers are below 4.5:1 on their grounds. Owner: components/code/code.css, components/diff/diff.css — retune --code-* / --diff-* token colours"
+  },
+  {
+    "rule": "button-name",
+    "target": "^\\.btn--primary$",
+    "reason": "Split-button caret half: an icon-only Dropdown trigger without aria-label. Owner: examples/shared/catalogue/dropdown.ts — pass attrs aria-label; components/dropdown/dropdown.ts could require one for an Html trigger"
+  },
+  {
+    "rule": "label",
+    "target": ".*",
+    "reason": "Catalogue cases render bare controls to show the control alone (inputs, editors, the editor checklist checkboxes). Owner: examples/shared/catalogue/{input,form,editor,...}.ts — give each bare control an aria-label; components/editor/editor.js should label its checklist boxes"
+  }
+]
