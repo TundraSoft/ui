@@ -84,3 +84,24 @@
 @import "../components/testimonial/testimonial.css" layer(components);
 @import "../components/site-footer/site-footer.css" layer(components);
 @import "../components/reveal/reveal.css" layer(components);
+
+/* v3.1 additions (2026-10-28) */
+@import "../components/list-group/list-group.css" layer(components);
+@import "../components/toggle/toggle.css" layer(components);
+@import "../components/kbd/kbd.css" layer(components);
+@import "../components/rating/rating.css" layer(components);
+@import "../components/separator/separator.css" layer(components);
+@import "../components/ratio/ratio.css" layer(components);
+@import "../components/figure/figure.css" layer(components);
+@import "../components/scrollspy/scrollspy.css" layer(components);
+@import "../components/back-to-top/back-to-top.css" layer(components);
+@import "../components/context-menu/context-menu.css" layer(components);
+@import "../components/menubar/menubar.css" layer(components);
+@import "../components/split-pane/split-pane.css" layer(components);
+@import "../components/scroll-area/scroll-area.css" layer(components);
+@import "../components/transfer/transfer.css" layer(components);
+@import "../components/color-picker/color-picker.css" layer(components);
+@import "../components/tour/tour.css" layer(components);
+@import "../components/fab/fab.css" layer(components);
+@import "../components/code/code.css" layer(components);
+@import "../components/diff/diff.css" layer(components);

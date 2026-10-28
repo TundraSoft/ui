@@ -1,0 +1,2 @@
+/** components/split-pane — placeholder, replaced by the component work. */
+export {};

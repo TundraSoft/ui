@@ -82,6 +82,25 @@ import { usage as pricingUsage } from "./usage/pricing.ts";
 import { usage as testimonialUsage } from "./usage/testimonial.ts";
 import { usage as siteFooterUsage } from "./usage/site-footer.ts";
 import { usage as revealUsage } from "./usage/reveal.ts";
+import { usage as listGroupUsage } from "./usage/list-group.ts";
+import { usage as toggleUsage } from "./usage/toggle.ts";
+import { usage as kbdUsage } from "./usage/kbd.ts";
+import { usage as ratingUsage } from "./usage/rating.ts";
+import { usage as separatorUsage } from "./usage/separator.ts";
+import { usage as ratioUsage } from "./usage/ratio.ts";
+import { usage as figureUsage } from "./usage/figure.ts";
+import { usage as scrollspyUsage } from "./usage/scrollspy.ts";
+import { usage as backToTopUsage } from "./usage/back-to-top.ts";
+import { usage as contextMenuUsage } from "./usage/context-menu.ts";
+import { usage as menubarUsage } from "./usage/menubar.ts";
+import { usage as splitPaneUsage } from "./usage/split-pane.ts";
+import { usage as scrollAreaUsage } from "./usage/scroll-area.ts";
+import { usage as transferUsage } from "./usage/transfer.ts";
+import { usage as colorPickerUsage } from "./usage/color-picker.ts";
+import { usage as tourUsage } from "./usage/tour.ts";
+import { usage as fabUsage } from "./usage/fab.ts";
+import { usage as codeUsage } from "./usage/code.ts";
+import { usage as diffUsage } from "./usage/diff.ts";
 
 export type UsageExample = {
   title: string;
@@ -111,6 +130,25 @@ const splitUsage: Record<string, UsageExample[]>[] = [
   testimonialUsage,
   siteFooterUsage,
   revealUsage,
+  listGroupUsage,
+  toggleUsage,
+  kbdUsage,
+  ratingUsage,
+  separatorUsage,
+  ratioUsage,
+  figureUsage,
+  scrollspyUsage,
+  backToTopUsage,
+  contextMenuUsage,
+  menubarUsage,
+  splitPaneUsage,
+  scrollAreaUsage,
+  transferUsage,
+  colorPickerUsage,
+  tourUsage,
+  fabUsage,
+  codeUsage,
+  diffUsage,
 ];
 
 type Invoice = { id: string; client: string; total: string };

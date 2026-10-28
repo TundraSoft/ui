@@ -20,7 +20,7 @@ export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.2
 export const UI_CSS: UiAsset = {
   file: "ui.css",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.24.0/dist/ui.css", // x-release-please-version
-  integrity: "sha384-rA1Y9UQ46vlLBTS3vHCcbweExqYieJKOq6xUScny3PM3Guegj/aDkFJ8QREYzldF",
+  integrity: "sha384-qfQ+esynvzvrfcyk5f4lXYoSU/aNBBSNENHObvn9kbhv4ln8TrBjvNiO364qXL+e",
 };
 
 export const UI_JS: UiAsset = {
@@ -33,7 +33,7 @@ export const UI_JS: UiAsset = {
 export const UI_ICONS: UiAsset = {
   file: "icons.svg",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.24.0/dist/icons.svg", // x-release-please-version
-  integrity: "sha384-d04P7ezS0zrG/ePVnAbwLGV9jueIdv7EIccnHcJb3Su+6tcBn/kS0bt08GdNUIZq",
+  integrity: "sha384-y4GI3r+3hjYFE664hMevOo6FYNAkVFUh73YTMjQc8cRQ2CYsLrGRr9K1IMUILOV3",
 };
 
 /** Every distributable, in load order. */

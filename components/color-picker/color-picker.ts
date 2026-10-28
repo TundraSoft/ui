@@ -1,0 +1,2 @@
+/** components/color-picker — placeholder, replaced by the component work. */
+export {};

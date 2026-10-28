@@ -1,0 +1,6 @@
+/** Usage examples for components/context-menu — merged into examples/docs/usage.ts. */
+import type { UsageExample } from "../usage.ts";
+
+export const usage: Record<string, UsageExample[]> = {
+  "components/context-menu": [],
+};

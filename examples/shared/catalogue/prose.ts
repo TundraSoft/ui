@@ -37,7 +37,8 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
           Prose({
             size,
             content: html`
-              <h2>Heading</h2><p>A paragraph at the ${size} size, with <code>code</code> and a <a href="#">link</a>.</p>
+              <h2>Heading</h2>
+              <p>A paragraph at the ${size} size, with <code>code</code> and a <a href="#">link</a>.</p>
             `,
           }),
         )

@@ -1,0 +1,2 @@
+/** components/scroll-area — placeholder, replaced by the component work. */
+export {};
