@@ -1,0 +1,143 @@
+/*
+ * Banner: a full-width strip at the top of a page. One line, centred,
+ * with its action inline; the close button hugs the end edge so the text
+ * stays centred on the page. Status variants paint the soft fill the
+ * alerts use; `accent` is the brand strip.
+ */
+.banner {
+  --banner-bg: var(--color-surface-sunken);
+  --banner-fg: var(--color-text);
+  --banner-rule: var(--color-border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--banner-bg);
+  color: var(--banner-fg);
+  border-bottom: var(--border-width) solid var(--banner-rule);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  animation: ui-fade-in var(--duration-enter) var(--ease-out);
+}
+
+.banner.is-closing {
+  animation: ui-sink-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.banner--sticky {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.banner--info {
+  --banner-bg: var(--color-info-soft);
+  --banner-fg: var(--color-info-soft-text);
+  --banner-rule: transparent;
+}
+
+.banner--success {
+  --banner-bg: var(--color-success-soft);
+  --banner-fg: var(--color-success-soft-text);
+  --banner-rule: transparent;
+}
+
+.banner--warning {
+  --banner-bg: var(--color-warning-soft);
+  --banner-fg: var(--color-warning-soft-text);
+  --banner-rule: transparent;
+}
+
+.banner--danger {
+  --banner-bg: var(--color-danger-soft);
+  --banner-fg: var(--color-danger-soft-text);
+  --banner-rule: transparent;
+}
+
+.banner--accent {
+  --banner-bg: var(--color-accent, var(--color-primary));
+  --banner-fg: var(--color-accent-contrast, var(--color-primary-contrast));
+  --banner-rule: transparent;
+}
+
+.banner__inner {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1) var(--space-3);
+  text-align: center;
+}
+
+.banner__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.banner__body {
+  min-width: 0;
+}
+
+.banner__action {
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 0 var(--space-1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid currentColor;
+    outline-offset: var(--ring-offset);
+  }
+}
+
+.banner__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: -4px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid currentColor;
+    outline-offset: var(--ring-offset);
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .banner__inner {
+    /* Balance the close button at the end with the same room at the start. */
+    padding-inline-start: 24px;
+  }
+
+  .banner:not([data-dismissible]) .banner__inner {
+    padding-inline-start: 0;
+  }
+}

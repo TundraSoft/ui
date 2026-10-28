@@ -1,3 +1,15 @@
+/*
+ * Tooltip. Two renderings of the same markup:
+ *
+ * - Without the script (html:not(.js)): the bubble is absolutely
+ *   positioned above the trigger and shown by :hover / :focus-within —
+ *   nowrap, no flipping, but it works.
+ * - With it: tooltip.js moves the bubble to `position: fixed`, places it
+ *   with shared/js/float.js (flip + shift into the viewport, data-side on
+ *   the bubble, --float-anchor where the trigger's centre falls, for the
+ *   arrow), shows it after a delay and hides it with the shared exit
+ *   animation. The text wraps at a readable measure.
+ */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -7,20 +19,97 @@
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(-0.25rem);
-  background: var(--color-surface-inverse);
-  color: var(--color-text-inverse);
+  translate: -50% calc(-1 * var(--space-1));
+  z-index: var(--z-popover);
+  max-width: min(18rem, calc(100vw - 2 * var(--space-4)));
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
   font-size: var(--font-size-xs);
-  white-space: nowrap;
+  line-height: var(--line-height-base);
+  width: max-content;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-fast);
-  z-index: var(--z-popover);
 }
 
-.tooltip:hover .tooltip__content,
-.tooltip:focus-within .tooltip__content {
+html:not(.js) .tooltip:hover .tooltip__content,
+html:not(.js) .tooltip:focus-within .tooltip__content {
   opacity: 1;
+}
+
+/* Enhanced: hidden until the script shows it, then fixed in the viewport. */
+.js .tooltip__content {
+  display: none;
+  position: fixed;
+  inset: auto;
+  translate: none;
+  text-wrap: pretty;
+  opacity: 1;
+  transition: none;
+}
+
+.js .tooltip__content.is-open {
+  display: block;
+  animation: ui-fade-in var(--duration-fast) var(--ease-out);
+}
+
+.js .tooltip__content.is-closing {
+  animation: ui-fade-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+/* The arrow: a rotated square on the edge facing the trigger, at the
+   trigger's centre (--float-anchor, from float.js). */
+.js .tooltip__content::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  rotate: 45deg;
+}
+
+.js .tooltip__content[data-side="top"]::after {
+  bottom: -4px;
+  left: calc(var(--float-anchor, 50%) - 4px);
+}
+
+.js .tooltip__content[data-side="bottom"]::after {
+  top: -4px;
+  left: calc(var(--float-anchor, 50%) - 4px);
+}
+
+.js .tooltip__content[data-side="left"]::after {
+  right: -4px;
+  top: calc(var(--float-anchor, 50%) - 4px);
+}
+
+.js .tooltip__content[data-side="right"]::after {
+  left: -4px;
+  top: calc(var(--float-anchor, 50%) - 4px);
+}
+
+/* No-JS placement for the other sides (the script ignores these: it
+   places the bubble itself). */
+html:not(.js) .tooltip--bottom .tooltip__content {
+  top: 100%;
+  bottom: auto;
+  translate: -50% var(--space-1);
+}
+
+html:not(.js) .tooltip--start .tooltip__content,
+html:not(.js) .tooltip--end .tooltip__content {
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  translate: 0 -50%;
+}
+
+html:not(.js) .tooltip--start .tooltip__content {
+  inset-inline-end: calc(100% + var(--space-1));
+}
+
+html:not(.js) .tooltip--end .tooltip__content {
+  inset-inline-start: calc(100% + var(--space-1));
 }
