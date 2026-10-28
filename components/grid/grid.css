@@ -36,6 +36,13 @@
   .grid--phone-2 > * {
     grid-column: span 6;
   }
+
+  /* Eleven 2rem gaps are 352px before any track has width — more than
+     a phone's column. Rows keep the large gap; the column gap falls
+     back to the default (cells are full width or two-up here anyway). */
+  .grid--gap-lg {
+    column-gap: var(--space-4);
+  }
 }
 
 .grid > .col-xs-1 {
