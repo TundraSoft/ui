@@ -1,6 +1,9 @@
+/* minmax(0, 1fr), not 1fr: a bare 1fr track is minmax(auto, 1fr), so
+   twelve tracks plus eleven gaps could never shrink below their content
+   and a wide gap pushed a phone-width grid past the viewport. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--space-4);
 }
 
