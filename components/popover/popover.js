@@ -28,9 +28,11 @@
     else hide();
   }
 
-  // A panel open across a resize is re-fitted; a scroll is left alone
-  // (it is absolutely positioned, so it moves with its trigger).
-  addEventListener("resize", () => {
+  // Every open panel is fitted on load and after a swap (one rendered
+  // `open` by the server never went through setOpen) and again across a
+  // resize; a scroll is left alone (it is absolutely positioned, so it
+  // moves with its trigger).
+  function fitOpen() {
     document.querySelectorAll("[data-popover] .popover__panel:not([hidden])").forEach((panel) => {
       const pop = panel.closest("[data-popover]");
       const fit = globalThis.uiFloat?.fit(panel, {
@@ -39,7 +41,12 @@
       });
       pop.classList.toggle("popover--above", !!fit && !fit.below);
     });
-  }, { passive: true });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fitOpen);
+  else fitOpen();
+  addEventListener("load", fitOpen);
+  document.addEventListener("rapid:swapped", fitOpen);
+  addEventListener("resize", fitOpen, { passive: true });
 
   const openPanels = () => document.querySelectorAll("[data-popover] .popover__panel:not([hidden])");
 
