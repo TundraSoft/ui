@@ -901,7 +901,8 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     // Segmented counts
     const counts = await page.$$eval(
       "#cat-seg-count .segmented__count",
-      (els) => els.map((e) => `${e.textContent}${e.classList.contains("segmented__count--alert") ? "!" : ""}`).join(),
+      (els) =>
+        els.map((e) => `${e.textContent?.trim()}${e.classList.contains("segmented__count--alert") ? "!" : ""}`).join(),
     );
     check(counts === "48.2k,120,3!,0!", `forms: segmented counts (${counts})`);
     const countTitle = await page.$eval("#cat-seg-count .segmented__count", (e) => e.getAttribute("title"));

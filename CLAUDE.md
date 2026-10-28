@@ -1281,11 +1281,12 @@ out of it:
   Collapsible/accordion animate `grid-template-rows: 0fr → 1fr` (the panel is a one-row grid, the padding moved to
   `.collapsible__inner`; collapsible.js runs in the capture phase and stops the click so toggle.js does not also act —
   accordion exclusivity moved there too). Tabs got the segmented thumb's idiom (`--tabs-x/--tabs-w` on the list,
-  `::after` indicator, `data-tabs-ready`, ResizeObserver); the theme toggle cross-fades (View Transition when available,
-  else one beat of `html.theme-changing` colour transitions); `.btn:active` and `.card--clickable:active` scale to
-  97%/99.5%; `data-table.js` gives rows a `view-transition-name` from their key (CSSOM) so a sort swap re-orders instead
-  of cross-fading. Adding a component: pick the pair, set `transform-origin` towards the trigger, write the
-  `.is-closing` rule, hide through `uiMotion.exit`.
+  `::after` indicator, `data-tabs-ready`, ResizeObserver); the theme toggle cross-fades (one beat of
+  `html.theme-changing` colour transitions — not a View Transition, which paints a snapshot that swallows every click
+  while it runs and fights a concurrent rAPId swap); `.btn:active` and `.card--clickable:active` scale to 97%/99.5%;
+  `data-table.js` gives rows a `view-transition-name` from their key (CSSOM) so a sort swap re-orders instead of
+  cross-fading. Adding a component: pick the pair, set `transform-origin` towards the trigger, write the `.is-closing`
+  rule, hide through `uiMotion.exit`.
 - **Floating panels fit the viewport** (`shared/js/float.js`): `uiFloat.fit(panel, { anchor, flip })` measures an
   absolutely positioned panel and writes `--float-shift-x` (CSSOM) when it would run off the side, reporting
   `below: false` when it should flip (popover adds `popover--above`; the arrow counter-shifts with

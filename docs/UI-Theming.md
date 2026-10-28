@@ -191,8 +191,8 @@ theme retunes the whole feel from the tokens alone — `--duration-enter: 160ms`
 - **Height** (collapsible, accordion) animates the panel's grid row from `0fr` to `1fr`, so nothing is measured.
 - **Indicators** (segmented thumb, tabs underline) are one surface that glides to the selected option; the selected
   tab's own border is the fallback until the script has measured.
-- **The theme toggle** cross-fades the palette: a View Transition where the browser has one, otherwise one beat of
-  colour transitions on every element (`html.theme-changing`).
+- **The theme toggle** cross-fades the palette with one beat of colour transitions on every element
+  (`html.theme-changing`) — not a View Transition, which would swallow clicks while it runs.
 - **Pressed** buttons and clickable cards scale to 97%; table rows carry a `view-transition-name` from their key, so a
   sorted table re-orders under rAPId's swap transition instead of cross-fading.
 - **Reduced motion** is one switch: `styles/reset.css` zeroes every animation and transition under
