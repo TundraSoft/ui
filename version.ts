@@ -20,13 +20,13 @@ export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.2
 export const UI_CSS: UiAsset = {
   file: "ui.css",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.24.0/dist/ui.css", // x-release-please-version
-  integrity: "sha384-hZsJY4xLsTurAOc9WnSPmcJ6Ke9nsVT8maJ4UYmKIW29AHbKeCVACTHLOGZMkR7O",
+  integrity: "sha384-rA1Y9UQ46vlLBTS3vHCcbweExqYieJKOq6xUScny3PM3Guegj/aDkFJ8QREYzldF",
 };
 
 export const UI_JS: UiAsset = {
   file: "ui.js",
   url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.24.0/dist/ui.js", // x-release-please-version
-  integrity: "sha384-fXUmg6zp4KnWceDB/0oYR6pzcupjucgnWj2KGrfZPS2MYTkZd08ACowqu6yZiEeT",
+  integrity: "sha384-w9EuH+uluIdQKwyKMyTzNlJvBX+Ngg68LE/Msy5SCZkP57ca2syX3xsttPXKnXmp",
 };
 
 /** The icon set as an SVG sprite (`<use href="…/icons.svg#icon-<name>">`, same-origin only). */
