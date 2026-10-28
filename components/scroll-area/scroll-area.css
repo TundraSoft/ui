@@ -1,1 +1,140 @@
-/* scroll-area — placeholder, replaced by the component work. */
+/*
+ * Scroll area: a scroll container with a thin, token-coloured scrollbar
+ * and edge shadows that show only where there is more to scroll. The
+ * shadows are the data-table's technique: covers that scroll with the
+ * content (background-attachment: local) hide fixed shadow gradients at
+ * each edge until the content moves away from it. No script.
+ */
+.scroll-area {
+  --scroll-area-max-height: none;
+  --scroll-area-shadow: rgb(var(--shadow-color) / 0.16);
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  max-height: var(--scroll-area-max-height);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+.scroll-area--y {
+  overflow-y: auto;
+}
+
+.scroll-area--x {
+  overflow-x: auto;
+}
+
+.scroll-area--both {
+  overflow: auto;
+}
+
+.scroll-area--sm {
+  --scroll-area-max-height: 240px;
+}
+
+.scroll-area--md {
+  --scroll-area-max-height: 400px;
+}
+
+.scroll-area--lg {
+  --scroll-area-max-height: 600px;
+}
+
+.scroll-area:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+/* Vertical shadows at the top and bottom edges. */
+.scroll-area--y:not(.scroll-area--plain) {
+  background-image:
+    linear-gradient(to bottom, var(--color-surface) 40%, transparent),
+    linear-gradient(to top, var(--color-surface) 40%, transparent),
+    radial-gradient(farthest-side at 50% 0, var(--scroll-area-shadow), transparent),
+    radial-gradient(farthest-side at 50% 100%, var(--scroll-area-shadow), transparent);
+  background-position: 0 0, 0 100%, 0 0, 0 100%;
+  background-size: 100% 48px, 100% 48px, 100% 16px, 100% 16px;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Horizontal shadows at the start and end edges. */
+.scroll-area--x:not(.scroll-area--plain) {
+  background-image:
+    linear-gradient(to right, var(--color-surface) 40%, transparent),
+    linear-gradient(to left, var(--color-surface) 40%, transparent),
+    radial-gradient(farthest-side at 0 50%, var(--scroll-area-shadow), transparent),
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-area-shadow), transparent);
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-size: 48px 100%, 48px 100%, 16px 100%, 16px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Both: all four edges. */
+.scroll-area--both:not(.scroll-area--plain) {
+  background-image:
+    linear-gradient(to bottom, var(--color-surface) 40%, transparent),
+    linear-gradient(to top, var(--color-surface) 40%, transparent),
+    linear-gradient(to right, var(--color-surface) 40%, transparent),
+    linear-gradient(to left, var(--color-surface) 40%, transparent),
+    radial-gradient(farthest-side at 50% 0, var(--scroll-area-shadow), transparent),
+    radial-gradient(farthest-side at 50% 100%, var(--scroll-area-shadow), transparent),
+    radial-gradient(farthest-side at 0 50%, var(--scroll-area-shadow), transparent),
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-area-shadow), transparent);
+  background-position: 0 0, 0 100%, 0 0, 100% 0, 0 0, 0 100%, 0 0, 100% 0;
+  background-size: 100% 48px, 100% 48px, 48px 100%, 48px 100%, 100% 16px, 100% 16px, 16px 100%, 16px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, local, local, scroll, scroll, scroll, scroll;
+}
+
+/* WebKit / Blink scrollbar, matching scrollbar-color. */
+.scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+  background-clip: padding-box;
+}
+
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-muted);
+}
+
+.scroll-area::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.scroll-area--thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-area--thin::-webkit-scrollbar-thumb {
+  border-width: 1px;
+}
+
+.scroll-area--thin {
+  scrollbar-width: thin;
+}
+
+/* The scroll-area's inner content keeps its own spacing. */
+.scroll-area > :first-child {
+  margin-top: 0;
+}
+
+.scroll-area > :last-child {
+  margin-bottom: 0;
+}

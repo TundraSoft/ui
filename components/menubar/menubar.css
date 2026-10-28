@@ -1,1 +1,111 @@
-/* menubar — placeholder, replaced by the component work. */
+/*
+ * Menubar: a row of menu buttons; each opens a Menu panel under itself
+ * (menubar.js). The panel is the dropdown's surface. Without the script
+ * every panel is shown in flow under its button.
+ */
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.menubar::-webkit-scrollbar {
+  display: none;
+}
+
+.menubar__item {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.menubar__button {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.menubar__button:hover,
+.menubar__button[aria-expanded="true"] {
+  background: var(--color-surface-alt);
+}
+
+.menubar__button:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+.menubar__button--disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.menubar__button--disabled:hover {
+  background: transparent;
+}
+
+/* Fixed, placed under its button by menubar.js (uiFloat.follow): the bar
+   is a scroll container below 768px, which would clip an absolute panel. */
+.menubar__panel {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  width: max-content;
+  min-width: 12rem;
+  max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
+  max-height: var(--dropdown-max-height);
+  overflow-y: auto;
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-inset-top), var(--shadow-lg);
+  transform-origin: top left;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
+}
+
+/* Opened upwards (a bar at the bottom of the screen). */
+.menubar__panel[data-side="top"] {
+  transform-origin: bottom left;
+  animation-name: ui-float-up-in;
+}
+
+.menubar__panel.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.menubar__panel[data-side="top"].is-closing {
+  animation-name: ui-float-up-out;
+}
+
+.menubar__panel .menu__link {
+  white-space: nowrap;
+}
+
+/* No script: the panels sit in flow under their buttons so links work. */
+html:not(.js) .menubar {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+html:not(.js) .menubar__panel[hidden] {
+  display: block;
+  position: static;
+  box-shadow: none;
+  animation: none;
+}

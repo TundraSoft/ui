@@ -45,6 +45,19 @@
   margin-bottom: var(--space-2);
 }
 
+/* The TOC body is a scroll spy (data-scrollspy): the section being read
+   has its link marked by scrollspy.js. */
+.layout__toc-body a.is-active,
+.layout__toc-body a[aria-current="true"] {
+  color: var(--color-accent, var(--color-primary));
+  font-weight: var(--font-weight-medium);
+  box-shadow: inset var(--border-width-thick) 0 0 var(--color-accent, var(--color-primary));
+}
+
+.layout__toc-body a.is-active-parent {
+  color: var(--color-text);
+}
+
 @media screen and (max-width: 1199px) {
   .layout__toc {
     order: -1;

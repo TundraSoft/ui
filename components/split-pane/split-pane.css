@@ -1,1 +1,154 @@
-/* split-pane — placeholder, replaced by the component work. */
+/*
+ * Split pane: two panes and a separator. --split-start (percent) is the
+ * start pane's share; split-pane.js writes it from data-split-initial,
+ * storage, a drag or the keyboard. Both panes stay min-size 0 so content
+ * scrolls inside them instead of pushing the divider.
+ */
+.split-pane {
+  --split-start: 50%;
+  --split-height: 24rem;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.split-pane--horizontal {
+  flex-direction: row;
+  min-height: var(--split-height);
+}
+
+.split-pane--vertical {
+  flex-direction: column;
+  height: var(--split-height);
+}
+
+.split-pane__pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.split-pane--padded > .split-pane__pane {
+  padding: var(--space-4);
+}
+
+.split-pane__pane--start {
+  flex: 0 0 var(--split-start);
+}
+
+.split-pane__pane--end {
+  flex: 1 1 0;
+}
+
+.split-pane__separator {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  touch-action: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.split-pane--horizontal > .split-pane__separator {
+  width: var(--border-width);
+  cursor: col-resize;
+}
+
+.split-pane--vertical > .split-pane__separator {
+  height: var(--border-width);
+  cursor: row-resize;
+}
+
+/* A wider hit area than the hairline it draws. */
+.split-pane__separator::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.split-pane--horizontal > .split-pane__separator::before {
+  inset-inline: calc(-1 * var(--space-2));
+}
+
+.split-pane--vertical > .split-pane__separator::before {
+  inset-block: calc(-1 * var(--space-2));
+}
+
+.split-pane__grip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-4);
+  height: var(--space-6);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.split-pane--vertical > .split-pane__separator .split-pane__grip {
+  width: var(--space-6);
+  height: var(--space-4);
+}
+
+.split-pane--vertical > .split-pane__separator .split-pane__grip svg {
+  rotate: 90deg;
+}
+
+.split-pane__separator:hover,
+.split-pane__separator.is-dragging {
+  background: var(--color-accent, var(--color-primary));
+  color: var(--color-accent, var(--color-primary));
+}
+
+.split-pane__separator:hover .split-pane__grip,
+.split-pane__separator.is-dragging .split-pane__grip {
+  border-color: var(--color-accent, var(--color-primary));
+}
+
+.split-pane__separator:focus-visible {
+  outline: none;
+  background: var(--color-accent, var(--color-primary));
+}
+
+.split-pane__separator:focus-visible .split-pane__grip {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+/* While dragging, nothing under the pointer selects or steals it. */
+.split-pane.is-dragging {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.split-pane.is-dragging .split-pane__pane {
+  pointer-events: none;
+}
+
+/* Phones: stacked, the divider gone, unless asked to keep the split. */
+@media (max-width: 767px) {
+  .split-pane--horizontal:not(.split-pane--keep) {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .split-pane--horizontal:not(.split-pane--keep) > .split-pane__pane {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .split-pane--horizontal:not(.split-pane--keep) > .split-pane__separator {
+    display: none;
+  }
+}
