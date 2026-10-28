@@ -1,1 +1,172 @@
-/* diff — placeholder, replaced by the component work. */
+/*
+ * Diff view: a table of lines. The `+` / `−` markers are `::before`
+ * content, so selecting and copying lines gives the text alone; added
+ * and removed lines sit on the success and danger soft tones.
+ */
+.diff {
+  --diff-max-height: none;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+}
+
+.diff__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+  padding: var(--space-1) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunken);
+  font-size: var(--font-size-xs);
+}
+
+.diff__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
+}
+
+.diff__stats {
+  display: inline-flex;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.diff__stat--add {
+  color: var(--color-success);
+}
+
+.diff__stat--remove {
+  color: var(--color-danger);
+}
+
+.diff__scroll {
+  max-height: var(--diff-max-height);
+  overflow: auto;
+}
+
+/* A capped view is focusable (tabindex="0") so the keyboard can scroll it. */
+.diff__scroll:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: calc(-1 * var(--ring-width));
+}
+
+.diff__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-family-mono);
+  line-height: var(--line-height-base);
+  tab-size: 2;
+}
+
+.diff__no {
+  width: 1%;
+  min-width: var(--space-8);
+  padding: 0 var(--space-2);
+  text-align: end;
+  color: var(--color-text-muted);
+  background: var(--color-surface-sunken);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  vertical-align: top;
+}
+
+.diff__text {
+  padding: 0 var(--space-3) 0 var(--space-6);
+  position: relative;
+  white-space: pre;
+  vertical-align: top;
+}
+
+.diff--wrap .diff__text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* The marker lives in the text cell's gutter, not in the text. */
+.diff__text::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: var(--space-2);
+  color: var(--color-text-subtle);
+  user-select: none;
+}
+
+/* Unified: the row carries the type. Split: each cell does. */
+.diff__line--add .diff__text,
+.diff__text--add {
+  background: var(--color-success-soft);
+  color: var(--color-success-soft-text);
+}
+
+.diff__line--add .diff__text::before,
+.diff__text--add::before {
+  content: "+";
+  color: var(--color-success);
+}
+
+.diff__line--remove .diff__text,
+.diff__text--remove {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}
+
+.diff__line--remove .diff__text::before,
+.diff__text--remove::before {
+  content: "\2212";
+  color: var(--color-danger);
+}
+
+.diff__line--add .diff__no,
+.diff__no--add {
+  background: var(--color-success-soft);
+  color: var(--color-success-soft-text);
+}
+
+.diff__line--remove .diff__no,
+.diff__no--remove {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}
+
+.diff__line--meta .diff__text {
+  padding-inline-start: var(--space-3);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+}
+
+.diff__text--empty,
+.diff__no--empty {
+  background: var(--color-surface-alt);
+}
+
+/* Split: two equal halves with a rule between them. Auto table layout on
+   purpose: a long line widens the table and `.diff__scroll` scrolls it,
+   where a fixed layout would spill the text over the other half. */
+.diff--split .diff__text {
+  width: 50%;
+}
+
+.diff--split .diff__text:first-of-type {
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.diff--sm {
+  --diff-max-height: 12rem;
+}
+
+.diff--md {
+  --diff-max-height: 20rem;
+}
+
+.diff--lg {
+  --diff-max-height: 32rem;
+}

@@ -181,6 +181,11 @@ const ownUsage: Record<string, UsageExample[]> = {
       render: () => Avatar({ src: "/photos/ada.jpg", alt: "Ada Lovelace", size: "md" }),
     },
     {
+      title: "Presence",
+      note: 'The dot carries sr-only text ("Online" by default); `statusLabel` words it.',
+      render: () => Avatar({ initials: "AL", status: "online", statusLabel: "Active now" }),
+    },
+    {
       title: "Who is on the project",
       render: () =>
         AvatarGroup({ avatars: [Avatar({ initials: "AL" }), Avatar({ initials: "GH" }), Avatar({ initials: "+3" })] }),
@@ -639,6 +644,36 @@ const ownUsage: Record<string, UsageExample[]> = {
           placeholder: "Write in Markdown…",
         }),
     },
+    {
+      title: "A comment box: the basic toolbar, a limit, and image uploads",
+      note:
+        '`toolbar: "basic"` keeps text, headings, lists, quote, code and link; `maxLength` counts down in the status bar; `uploadAction` receives a dropped or pasted image as multipart `file` and answers with its URL.',
+      render: () =>
+        Editor({
+          id: "comment",
+          name: "comment",
+          toolbar: "basic",
+          maxLength: 2000,
+          uploadAction: "/fragments/upload",
+          rows: 5,
+          placeholder: "Leave a comment…",
+        }),
+    },
+    {
+      title: "A WYSIWYG profile bio",
+      note:
+        '`mode: "html"` edits a contenteditable surface whose HTML is mirrored into the textarea that submits; `value` is HTML the server already sanitised.',
+      render: () =>
+        Editor({
+          id: "bio",
+          name: "bio",
+          mode: "html",
+          value: "<p>Hello <strong>world</strong></p>",
+          toolbar: "minimal",
+          statusBar: false,
+          rows: 4,
+        }),
+    },
   ],
   "components/empty": [
     {
@@ -852,6 +887,18 @@ const ownUsage: Record<string, UsageExample[]> = {
           ],
         }),
     },
+    {
+      title: "A span per breakpoint",
+      note:
+        "An object span is mobile first: `{ xs: 6, md: 4, xl: 3 }` is two-up on a phone, three across from 768px and four from 1400px (`col-xs-6 col-md-4 col-xl-3`). A main column and an aside: `{ sm: 6, lg: 8 }` beside `{ sm: 6, lg: 4 }`.",
+      render: () =>
+        Grid({
+          gap: "sm",
+          items: ["Revenue", "Open", "Overdue", "Paid"].map((label) =>
+            GridCol({ span: { xs: 6, md: 4, xl: 3 }, content: Stat({ label, value: "12" }) })
+          ),
+        }),
+    },
   ],
   "components/input": [
     {
@@ -998,6 +1045,31 @@ const ownUsage: Record<string, UsageExample[]> = {
                 messages: { match: "The passwords do not match." },
               }),
           })}
+        `,
+    },
+    {
+      title: "Masked fields: a card number and a price",
+      note:
+        "`mask` formats as you type and keeps the caret; `currency` posts the raw number through a hidden input when the script runs, the text as typed without it. `custom` follows `maskPattern` (`#` digit, `A` letter, `*` either).",
+      render: () =>
+        html`
+          <div class="stack stack--sm">${Input({
+            id: "card",
+            name: "card",
+            mask: "card",
+            autocomplete: "cc-number",
+          })}${Input({
+            id: "price",
+            name: "price",
+            mask: "currency",
+            maskCurrency: "EUR",
+            maskLocale: "de-DE",
+          })}${Input({
+            id: "ref",
+            name: "ref",
+            mask: "custom",
+            maskPattern: "AA-####",
+          })}</div>
         `,
     },
   ],
@@ -1434,6 +1506,11 @@ const ownUsage: Record<string, UsageExample[]> = {
         }),
     },
     { title: "The region the shell renders once", render: () => ToastRegion() },
+    {
+      title: "Toasts at the top, centred",
+      note: "`createCoreTemplate({ toastPosition })` sets the same on the shared region.",
+      render: () => ToastRegion({ position: "top-center", max: 3 }),
+    },
   ],
   "components/toolbar": [
     {

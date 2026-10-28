@@ -86,11 +86,42 @@ export function Toast(props: ToastProps): Html {
   }</div>`;
 }
 
-/** The fixed-position container a page renders once; toasts get appended into it. */
-export function ToastRegion(props: { id?: string; toasts?: Html[]; max?: number } = {}): Html {
+/** Which viewport corner (or edge middle) the toast stack grows from. */
+export type ToastPosition =
+  | "bottom-end"
+  | "bottom-start"
+  | "bottom-center"
+  | "top-end"
+  | "top-start"
+  | "top-center";
+
+export type ToastRegionProps = {
+  /** @default "toast-region" */
+  id?: string;
+  /** Toasts rendered with the page. */
+  toasts?: Html[];
+  /** Most toasts shown at once; the oldest leave first. @default 4 */
+  max?: number;
+  /** @default "bottom-end" */
+  position?: ToastPosition;
+};
+
+/**
+ * The fixed-position container a page renders once; toasts get appended
+ * into it. Where the browser has the Popover API, toast.js shows the
+ * region as a manual popover so it sits in the top layer above any open
+ * `<dialog>`; elsewhere it is a fixed element under the toast z-index.
+ */
+export function ToastRegion(props: ToastRegionProps = {}): Html {
+  const position = props.position ?? "bottom-end";
   return html`
-    <div class="toast-region" id="${props.id ?? "toast-region"}" role="status" aria-live="polite" ${renderAttrs({
+    <div ${renderAttrs({
+      class: cx("toast-region", position !== "bottom-end" && `toast-region--${position}`),
+      id: props.id ?? "toast-region",
+      role: "status",
+      "aria-live": "polite",
       "data-toast-max": props.max ? String(props.max) : undefined,
+      "data-toast-position": position,
     })}>${props.toasts ?? []}</div>
   `;
 }

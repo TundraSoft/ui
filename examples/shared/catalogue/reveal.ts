@@ -1,12 +1,29 @@
 /** Catalogue cases for components/reveal — see examples/shared/catalogue.ts. */
 import { html } from "@tundralibs/rapid/ui";
 import { Card } from "../../../components/card/card.ts";
-import { LazySection, Parallax, Reveal, RevealGroup } from "../../../components/reveal/reveal.ts";
+import {
+  CountUp,
+  LazySection,
+  Parallax,
+  Reveal,
+  RevealGroup,
+  ScrollProgress,
+  ScrollSteps,
+} from "../../../components/reveal/reveal.ts";
 import { SkeletonCard } from "../../../components/skeleton/skeleton.ts";
 import { caseCopy, caseOf, caseRow, type CatalogueEntryInput, type CatalogueState } from "../catalogue.ts";
 import type { DemoRoutes } from "../data.ts";
 
 const card = (title: string) => Card({ title, body: caseCopy });
+
+const stepMedia = (label: string) =>
+  Card({
+    title: label,
+    body: html`
+      <p>The stage shows this while its step is current.</p>
+    `,
+    variant: "elevated",
+  });
 
 export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEntryInput {
   return {
@@ -67,6 +84,98 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
           placeholder: SkeletonCard(),
           rootMargin: "100px 0px",
         }),
+      ),
+      caseOf(
+        "ScrollProgress — position top (the page's own progress, CSS-only where scroll timelines exist, #cat-scroll-progress-top) / bottom tracking this case (#cat-scroll-progress-bottom)",
+        html`
+          ${ScrollProgress({ id: "cat-scroll-progress-top" })}${ScrollProgress({
+            id: "cat-scroll-progress-bottom",
+            position: "bottom",
+            target: "#cat-scroll-progress-bottom-target",
+          })}
+          <p id="cat-scroll-progress-bottom-target">
+            The bottom bar fills as this paragraph scrolls past; the top bar fills with the page.
+          </p>
+        `,
+      ),
+      caseOf(
+        "CountUp — duration fast / base / slow · format number / compact / percent / currency · tag span / strong / b (#cat-count-up)",
+        caseRow(
+          html`
+            <span class="text-semibold">${CountUp({
+              value: 12840,
+              duration: "fast",
+              attrs: { id: "cat-count-up" },
+            })}</span>
+          `,
+          CountUp({ value: 1284000, format: "compact", duration: "base", tag: "strong" }),
+          CountUp({ value: 0.42, format: "percent", duration: "slow", tag: "b" }),
+          CountUp({ value: 99.5, format: "currency:EUR", locale: "de-DE", from: 50 }),
+          CountUp({ value: 4.8, decimals: 1, tag: "span" }),
+        ),
+      ),
+      caseOf(
+        "ScrollSteps — height sm · stage end (#cat-scroll-steps); below 768 each step shows its media in flow",
+        ScrollSteps({
+          id: "cat-scroll-steps",
+          height: "sm",
+          steps: [
+            {
+              content: html`
+                <h3>1. Send</h3>
+                <p>An invoice goes out with one click.</p>
+              `,
+              media: stepMedia("Send"),
+            },
+            {
+              content: html`
+                <h3>2. Chase</h3>
+                <p>Reminders follow on the schedule you set.</p>
+              `,
+              media: stepMedia("Chase"),
+            },
+            {
+              content: html`
+                <h3>3. Collect</h3>
+                <p>Payment lands and the ledger closes itself.</p>
+              `,
+              media: stepMedia("Collect"),
+            },
+          ],
+        }),
+      ),
+      caseOf(
+        "ScrollSteps — height md / lg · stage start · a step without media keeps the last one",
+        html`
+          ${ScrollSteps({
+            id: "cat-scroll-steps-md",
+            height: "md",
+            stage: "start",
+            label: "How it works",
+            steps: [
+              {
+                content: html`
+                  <h3>Stage on the start side</h3>
+                `,
+                media: stepMedia("md"),
+              },
+              {
+                content: html`
+                  <h3>No media of its own</h3>
+                `,
+              },
+            ],
+          })}${ScrollSteps({
+            id: "cat-scroll-steps-lg",
+            height: "lg",
+            steps: [{
+              content: html`
+                <h3>A full-height band</h3>
+              `,
+              media: stepMedia("lg"),
+            }],
+          })}
+        `,
       ),
     ],
   };

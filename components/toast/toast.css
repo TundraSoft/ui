@@ -1,6 +1,9 @@
 .toast-region {
   position: fixed;
+  /* All four insets, explicitly: the UA's popover rule sets `inset: 0`. */
+  top: auto;
   bottom: var(--space-4);
+  inset-inline-start: auto;
   inset-inline-end: var(--space-4);
   z-index: var(--z-toast);
   display: flex;
@@ -16,6 +19,61 @@
 
 .toast-region > * {
   pointer-events: auto;
+}
+
+/* Positions: every rule sets all four insets, so one class moves the stack. */
+.toast-region--bottom-start {
+  inset-inline-end: auto;
+  inset-inline-start: var(--space-4);
+}
+
+.toast-region--bottom-center {
+  inset-inline-end: auto;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  align-items: center;
+}
+
+.toast-region--top-end,
+.toast-region--top-start,
+.toast-region--top-center {
+  bottom: auto;
+  top: var(--space-4);
+  flex-direction: column-reverse;
+}
+
+.toast-region--top-start {
+  inset-inline-end: auto;
+  inset-inline-start: var(--space-4);
+}
+
+.toast-region--top-center {
+  inset-inline-end: auto;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  align-items: center;
+}
+
+[dir="rtl"] .toast-region--bottom-center,
+[dir="rtl"] .toast-region--top-center {
+  translate: 50% 0;
+}
+
+/*
+ * In the top layer (toast.js shows the region as a manual popover where
+ * the Popover API exists) so a toast is never under an open <dialog>.
+ * The UA popover styles are undone; the insets above still apply because
+ * a popover's `inset: 0` is in the UA sheet and ours outranks it.
+ */
+.toast-region:popover-open {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  width: auto;
+  height: auto;
+  background: none;
+  color: inherit;
+  overflow: hidden;
 }
 
 /*
@@ -42,6 +100,19 @@
 /* Leaving (toast.js / dismiss.js add .is-closing and remove after). */
 .toast.is-closing {
   animation: ui-sink-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+/* A stack at the top drops in and lifts out instead. */
+.toast-region--top-end .toast,
+.toast-region--top-start .toast,
+.toast-region--top-center .toast {
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
+}
+
+.toast-region--top-end .toast.is-closing,
+.toast-region--top-start .toast.is-closing,
+.toast-region--top-center .toast.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 .toast__icon {

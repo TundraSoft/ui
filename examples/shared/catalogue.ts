@@ -564,12 +564,27 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           c(`size ${size}`, row(Avatar({ initials: "AB", size }), Avatar({ src: img(7, 96, 96), alt: "Photo", size })))
         ),
         c(
+          "status online / away / busy / offline — a presence dot with sr-only text, at every size (#cat-avatar-online)",
+          row(
+            ...(["online", "away", "busy", "offline"] as const).map((status) =>
+              Avatar({
+                initials: status.slice(0, 2).toUpperCase(),
+                status,
+                attrs: status === "online" ? { id: "cat-avatar-online" } : {},
+              })
+            ),
+            ...avatarSizes.map((size) =>
+              Avatar({ src: img(7, 96, 96), alt: "Photo", size, status: "online", statusLabel: "Active now" })
+            ),
+          ),
+        ),
+        c(
           "AvatarGroup",
           AvatarGroup({
             avatars: [
-              Avatar({ initials: "AB" }),
+              Avatar({ initials: "AB", status: "online" }),
               Avatar({ initials: "CD" }),
-              Avatar({ initials: "EF" }),
+              Avatar({ initials: "EF", status: "busy" }),
               Avatar({ initials: "+3" }),
             ],
           }),
@@ -1626,6 +1641,61 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "html mode with a table, a task list and a code block — the contextual table tools show while the caret is in a cell (#cat-ed-rich)",
+          Editor({
+            id: "cat-ed-rich",
+            name: "rich",
+            mode: "html",
+            value: "<h2>Launch checklist</h2>" +
+              '<ul class="task-list"><li><input type="checkbox" checked> Freeze the schema</li>' +
+              '<li><input type="checkbox"> Rotate the keys</li></ul>' +
+              "<table><thead><tr><th>Region</th><th>Status</th></tr></thead>" +
+              "<tbody><tr><td>eu-west</td><td>ready</td></tr><tr><td>us-east</td><td>pending</td></tr></tbody></table>" +
+              '<pre><code class="language-bash">deno task deploy --region eu-west</code></pre>',
+          }),
+        ),
+        c(
+          "toolbar basic (a comment box, no status bar) / minimal (a caption)",
+          row(
+            Editor({
+              id: "cat-ed-basic",
+              name: "comment",
+              toolbar: "basic",
+              statusBar: false,
+              rows: 4,
+              placeholder: "Leave a comment…",
+            }),
+            Editor({
+              id: "cat-ed-min",
+              name: "caption",
+              mode: "html",
+              toolbar: "minimal",
+              statusBar: false,
+              rows: 3,
+              value: "<p>A <em>short</em> caption.</p>",
+            }),
+          ),
+        ),
+        c(
+          "maxLength — the status bar counts down; uploadAction — a dropped or pasted image is stored by the server (#cat-ed-max, #cat-ed-up)",
+          row(
+            Editor({
+              id: "cat-ed-max",
+              name: "summary",
+              maxLength: 120,
+              rows: 4,
+              value: "A summary that may not run past one hundred and twenty characters.",
+            }),
+            Editor({
+              id: "cat-ed-up",
+              name: "post",
+              rows: 4,
+              uploadAction: routes.upload,
+              placeholder: "Drop an image here, or paste one…",
+            }),
+          ),
+        ),
+        c(
           "disabled / invalid",
           row(
             Editor({ id: "cat-ed-dis", name: "d", value: "Read-only", disabled: true, rows: 3 }),
@@ -1934,6 +2004,76 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             })],
           }),
         ),
+        c(
+          "span per breakpoint (GridColSpans, mobile first): { xs: 6, md: 4, xl: 3 } — two-up on a phone, three from 768, four from 1400",
+          Grid({
+            attrs: { id: "cat-grid-breakpoints" },
+            items: ["1", "2", "3", "4"].map((n) =>
+              GridCol({
+                span: { xs: 6, md: 4, xl: 3 },
+                content: html`
+                  <div class="cat-swatch">${n}</div>
+                `,
+              })
+            ),
+          }),
+        ),
+        c(
+          "{ sm: 6, lg: 8 } beside { sm: 6, lg: 4 } — a main + aside that stacks only below 576 (every GridBreakpoint)",
+          Grid({
+            attrs: { id: "cat-grid-aside" },
+            items: [
+              GridCol({
+                span: { xs: 12, sm: 6, lg: 8 },
+                content: html`
+                  <div class="cat-swatch">main</div>
+                `,
+              }),
+              GridCol({
+                span: { sm: 6, md: 6, lg: 4, xl: 4 },
+                content: html`
+                  <div class="cat-swatch">aside</div>
+                `,
+              }),
+            ],
+          }),
+        ),
+        c(
+          'gap: "sm" | "md" | "lg" (every GridGap)',
+          html`
+            <div class="stack stack--sm">
+              ${(["sm", "md", "lg"] as const).map((gap) =>
+                Grid({
+                  gap,
+                  attrs: { id: `cat-grid-gap-${gap}` },
+                  items: ["1", "2", "3"].map((n) =>
+                    GridCol({
+                      span: 4,
+                      content: html`
+                        <div class="cat-swatch">${gap} ${n}</div>
+                      `,
+                    })
+                  ),
+                })
+              )}
+            </div>
+          `,
+        ),
+        c(
+          "utilities layer (styles/utilities.css): d-flex / align-items-center / justify-content-between / gap-3 / p-3 / rounded / border / text-truncate / hide-sm / d-md-none",
+          html`
+            <div id="cat-utilities" class="d-flex align-items-center justify-content-between gap-3 p-3 border rounded">
+              <span class="text-truncate min-w-0">A row laid out with utilities alone — this label truncates when the row is narrow.</span>
+              <span class="hide-sm text-muted text-nowrap">hidden &lt; 576</span>
+              <span class="d-md-none text-muted text-nowrap">phone only</span>
+              ${Button({ label: "Action", size: "sm" })}
+            </div>
+            <div class="cluster mt-3">
+              ${Badge({ label: "cluster" })} ${Badge({ label: "wraps" })} ${Badge({ label: "chips" })}
+              <span class="ms-auto text-sm text-muted">ms-auto</span>
+            </div>
+          `,
+        ),
       ],
     },
     {
@@ -2141,6 +2281,76 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 invalid: a.invalid,
                 attrs: { "aria-describedby": a.describedBy },
               }),
+          }),
+        ),
+        c(
+          "mask: 'phone' / 'card' / 'postcode' — formatted as you type, the caret stays put; paste works",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-phone",
+              attrs: { "aria-label": "Phone" },
+              name: "phone",
+              mask: "phone",
+              value: "4155550132",
+            })}${Input({ id: "cat-mask-card", name: "card", mask: "card", placeholder: "Card number" })}${Input({
+              id: "cat-mask-postcode",
+              name: "postcode",
+              mask: "postcode",
+              placeholder: "Postcode",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'date' / 'time' — slot order from maskLocale (en-GB here: dd/mm/yyyy); an impossible date or time is a validity error",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-date",
+              attrs: { "aria-label": "Date of birth" },
+              name: "born",
+              mask: "date",
+              maskLocale: "en-GB",
+              messages: { mask: "That date does not exist." },
+            })}${Input({
+              id: "cat-mask-date-us",
+              attrs: { "aria-label": "Due date" },
+              name: "due",
+              mask: "date",
+              value: "12/31/2026",
+            })}${Input({
+              id: "cat-mask-time",
+              attrs: { "aria-label": "Time" },
+              name: "at",
+              mask: "time",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'currency' — grouped as typed, two decimals on blur, the symbol as an addon; the form posts the raw number (maskRaw)",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-currency",
+              attrs: { "aria-label": "Amount" },
+              name: "amount",
+              mask: "currency",
+              value: "1234.5",
+            })}${Input({
+              id: "cat-mask-currency-eur",
+              attrs: { "aria-label": "Price" },
+              name: "price",
+              mask: "currency",
+              maskCurrency: "EUR",
+              maskLocale: "de-DE",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'custom' — maskPattern '##-AAA-####' (# digit, A letter, * either), maskPlaceholderChar",
+          Input({
+            id: "cat-mask-custom",
+            name: "ref",
+            mask: "custom",
+            maskPattern: "##-AAA-####",
+            maskPlaceholderChar: "_",
           }),
         ),
       ],
@@ -3080,6 +3290,44 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "ToastRegion with max",
           ToastRegion({ id: "cat-toast-region", max: 3, toasts: [Toast({ body: "In a region" })] }),
+        ),
+        c(
+          "position bottom-end / bottom-start / bottom-center / top-end / top-start / top-center — each button appends into its own region (#cat-toast-pos-top-center); the regions sit in the top layer, above an open modal, where the Popover API exists",
+          html`
+            ${row(
+              ...([
+                "bottom-end",
+                "bottom-start",
+                "bottom-center",
+                "top-end",
+                "top-start",
+                "top-center",
+              ] as const).map((position) =>
+                Button({
+                  label: position,
+                  variant: "outline",
+                  size: "sm",
+                  attrs: {
+                    "data-toast-open": "#cat-toast-pos-template",
+                    "data-toast-region": `#cat-toast-pos-${position}`,
+                    id: `cat-toast-pos-btn-${position}`,
+                  },
+                })
+              ),
+            )}<template id="cat-toast-pos-template">${Toast({
+              variant: "info",
+              body: "Positioned toast",
+              meta: "closes in 4 s",
+              autoDismissMs: 4000,
+            })}</template>${([
+              "bottom-end",
+              "bottom-start",
+              "bottom-center",
+              "top-end",
+              "top-start",
+              "top-center",
+            ] as const).map((position) => ToastRegion({ id: `cat-toast-pos-${position}`, position, max: 2 }))}
+          `,
         ),
       ],
     },
