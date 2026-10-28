@@ -36,7 +36,7 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### Pages of a table, swapped in place
 
-`target` makes every link a rAPId swap of that region with history push; leave it out for plain links.
+`target` makes every link a rAPId swap of that region with history push; leave it out for plain links. Below 576px the row folds to prev · "Page 3 of 12" · next.
 
 ```ts
 Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, target: "#invoices" })
@@ -45,28 +45,29 @@ Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, t
 ```html
 <nav aria-label="Pagination">
   <ul class="pagination">
-    <li>
+    <li class="pagination__item pagination__item--nav">
       <a href="/invoices?page=2" class="pagination__link" aria-label="Previous page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8249;</a>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--page">
       <a href="/invoices?page=1" class="pagination__link" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--page">
       <a href="/invoices?page=2" class="pagination__link" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--page pagination__item--current">
       <a href="/invoices?page=3" class="pagination__link" aria-current="page" aria-label="Page 3" data-action="/invoices?page=3" data-target="#invoices" data-swap="outer" data-push="">3</a>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--page">
       <a href="/invoices?page=4" class="pagination__link" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--ellipsis">
       <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
     </li>
-    <li>
+    <li class="pagination__item pagination__item--page">
       <a href="/invoices?page=12" class="pagination__link" aria-label="Page 12" data-action="/invoices?page=12" data-target="#invoices" data-swap="outer" data-push="">12</a>
     </li>
-    <li>
+    <li class="pagination__status" aria-hidden="true">Page 3 of 12</li>
+    <li class="pagination__item pagination__item--nav">
       <a href="/invoices?page=4" class="pagination__link" aria-label="Next page" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
     </li>
   </ul>
@@ -77,4 +78,4 @@ Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, t
 
 Classes defined by `components/pagination/pagination.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.pagination`, `.pagination__ellipsis`, `.pagination__link`, `.pagination__link--disabled`
+`.pagination`, `.pagination__ellipsis`, `.pagination__item--ellipsis`, `.pagination__item--page`, `.pagination__link`, `.pagination__link--disabled`, `.pagination__status`

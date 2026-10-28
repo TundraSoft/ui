@@ -14,7 +14,8 @@ Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/
 Stat(props: StatProps): Html
 ```
 
-A KPI tile: icon chip, label, value, trend.
+A KPI tile: label on top, the value large with its trend inline beside
+it, an optional icon chip at the top end, an optional sparkline under.
 
 ## Types
 
@@ -35,7 +36,9 @@ A KPI tile: icon chip, label, value, trend.
 | `value` | `string | Html` | yes |  |
 | `icon` | `Html` |  |  |
 | `tone` | `StatTone` |  |  |
-| `trend` | `{ label: string; up: boolean }` |  | e.g. `{ label: "+12.4%", up: true }` — rendered as a status badge. |
+| `trend` | `{ label: string; up: boolean }` |  | e.g. `{ label: "+12.4%", up: true }` — rendered as a status badge beside the value. |
+| `sparkline` | `number[]` |  | A small trend line under the value, drawn on the server as an inline SVG (a polyline and a soft fill) from these points — no chart engine, the same bytes on every render. Two or more numbers; the line fills the tile's width. Say what it shows in `sparklineLabel`. |
+| `sparklineLabel` | `string` |  | Accessible name of the sparkline, e.g. "Daily signups, rising". Without it the drawing is decorative. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -51,10 +54,40 @@ Stat({ label: "Revenue (30d)", value: "$48,200", trend: { label: "+12.4%", up: t
 ```html
 <div class="stat">
   <span class="stat__label">Revenue (30d)</span>
-  <span class="stat__value">$48,200</span>
-  <span class="stat__trend">
-    <span class="badge badge--success">+12.4%</span>
+  <span class="stat__row">
+    <span class="stat__value">$48,200</span>
+    <span class="stat__trend">
+      <span class="badge badge--success">+12.4%</span>
+    </span>
   </span>
+</div>
+```
+
+### With a sparkline
+
+The line is an inline SVG the server draws from the numbers — no chart engine on the page.
+
+```ts
+Stat({
+  label: "Signups (30d)",
+  value: "1,284",
+  tone: "primary",
+  trend: { label: "+8.2%", up: true },
+  sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40],
+  sparklineLabel: "Daily signups over the last 30 days, rising",
+})
+```
+
+```html
+<div class="stat stat--primary">
+  <span class="stat__label">Signups (30d)</span>
+  <span class="stat__row">
+    <span class="stat__value">1,284</span>
+    <span class="stat__trend">
+      <span class="badge badge--success">+8.2%</span>
+    </span>
+  </span>
+  <svg width="2" …>…</svg>
 </div>
 ```
 
@@ -62,4 +95,4 @@ Stat({ label: "Revenue (30d)", value: "$48,200", trend: { label: "+12.4%", up: t
 
 Classes defined by `components/stat/stat.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__trend`, `.stat__value`
+`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-line`, `.stat__trend`, `.stat__value`

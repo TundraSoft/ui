@@ -9,10 +9,13 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [alert](reference/components-alert.md) — `Alert`, `FormErrorAlert`
 - [avatar](reference/components-avatar.md) — `Avatar`, `AvatarGroup`
 - [badge](reference/components-badge.md) — `Badge`, `Chip`
+- [banner](reference/components-banner.md) — `Banner`
 - [breadcrumb](reference/components-breadcrumb.md) — `Breadcrumb`
 - [button](reference/components-button.md) — `Button`, `ButtonGroup`, `CopyButton`
+- [calendar](reference/components-calendar.md) — `Calendar`
 - [card](reference/components-card.md) — `CardMedia`, `CardHeader`, `CardBody`, `CardFooter`, `Card`
 - [card-fields](reference/components-card-fields.md) — `CardFields`
+- [carousel](reference/components-carousel.md) — `Carousel`
 - [chart](reference/components-chart.md) — `ChartScript`, `chartOptions`, `Chart`
 - [choice](reference/components-choice.md) — `Choice`, `Checkbox`, `Radio`, `ChoiceGroup`
 - [collapsible](reference/components-collapsible.md) — `Collapsible`, `Accordion`
@@ -22,36 +25,48 @@ Every exported function, type and constant, one page per module. Guides: [Gettin
 - [data-table](reference/components-data-table.md) — `RowActions`, `DataTable`
 - [datepicker](reference/components-datepicker.md) — `formatDate`, `DatePickerPanel`, `DatePicker`
 - [datetimepicker](reference/components-datetimepicker.md) — `toUtcIso`, `utcParts`, `dateTimePresets`, `DateTimePicker`
+- [description-list](reference/components-description-list.md) — `DescriptionList`
 - [dropdown](reference/components-dropdown.md) — `Dropdown`
 - [dropzone](reference/components-dropzone.md) — `Dropzone`
 - [editor](reference/components-editor.md) — `Editor`
 - [empty](reference/components-empty.md) — `Empty`
+- [feature-grid](reference/components-feature-grid.md) — `FeatureGrid`
 - [form](reference/components-form.md) — `CsrfField`, `Form`
 - [form-field](reference/components-form-field.md) — `FormField`, `FormGrid`, `FormActions`
 - [grid](reference/components-grid.md) — `Grid`, `GridCol`
+- [hero](reference/components-hero.md) — `Hero`
 - [input](reference/components-input.md) — `attr`, `messageAttrs`, `Counter`, `Input`, `FloatingInput`, `InputIcon`, `InputGroup`
+- [lightbox](reference/components-lightbox.md) — `Lightbox`, `LightboxLink`
 - [menu](reference/components-menu.md) — `Menu`
 - [modal](reference/components-modal.md) — `Modal`, `ConfirmModal`
 - [navbar](reference/components-navbar.md) — `Navbar`
+- [number-input](reference/components-number-input.md) — `NumberInput`
 - [otp](reference/components-otp.md) — `Otp`
 - [page-header](reference/components-page-header.md) — `PageHeader`
 - [pagination](reference/components-pagination.md) — `Pagination`
 - [popover](reference/components-popover.md) — `Popover`, `PopoverTrigger`
+- [pricing](reference/components-pricing.md) — `PricingTable`
 - [progress](reference/components-progress.md) — `Progress`, `Spinner`
+- [prose](reference/components-prose.md) — `Prose`, `proseHtml`
+- [reveal](reference/components-reveal.md) — `Reveal`, `RevealGroup`, `Parallax`, `LazySection`
 - [segmented](reference/components-segmented.md) — `Segmented`
 - [select](reference/components-select.md) — `Select`
+- [sheet](reference/components-sheet.md) — `Sheet`
 - [sidebar](reference/components-sidebar.md) — `Sidebar`, `SidebarToggle`
+- [site-footer](reference/components-site-footer.md) — `SiteFooter`
 - [skeleton](reference/components-skeleton.md) — `Skeleton`, `SkeletonTable`, `SkeletonCard`
 - [slider](reference/components-slider.md) — `Slider`
 - [stat](reference/components-stat.md) — `Stat`
 - [switch](reference/components-switch.md) — `Switch`
 - [tabs](reference/components-tabs.md) — `Tabs`, `TabLinks`
+- [testimonial](reference/components-testimonial.md) — `Testimonial`, `TestimonialGrid`
 - [textarea](reference/components-textarea.md) — `Textarea`
 - [timeline](reference/components-timeline.md) — `Timeline`
 - [timepicker](reference/components-timepicker.md) — `timeToMinutes`, `minutesToTime`, `timeSlots`, `TimePicker`
 - [toast](reference/components-toast.md) — `Toast`, `ToastRegion`
 - [toolbar](reference/components-toolbar.md) — `Toolbar`
 - [tooltip](reference/components-tooltip.md) — `Tooltip`
+- [tree](reference/components-tree.md) — `Tree`
 - [wizard](reference/components-wizard.md) — `Wizard`
 
 ## layouts

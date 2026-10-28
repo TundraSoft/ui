@@ -65,10 +65,13 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 `⌘K` or any `[data-command-open="#palette"]` opens it; `action` makes the results server-side.
 
 ```ts
-html`${
-  Button({ label: "Search", variant: "outline", size: "sm", attrs: { "data-command-open": "#palette" } })
-}${
-  Command({
+html`
+  ${Button({
+    label: "Search",
+    variant: "outline",
+    size: "sm",
+    attrs: { "data-command-open": "#palette" },
+  })}${Command({
     id: "palette",
     action: "/fragments/commands",
     placeholder: "Jump to…",
@@ -76,8 +79,8 @@ html`${
       { label: "New invoice", group: "Actions", icon: "plus", shortcut: "N" },
       { label: "Contoso Ltd", group: "Clients", badge: "CL", href: "/clients/contoso" },
     ],
-  })
-}`
+  })}
+`
 ```
 
 ```html
@@ -139,7 +142,7 @@ CommandList({
 
 Classes defined by `components/command/command.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.command`, `.command--inline`, `.command__count`, `.command__empty`, `.command__esc`, `.command__footer`, `.command__group`, `.command__input`, `.command__item`, `.command__item-badge`, `.command__item-icon`, `.command__item-label`, `.command__item-meta`, `.command__kbd`, `.command__list`, `.command__match`, `.command__search`, `.command__search-icon`, `.command__sheet`, `.command__trigger`, `.hide-sm`
+`.command`, `.command--inline`, `.command__count`, `.command__empty`, `.command__esc`, `.command__footer`, `.command__group`, `.command__input`, `.command__item`, `.command__item-badge`, `.command__item-icon`, `.command__item-label`, `.command__item-meta`, `.command__kbd`, `.command__list`, `.command__match`, `.command__search`, `.command__search-icon`, `.command__sheet`, `.command__trigger`, `.hide-sm`, `.is-closing`
 
 ## Behaviour
 

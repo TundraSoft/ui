@@ -122,8 +122,8 @@ FormField({
 ### Two fields side by side, then the actions
 
 ```ts
-html`${
-  FormGrid({
+html`
+  ${FormGrid({
     fields: [
       FormField({
         id: "first",
@@ -138,12 +138,12 @@ html`${
         control: (a) => Input({ id: a.id, name: "last" }),
       }),
     ],
-  })
-}${
-  FormActions({
-    content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}`,
-  })
-}`
+  })}${FormActions({
+    content: html`
+      ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}
+    `,
+  })}
+`
 ```
 
 ```html

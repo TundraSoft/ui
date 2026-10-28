@@ -47,7 +47,13 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 ### A details section
 
 ```ts
-Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 30, 2% late fee.</p>` })
+Collapsible({
+  id: "terms",
+  title: "Terms and conditions",
+  content: html`
+    <p>Net 30, 2% late fee.</p>
+  `,
+})
 ```
 
 ```html
@@ -61,7 +67,9 @@ Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 3
     </button>
   </h3>
   <div class="collapsible__panel" id="terms-panel" data-toggle-panel hidden>
-    <p>Net 30, 2% late fee.</p>
+    <div class="collapsible__inner">
+      <p>Net 30, 2% late fee.</p>
+    </div>
   </div>
 </div>
 ```
@@ -72,8 +80,19 @@ Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 3
 Accordion({
   id: "faq",
   items: [
-    { title: "How do refunds work?", content: html`<p>Within 14 days, in full.</p>`, defaultOpen: true },
-    { title: "Can I change plans?", content: html`<p>Any time; the difference is prorated.</p>` },
+    {
+      title: "How do refunds work?",
+      content: html`
+        <p>Within 14 days, in full.</p>
+      `,
+      defaultOpen: true,
+    },
+    {
+      title: "Can I change plans?",
+      content: html`
+        <p>Any time; the difference is prorated.</p>
+      `,
+    },
   ],
 })
 ```
@@ -90,7 +109,9 @@ Accordion({
       </button>
     </h3>
     <div class="collapsible__panel" id="faq-0-panel" data-toggle-panel>
-      <p>Within 14 days, in full.</p>
+      <div class="collapsible__inner">
+        <p>Within 14 days, in full.</p>
+      </div>
     </div>
   </div>
   <div class="collapsible">
@@ -103,7 +124,9 @@ Accordion({
       </button>
     </h3>
     <div class="collapsible__panel" id="faq-1-panel" data-toggle-panel hidden>
-      <p>Any time; the difference is prorated.</p>
+      <div class="collapsible__inner">
+        <p>Any time; the difference is prorated.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -113,7 +136,7 @@ Accordion({
 
 Classes defined by `components/collapsible/collapsible.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.accordion`, `.collapsible`, `.collapsible__heading`, `.collapsible__icon`, `.collapsible__panel`, `.collapsible__trigger`
+`.accordion`, `.collapsible`, `.collapsible__heading`, `.collapsible__icon`, `.collapsible__inner`, `.collapsible__panel`, `.collapsible__trigger`, `.is-animating`, `.is-collapsed`
 
 ## Behaviour
 

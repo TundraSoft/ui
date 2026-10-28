@@ -142,7 +142,9 @@ ButtonGroup({
     Dropdown({
       id: "export-more",
       align: "end",
-      trigger: html`${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>`,
+      trigger: html`
+        ${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>
+      `,
       triggerClass: "btn btn--outline btn--icon",
       content: Menu({ items: [{ label: "CSV", href: "/export.csv" }, { label: "PDF", href: "/export.pdf" }] }),
     }),

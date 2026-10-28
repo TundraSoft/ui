@@ -41,9 +41,9 @@ PageHeader({
   title: "INV-2048",
   subtitle: "Northwind Traders · due 15 Oct",
   breadcrumb: Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-2048" }] }),
-  actions: html`${Button({ label: "Send reminder", variant: "outline" })}${
-    Button({ label: "Record payment" })
-  }`,
+  actions: html`
+    ${Button({ label: "Send reminder", variant: "outline" })}${Button({ label: "Record payment" })}
+  `,
 })
 ```
 

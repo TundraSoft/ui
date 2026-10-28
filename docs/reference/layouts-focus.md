@@ -37,11 +37,15 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ```ts
 FocusLayout({
-  header: html`<a class="navbar__brand" href="/">Acme</a>`,
+  header: html`
+    <a class="navbar__brand" href="/">Acme</a>
+  `,
   content: Wizard({
     id: "checkout",
     steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }],
-    content: html`<p>…</p>`,
+    content: html`
+      <p>…</p>
+    `,
   }),
 })
 ```

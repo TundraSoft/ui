@@ -46,13 +46,13 @@ AuthLayout({
   content: Form({
     id: "signin",
     action: "/signin",
-    content: html`${
-      FormField({
+    content: html`
+      ${FormField({
         id: "email",
         label: "Email",
         control: (a) => Input({ id: a.id, name: "email", type: "email" }),
-      })
-    }${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}`,
+      })}${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}
+    `,
   }),
 })
 ```

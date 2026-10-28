@@ -98,7 +98,7 @@ Popover({
 
 Classes defined by `components/popover/popover.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.popover`, `.popover--end`, `.popover--start`, `.popover__arrow`, `.popover__body`, `.popover__footer`, `.popover__header`, `.popover__panel`, `.popover__stat`, `.popover__stat-label`, `.popover__stat-value`, `.popover__stats`, `.popover__subtitle`, `.popover__title`
+`.btn`, `.popover`, `.popover--above`, `.popover--end`, `.popover--start`, `.popover__arrow`, `.popover__body`, `.popover__footer`, `.popover__header`, `.popover__panel`, `.popover__stat`, `.popover__stat-label`, `.popover__stat-value`, `.popover__stats`, `.popover__subtitle`, `.popover__title`
 
 ## Behaviour
 

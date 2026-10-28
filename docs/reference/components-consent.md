@@ -62,17 +62,19 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Rendered hidden: consent.js shows it to a visitor who has not chosen and loads the scripts only after Accept. A `[data-consent-open]` link anywhere reopens it.
 
 ```ts
-html`${
-  ConsentBanner({
+html`
+  ${ConsentBanner({
     title: "Cookies for analytics?",
-    body: html`We would use Google Analytics to see which pages help. <a href="/privacy">Privacy notice</a>`,
+    body: html`
+      We would use Google Analytics to see which pages help. <a href="/privacy">Privacy notice</a>
+    `,
     loaders: [
       { src: "https://www.googletagmanager.com/gtag/js?id=G-XXXX", async: true },
       { src: "/public/ga.js", attrs: { "data-id": "G-XXXX" } },
     ],
     storageKey: "acme-consent",
-  })
-}<a href="#" data-consent-open>Cookie settings</a>`
+  })}<a href="#" data-consent-open>Cookie settings</a>
+`
 ```
 
 ```html

@@ -273,6 +273,17 @@ A native `<input type=file>` covers the area. Upload rows are server state (`pro
 picked file on submit, fills its bar from rAPId's `rapid:progress`, and the reply (the `Dropzone` again, with your rows)
 replaces them. See the [upload recipe](./UI-Recipes.md#5-attachments-with-upload-progress).
 
+### [NumberInput](./reference/components-number-input.md)
+
+```ts
+NumberInput({ id: "seats", name: "seats", value: 5, min: 1, max: 500, step: 1, unit: "seats" });
+NumberInput({ id: "budget", name: "budget", value: 125000, step: 500, format: "group" }); // 125,000 while blurred
+```
+
+A native `<input type="number">` between − and + steppers (hold to repeat; a stepper disables at `min`/`max`), the
+browser's own spin buttons hidden. `format: "group"` shows thousands separators while the field is blurred and submits
+the raw number. Without the script the native control stands alone.
+
 ### Password (`Input({ type: "password" })`)
 
 ```ts
@@ -494,6 +505,36 @@ Spinner({ label: "Loading rows" });
 Skeletons pair with `data-load` regions: render them as the placeholder, the lazy GET swaps the real content in. Widths
 are a step scale, never inline.
 
+### [DescriptionList](./reference/components-description-list.md), [Calendar](./reference/components-calendar.md)
+
+```ts
+DescriptionList({
+  layout: "inline",
+  items: [{ term: "Billed to", description: "Blue Bottle Co." }, { term: "Due", description: "Sep 15, 2026" }],
+});
+DescriptionList({ layout: "columns", size: "sm", divided: true, items });
+Calendar({
+  id: "schedule",
+  year: 2026,
+  month: 9,
+  today: "2026-10-28",
+  events: [{ id: "e1", date: "2026-10-30", title: "Invoice run", tone: "accent", time: "09:00" }, {
+    id: "e2",
+    date: "2026-10-12",
+    end: "2026-10-14",
+    title: "Offsite",
+    tone: "success",
+  }],
+  buildHref: (y, m) => `/schedule?month=${y}-${m + 1}`,
+  target: "#schedule",
+});
+```
+
+A description list is a real `<dl>`: `stacked`, `inline` (term in a fixed column) or `columns` (a responsive grid of
+pairs). The calendar is a month grid with event chips (multi-day spans fill each day, `+N more` folds the overflow,
+today is ringed), prev/next as links — or swaps with `target` — and it becomes a list of the days that have events below
+768px.
+
 ---
 
 ## Cards & structure
@@ -558,6 +599,15 @@ Tabs have roving tabindex, Home/End, and a `#tab-<id>` deep link that activates 
 sidebar link does not paint a focus ring). A collapsible's `<h3>` is a landmark only: its trigger reads in the
 surrounding text's type (an FAQ row, not a heading), so set the size on the container if a row should be larger.
 
+### [Prose](./reference/components-prose.md)
+
+```ts
+Prose({ content: proseHtml(renderedMarkdown), size: "md", measure: true });
+```
+
+Styles for rendered Markdown — headings with rhythm, lists, quotes, code, tables, figures, `kbd` — on the library's
+tokens. `proseHtml()` wraps an HTML string the **server has already sanitised**; never hand it user input.
+
 ---
 
 ## Navigation
@@ -602,6 +652,27 @@ inside the phone menu, hidden from 768px) and mark their twins in `actions` `hid
 hides below 576px). The sidebar is the drawer / collapsible rail the `SidebarLayout` manages;
 `SidebarToggle({ targetId })` is the button it renders. Menus nest to any depth; the script marks the link matching the
 full URL (path + hash) current and opens its parents.
+
+### [Tree](./reference/components-tree.md)
+
+```ts
+Tree({
+  id: "files",
+  label: "Project files",
+  items: [{
+    label: "src",
+    icon: Icon("folder", { size: 16 }),
+    expanded: true,
+    children: [{ label: "app.ts", href: "/files/src/app.ts", selected: true }, {
+      label: "mod.ts",
+      href: "/files/src/mod.ts",
+    }],
+  }, { label: "README.md", href: "/files/README.md" }],
+});
+```
+
+A WAI-ARIA tree: roving tabindex, arrow keys open, close and walk the levels, Home/End, Enter follows the link,
+type-ahead. Groups render open and the script folds the ones not `expanded`, so a page without it shows everything.
 
 ### [Command](./reference/components-command.md)
 
@@ -663,6 +734,7 @@ Tooltip({
   id: "tip",
   trigger: Button({ label: "Hover", attrs: { "aria-describedby": "tip" } }),
   content: "Helpful context",
+  side: "bottom",
 });
 ```
 
@@ -671,7 +743,9 @@ Dropdowns close on pick, Escape and outside click, and switch to fixed positioni
 while a child matches) or any `[data-dropdown-item]`s; ↓ moves into the items, Enter takes the first match, and closing
 clears it. A panel with nothing to filter (a notifications feed) hides the box — or pass `searchable: false`. The panel
 caps at `--dropdown-max-height` and scrolls under the box. Popovers restore focus and only claim Escape when open;
-`loadFrom` fetches content lazily. Tooltips are CSS-only.
+`loadFrom` fetches content lazily; a popover that would run off the viewport is shifted back in and flips above its
+trigger when there is no room below. Tooltips show after `delay` (150ms) on hover and at once on focus, wrap at a
+readable measure, flip when there is no room on their `side`, and fall back to a CSS-only bubble without the script.
 
 ---
 
@@ -701,6 +775,35 @@ Modal({
 Toasts append into the region (`data-swap="append"` from the server, or `[data-toast-open="#template"]` client-side) and
 auto-dismiss. Modals are native `<dialog>`s: centred, backdrop click closes, Escape closes, focus returns.
 
+### [Sheet](./reference/components-sheet.md), [Banner](./reference/components-banner.md)
+
+```ts
+Button({ label: "Edit customer", attrs: { "data-sheet-open": "#customer" } });
+Sheet({
+  id: "customer",
+  title: "Edit customer",
+  side: "end",
+  size: "md",
+  body: Form({ content: fields }),
+  footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-sheet-close": "" } })}${
+    Button({ label: "Save", type: "submit" })
+  }`,
+});
+Banner({ variant: "info", body: "Markets close early on Friday.", action: { label: "Details", href: "/notices/1" } });
+Banner({
+  variant: "warning",
+  body: "Billing fails over to the backup provider tonight.",
+  dismissible: true,
+  storageKey: "failover-2026-10",
+});
+```
+
+A sheet is a native `<dialog>` that slides in from the side you name (`end`, `start`, `bottom`) — and from the bottom on
+every phone, where it becomes a bottom sheet with a drag handle. Backdrop click, Escape and `[data-sheet-close]` slide
+it out before it closes; `open` opens it on load and after a swap, the way a modal does. A banner is the page-level
+strip an alert is not: full width, centred text, one action, an optional close that `storageKey` remembers across
+visits; `sticky` keeps it at the top.
+
 ### [ConsentBanner](./reference/components-consent.md)
 
 ```ts
@@ -727,6 +830,106 @@ choice lives in the browser (`storageKey`, `granted` | `denied`) so cached pages
 choice fires `consent:change` (`detail: { state, key }`). Without a script nothing loads and nothing is asked. No inline
 script anywhere: under a strict CSP add the trackers' origins to `script-src` (a nonce on the bundle's own `<script>` is
 copied onto the loaders). In a rAPId app pass the props to `createCoreTemplate({ consent })` and every page carries it.
+
+---
+
+## Marketing & media
+
+The landing-page partials. Each is a bare section that sits inside a `StackedLayout` (`width: "bleed"` for full-width
+bands) and is composed from the same tokens as the app components, so a marketing page and the product behind it read as
+one thing.
+
+### [Hero](./reference/components-hero.md), [FeatureGrid](./reference/components-feature-grid.md), [PricingTable](./reference/components-pricing.md)
+
+```ts
+Hero({
+  eyebrow: "Invoicing",
+  title: "Invoices your customers pay on time",
+  text: "Send, chase and collect from one place.",
+  actions: html`${Button({ label: "Start free", size: "lg" })}${Button({ label: "See pricing", variant: "outline", size: "lg", href: "#pricing" })}`,
+  media: html`<img src="/img/app.png" width="1200" height="800" alt="The invoices screen">`,
+  layout: "split",
+  size: "lg",
+  parallax: true,
+});
+FeatureGrid({
+  title: "Everything the finance team asked for",
+  columns: "3",
+  variant: "cards",
+  items: [{ icon: Icon("invoice"), title: "Recurring invoices", text: "Set it once." }, …],
+});
+PricingTable({
+  toggle: { monthly: "Monthly", yearly: "Yearly", note: "Two months free" },
+  plans: [{
+    name: "Team",
+    price: "$49",
+    priceYearly: "$490",
+    period: "/mo",
+    features: ["10 seats", { label: "Audit log", included: false }],
+    action: Button({ label: "Choose Team", block: true }),
+    featured: true,
+    badge: "Popular",
+  }, …],
+});
+```
+
+The hero's `tone` paints it on the surface, inverse (ink) or an accent wash; `parallax` lets the media drift on scroll.
+The pricing toggle is a real radio group that `pricing.js` mirrors onto `data-billing`; without the script both prices
+show.
+
+### [Testimonial](./reference/components-testimonial.md), [SiteFooter](./reference/components-site-footer.md)
+
+```ts
+TestimonialGrid({
+  columns: "3",
+  items: [{ quote: "We got paid 11 days faster.", name: "Priya N.", role: "CFO, Northwind", rating: 5, avatar: Avatar({ initials: "PN" }) }, …],
+});
+SiteFooter({
+  brand: html`<span class="sidebar__brand-mark">A</span> Acme`,
+  tagline: "Invoicing for teams.",
+  columns: [{ title: "Product", links: [{ label: "Pricing", href: "/pricing" }] }, { title: "Company", links }],
+  social: [{ label: "GitHub", href: "https://github.com/acme", icon: Icon("externalLink") }],
+  bottom: html`© 2026 Acme`,
+});
+```
+
+### [Carousel](./reference/components-carousel.md), [Lightbox](./reference/components-lightbox.md)
+
+```ts
+Carousel({
+  id: "stories",
+  label: "Customer stories",
+  items: cards,
+  perView: "3",
+  gap: "md",
+  peek: true,
+  autoplay: 6000,
+});
+Lightbox({ id: "office", items: photos.map((p) => ({ src: p.src, alt: p.alt, caption: p.caption })) });
+photos.map((p, i) =>
+  LightboxLink({ controls: "office", index: i, href: p.src, content: html`<img src="${p.thumb}" alt="${p.alt}">` })
+);
+```
+
+The carousel is a scroll-snap track: it scrolls by hand with nothing loaded, and the script adds prev/next, dots, arrow
+keys, the active slide and autoplay that pauses on hover, focus and off-screen. The lightbox is a `<dialog>` opened by
+any `LightboxLink` (a plain link to the full image without the script): keys, swipe, counter, caption, backdrop click,
+and focus back on the thumbnail.
+
+### [Reveal, RevealGroup, Parallax, LazySection](./reference/components-reveal.md)
+
+```ts
+Reveal({ content: html`<h2>Why teams switch</h2>`, effect: "rise", tag: "section" });
+RevealGroup({ items: cards, stagger: true }); // one after another
+Parallax({ content: html`<img src="/img/texture.png" alt="">`, speed: "slow" });
+LazySection({ id: "customers", action: "/fragments/customers", placeholder: SkeletonCard() });
+```
+
+Scroll effects that cost nothing when they cannot run: a revealed block is hidden only under `html.js` and shown by an
+IntersectionObserver (already-visible blocks reveal on load; `once: false` replays); the stagger is a `--reveal-index`
+set through the CSSOM; parallax is a rAF-throttled transform, off under reduced motion and on coarse pointers. A lazy
+section calls `window.rapid.swap()` as it nears the viewport when the runtime is present — on a plain page it simply
+shows what it carries.
 
 ---
 

@@ -298,7 +298,7 @@ Select({
 
 Classes defined by `components/select/select.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox__field`, `.combobox__hints`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__button`, `.select__lead`, `.select__native`, `.select__text`, `.select__text--placeholder`, `.select__ui`
+`.combobox__field`, `.combobox__hints`, `.input-group`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__button`, `.select__lead`, `.select__native`, `.select__text`, `.select__text--placeholder`, `.select__ui`
 
 ## Behaviour
 

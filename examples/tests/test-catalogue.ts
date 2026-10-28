@@ -29,7 +29,9 @@ const fail = (s: string) => issues.push(s);
 const check = (cond: unknown, s: string) => {
   if (!cond) fail(s);
 };
-const pause = (ms = 150) => new Promise((r) => setTimeout(r, ms));
+// 260ms: longer than an exit animation (--duration-exit 150ms), so a
+// "closed" check after a close never races the panel on its way out.
+const pause = (ms = 260) => new Promise((r) => setTimeout(r, ms));
 
 /* ---------------------------------------------------------- coverage */
 const splitSources = await Promise.all(
@@ -2316,7 +2318,9 @@ for (const group of catalogueGroups) {
     );
     check(modalTicks === "ga4", `feedback: select in a modal ticks the picked option only (${modalTicks})`);
     await page.keyboard.press("Escape");
+    await pause();
     await page.click("[aria-controls=cat-modal-at-time-list]");
+    await pause();
     const spill = await page.evaluate(() => {
       const dlg = document.getElementById("cat-modal-3")!;
       const list = document.getElementById("cat-modal-at-time-list")!.getBoundingClientRect();

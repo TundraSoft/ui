@@ -68,9 +68,12 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Render it as the initial content of a `data-load` region; the server's fragment replaces it.
 
 ```ts
-html`<div id="orders" data-load data-action="/fragments/orders">${
-  SkeletonTable({ rows: 3, columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]] })
-}</div>`
+html`
+  <div id="orders" data-load data-action="/fragments/orders">${SkeletonTable({
+    rows: 3,
+    columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]],
+  })}</div>
+`
 ```
 
 ```html

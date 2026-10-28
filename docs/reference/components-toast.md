@@ -104,7 +104,7 @@ ToastRegion()
 
 Classes defined by `components/toast/toast.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.toast`, `.toast--danger`, `.toast--info`, `.toast--ink`, `.toast--success`, `.toast--warning`, `.toast-region`, `.toast__action`, `.toast__body`, `.toast__close`, `.toast__icon`, `.toast__meta`
+`.is-closing`, `.toast`, `.toast--danger`, `.toast--info`, `.toast--ink`, `.toast--success`, `.toast--warning`, `.toast-region`, `.toast__action`, `.toast__body`, `.toast__close`, `.toast__icon`, `.toast__meta`
 
 ## Behaviour
 

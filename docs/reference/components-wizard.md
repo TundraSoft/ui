@@ -51,7 +51,9 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Wizard({
   id: "checkout",
   steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }, { label: "Review" }],
-  content: html`<p>Card details go here.</p>`,
+  content: html`
+    <p>Card details go here.</p>
+  `,
 })
 ```
 

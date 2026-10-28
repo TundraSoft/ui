@@ -56,7 +56,9 @@ RailLayout({
     { href: "/settings", label: "Settings", icon: Icon("settings", { size: 20 }) },
   ],
   end: Avatar({ initials: "AL", size: "sm" }),
-  content: html`<h1>Home</h1>`,
+  content: html`
+    <h1>Home</h1>
+  `,
 })
 ```
 

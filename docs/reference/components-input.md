@@ -602,8 +602,8 @@ Input({ id: "current", name: "password", type: "password", required: true, autoc
 `strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.
 
 ```ts
-html`${
-  FormField({
+html`
+  ${FormField({
     id: "new-password",
     label: "Password",
     required: true,
@@ -620,9 +620,7 @@ html`${
         strengthMin: 3,
         messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
       }),
-  })
-}${
-  FormField({
+  })}${FormField({
     id: "confirm",
     label: "Confirm password",
     required: true,
@@ -636,8 +634,8 @@ html`${
         match: "#new-password",
         messages: { match: "The passwords do not match." },
       }),
-  })
-}`
+  })}
+`
 ```
 
 ```html

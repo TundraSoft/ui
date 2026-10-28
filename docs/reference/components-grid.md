@@ -39,11 +39,19 @@ Wraps `content` with a `col-N` span for direct placement inside a Grid.
 - `"11"`
 - `"12"`
 
+### `GridPhoneColumns`
+
+Columns below 768px, where every `col-N` otherwise collapses to one.
+
+- `"1"`
+- `"2"`
+
 ### `GridProps`
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `items` | `Html[]` | yes |  |
+| `phoneColumns` | `GridPhoneColumns` |  | Below 768px the grid is one column (every item full width) unless this says `"2"`: then items sit two-up — stat tiles, small cards — instead of stacking one tall tile per row. @default "1" |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -52,10 +60,11 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### Three stat tiles in a row
 
-12 columns; every column collapses to full width below `md`.
+12 columns; every column collapses to full width below `md` — `phoneColumns: "2"` keeps tiles two-up on a phone.
 
 ```ts
 Grid({
+  phoneColumns: "2",
   items: [
     GridCol({ span: 4, content: Stat({ label: "Revenue", value: "$48,200" }) }),
     GridCol({ span: 4, content: Stat({ label: "Open", value: "12" }) }),
@@ -65,23 +74,29 @@ Grid({
 ```
 
 ```html
-<div class="grid">
+<div class="grid grid--phone-2">
   <div class="col-4">
     <div class="stat">
       <span class="stat__label">Revenue</span>
-      <span class="stat__value">$48,200</span>
+      <span class="stat__row">
+        <span class="stat__value">$48,200</span>
+      </span>
     </div>
   </div>
   <div class="col-4">
     <div class="stat">
       <span class="stat__label">Open</span>
-      <span class="stat__value">12</span>
+      <span class="stat__row">
+        <span class="stat__value">12</span>
+      </span>
     </div>
   </div>
   <div class="col-4">
     <div class="stat stat--danger">
       <span class="stat__label">Overdue</span>
-      <span class="stat__value">3</span>
+      <span class="stat__row">
+        <span class="stat__value">3</span>
+      </span>
     </div>
   </div>
 </div>
@@ -91,4 +106,4 @@ Grid({
 
 Classes defined by `components/grid/grid.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.col-1`, `.col-10`, `.col-11`, `.col-12`, `.col-2`, `.col-3`, `.col-4`, `.col-5`, `.col-6`, `.col-7`, `.col-8`, `.col-9`, `.grid`
+`.card`, `.col-1`, `.col-10`, `.col-11`, `.col-12`, `.col-2`, `.col-3`, `.col-4`, `.col-5`, `.col-6`, `.col-7`, `.col-8`, `.col-9`, `.grid`, `.grid--phone-2`

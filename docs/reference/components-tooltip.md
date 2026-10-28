@@ -14,9 +14,22 @@ Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/
 Tooltip(props: TooltipProps): Html
 ```
 
-CSS-only (hover/focus) — no JS, so it degrades to "just the trigger" cleanly.
+A short label on hover or focus. tooltip.js places the bubble in the
+viewport (flipping to the other side when there is no room, the text
+wrapping at a readable measure) and shows it after `delay`; a tap
+toggles it on touch. Without JS the bubble still appears on hover and
+focus, from CSS alone, above the trigger.
 
 ## Types
+
+### `TooltipSide`
+
+Where the bubble sits relative to the trigger; it flips when there is no room.
+
+- `"top"`
+- `"bottom"`
+- `"start"`
+- `"end"`
 
 ### `TooltipProps`
 
@@ -25,6 +38,8 @@ CSS-only (hover/focus) — no JS, so it degrades to "just the trigger" cleanly.
 | `id` | `string` | yes | Build the trigger's own `attrs.aria-describedby` from this same id. |
 | `trigger` | `string | Html` | yes |  |
 | `content` | `string | Html` | yes |  |
+| `side` | `TooltipSide` |  |  |
+| `delay` | `number` |  | Hover delay before it shows, in ms (focus shows at once). @default 150 |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -33,7 +48,7 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### A hint on an icon button
 
-CSS-only. Point the trigger's `aria-describedby` at the tooltip's id.
+Point the trigger's `aria-describedby` at the tooltip's id. tooltip.js keeps the bubble on screen; without JS it still shows on hover and focus.
 
 ```ts
 Tooltip({
@@ -49,7 +64,7 @@ Tooltip({
 ```
 
 ```html
-<span class="tooltip">
+<span class="tooltip" data-tooltip="" data-tooltip-side="top">
   <button type="button" class="btn btn--ghost btn--icon" aria-label="Archive" aria-describedby="archive-tip">
     <svg width="16" height="16" width="2" …>…</svg>
   </button>
@@ -57,8 +72,40 @@ Tooltip({
 </span>
 ```
 
+### Why a control is disabled
+
+`side` picks the edge; it flips when there is no room. A longer sentence wraps.
+
+```ts
+Tooltip({
+  id: "delete-tip",
+  side: "bottom",
+  trigger: Button({
+    label: "Delete",
+    variant: "danger",
+    attrs: { disabled: "", "aria-describedby": "delete-tip" },
+  }),
+  content: "Sent invoices cannot be deleted — void it and the client gets a credit note.",
+})
+```
+
+```html
+<span class="tooltip tooltip--bottom" data-tooltip="" data-tooltip-side="bottom">
+  <button type="button" class="btn btn--danger" disabled="" aria-describedby="delete-tip">Delete</button>
+  <span class="tooltip__content" role="tooltip" id="delete-tip">Sent invoices cannot be deleted — void it and the client gets a credit note.</span>
+</span>
+```
+
 ## CSS hooks
 
 Classes defined by `components/tooltip/tooltip.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.tooltip`, `.tooltip__content`
+`.js`, `.tooltip`, `.tooltip--bottom`, `.tooltip--end`, `.tooltip--start`, `.tooltip__content`
+
+## Behaviour
+
+`components/tooltip/tooltip.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
+
+Attributes it reads or writes: `data-tooltip`, `data-tooltip-delay`, `data-tooltip-side`.
+
+Events: `rapid:swapped`.

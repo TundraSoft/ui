@@ -136,6 +136,13 @@
   }
 }
 
+/* A panel on its way out must not catch the click that follows — the
+   next tap lands on whatever is underneath, as if it were already gone. */
+.is-closing,
+.is-closing * {
+  pointer-events: none;
+}
+
 /* Switching the palette: theme-toggle.js adds this class for one beat so
    colours cross-fade instead of snapping (a View Transition where the
    browser has one; this is the fallback). */

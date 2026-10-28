@@ -153,14 +153,14 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode.
 
 ```ts
-html`${ChartScript()}${
-  Chart({
+html`
+  ${ChartScript()}${Chart({
     id: "revenue",
     type: "area",
     series: [{ name: "Revenue", data: [12, 19, 14, 22, 28] }],
     categories: ["May", "Jun", "Jul", "Aug", "Sep"],
-  })
-}`
+  })}
+`
 ```
 
 ```html

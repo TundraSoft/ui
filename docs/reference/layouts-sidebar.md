@@ -56,7 +56,9 @@ SidebarLayout({
     collapsible: true,
     items: [{ label: "Dashboard", href: "/", active: true }, { label: "Invoices", href: "/invoices" }],
   }),
-  content: html`${PageHeader({ title: "Dashboard" })}<p>…</p>`,
+  content: html`
+    ${PageHeader({ title: "Dashboard" })}<p>…</p>
+  `,
 })
 ```
 

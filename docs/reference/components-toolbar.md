@@ -34,14 +34,17 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ```ts
 Toolbar({
-  start: html`${
-    Input({ type: "search", size: "sm", placeholder: "Search invoices", attrs: { "data-table-search": "" } })
-  }${
-    Select({
+  start: html`
+    ${Input({
+      type: "search",
+      size: "sm",
+      placeholder: "Search invoices",
+      attrs: { "data-table-search": "" },
+    })}${Select({
       placeholder: "All statuses",
       options: [{ value: "open", label: "Open" }, { value: "paid", label: "Paid" }],
-    })
-  }`,
+    })}
+  `,
   end: Button({ label: "New invoice", size: "sm" }),
 })
 ```

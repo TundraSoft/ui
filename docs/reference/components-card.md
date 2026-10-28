@@ -123,7 +123,9 @@ Card({
   title: "Northwind Traders",
   subtitle: "12 open invoices",
   href: "/clients/northwind",
-  body: html`<p>Last payment received 2 days ago.</p>`,
+  body: html`
+    <p>Last payment received 2 days ago.</p>
+  `,
   footer: Badge({ label: "Active", variant: "success", dot: true }),
 })
 ```
