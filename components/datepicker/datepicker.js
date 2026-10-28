@@ -47,7 +47,17 @@
   function setOpen(dp, on, restoreFocus) {
     const panel = dp.querySelector(".datepicker__panel");
     const trigger = dp.querySelector("[data-datepicker-trigger]");
-    if (panel) panel.hidden = !on;
+    const was = dp.classList.contains("datepicker--open");
+    if (panel) {
+      if (on) {
+        globalThis.uiMotion?.cancelExit(panel);
+        panel.hidden = false;
+      } else if (was && globalThis.uiMotion && !dp.classList.contains("datepicker--inline")) {
+        globalThis.uiMotion.exit(panel, () => {
+          panel.hidden = true;
+        });
+      } else panel.hidden = true;
+    }
     dp.classList.toggle("datepicker--open", !!on);
     if (trigger) {
       trigger.setAttribute("aria-expanded", on ? "true" : "false");

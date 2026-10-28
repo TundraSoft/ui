@@ -80,9 +80,14 @@ export function CardMedia(props: CardMediaProps): Html {
 
   return html`
     <div
-      class="${className}"><img src="${props.src}" alt="${props.alt}" loading="${props.loading ??
+      class="${className}"
+    >
+      <img src="${props.src}" alt="${props.alt}" loading="${props.loading ??
         "lazy"}" decoding="async">${props.overlay &&
-        html`<div class="card__media-overlay">${props.overlay}</div>`}</div>
+        html`
+          <div class="card__media-overlay">${props.overlay}</div>
+        `}
+    </div>
   `;
 }
 
@@ -91,31 +96,47 @@ export function CardHeader(
   opts: { titleHref?: string } = {},
 ): Html {
   if (!props.avatar && !props.title && !props.subtitle && !props.actions) {
-    return html``;
+    return html`
+
+    `;
   }
 
   const titleContent = opts.titleHref
-    ? html`<a class="card__title-link" href="${opts.titleHref}">${props.title}</a>`
+    ? html`
+      <a class="card__title-link" href="${opts.titleHref}">${props.title}</a>
+    `
     : props.title;
 
   const heading = (props.title || props.subtitle) &&
-    html`<div class="card__heading">${props.title && html`<div class="card__title">${titleContent}</div>`}${
-      props.subtitle &&
-      html`<div class="card__subtitle">${props.subtitle}</div>`
-    }</div>`;
+    html`
+      <div class="card__heading">${props.title && html`
+        <div class="card__title">${titleContent}</div>
+      `}${props.subtitle &&
+        html`
+          <div class="card__subtitle">${props.subtitle}</div>
+        `}</div>
+    `;
 
-  return html`<div class="card__header">${
-    props.avatar && html`<div class="card__avatar">${props.avatar}</div>`
-  }${heading}${props.actions && html`<div class="card__actions">${props.actions}</div>`}</div>`;
+  return html`
+    <div class="card__header">${props.avatar && html`
+      <div class="card__avatar">${props.avatar}</div>
+    `}${heading}${props.actions && html`
+      <div class="card__actions">${props.actions}</div>
+    `}</div>
+  `;
 }
 
 export function CardBody(body: string | Html): Html {
-  return html`<div class="card__body">${body}</div>`;
+  return html`
+    <div class="card__body">${body}</div>
+  `;
 }
 
 export function CardFooter(props: CardFooterProps): Html {
   const className = cx("card__footer", props.split && "card__footer--split");
-  return html`<div class="${className}">${props.content}</div>`;
+  return html`
+    <div class="${className}">${props.content}</div>
+  `;
 }
 
 function renderRoot(
@@ -170,16 +191,24 @@ export function Card(props: CardProps): Html {
   const header = CardHeader(props, {
     titleHref: useStretchLink && props.title ? props.href : undefined,
   });
-  const body = props.body !== undefined ? CardBody(props.body) : html``;
-  const footer = props.footer ? CardFooter({ content: props.footer, split: props.footerSplit }) : html``;
+  const body = props.body !== undefined ? CardBody(props.body) : html`
+
+  `;
+  const footer = props.footer ? CardFooter({ content: props.footer, split: props.footerSplit }) : html`
+
+  `;
 
   const stretchFallback = useStretchLink && !props.title
-    ? html`<a class="card__stretch-link" href="${props.href}"><span class="sr-only">View</span></a>`
-    : html``;
+    ? html`
+      <a class="card__stretch-link" href="${props.href}"><span class="sr-only">View</span></a>
+    `
+    : html`
 
-  const inner = html`${
-    props.media && CardMedia(props.media)
-  }<div class="card__content">${header}${body}${footer}</div>${stretchFallback}`;
+    `;
+
+  const inner = html`
+    ${props.media && CardMedia(props.media)}<div class="card__content">${header}${body}${footer}</div>${stretchFallback}
+  `;
 
   return renderRoot(tag, className, attrs, inner);
 }

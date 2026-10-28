@@ -97,19 +97,14 @@
      blur reads grey and muddy over warm neutrals. */
   --shadow-color: 26 25 23;
   --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.05);
-  --shadow-md: 0 1px 2px rgb(var(--shadow-color) / 0.04),
-    0 6px 16px -4px rgb(var(--shadow-color) / 0.1);
-  --shadow-lg: 0 2px 4px rgb(var(--shadow-color) / 0.04),
-    0 16px 32px -8px rgb(var(--shadow-color) / 0.14);
-  --shadow-xl: 0 4px 8px rgb(var(--shadow-color) / 0.05),
-    0 28px 64px -12px rgb(var(--shadow-color) / 0.22);
+  --shadow-md: 0 1px 2px rgb(var(--shadow-color) / 0.04), 0 6px 16px -4px rgb(var(--shadow-color) / 0.1);
+  --shadow-lg: 0 2px 4px rgb(var(--shadow-color) / 0.04), 0 16px 32px -8px rgb(var(--shadow-color) / 0.14);
+  --shadow-xl: 0 4px 8px rgb(var(--shadow-color) / 0.05), 0 28px 64px -12px rgb(var(--shadow-color) / 0.22);
   --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.12);
 
-  --font-family-base: "Instrument Sans", system-ui, -apple-system,
-    "Segoe UI", sans-serif;
+  --font-family-base: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-family-display: var(--font-family-base);
-  --font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
+  --font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --font-size-2xs: 0.6875rem;
   --font-size-xs: 0.75rem;
@@ -176,9 +171,26 @@
   /* The consent banner's card at the foot of the viewport. */
   --consent-max-width: 56rem;
 
-  --transition-fast: 120ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 320ms ease;
+  /* Motion. Three durations and three curves; every transition and
+     animation in the kit is built from these, and reset.css's
+     reduced-motion block is the one switch that turns them all off.
+     ease-out (a quintic) is for things arriving and moving; ease-in for
+     things leaving (shorter, so a close never feels slower than an open);
+     ease-spring overshoots a touch — thumbs and indicators only, never a
+     panel. */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-enter: 220ms;
+  --duration-exit: 150ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.26, 0.64, 1);
+
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-base: var(--duration-base) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
 
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -226,9 +238,9 @@
     --color-surface-inverse: #f2efe9;
     --color-overlay: rgb(0 0 0 / 0.6);
 
-    --color-border-subtle: #232118;
-    --color-border: #2a2823;
-    --color-border-strong: #3a3730;
+    --color-border-subtle: #262420;
+    --color-border: #302d27;
+    --color-border-strong: #413d36;
 
     --color-text: #f2efe9;
     --color-text-muted: #a9a29a;
@@ -259,7 +271,7 @@
     --color-info-soft-text: #8fc6d8;
 
     --shadow-color: 0 0 0;
-    --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.06);
+    --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.08);
   }
 }
 
@@ -284,9 +296,9 @@
   --color-surface-inverse: #f2efe9;
   --color-overlay: rgb(0 0 0 / 0.6);
 
-  --color-border-subtle: #232118;
-  --color-border: #2a2823;
-  --color-border-strong: #3a3730;
+  --color-border-subtle: #262420;
+  --color-border: #302d27;
+  --color-border-strong: #413d36;
 
   --color-text: #f2efe9;
   --color-text-muted: #a9a29a;
@@ -314,5 +326,5 @@
   --color-info-soft-text: #8fc6d8;
 
   --shadow-color: 0 0 0;
-  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --shadow-inset-top: inset 0 1px 0 rgb(255 255 255 / 0.08);
 }

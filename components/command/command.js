@@ -110,9 +110,13 @@
 
   function close(root) {
     if (!isFloating(root)) return;
-    root.hidden = true;
     const opener = openers.get(root);
     openers.delete(root);
+    const hide = () => {
+      root.hidden = true;
+    };
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(root, hide);
+    else hide();
     if (opener?.isConnected) opener.focus();
   }
 
@@ -129,6 +133,7 @@
 
   function open(palette, opener) {
     openers.set(palette, opener ?? document.activeElement);
+    globalThis.uiMotion?.cancelExit(palette);
     palette.hidden = false;
     inputOf(palette)?.focus();
   }

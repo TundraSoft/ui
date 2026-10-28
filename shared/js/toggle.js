@@ -21,9 +21,25 @@
 
     const wasExpanded = trigger.getAttribute("aria-expanded") === "true";
     trigger.setAttribute("aria-expanded", String(!wasExpanded));
-    if (!classOnly(trigger)) target.toggleAttribute("hidden", wasExpanded);
-    target.classList.toggle("is-open", !wasExpanded);
+    if (classOnly(trigger)) {
+      target.classList.toggle("is-open", !wasExpanded);
+      return;
+    }
+    if (wasExpanded) hide(target);
+    else {
+      globalThis.uiMotion?.cancelExit(target);
+      target.removeAttribute("hidden");
+      target.classList.add("is-open");
+    }
   });
+
+  /** Hidden after the panel's exit animation, when its CSS has one. */
+  function hide(target) {
+    target.classList.remove("is-open");
+    const done = () => target.setAttribute("hidden", "");
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(target, done);
+    else done();
+  }
 
   document.addEventListener("click", (event) => {
     const dismisser = event.target.closest?.("[data-toggle-close]");
@@ -48,13 +64,15 @@
   });
 
   function close(target) {
-    target.classList.remove("is-open");
+    let hideIt = false;
     document.querySelectorAll(`[data-toggle][aria-expanded="true"]`).forEach((trigger) => {
       const sel = trigger.getAttribute("data-toggle");
       if (sel && document.querySelector(sel) === target) {
         trigger.setAttribute("aria-expanded", "false");
-        if (!classOnly(trigger)) target.setAttribute("hidden", "");
+        if (!classOnly(trigger)) hideIt = true;
       }
     });
+    if (hideIt) hide(target);
+    else target.classList.remove("is-open");
   }
 })();

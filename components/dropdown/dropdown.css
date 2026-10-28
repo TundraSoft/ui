@@ -39,6 +39,20 @@
   display: flex;
   flex-direction: column;
   max-height: var(--dropdown-max-height);
+  /* dropdown.js nudges a panel that would run off the viewport sideways
+     (shared/js/float.js writes --float-shift-x); `translate` so it
+     composes with the keyframes' transform. */
+  translate: var(--float-shift-x, 0px) 0;
+  transform-origin: top left;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
+}
+
+.dropdown__panel--end {
+  transform-origin: top right;
+}
+
+.dropdown__panel.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 .dropdown__body {
@@ -61,9 +75,11 @@
   background: var(--color-surface);
   color: var(--color-text-subtle);
 
+  /* The box takes focus as the menu opens, so its focus state is quiet:
+     a stronger border, not the field ring — the panel is a menu, not a
+     form. Keyboard users still see the caret and the border change. */
   &:focus-within {
-    border-color: var(--ring-color);
-    box-shadow: 0 0 0 1px var(--ring-color);
+    border-color: var(--color-border-strong);
     color: var(--color-text);
   }
 }

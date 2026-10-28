@@ -12,7 +12,12 @@
   position: absolute;
   top: calc(100% + var(--space-2));
   inset-inline-start: 50%;
-  transform: translateX(-50%);
+  /* Centred with `translate`, plus the shift popover.js writes when the
+     panel would run off the viewport (shared/js/float.js): `transform`
+     is left to the enter/exit keyframes. */
+  translate: calc(-50% + var(--float-shift-x, 0px)) 0;
+  transform-origin: top center;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
   z-index: var(--z-popover);
   width: max-content;
   max-width: min(18rem, calc(100vw - 2 * var(--space-4)));
@@ -26,11 +31,35 @@
   display: none;
 }
 
+.popover__panel.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+/* Flipped above the trigger when there is no room below (popover.js). */
+.popover--above .popover__panel {
+  top: auto;
+  bottom: calc(100% + var(--space-2));
+  transform-origin: bottom center;
+  animation-name: ui-float-up-in;
+}
+
+.popover--above .popover__panel.is-closing {
+  animation-name: ui-float-up-out;
+}
+
+.popover--above .popover__arrow {
+  top: auto;
+  bottom: -5px;
+  rotate: 180deg;
+}
+
 .popover__arrow {
   position: absolute;
   top: -5px;
   inset-inline-start: 50%;
-  transform: translateX(-50%) rotate(45deg);
+  /* The arrow stays over the trigger when the panel is shifted. */
+  translate: calc(-50% - var(--float-shift-x, 0px)) 0;
+  transform: rotate(45deg);
   width: 9px;
   height: 9px;
   background: var(--color-surface);
@@ -40,24 +69,34 @@
 
 .popover--start .popover__panel {
   inset-inline-start: 0;
-  transform: none;
+  translate: var(--float-shift-x, 0px) 0;
+  transform-origin: top left;
 }
 
 .popover--start .popover__arrow {
   inset-inline-start: var(--space-4);
-  transform: rotate(45deg);
+  translate: calc(-1 * var(--float-shift-x, 0px)) 0;
 }
 
 .popover--end .popover__panel {
   inset-inline-start: auto;
   inset-inline-end: 0;
-  transform: none;
+  translate: var(--float-shift-x, 0px) 0;
+  transform-origin: top right;
 }
 
 .popover--end .popover__arrow {
   inset-inline-start: auto;
   inset-inline-end: var(--space-4);
-  transform: rotate(45deg);
+  translate: calc(-1 * var(--float-shift-x, 0px)) 0;
+}
+
+.popover--above.popover--start .popover__panel {
+  transform-origin: bottom left;
+}
+
+.popover--above.popover--end .popover__panel {
+  transform-origin: bottom right;
 }
 
 .popover__header {

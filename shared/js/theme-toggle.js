@@ -45,7 +45,20 @@
     const current = valid(root.dataset.theme) ? root.dataset.theme : fallback;
     const next = current === "dark" ? "light" : "dark";
 
-    root.dataset.theme = next;
+    // The palette cross-fades instead of snapping: a View Transition where
+    // the browser has one, else one beat of colour transitions on every
+    // element (styles/motion.css `.theme-changing`). Not under reduced motion.
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const apply = () => {
+      root.dataset.theme = next;
+    };
+    if (reduced) apply();
+    else if (typeof document.startViewTransition === "function") document.startViewTransition(apply);
+    else {
+      root.classList.add("theme-changing");
+      apply();
+      setTimeout(() => root.classList.remove("theme-changing"), 260);
+    }
     try {
       localStorage.setItem(KEY, next);
     } catch {

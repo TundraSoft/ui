@@ -43,6 +43,7 @@ const GROUP_ICON: Record<CatalogueGroup, IconName> = {
   navigation: "list",
   actions: "plus",
   feedback: "bell",
+  marketing: "star",
 };
 
 /** An icon per component, from the library's own set, for the submenu and the page dropdown. */

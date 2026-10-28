@@ -18,14 +18,21 @@ export type PopoverProps = {
 
 export function Popover(props: PopoverProps): Html {
   return html`
-    <div class="${cx("popover", props.align === "start" && "popover--start", props.align === "end" && "popover--end")}"
-      data-popover>${props.trigger}<div class="popover__panel" id="${props.id}" role="dialog"${renderAttrs({
+    <div class="${cx(
+      "popover",
+      props.align === "start" && "popover--start",
+      props.align === "end" && "popover--end",
+    )}" data-popover>
+      ${props.trigger}<div class="popover__panel" id="${props.id}" role="dialog" ${renderAttrs({
         "aria-label": props.label,
         hidden: props.open ? undefined : "",
         // rAPId reads the URL from data-action; data-load is only the marker.
         "data-action": props.loadFrom,
         "data-load": props.loadFrom ? "" : undefined,
-      })}><span class="popover__arrow"></span>${props.content ?? ""}</div></div>
+      })}>
+        <span class="popover__arrow"></span>${props.content ?? ""}
+      </div>
+    </div>
   `;
 }
 
@@ -41,7 +48,8 @@ export function PopoverTrigger(props: PopoverTriggerProps): Html {
   return html`
     <button type="button" class="${props.className ?? "btn btn--outline btn--sm"}" aria-expanded="${props.open
       ? "true"
-      : "false"}" aria-controls="${props.controls}"
-      data-popover-trigger>${props.label}</button>
+      : "false"}" aria-controls="${props.controls}" data-popover-trigger>
+      ${props.label}
+    </button>
   `;
 }

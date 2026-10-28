@@ -3,12 +3,42 @@
    overflows the strip, so the horizontal scroller only appears when the
    tabs really are wider than the strip. */
 .tabs__list {
+  position: relative;
   display: flex;
   gap: var(--space-1);
   box-shadow: inset 0 calc(var(--border-width) * -1) 0 var(--color-border);
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
+}
+
+/* The indicator: one bar that glides to the selected tab, like the
+   segmented control's thumb. tabs.js measures the selected tab and sets
+   --tabs-x / --tabs-w on the list (CSSOM); until it has (`data-tabs-
+   ready`) each tab keeps its own bottom border below, so nothing depends
+   on the script. */
+.js .tabs__list[data-tabs-ready]::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: 0;
+  height: var(--border-width-thick);
+  width: var(--tabs-w, 0px);
+  background: var(--color-primary);
+  transform: translateX(var(--tabs-x, 0px));
+  transition: transform var(--duration-base) var(--ease-out), width var(--duration-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.js .tabs__list[data-tabs-ready] > .tabs__tab[aria-selected="true"],
+.js .tabs__list[data-tabs-ready] > .tabs__tab[aria-current="page"] {
+  border-bottom-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .tabs__list[data-tabs-ready]::after {
+    transition: none;
+  }
 }
 
 .tabs__tab {

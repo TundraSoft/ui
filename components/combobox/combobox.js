@@ -152,7 +152,17 @@
     const list = root.querySelector(".combobox__list");
     const input = inputOf(root);
     const search = searchOf(root);
-    if (list) list.hidden = !on;
+    if (list) {
+      if (on) {
+        globalThis.uiMotion?.cancelExit(list);
+        list.hidden = false;
+      } else if (was && globalThis.uiMotion) {
+        // Leave with the list's exit animation, then hide it.
+        globalThis.uiMotion.exit(list, () => {
+          list.hidden = true;
+        });
+      } else list.hidden = true;
+    }
     if (input) input.setAttribute("aria-expanded", on ? "true" : "false");
     root.classList.toggle("combobox--open", !!on);
     if (!on) {

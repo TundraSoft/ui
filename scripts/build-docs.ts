@@ -12,7 +12,7 @@
  * Deno-only — it is the one dev tool that needs Deno; the generated files
  * are what ship).
  */
-import { ensureDir, pathExists, readTextFile, writeTextFile } from "@tundralibs/compat/file";
+import { ensureDir, pathExists, readDir, readTextFile, writeTextFile } from "@tundralibs/compat/file";
 import { render } from "@tundralibs/rapid/ui";
 import { usage } from "../examples/docs/usage.ts";
 import { prettyHtml } from "../examples/docs/pretty-html.ts";
@@ -119,7 +119,12 @@ function propsTable(props: Prop[]): string {
  * `render: () =>` arrow body, found by bracket balance, strings and
  * template literals respected.
  */
-const usageSource = await readTextFile("examples/docs/usage.ts");
+const usageSource = (await readTextFile("examples/docs/usage.ts")) +
+  (await Promise.all(
+    (await Array.fromAsync(readDir("examples/docs/usage", { includeDirs: false, exts: [".ts"] })))
+      .map((e) => e.name).sort()
+      .map((name) => readTextFile(`examples/docs/usage/${name}`)),
+  )).join("\n");
 const snippets: Record<string, string[]> = (() => {
   const out: Record<string, string[]> = {};
   const keys = [...usageSource.matchAll(/^ {2}"((?:components|layouts)\/[a-z-]+)": \[/gm)].map((m) => ({

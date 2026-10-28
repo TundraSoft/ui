@@ -17,16 +17,24 @@
 (() => {
   const timers = new WeakMap();
 
+  /** Leave with the exit animation (toast.css `.is-closing`), then go. */
+  const leave = (el) => {
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(el, () => el.remove());
+    else el.remove();
+  };
+
   function autoDismiss(el) {
     const ms = Number(el.dataset.toastAutodismiss);
     if (!ms || timers.has(el)) return;
-    timers.set(el, setTimeout(() => el.remove(), ms));
+    timers.set(el, setTimeout(() => leave(el), ms));
   }
 
   function cap(region) {
     const max = Number(region.dataset.toastMax) || 4;
-    const toasts = region.querySelectorAll(":scope > .toast");
-    for (let i = 0; i < toasts.length - max; i++) toasts[i].remove();
+    const toasts = Array.from(region.querySelectorAll(":scope > .toast")).filter((t) =>
+      !globalThis.uiMotion?.isExiting(t)
+    );
+    for (let i = 0; i < toasts.length - max; i++) leave(toasts[i]);
   }
 
   function scan(root) {

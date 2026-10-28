@@ -120,11 +120,17 @@
 
   function close(panel, trigger) {
     reset(panel);
-    panel.setAttribute("hidden", "");
-    panel.classList.remove("is-open", "dropdown__panel--fixed");
-    panel.style.removeProperty("left");
-    panel.style.removeProperty("top");
     trigger?.setAttribute("aria-expanded", "false");
+    panel.classList.remove("is-open");
+    const hide = () => {
+      panel.setAttribute("hidden", "");
+      panel.classList.remove("dropdown__panel--fixed");
+      panel.style.removeProperty("left");
+      panel.style.removeProperty("top");
+      globalThis.uiFloat?.clear(panel);
+    };
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(panel, hide);
+    else hide();
   }
 
   document.addEventListener("click", (event) => {
@@ -134,6 +140,7 @@
         // toggle.js just opened it (its listener runs first) — place it.
         if (!panel.classList.contains("dropdown__panel--fixed")) {
           place(panel, trigger);
+          if (!panel.classList.contains("dropdown__panel--fixed")) globalThis.uiFloat?.fit(panel);
           prepare(panel, event);
         }
         return;

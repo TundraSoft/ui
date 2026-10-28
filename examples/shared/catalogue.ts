@@ -58,6 +58,21 @@ import { Tooltip } from "../../components/tooltip/tooltip.ts";
 import { Wizard } from "../../components/wizard/wizard.ts";
 import { Icon } from "../../shared/icons.ts";
 import { chartSamples } from "./charts.ts";
+import { entry as sheetEntry } from "./catalogue/sheet.ts";
+import { entry as bannerEntry } from "./catalogue/banner.ts";
+import { entry as descriptionListEntry } from "./catalogue/description-list.ts";
+import { entry as calendarEntry } from "./catalogue/calendar.ts";
+import { entry as numberInputEntry } from "./catalogue/number-input.ts";
+import { entry as proseEntry } from "./catalogue/prose.ts";
+import { entry as treeEntry } from "./catalogue/tree.ts";
+import { entry as carouselEntry } from "./catalogue/carousel.ts";
+import { entry as lightboxEntry } from "./catalogue/lightbox.ts";
+import { entry as heroEntry } from "./catalogue/hero.ts";
+import { entry as featureGridEntry } from "./catalogue/feature-grid.ts";
+import { entry as pricingEntry } from "./catalogue/pricing.ts";
+import { entry as testimonialEntry } from "./catalogue/testimonial.ts";
+import { entry as siteFooterEntry } from "./catalogue/site-footer.ts";
+import { entry as revealEntry } from "./catalogue/reveal.ts";
 import {
   commandItems,
   type DemoRoutes,
@@ -84,7 +99,15 @@ export type CatalogueState = {
 };
 
 export type CatalogueCase = { label: string; html: Html };
-export type CatalogueGroup = "forms" | "data" | "charts" | "cards" | "navigation" | "actions" | "feedback";
+export type CatalogueGroup =
+  | "forms"
+  | "data"
+  | "charts"
+  | "cards"
+  | "navigation"
+  | "actions"
+  | "feedback"
+  | "marketing";
 export type CatalogueEntry = {
   /** Component directory name under components/. */
   name: string;
@@ -92,6 +115,19 @@ export type CatalogueEntry = {
   group: CatalogueGroup;
   cases: CatalogueCase[];
 };
+/** An entry before its group is looked up — what a split entry file (`./catalogue/<name>.ts`) returns. */
+export type CatalogueEntryInput = Omit<CatalogueEntry, "group">;
+/** One case. */
+export const caseOf = (label: string, html: Html): CatalogueCase => ({ label, html });
+/** Several cases side by side (wraps). */
+export const caseRow = (...items: Html[]): Html =>
+  html`
+    <div class="cat-row">${items}</div>
+  `;
+/** A paragraph of body copy for a case. */
+export const caseCopy: Html = html`
+  <p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>
+`;
 
 /** One page per group — the "basis types" a user browses. */
 export const catalogueGroups: readonly { id: CatalogueGroup; title: string; blurb: string }[] = [
@@ -114,7 +150,16 @@ export const catalogueGroups: readonly { id: CatalogueGroup; title: string; blur
   },
   { id: "navigation", title: "Navigation", blurb: "Navbar, sidebar, menus, breadcrumbs, the command palette." },
   { id: "actions", title: "Actions", blurb: "Buttons, dropdowns, popovers, tooltips." },
-  { id: "feedback", title: "Feedback", blurb: "Alerts, toasts (including one from the server), modals." },
+  {
+    id: "feedback",
+    title: "Feedback",
+    blurb: "Alerts, toasts (including one from the server), modals, sheets, banners.",
+  },
+  {
+    id: "marketing",
+    title: "Marketing & media",
+    blurb: "Hero, feature grid, pricing, testimonials, site footer, carousel, lightbox, scroll effects.",
+  },
 ];
 
 const GROUP_OF: Record<string, CatalogueGroup> = {
@@ -165,10 +210,52 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   toast: "feedback",
   modal: "feedback",
   consent: "feedback",
+  sheet: "feedback",
+  banner: "feedback",
+  "description-list": "data",
+  calendar: "data",
+  "number-input": "forms",
+  prose: "cards",
+  tree: "navigation",
+  carousel: "marketing",
+  lightbox: "marketing",
+  hero: "marketing",
+  "feature-grid": "marketing",
+  pricing: "marketing",
+  testimonial: "marketing",
+  "site-footer": "marketing",
+  reveal: "marketing",
 };
 
+/**
+ * Entries kept in files of their own (`./catalogue/<name>.ts`, one per
+ * component, each exporting `entry(routes, state)`): a new component adds
+ * a file here instead of growing this one. `test-catalogue.ts` reads them
+ * for its coverage check alongside this file.
+ */
+const splitEntries: ((routes: DemoRoutes, state: CatalogueState) => CatalogueEntryInput)[] = [
+  sheetEntry,
+  bannerEntry,
+  descriptionListEntry,
+  calendarEntry,
+  numberInputEntry,
+  proseEntry,
+  treeEntry,
+  carouselEntry,
+  lightboxEntry,
+  heroEntry,
+  featureGridEntry,
+  pricingEntry,
+  testimonialEntry,
+  siteFooterEntry,
+  revealEntry,
+];
+
 const c = (label: string, html: Html): CatalogueCase => ({ label, html });
-const row = (...items: Html[]) => html`<div class="cat-row">${items}</div>`;
+const row = (...items: Html[]) =>
+  html`
+    <div class="cat-row">${items}</div>
+  `;
 
 /** A list long enough to need the search box and the height cap. */
 const cities = [
@@ -256,9 +343,13 @@ const requiredForm = (id: string, validate: boolean, fields: Html) =>
     id,
     action: "?required",
     validate,
-    content: html`${fields}${Button({ label: "Save", type: "submit", attrs: { id: `${id}-go` } })}`,
+    content: html`
+      ${fields}${Button({ label: "Save", type: "submit", attrs: { id: `${id}-go` } })}
+    `,
   });
-const lorem = html`<p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>`;
+const lorem = html`
+  <p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>
+`;
 const img = (seed: number, w = 600, h = 338) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
 const alertVariants = ["neutral", "success", "warning", "danger", "info"] as const;
@@ -282,6 +373,7 @@ const timelineStatuses = ["done", "current", "pending"] as const;
 const timelineTones = ["neutral", "success", "warning", "danger", "info", "accent"] as const;
 const wizardStatuses = ["pending", "active", "done"] as const;
 const popoverAligns = ["center", "start", "end"] as const;
+const tooltipSides = ["top", "bottom", "start", "end"] as const;
 const dropdownAligns = ["start", "end"] as const;
 const segmentedSizes = ["sm", "md"] as const;
 const otpModes = ["numeric", "alphanumeric"] as const;
@@ -334,41 +426,51 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("FormErrorAlert (RapidFormError)", FormErrorAlert(formError)),
         c(
           "role — status by default for neutral/success/info, alert for warning/danger; override or none (#cat-alert-roles)",
-          html`<div class="stack stack--sm" id="cat-alert-roles">${Alert({ variant: "success", body: "Saved." })}${
-            Alert({ variant: "danger", body: "Could not save." })
-          }${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${
-            Alert({ variant: "neutral", role: "none", body: "A static note." })
-          }${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>`,
+          html`
+            <div class="stack stack--sm" id="cat-alert-roles">${Alert({ variant: "success", body: "Saved." })}${Alert({
+              variant: "danger",
+              body: "Could not save.",
+            })}${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${Alert({
+              variant: "neutral",
+              role: "none",
+              body: "A static note.",
+            })}${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>
+          `,
         ),
         c(
           "aside, bodyAttrs, textTag — a badge or link beside the body, a class on the body, prose text (#cat-alert-slots)",
-          html`<div class="stack stack--sm" id="cat-alert-slots">${
-            Alert({
+          html`
+            <div class="stack stack--sm" id="cat-alert-slots">${Alert({
               variant: "warning",
               title: "Choose which domains stay",
               body: "Your plan includes 3 domains; you have 5.",
               aside: Badge({ label: "3 days left", variant: "warning" }),
-            })
-          }${
-            Alert({
+            })}${Alert({
               variant: "info",
               role: "note",
               body:
                 "Payments are not set up yet. Until they are, moving to a paid plan, changing it or cancelling goes through support; extras are paid in credits and work as usual.",
-              aside: html`<a href="#">Write to support</a>`,
+              aside: html`
+                <a href="#">Write to support</a>
+              `,
               bodyAttrs: { class: "cat-alert-body", "data-kind": "billing" },
-            })
-          }${Alert({ variant: "neutral", role: "note", textTag: "p", body: "Every request carries a key." })}${
-            Alert({
+            })}${Alert({
+              variant: "neutral",
+              role: "note",
+              textTag: "p",
+              body: "Every request carries a key.",
+            })}${Alert({
               variant: "info",
               icon: false,
               role: "note",
               body:
                 "A theme that draws the icon as a ::before sets --alert-aside-indent on its variants; the action then lines up with the text on a phone.",
-              aside: html`<a href="#">Open settings</a>`,
+              aside: html`
+                <a href="#">Open settings</a>
+              `,
               attrs: { class: "cat-alert-before-icon" },
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
         c(
           "actions",
@@ -376,9 +478,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             variant: "warning",
             title: "This link is flagged",
             body: "Visitors see a warning instead of the destination.",
-            actions: html`${Button({ label: "Change destination", size: "sm" })}${
-              Button({ label: "Ask for a review", size: "sm", variant: "outline" })
-            }`,
+            actions: html`
+              ${Button({ label: "Change destination", size: "sm" })}${Button({
+                label: "Ask for a review",
+                size: "sm",
+                variant: "outline",
+              })}
+            `,
           }),
         ),
       ],
@@ -438,8 +544,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("single", Breadcrumb({ items: [{ label: "Home" }] })),
         c(
           "collapse — the middle folds into … when the trail does not fit (#cat-bc-fold)",
-          html`<div class="cat-narrow" id="cat-bc-fold">${
-            Breadcrumb({
+          html`
+            <div class="cat-narrow" id="cat-bc-fold">${Breadcrumb({
               collapse: true,
               items: [
                 { label: "Northwind Traders", href: "#" },
@@ -447,8 +553,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 { label: "Groups & permissions", href: "#" },
                 { label: "Billing administrators" },
               ],
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -548,15 +654,23 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             subtitle: "Admin",
             actions: Button({ label: "Edit", size: "sm", variant: "ghost" }),
             body: lorem,
-            footer: html`<span>Left</span><span>Right</span>`,
+            footer: html`
+              <span>Left</span><span>Right</span>
+            `,
             footerSplit: true,
           }),
         ),
         c(
           "parts: CardHeader / CardBody / CardFooter / CardMedia",
-          html`<div class="card">${CardMedia({ src: img(30), alt: "" })}${
-            CardHeader({ title: "Assembled", subtitle: "from parts" }, { titleHref: "#" })
-          }${CardBody(lorem)}${CardFooter({ content: Button({ label: "Done", size: "sm" }), split: true })}</div>`,
+          html`
+            <div class="card">${CardMedia({ src: img(30), alt: "" })}${CardHeader({
+              title: "Assembled",
+              subtitle: "from parts",
+            }, { titleHref: "#" })}${CardBody(lorem)}${CardFooter({
+              content: Button({ label: "Done", size: "sm" }),
+              split: true,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -582,17 +696,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "format / xFormat — number formats as data (functions cannot cross JSON); a long category axis thins (#cat-chart-format, #cat-chart-hformat, #cat-chart-xformat, #cat-chart-pformat)",
-          html`<div class="stack">${
-            Chart({
+          html`
+            <div class="stack">${Chart({
               id: "cat-chart-format",
               type: "line",
               height: 200,
               format: "currency:USD",
               series: [{ name: "Equity", data: Array.from({ length: 30 }, (_, i) => 12000 + i * 137.000001) }],
               categories: Array.from({ length: 30 }, (_, i) => `Oct ${String(i + 1).padStart(2, "0")}`),
-            })
-          }${
-            row(
+            })}${row(
               Chart({
                 id: "cat-chart-hformat",
                 type: "bar",
@@ -635,8 +747,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 series: [{ name: "Revenue", data: [1250000, 2300000, 1800000] }],
                 categories: ["Q1", "Q2", "Q3"],
               }),
-            )
-          }</div>`,
+            )}</div>
+          `,
         ),
       ]),
     },
@@ -668,9 +780,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "Collapsible closed / defaultOpen",
-          html`<div class="stack stack--sm">${Collapsible({ id: "cat-col-1", title: "Closed", content: lorem })}${
-            Collapsible({ id: "cat-col-2", title: "Open", content: lorem, defaultOpen: true })
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${Collapsible({
+              id: "cat-col-1",
+              title: "Closed",
+              content: lorem,
+            })}${Collapsible({ id: "cat-col-2", title: "Open", content: lorem, defaultOpen: true })}</div>
+          `,
         ),
         c(
           "Accordion",
@@ -693,16 +809,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             requiredForm(
               "cat-req-cb",
               true,
-              html`${
-                Combobox({
+              html`
+                ${Combobox({
                   id: "cat-req-cb-one",
                   name: "owner",
                   label: "Owner",
                   required: true,
                   options: cityOptions.slice(0, 6),
-                })
-              }${
-                Combobox({
+                })}${Combobox({
                   id: "cat-req-cb-many",
                   name: "regions",
                   label: "Regions",
@@ -710,8 +824,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   required: true,
                   requiredMessage: "Add at least one region.",
                   options: cityOptions.slice(0, 6),
-                })
-              }`,
+                })}
+              `,
             ),
             requiredForm(
               "cat-req-cb-plain",
@@ -976,7 +1090,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               size: "sm",
               attrs: { "data-table-search": "", "aria-label": "Filter accounts" },
             }),
-            footer: html`<span>3 rows</span>`,
+            footer: html`
+              <span>3 rows</span>
+            `,
             attrs: { "data-filter-scope": "" },
           }),
         ),
@@ -991,6 +1107,29 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               rowKey: (r) => r.id,
             }),
           )
+        ),
+        c(
+          "responsive: cards — card per row below 768 (#cat-dt-cards)",
+          DataTable<Row>({
+            id: "cat-dt-cards",
+            responsive: "cards",
+            selectable: true,
+            selected: ["2"],
+            columns: [
+              { key: "name", label: "Name", pinned: true },
+              { key: "status", label: "Status", render: (r) => Badge({ label: r.status }) },
+              { key: "amount", label: "Amount", numeric: true },
+            ],
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-cards-${r.id}`,
+                label: `Actions for ${r.name}`,
+                items: [{ label: "Edit", href: "#" }, { label: "Archive", danger: true, attrs: { type: "button" } }],
+              }),
+            footer: Pagination({ page: 2, totalPages: 8, buildHref: (p) => `?p=${p}` }),
+          }),
         ),
         c(
           "sortable + toolbar + pagination footer (no selection)",
@@ -1092,8 +1231,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           DataTable<Row>({
             id: "cat-dt-tools",
             maxHeight: "sm",
-            toolbar: html`${
-              Select({
+            toolbar: html`
+              ${Select({
                 id: "cat-dt-tools-status",
                 name: "status",
                 options: [
@@ -1107,16 +1246,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   { value: "draft", label: "Draft" },
                 ],
                 attrs: { "aria-label": "Status" },
-              })
-            }${
-              Combobox({
+              })}${Combobox({
                 id: "cat-dt-tools-owner",
                 name: "owner",
                 placeholder: "Owner",
                 hints: false,
                 options: rows.map((r) => ({ value: r.id, label: r.name })),
-              })
-            }`,
+              })}
+            `,
             columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }, {
               key: "amount",
               label: "Amount",
@@ -1215,8 +1352,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "tp-form",
             action: "?time",
             validate: true,
-            content: html`${
-              FormField({
+            content: html`
+              ${FormField({
                 id: "tp-req",
                 label: "Pickup",
                 required: true,
@@ -1230,8 +1367,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                     max: "18:00",
                     messages: { required: "Pick a pickup time." },
                   }),
-              })
-            }${FormActions({ content: Button({ label: "Book", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Book", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -1263,15 +1400,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "dtp-form",
             action: "?expiry",
             validate: true,
-            content: html`${
-              FormField({
+            content: html`
+              ${FormField({
                 id: "dtp-req-time",
                 label: "Expires",
                 required: true,
                 control: () =>
                   DateTimePicker({ id: "dtp-req", name: "expires", required: true, today: "2026-09-14", step: 60 }),
-              })
-            }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Save", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -1384,9 +1521,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-dz-form",
             action: routes.upload,
             attrs: { "data-action": routes.upload, "data-target": "#cat-dz-1", "data-swap": "outer" },
-            content: html`${Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB" })}${
-              FormActions({ content: Button({ label: "Upload", type: "submit" }) })
-            }`,
+            content: html`
+              ${Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB" })}${FormActions(
+                { content: Button({ label: "Upload", type: "submit" }) },
+              )}
+            `,
           }),
         ),
         c(
@@ -1459,16 +1598,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "icon as Html (another icon set), text as Html, details (#cat-empty-details)",
-          html`<div id="cat-empty-details">${
-            Empty({
+          html`
+            <div id="cat-empty-details">${Empty({
               variant: "inline",
-              icon: html`<span class="cat-own-icon">#</span>`,
+              icon: html`
+                <span class="cat-own-icon">#</span>
+              `,
               title: "No tags yet",
-              text: html`Tags group links by <strong>campaign</strong>.`,
-              details: html`<span>Included in ${Badge({ label: "Pro", variant: "accent" })}</span>`,
+              text: html`
+                Tags group links by <strong>campaign</strong>.
+              `,
+              details: html`
+                <span>Included in ${Badge({ label: "Pro", variant: "accent" })}</span>
+              `,
               actions: Button({ label: "Compare plans", size: "sm", variant: "outline" }),
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -1503,7 +1648,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "FormActions",
-          FormActions({ content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}` }),
+          FormActions({
+            content: html`
+              ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}
+            `,
+          }),
         ),
       ],
     },
@@ -1513,16 +1662,19 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("plain", Form({ id: "cat-form-1", action: "#", content: FormField({ label: "Name", control: Input({}) }) })),
         c(
           "csrfToken — the hidden field a no-JS POST carries; CsrfField for a hand-built form",
-          html`${
-            Form({
+          html`
+            ${Form({
               id: "cat-form-csrf",
               action: "?save",
               csrfToken: "demo-token",
               content: FormField({ label: "Name", control: Input({ name: "name" }) }),
-            })
-          }<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${
-            Button({ label: "Revoke", size: "sm", variant: "danger", type: "submit" })
-          }</form>`,
+            })}<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${Button({
+              label: "Revoke",
+              size: "sm",
+              variant: "danger",
+              type: "submit",
+            })}</form>
+          `,
         ),
         c(
           "autosubmit — a filter bar: a choice submits, typing does not (#cat-autosubmit)",
@@ -1532,10 +1684,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             method: "get",
             autosubmit: true,
             attrs: { "data-cat-autosubmit": "" },
-            content: html`<div class="cat-row">${
-              Input({ type: "search", name: "q", placeholder: "Search", size: "sm", attrs: { "aria-label": "Search" } })
-            }${
-              Select({
+            content: html`
+              <div class="cat-row">${Input({
+                type: "search",
+                name: "q",
+                placeholder: "Search",
+                size: "sm",
+                attrs: { "aria-label": "Search" },
+              })}${Select({
                 id: "cat-autosubmit-status",
                 name: "status",
                 options: [{ value: "", label: "All" }, { value: "active", label: "Active" }, {
@@ -1543,17 +1699,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   label: "Paused",
                 }],
                 attrs: { "aria-label": "Status" },
-              })
-            }${
-              Segmented({
+              })}${Segmented({
                 id: "cat-autosubmit-range",
                 name: "range",
                 size: "sm",
                 value: "7d",
                 legend: "Range",
                 options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
-              })
-            }</div>`,
+              })}</div>
+            `,
           }),
         ),
         c(
@@ -1572,8 +1726,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-validate",
             action: "?validate",
             validate: true,
-            content: html`${
-              FormGrid({
+            content: html`
+              ${FormGrid({
                 fields: [
                   FormField({
                     id: "cv-email",
@@ -1664,8 +1818,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                       }),
                   }),
                 ],
-              })
-            }${FormActions({ content: Button({ label: "Create account", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Create account", type: "submit" }) })}
+            `,
           }),
         ),
       ],
@@ -1677,11 +1831,52 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "every GridColSpan",
           Grid({
             items: gridSpans.map((span) =>
-              GridCol({ span, content: html`<div class="cat-swatch">${String(span)}</div>` })
+              GridCol({
+                span,
+                content: html`
+                  <div class="cat-swatch">${String(span)}</div>
+                `,
+              })
             ),
           }),
         ),
-        c("default span", Grid({ items: [GridCol({ content: html`<div class="cat-swatch">default</div>` })] })),
+        c(
+          'phoneColumns: "2" — two-up below 768 (every GridPhoneColumns)',
+          Grid({
+            phoneColumns: "2",
+            attrs: { id: "cat-grid-phone-2" },
+            items: ["1", "2", "3", "4"].map((n) =>
+              GridCol({
+                span: 3,
+                content: html`
+                  <div class="cat-swatch">${n}</div>
+                `,
+              })
+            ),
+          }),
+        ),
+        c(
+          'phoneColumns: "1" (the default)',
+          Grid({
+            phoneColumns: "1",
+            items: [GridCol({
+              span: 6,
+              content: html`
+                <div class="cat-swatch">one</div>
+              `,
+            })],
+          }),
+        ),
+        c(
+          "default span",
+          Grid({
+            items: [GridCol({
+              content: html`
+                <div class="cat-swatch">default</div>
+              `,
+            })],
+          }),
+        ),
       ],
     },
     {
@@ -1689,15 +1884,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "type email + domains — local part, fixed @, the domain (one domain: fixed text)",
-          html`<div class="stack stack--sm">${
-            Input({
+          html`
+            <div class="stack stack--sm">${Input({
               id: "cat-em-1",
               name: "email",
               type: "email",
               domains: ["acme.com", "acme.io"],
               value: "ada@acme.io",
-            })
-          }${Input({ id: "cat-em-2", name: "email", type: "email", domains: ["acme.com"] })}</div>`,
+            })}${Input({ id: "cat-em-2", name: "email", type: "email", domains: ["acme.com"] })}</div>
+          `,
         ),
         c(
           "type tel + countries — country code, then the number",
@@ -1719,8 +1914,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "prefix / suffix",
-          html`<div class="stack stack--sm">${
-            Input({
+          html`
+            <div class="stack stack--sm">${Input({
               id: "cat-px-1",
               name: "amount",
               type: "number",
@@ -1728,14 +1923,17 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               suffix: "per seat",
               min: 0,
               step: "any",
-            })
-          }${Input({ id: "cat-px-2", name: "weight", type: "number", suffix: "kg" })}</div>`,
+            })}${Input({ id: "cat-px-2", name: "weight", type: "number", suffix: "kg" })}</div>
+          `,
         ),
         c(
           "Counter() alone — for a custom control that sets data-counter itself",
-          html`${Input({ id: "cat-cnt-2", name: "tag", maxLength: 10, attrs: { "data-counter": "" } })}${
-            Counter("cat-cnt-2", 10)
-          }`,
+          html`
+            ${Input({ id: "cat-cnt-2", name: "tag", maxLength: 10, attrs: { "data-counter": "" } })}${Counter(
+              "cat-cnt-2",
+              10,
+            )}
+          `,
         ),
         c(
           "counter (maxLength 40)",
@@ -1743,11 +1941,21 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "type search — clear button (clearable: false to drop it)",
-          html`<div class="stack stack--sm">${
-            Input({ id: "cat-srch-1", name: "q", type: "search", placeholder: "Search", value: "invoices" })
-          }${
-            Input({ id: "cat-srch-2", name: "q", type: "search", placeholder: "No clear button", clearable: false })
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-srch-1",
+              name: "q",
+              type: "search",
+              placeholder: "Search",
+              value: "invoices",
+            })}${Input({
+              id: "cat-srch-2",
+              name: "q",
+              type: "search",
+              placeholder: "No clear button",
+              clearable: false,
+            })}</div>
+          `,
         ),
         c(
           "the invite form — email domains + tel countries + url scheme, validate + guard (#cat-invite; the app joins the parts)",
@@ -1889,28 +2097,27 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "open — shown as soon as it is on the page: on load, or when a swap brings it (#cat-modal-open)",
-          html`${
-            Button({
+          html`
+            ${Button({
               label: "Swap it in",
               variant: "outline",
               attrs: { "data-cat-swap-in": "#cat-modal-open-template", id: "cat-modal-open-trigger" },
-            })
-          }<template id="cat-modal-open-template">${
-            Modal({
+            })}<template id="cat-modal-open-template">${Modal({
               id: "cat-modal-open",
               title: "Opened by the server",
               open: true,
-              body:
-                html`<p>Rendered with <code>open: true</code>, the way a form that failed inside a modal comes back.</p>`,
+              body: html`
+                <p>Rendered with <code>open: true</code>, the way a form that failed inside a modal comes back.</p>
+              `,
               footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
-            })
-          }</template>`,
+            })}</template>
+          `,
         ),
         c(
           "ConfirmModal + data-confirm — a link, a button and a submit button ask first (#cat-confirm)",
           html`
-            <div class="cat-row"
-              id="cat-confirm">${Button({
+            <div class="cat-row" id="cat-confirm">
+              ${Button({
                 label: "Leave (link)",
                 href: "#cat-confirmed",
                 variant: "outline",
@@ -1923,9 +2130,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 label: "Send (submit)",
                 type: "submit",
                 attrs: { "data-confirm": "Send the form?" },
-              })}</form></div>
+              })}</form>
+            </div>
             <p
-              class="text-muted text-2xs">One ConfirmModal per page: this page's chrome renders it (the core template does in a rAPId app). Its props, kept out of the page in a template:</p>
+              class="text-muted text-2xs"
+            >
+              One ConfirmModal per page: this page's chrome renders it (the core template does in a rAPId app). Its props, kept out
+              of the page in a template:
+            </p>
             <template id="cat-confirm-sample">${ConfirmModal(
               { id: "cat-confirm-sample-dialog", title: "Sure?", confirmLabel: "OK", cancelLabel: "Back" },
             )}</template>
@@ -1933,31 +2145,39 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "title + footer (button opens)",
-          html`${Button({ label: "Open modal", attrs: { "data-modal-open": "#cat-modal-1" } })}${
-            Modal({
+          html`
+            ${Button({ label: "Open modal", attrs: { "data-modal-open": "#cat-modal-1" } })}${Modal({
               id: "cat-modal-1",
               title: "Confirm",
               body: lorem,
-              footer: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "OK" })}`,
-            })
-          }`,
+              footer: html`
+                ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "OK" })}
+              `,
+            })}
+          `,
         ),
         c(
           "label only (no title)",
-          html`${
-            Button({ label: "Open labelled modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-2" } })
-          }${Modal({ id: "cat-modal-2", label: "Plain dialog", body: lorem })}`,
+          html`
+            ${Button({
+              label: "Open labelled modal",
+              variant: "outline",
+              attrs: { "data-modal-open": "#cat-modal-2" },
+            })}${Modal({ id: "cat-modal-2", label: "Plain dialog", body: lorem })}
+          `,
         ),
         c(
           "a form in a modal — Select, DateTimePicker (#cat-modal-3)",
-          html`${
-            Button({ label: "Open form modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-3" } })
-          }${
-            Modal({
+          html`
+            ${Button({
+              label: "Open form modal",
+              variant: "outline",
+              attrs: { "data-modal-open": "#cat-modal-3" },
+            })}${Modal({
               id: "cat-modal-3",
               title: "New destination",
-              body: html`${
-                FormField({
+              body: html`
+                ${FormField({
                   id: "cat-modal-sel",
                   label: "Kind",
                   control: (a) =>
@@ -1971,9 +2191,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                         { value: "slack", label: "Slack" },
                       ],
                     }),
-                })
-              }${
-                FormField({
+                })}${FormField({
                   id: "cat-modal-at-time",
                   label: "Starts",
                   control: () =>
@@ -1983,11 +2201,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                       value: "2026-09-15T09:00:00Z",
                       today: "2026-09-14",
                     }),
-                })
-              }`,
-              footer: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}`,
-            })
-          }`,
+                })}
+              `,
+              footer: html`
+                ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}
+              `,
+            })}
+          `,
         ),
       ],
     },
@@ -2003,16 +2223,29 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             actions: Button({ label: "Sign in", size: "sm" }),
           }),
         ),
-        c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
+        c(
+          "brand only",
+          Navbar({
+            id: "cat-nav-2",
+            brand: html`
+              <span class="sidebar__brand-mark">A</span> Acme
+            `,
+          }),
+        ),
         c(
           "menuActions — a control that moves into the phone menu; its twin in actions is hide-md (#cat-nav-menu)",
           Navbar({
             id: "cat-nav-menu",
             brand: "Acme",
             links: [{ href: "#", label: "How it works", active: true }, { href: "#", label: "Pricing" }],
-            actions: html`${
-              Button({ label: "Status: all systems go", size: "sm", variant: "ghost", attrs: { class: "hide-md" } })
-            }${Button({ label: "Sign in", size: "sm" })}`,
+            actions: html`
+              ${Button({
+                label: "Status: all systems go",
+                size: "sm",
+                variant: "ghost",
+                attrs: { class: "hide-md" },
+              })}${Button({ label: "Sign in", size: "sm" })}
+            `,
             menuActions: Button({ label: "Status: all systems go", size: "sm", variant: "ghost" }),
           }),
         ),
@@ -2027,13 +2260,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-card-form",
             action: "?card",
             validate: true,
-            content: html`${
-              CardFields({
+            content: html`
+              ${CardFields({
                 name: "card",
                 luhn: true,
                 messages: { luhn: "Check the card number.", expired: "This card has expired." },
-              })
-            }${FormActions({ content: Button({ label: "Pay", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Pay", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -2168,635 +2401,808 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             trigger: PopoverTrigger({ controls: "gh-card", label: "Grace Hopper" }),
             content: html`
               <div
-                class="popover__header"><span><span class="popover__title">Grace Hopper</span><br><span class="popover__subtitle">grace@tundra.dev</span></span></div>
-              <div
-                class="popover__stats"><span class="popover__stat"><span class="popover__stat-value">148</span><span class="popover__stat-label">Reviews</span></span><span class="popover__stat"><span class="popover__stat-value">2.1h</span><span class="popover__stat-label">Median</span></span></div>
-              <div class="popover__footer">${Button({ label: "Message", size: "sm" })}${Button({
-                label: "Profile",
-                size: "sm",
-                variant: "outline",
-              })}</div>
-            `,
-          }),
-        ),
-        ...popoverAligns.map((align) =>
-          c(
-            `align ${align}`,
-            Popover({
-              id: `cat-pop-${align}`,
-              align,
-              trigger: PopoverTrigger({ controls: `cat-pop-${align}`, label: align }),
-              content: html`<div class="popover__header"><span class="popover__title">${align}</span></div>`,
-            }),
-          )
-        ),
-        c(
-          "open + label",
-          Popover({
-            id: "cat-pop-open",
-            open: true,
-            label: "Details",
-            trigger: PopoverTrigger({
-              controls: "cat-pop-open",
-              label: "Open",
-              open: true,
-              className: "btn btn--outline btn--sm",
-            }),
-            content: lorem,
-          }),
-        ),
-        c(
-          "loadFrom (lazy, data-load)",
-          Popover({
-            id: "cat-pop-lazy",
-            loadFrom: "/fragments/profile",
-            trigger: PopoverTrigger({ controls: "cat-pop-lazy", label: "Lazy" }),
-          }),
-        ),
-      ],
-    },
-    {
-      name: "progress",
-      cases: [
-        c(
-          "Progress 0 / 60 / max 200",
-          row(Progress({ value: 0 }), Progress({ value: 60 }), Progress({ value: 150, max: 200 })),
-        ),
-        c("Spinner", row(Spinner(), Spinner({ label: "Loading rows" }))),
-      ],
-    },
-    {
-      name: "segmented",
-      cases: [
-        ...segmentedSizes.map((size) =>
-          c(
-            `size ${size}`,
-            Segmented({
-              id: `cat-seg-${size}`,
-              name: `seg-${size}`,
-              size,
-              legend: size,
-              value: "b",
-              options: [{ value: "a", label: "A" }, { value: "b", label: "B" }, {
-                value: "c",
-                label: "C",
-                disabled: true,
-              }],
-            }),
-          )
-        ),
-        c(
-          "inside a dialog closed at load — placed when it opens (#cat-seg-dialog)",
-          html`${Button({ label: "Open", variant: "outline", attrs: { "data-modal-open": "#cat-seg-dialog" } })}${
-            Modal({
-              id: "cat-seg-dialog",
-              title: "Range",
-              body: Segmented({
-                id: "cat-seg-in-dialog",
-                name: "seg-dialog",
-                value: "30d",
-                legend: "Range",
-                options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
-              }),
-              footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
-            })
-          }`,
-        ),
-        c(
-          "long options in a FormField — as wide as its options, scrolls inside on a phone, never widens the page (#cat-seg-long)",
-          FormField({
-            label: "Preset",
-            id: "cat-seg-long",
-            control: Segmented({
-              id: "cat-seg-long",
-              name: "seg-long",
-              value: "aggressive",
-              legend: "Preset",
-              options: [
-                { value: "conservative", label: "Conservative · 50 sh · stop 30¢" },
-                { value: "balanced", label: "Balanced · 100 sh · stop 20¢" },
-                { value: "aggressive", label: "Aggressive · 250 sh · stop 10¢" },
-                { value: "custom", label: "Custom" },
-              ],
-            }),
-          }),
-        ),
-        c(
-          "counts + Html label (#cat-seg-count)",
-          Segmented({
-            id: "cat-seg-count",
-            name: "seg-count",
-            size: "sm",
-            value: "",
-            legend: "Status",
-            options: [
-              { value: "", label: "All", count: html`<span>48.2k</span>`, countTitle: "48,213" },
-              { value: "active", label: "Active", count: 120 },
-              { value: "flagged", label: html`${Icon("warning", { size: 13 })}Flagged`, count: 3, alert: true },
-              { value: "paused", label: "Paused", count: 0, alert: true },
-            ],
-          }),
-        ),
-        c(
-          "icons + block",
-          Segmented({
-            id: "cat-seg-icons",
-            name: "seg-icons",
-            block: true,
-            value: "list",
-            options: [{ value: "list", icon: Icon("list", { size: 15 }), ariaLabel: "List" }, {
-              value: "grid",
-              icon: Icon("dashboard", { size: 15 }),
-              ariaLabel: "Grid",
-            }],
-          }),
-        ),
-      ],
-    },
-    {
-      name: "select",
-      cases: [
-        c(
-          "options with a lead — any Html before the label, here a flag",
-          Select({
-            id: "cat-sel-lead",
-            name: "market",
-            value: "de",
-            options: [
-              { value: "fr", label: "France", lead: flags.fr },
-              { value: "de", label: "Germany", lead: flags.de },
-              { value: "it", label: "Italy", lead: flags.it },
-              { value: "se", label: "Sweden", lead: flags.se },
-            ],
-          }),
-        ),
-        c(
-          "a long list: the search box (on by default) filters as you type, the list caps at --dropdown-max-height and opens scrolled to the pick",
-          Select({
-            id: "cat-sel-long",
-            name: "city",
-            value: "tokyo",
-            options: cityOptions,
-            searchPlaceholder: "Search cities…",
-            emptyText: "No city matches.",
-          }),
-        ),
-        c(
-          "required — nothing picked is reported on the visible field, in a plain form (#cat-req-plain: the browser cannot point at the hidden native control) and in Form({ validate }) (#cat-req-val)",
-          row(
-            requiredForm(
-              "cat-req-plain",
-              false,
-              FormField({
-                label: "City (plain form)",
-                control: Select({
-                  id: "cat-req-plain-sel",
-                  name: "city",
-                  required: true,
-                  placeholder: "Pick a city",
-                  options: cityOptions.slice(0, 12),
-                }),
-              }),
-            ),
-            requiredForm(
-              "cat-req-val",
-              true,
-              FormField({
-                label: "City (validated)",
-                control: Select({
-                  id: "cat-req-val-sel",
-                  name: "city",
-                  required: true,
-                  requiredMessage: "Choose the city you are based in.",
-                  placeholder: "Pick a city",
-                  options: cityOptions.slice(0, 12),
-                }),
-              }),
-            ),
-          ),
-        ),
-        c(
-          "searchable: false — typing on the field jumps to the first option starting with it",
-          Select({ id: "cat-sel-plain", searchable: false, options: cityOptions.slice(0, 8) }),
-        ),
-        c(
-          "plain / placeholder / value",
-          row(
-            Select({ id: "cat-sel", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
-            Select({ placeholder: "Pick one", options: [{ value: "a", label: "Alpha" }] }),
-            Select({ value: "b", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
-          ),
-        ),
-        c(
-          "disabled / required / invalid / disabled option",
-          row(
-            Select({ disabled: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ required: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ invalid: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta (off)", disabled: true }] }),
-          ),
-        ),
-      ],
-    },
-    {
-      name: "sidebar",
-      cases: [
-        c(
-          "brand + items",
-          Sidebar({ id: "cat-sb-1", brand: html`<span class="sidebar__brand-mark">A</span> Acme`, items: menuItems }),
-        ),
-        c("collapsible", Sidebar({ id: "cat-sb-2", items: menuItems, collapsible: true })),
-        c("SidebarToggle", SidebarToggle({ targetId: "cat-sb-1", label: "Menu" })),
-      ],
-    },
-    {
-      name: "skeleton",
-      cases: [
-        c("Skeleton variants", row(...skeletonVariants.map((variant) => Skeleton({ variant })))),
-        c(
-          "Skeleton widths",
-          html`<div class="stack stack--sm">${
-            skeletonWidths.map((width) => Skeleton({ variant: "text", width }))
-          }</div>`,
-        ),
-        c("SkeletonTable rows/columns", SkeletonTable({ rows: 2, columns: [["md", "sm", "xs"], ["lg", "sm", "xs"]] })),
-        c("SkeletonCard", SkeletonCard()),
-      ],
-    },
-    {
-      name: "slider",
-      cases: [
-        c(
-          "showValue in a FormField — the field's label names it, the slider shows its value (#cat-sl-field)",
-          FormField({
-            label: "Position size",
-            id: "cat-sl-field",
-            control: Slider({
-              id: "cat-sl-field",
-              name: "size",
-              showValue: true,
-              min: 0,
-              max: 500,
-              step: 50,
-              value: 150,
-              unit: "shares",
-              unitOne: "share",
-            }),
-          }),
-        ),
-        c(
-          "unit / unitOne (#concurrency)",
-          Slider({
-            id: "concurrency",
-            name: "concurrency",
-            label: "Concurrency",
-            min: 1,
-            max: 32,
-            value: 12,
-            unit: "workers",
-            unitOne: "worker",
-          }),
-        ),
-        c(
-          "plain / unit / step",
-          row(
-            Slider({ id: "cat-sl-1", name: "s1", label: "Plain", value: 40 }),
-            Slider({
-              id: "cat-sl-2",
-              name: "s2",
-              label: "Workers",
-              min: 1,
-              max: 32,
-              value: 12,
-              unit: "workers",
-              unitOne: "worker",
-            }),
-            Slider({ id: "cat-sl-3", name: "s3", label: "Step 5", min: 0, max: 50, step: 5, value: 25 }),
-          ),
-        ),
-        c(
-          "scale + format / disabled",
-          row(
-            Slider({
-              id: "cat-sl-4",
-              name: "s4",
-              label: "Size",
-              min: 0,
-              max: 3,
-              value: 1,
-              scale: ["S", "M", "L", "XL"],
-              format: (v) => ["Small", "Medium", "Large", "XL"][v],
-            }),
-            Slider({ id: "cat-sl-5", name: "s5", label: "Disabled", value: 30, disabled: true }),
-          ),
-        ),
-      ],
-    },
-    {
-      name: "stat",
-      cases: [
-        c(
-          "Stat tones",
-          Grid({
-            items: statTones.map((tone) =>
-              GridCol({
-                span: 4,
-                content: Card({ body: Stat({ label: tone, value: "1,234", tone, icon: Icon("coin", { size: 20 }) }) }),
-              })
-            ),
-          }),
-        ),
-        c(
-          "trend up / down / no icon",
-          row(
-            Stat({ label: "Up", value: "12%", trend: { label: "+2.1%", up: true } }),
-            Stat({ label: "Down", value: "8%", trend: { label: "-0.4%", up: false } }),
-            Stat({ label: "Plain", value: "42" }),
-          ),
-        ),
-      ],
-    },
-    {
-      name: "switch",
-      cases: [
-        c(
-          "off / on / disabled",
-          row(
-            Switch({ label: "Off" }),
-            Switch({ label: "On", checked: true }),
-            Switch({ label: "Disabled", disabled: true }),
-            Switch({ label: "Disabled on", checked: true, disabled: true }),
-          ),
-        ),
-        c(
-          "labels — a word that follows the state, alone (#cat-sw-state) and beside a label (#cat-sw-state-label)",
-          row(
-            Switch({ id: "cat-sw-state", name: "analytics", labels: { on: "On", off: "Off" } }),
-            Switch({
-              id: "cat-sw-state-label",
-              name: "visible",
-              checked: true,
-              label: "Profile",
-              labels: { on: "Shown", off: "Hidden" },
-              hint: "Others can find you by name.",
-            }),
-          ),
-        ),
-        c(
-          "hint + name/value",
-          Switch({ id: "cat-sw", name: "notify", value: "yes", label: "Notify", hint: "Email on every deploy." }),
-        ),
-      ],
-    },
-    {
-      name: "tabs",
-      cases: [
-        c(
-          "default active",
-          Tabs({
-            id: "cat-tabs-1",
-            items: [{ id: "a", label: "First", content: lorem }, { id: "b", label: "Second", content: lorem }, {
-              id: "c",
-              label: "Third",
-              content: lorem,
-            }],
-          }),
-        ),
-        c(
-          "TabLinks — tabs that are pages (#cat-tablinks)",
-          TabLinks({
-            id: "cat-tablinks",
-            label: "Analytics",
-            listAttrs: { class: "cat-tablinks-list", "data-kind": "links" },
-            items: [
-              { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
-              { label: "Conversions", href: "#", count: html`<span>1.2k</span>`, countTitle: "1,204" },
-              { label: "Attribution", href: "#", badge: Badge({ label: "Pro", variant: "neutral" }) },
-            ],
-          }),
-        ),
-        c(
-          "active = second",
-          Tabs({
-            id: "cat-tabs-2",
-            active: "b",
-            items: [{ id: "a", label: "First", content: lorem }, { id: "b", label: "Second", content: lorem }],
-          }),
-        ),
-      ],
-    },
-    {
-      name: "textarea",
-      cases: [
-        c(
-          "counter (maxLength 280)",
-          Textarea({ id: "cat-ta-cnt", name: "note", maxLength: 280, counter: true, rows: 3, value: "Ship it." }),
-        ),
-        c(
-          "autosize — grows with the content",
-          Textarea({ id: "cat-ta-auto", name: "note", autosize: true, rows: 2, placeholder: "Type a few lines…" }),
-        ),
-        c(
-          "plain / rows / states",
-          row(
-            Textarea({ placeholder: "Plain" }),
-            Textarea({ rows: 6, value: "Six rows" }),
-            Textarea({ value: "Disabled", disabled: true }),
-            Textarea({ value: "Readonly", readonly: true }),
-            Textarea({ required: true, placeholder: "Required" }),
-            Textarea({ value: "bad", invalid: true }),
-          ),
-        ),
-      ],
-    },
-    {
-      name: "timeline",
-      cases: [
-        c(
-          "every status + meta",
-          Timeline({
-            id: "cat-tl",
-            items: [
-              ...timelineStatuses.map((status) => ({ title: status as string, meta: `meta for ${status}`, status })),
-              { title: "No status" },
-            ],
-          }),
-        ),
-        c(
-          "tones, icons and text",
-          Timeline({
-            id: "cat-tl-tones",
-            attrs: { class: "cat-tl", "data-kind": "tones" },
-            items: timelineTones.map((tone) => ({
-              attrs: { class: `cat-tl-${tone}` },
-              title: `tone ${tone}`,
-              meta: "Sep 14",
-              text: "What happened, and what happens next.",
-              tone,
-              icon: tone === "danger"
-                ? Icon("x", { size: 12 })
-                : tone === "info"
-                ? Icon("info", { size: 12 })
-                : undefined,
-              status: "done" as const,
-            })),
-          }),
-        ),
-      ],
-    },
-    {
-      name: "toast",
-      cases: [
-        c(
-          routes.toast === "#"
-            ? "Show toast — data-toast-open clones a <template> into #toast-region (no server on this page)"
-            : "from the server — data-action appends into #toast-region",
-          routes.toast === "#"
-            ? html`${
-              Button({ label: "Show toast", attrs: { "data-toast-open": "#cat-toast-template" } })
-            }<template id="cat-toast-template">${
-              Toast({ variant: "success", body: "Saved.", meta: "just now", dismissible: true, autoDismissMs: 6000 })
-            }</template>`
-            : Button({
-              label: "Show toast",
-              attrs: { "data-action": routes.toast, "data-target": "#toast-region", "data-swap": "append" },
-            }),
-        ),
-        c(
-          "Toast variants",
-          html`<div class="stack stack--sm">${
-            toastVariants.map((variant) => Toast({ variant, body: `${variant} toast`, meta: "just now" }))
-          }</div>`,
-        ),
-        c(
-          "icon / no icon / action / dismissible / autoDismiss",
-          html`<div class="stack stack--sm">${Toast({ body: "Custom icon", icon: Icon("bell", { size: 13 }) })}${
-            Toast({ body: "No icon", icon: false })
-          }${Toast({ variant: "ink", body: "With action", action: { label: "Undo", attrs: { "data-undo": "" } } })}${
-            Toast({ body: "Not dismissible", dismissible: false })
-          }${Toast({ body: "Auto-dismiss 60s", autoDismissMs: 60000 })}</div>`,
-        ),
-        c(
-          "ToastRegion with max",
-          ToastRegion({ id: "cat-toast-region", max: 3, toasts: [Toast({ body: "In a region" })] }),
-        ),
-      ],
-    },
-    {
-      name: "consent",
-      cases: [
-        c(
-          "ConsentBanner + a Cookie settings link — shown until a choice is stored, loads its loader on Accept (#cat-consent-banner)",
-          html`${
-            Button({
-              label: "Cookie settings",
-              variant: "outline",
-              attrs: { "data-consent-open": "#cat-consent-banner" },
-            })
-          }${
-            ConsentBanner({
-              id: "cat-consent-banner",
-              title: "Cookies for analytics?",
-              body: html`
-                Acme would use a sample analytics script to count visits. Nothing loads unless you accept. <a
-                  href="#">Privacy notice</a>
-              `,
-              accept: "Accept",
-              reject: "Reject",
-              variant: "outline",
-              storageKey: "cat-consent",
-              loaders: [{ src: routes.consentLoader, attrs: { "data-id": "sample" } }],
-              cookies: ["_ga*", "_gid", "cat_*"],
-            })
-          }`,
-        ),
-      ],
-    },
-    {
-      name: "toolbar",
-      cases: [
-        c(
-          "start + end",
-          Toolbar({
-            start: html`${Input({ type: "search", placeholder: "Search", size: "sm" })}${
-              Select({ options: [{ value: "all", label: "All" }] })
-            }`,
-            end: html`${Button({ label: "Export", size: "sm", variant: "outline" })}${
-              Button({ label: "New", size: "sm" })
-            }`,
-          }),
-        ),
-      ],
-    },
-    {
-      name: "tooltip",
-      cases: [
-        c(
-          "hover trigger",
-          Tooltip({
-            id: "cat-tip",
-            trigger: Button({ label: "Hover me", variant: "outline", attrs: { "aria-describedby": "cat-tip" } }),
-            content: "Helpful context",
-          }),
-        ),
-      ],
-    },
-    {
-      name: "wizard",
-      cases: [
-        c(
-          "every step status",
-          Wizard({ id: "cat-wz", steps: wizardStatuses.map((status) => ({ label: status, status })), content: lorem }),
-        ),
-        c(
-          "steps only — no content (a flow whose pages carry their own)",
-          Wizard({
-            id: "cat-wz-steps",
-            label: "Import steps",
-            listAttrs: { class: "cat-wz-list" },
-            steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, { label: "Results" }],
-          }),
-        ),
-      ],
-    },
-  ];
-}
-
-/** Every entry, grouped — `routes` decides where the server-driven cases point. */
-export function catalogue(routes: DemoRoutes = staticRoutes, state: CatalogueState = {}): CatalogueEntry[] {
-  return entries(routes, state).map((e) => {
-    const group = GROUP_OF[e.name];
-    if (!group) throw new Error(`catalogue: components/${e.name} has no group in GROUP_OF`);
-    return { ...e, group };
-  });
-}
-
-/** The whole catalogue (or one group of it) as one page body. */
-export function catalogueHtml(list: CatalogueEntry[] = catalogue()): Html {
-  const entries = list;
-  return html`<nav class="cat-nav" aria-label="Components">${
-    entries.map((e) => html`<a href="#cat-${e.name}">${e.name}</a>`)
-  }</nav>${
-    entries.map((e) =>
-      html`
-        <section class="cat-section" id="cat-${e.name}"
-          data-catalogue="${e.name}"><h2 class="cat-section__title">${e
-            .name} <span class="text-mono text-2xs">components/${e.name}</span></h2>${e.cases.map((k) =>
-              html`
-                <div class="cat-case" data-case="${k.label}">
-                  <p class="cat-case__label">${k.label}</p>
-                  <div class="cat-case__body">${k.html}</div>
+                class="popover__header"
+              >
+                <span><span class="popover__title">Grace Hopper</span><br><span class="popover__subtitle"
+                  >grace@tundra.dev</span></span>
                 </div>
-              `
-            )}</section>
-      `
-    )
-  }`;
-}
+                <div
+                  class="popover__stats"
+                >
+                  <span class="popover__stat"><span class="popover__stat-value">148</span><span class="popover__stat-label"
+                    >Reviews</span></span><span class="popover__stat"><span class="popover__stat-value">2.1h</span><span
+                      class="popover__stat-label"
+                    >Median</span></span>
+                  </div>
+                  <div class="popover__footer">${Button({ label: "Message", size: "sm" })}${Button({
+                    label: "Profile",
+                    size: "sm",
+                    variant: "outline",
+                  })}</div>
+                `,
+              }),
+            ),
+            ...popoverAligns.map((align) =>
+              c(
+                `align ${align}`,
+                Popover({
+                  id: `cat-pop-${align}`,
+                  align,
+                  trigger: PopoverTrigger({ controls: `cat-pop-${align}`, label: align }),
+                  content: html`
+                    <div class="popover__header"><span class="popover__title">${align}</span></div>
+                  `,
+                }),
+              )
+            ),
+            c(
+              "open + label",
+              html`
+                <div class="cat-room">${Popover({
+                  id: "cat-pop-open",
+                  open: true,
+                  label: "Details",
+                  trigger: PopoverTrigger({
+                    controls: "cat-pop-open",
+                    label: "Open",
+                    open: true,
+                    className: "btn btn--outline btn--sm",
+                  }),
+                  content: lorem,
+                })}</div>
+              `,
+            ),
+            c(
+              "loadFrom (lazy, data-load)",
+              Popover({
+                id: "cat-pop-lazy",
+                loadFrom: "/fragments/profile",
+                trigger: PopoverTrigger({ controls: "cat-pop-lazy", label: "Lazy" }),
+              }),
+            ),
+          ],
+        },
+        {
+          name: "progress",
+          cases: [
+            c(
+              "Progress 0 / 60 / max 200",
+              row(Progress({ value: 0 }), Progress({ value: 60 }), Progress({ value: 150, max: 200 })),
+            ),
+            c("Spinner", row(Spinner(), Spinner({ label: "Loading rows" }))),
+          ],
+        },
+        {
+          name: "segmented",
+          cases: [
+            ...segmentedSizes.map((size) =>
+              c(
+                `size ${size}`,
+                Segmented({
+                  id: `cat-seg-${size}`,
+                  name: `seg-${size}`,
+                  size,
+                  legend: size,
+                  value: "b",
+                  options: [{ value: "a", label: "A" }, { value: "b", label: "B" }, {
+                    value: "c",
+                    label: "C",
+                    disabled: true,
+                  }],
+                }),
+              )
+            ),
+            c(
+              "inside a dialog closed at load — placed when it opens (#cat-seg-dialog)",
+              html`
+                ${Button({
+                  label: "Open",
+                  variant: "outline",
+                  attrs: { "data-modal-open": "#cat-seg-dialog" },
+                })}${Modal({
+                  id: "cat-seg-dialog",
+                  title: "Range",
+                  body: Segmented({
+                    id: "cat-seg-in-dialog",
+                    name: "seg-dialog",
+                    value: "30d",
+                    legend: "Range",
+                    options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
+                  }),
+                  footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
+                })}
+              `,
+            ),
+            c(
+              "long options in a FormField — as wide as its options, scrolls inside on a phone, never widens the page (#cat-seg-long)",
+              FormField({
+                label: "Preset",
+                id: "cat-seg-long",
+                control: Segmented({
+                  id: "cat-seg-long",
+                  name: "seg-long",
+                  value: "aggressive",
+                  legend: "Preset",
+                  options: [
+                    { value: "conservative", label: "Conservative · 50 sh · stop 30¢" },
+                    { value: "balanced", label: "Balanced · 100 sh · stop 20¢" },
+                    { value: "aggressive", label: "Aggressive · 250 sh · stop 10¢" },
+                    { value: "custom", label: "Custom" },
+                  ],
+                }),
+              }),
+            ),
+            c(
+              "counts + Html label (#cat-seg-count)",
+              Segmented({
+                id: "cat-seg-count",
+                name: "seg-count",
+                size: "sm",
+                value: "",
+                legend: "Status",
+                options: [
+                  {
+                    value: "",
+                    label: "All",
+                    count: html`
+                      <span>48.2k</span>
+                    `,
+                    countTitle: "48,213",
+                  },
+                  { value: "active", label: "Active", count: 120 },
+                  {
+                    value: "flagged",
+                    label: html`
+                      ${Icon("warning", { size: 13 })}Flagged
+                    `,
+                    count: 3,
+                    alert: true,
+                  },
+                  { value: "paused", label: "Paused", count: 0, alert: true },
+                ],
+              }),
+            ),
+            c(
+              "icons + block",
+              Segmented({
+                id: "cat-seg-icons",
+                name: "seg-icons",
+                block: true,
+                value: "list",
+                options: [{ value: "list", icon: Icon("list", { size: 15 }), ariaLabel: "List" }, {
+                  value: "grid",
+                  icon: Icon("dashboard", { size: 15 }),
+                  ariaLabel: "Grid",
+                }],
+              }),
+            ),
+          ],
+        },
+        {
+          name: "select",
+          cases: [
+            c(
+              "options with a lead — any Html before the label, here a flag",
+              Select({
+                id: "cat-sel-lead",
+                name: "market",
+                value: "de",
+                options: [
+                  { value: "fr", label: "France", lead: flags.fr },
+                  { value: "de", label: "Germany", lead: flags.de },
+                  { value: "it", label: "Italy", lead: flags.it },
+                  { value: "se", label: "Sweden", lead: flags.se },
+                ],
+              }),
+            ),
+            c(
+              "a long list: the search box (on by default) filters as you type, the list caps at --dropdown-max-height and opens scrolled to the pick",
+              Select({
+                id: "cat-sel-long",
+                name: "city",
+                value: "tokyo",
+                options: cityOptions,
+                searchPlaceholder: "Search cities…",
+                emptyText: "No city matches.",
+              }),
+            ),
+            c(
+              "required — nothing picked is reported on the visible field, in a plain form (#cat-req-plain: the browser cannot point at the hidden native control) and in Form({ validate }) (#cat-req-val)",
+              row(
+                requiredForm(
+                  "cat-req-plain",
+                  false,
+                  FormField({
+                    label: "City (plain form)",
+                    control: Select({
+                      id: "cat-req-plain-sel",
+                      name: "city",
+                      required: true,
+                      placeholder: "Pick a city",
+                      options: cityOptions.slice(0, 12),
+                    }),
+                  }),
+                ),
+                requiredForm(
+                  "cat-req-val",
+                  true,
+                  FormField({
+                    label: "City (validated)",
+                    control: Select({
+                      id: "cat-req-val-sel",
+                      name: "city",
+                      required: true,
+                      requiredMessage: "Choose the city you are based in.",
+                      placeholder: "Pick a city",
+                      options: cityOptions.slice(0, 12),
+                    }),
+                  }),
+                ),
+              ),
+            ),
+            c(
+              "searchable: false — typing on the field jumps to the first option starting with it",
+              Select({ id: "cat-sel-plain", searchable: false, options: cityOptions.slice(0, 8) }),
+            ),
+            c(
+              "plain / placeholder / value",
+              row(
+                Select({ id: "cat-sel", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
+                Select({ placeholder: "Pick one", options: [{ value: "a", label: "Alpha" }] }),
+                Select({ value: "b", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
+              ),
+            ),
+            c(
+              "disabled / required / invalid / disabled option",
+              row(
+                Select({ disabled: true, options: [{ value: "a", label: "Alpha" }] }),
+                Select({ required: true, options: [{ value: "a", label: "Alpha" }] }),
+                Select({ invalid: true, options: [{ value: "a", label: "Alpha" }] }),
+                Select({
+                  options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta (off)", disabled: true }],
+                }),
+              ),
+            ),
+          ],
+        },
+        {
+          name: "sidebar",
+          cases: [
+            c(
+              "brand + items",
+              Sidebar({
+                id: "cat-sb-1",
+                brand: html`
+                  <span class="sidebar__brand-mark">A</span> Acme
+                `,
+                items: menuItems,
+              }),
+            ),
+            c("collapsible", Sidebar({ id: "cat-sb-2", items: menuItems, collapsible: true })),
+            c("SidebarToggle", SidebarToggle({ targetId: "cat-sb-1", label: "Menu" })),
+          ],
+        },
+        {
+          name: "skeleton",
+          cases: [
+            c("Skeleton variants", row(...skeletonVariants.map((variant) => Skeleton({ variant })))),
+            c(
+              "Skeleton widths",
+              html`
+                <div class="stack stack--sm">${skeletonWidths.map((width) =>
+                  Skeleton({ variant: "text", width })
+                )}</div>
+              `,
+            ),
+            c(
+              "SkeletonTable rows/columns",
+              SkeletonTable({ rows: 2, columns: [["md", "sm", "xs"], ["lg", "sm", "xs"]] }),
+            ),
+            c("SkeletonCard", SkeletonCard()),
+          ],
+        },
+        {
+          name: "slider",
+          cases: [
+            c(
+              "showValue in a FormField — the field's label names it, the slider shows its value (#cat-sl-field)",
+              FormField({
+                label: "Position size",
+                id: "cat-sl-field",
+                control: Slider({
+                  id: "cat-sl-field",
+                  name: "size",
+                  showValue: true,
+                  min: 0,
+                  max: 500,
+                  step: 50,
+                  value: 150,
+                  unit: "shares",
+                  unitOne: "share",
+                }),
+              }),
+            ),
+            c(
+              "unit / unitOne (#concurrency)",
+              Slider({
+                id: "concurrency",
+                name: "concurrency",
+                label: "Concurrency",
+                min: 1,
+                max: 32,
+                value: 12,
+                unit: "workers",
+                unitOne: "worker",
+              }),
+            ),
+            c(
+              "plain / unit / step",
+              row(
+                Slider({ id: "cat-sl-1", name: "s1", label: "Plain", value: 40 }),
+                Slider({
+                  id: "cat-sl-2",
+                  name: "s2",
+                  label: "Workers",
+                  min: 1,
+                  max: 32,
+                  value: 12,
+                  unit: "workers",
+                  unitOne: "worker",
+                }),
+                Slider({ id: "cat-sl-3", name: "s3", label: "Step 5", min: 0, max: 50, step: 5, value: 25 }),
+              ),
+            ),
+            c(
+              "scale + format / disabled",
+              row(
+                Slider({
+                  id: "cat-sl-4",
+                  name: "s4",
+                  label: "Size",
+                  min: 0,
+                  max: 3,
+                  value: 1,
+                  scale: ["S", "M", "L", "XL"],
+                  format: (v) => ["Small", "Medium", "Large", "XL"][v],
+                }),
+                Slider({ id: "cat-sl-5", name: "s5", label: "Disabled", value: 30, disabled: true }),
+              ),
+            ),
+          ],
+        },
+        {
+          name: "stat",
+          cases: [
+            c(
+              "Stat tones",
+              Grid({
+                items: statTones.map((tone) =>
+                  GridCol({
+                    span: 4,
+                    content: Card({
+                      body: Stat({ label: tone, value: "1,234", tone, icon: Icon("coin", { size: 20 }) }),
+                    }),
+                  })
+                ),
+              }),
+            ),
+            c(
+              "trend up / down / no icon",
+              row(
+                Stat({ label: "Up", value: "12%", trend: { label: "+2.1%", up: true } }),
+                Stat({ label: "Down", value: "8%", trend: { label: "-0.4%", up: false } }),
+                Stat({ label: "Plain", value: "42" }),
+              ),
+            ),
+            c(
+              "sparkline — an inline SVG drawn on the server, no chart engine (#cat-stat-spark)",
+              Grid({
+                phoneColumns: "2",
+                items: [
+                  GridCol({
+                    span: 4,
+                    content: Card({
+                      body: Stat({
+                        label: "Signups (30d)",
+                        value: "1,284",
+                        tone: "primary",
+                        icon: Icon("users", { size: 20 }),
+                        trend: { label: "+8.2%", up: true },
+                        sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40, 38, 44],
+                        sparklineLabel: "Daily signups over the last 30 days, rising",
+                        attrs: { id: "cat-stat-spark" },
+                      }),
+                    }),
+                  }),
+                  GridCol({
+                    span: 4,
+                    content: Card({
+                      body: Stat({
+                        label: "Churn",
+                        value: "1.2%",
+                        tone: "danger",
+                        trend: { label: "+0.2%", up: false },
+                        sparkline: [9, 8, 8, 10, 11, 10, 12, 13, 12, 14],
+                      }),
+                    }),
+                  }),
+                  GridCol({
+                    span: 4,
+                    content: Card({ body: Stat({ label: "Flat", value: "0", sparkline: [1, 1, 1, 1] }) }),
+                  }),
+                ],
+              }),
+            ),
+          ],
+        },
+        {
+          name: "switch",
+          cases: [
+            c(
+              "off / on / disabled",
+              row(
+                Switch({ label: "Off" }),
+                Switch({ label: "On", checked: true }),
+                Switch({ label: "Disabled", disabled: true }),
+                Switch({ label: "Disabled on", checked: true, disabled: true }),
+              ),
+            ),
+            c(
+              "labels — a word that follows the state, alone (#cat-sw-state) and beside a label (#cat-sw-state-label)",
+              row(
+                Switch({ id: "cat-sw-state", name: "analytics", labels: { on: "On", off: "Off" } }),
+                Switch({
+                  id: "cat-sw-state-label",
+                  name: "visible",
+                  checked: true,
+                  label: "Profile",
+                  labels: { on: "Shown", off: "Hidden" },
+                  hint: "Others can find you by name.",
+                }),
+              ),
+            ),
+            c(
+              "hint + name/value",
+              Switch({ id: "cat-sw", name: "notify", value: "yes", label: "Notify", hint: "Email on every deploy." }),
+            ),
+          ],
+        },
+        {
+          name: "tabs",
+          cases: [
+            c(
+              "default active",
+              Tabs({
+                id: "cat-tabs-1",
+                items: [{ id: "a", label: "First", content: lorem }, { id: "b", label: "Second", content: lorem }, {
+                  id: "c",
+                  label: "Third",
+                  content: lorem,
+                }],
+              }),
+            ),
+            c(
+              "TabLinks — tabs that are pages (#cat-tablinks)",
+              TabLinks({
+                id: "cat-tablinks",
+                label: "Analytics",
+                listAttrs: { class: "cat-tablinks-list", "data-kind": "links" },
+                items: [
+                  { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
+                  {
+                    label: "Conversions",
+                    href: "#",
+                    count: html`
+                      <span>1.2k</span>
+                    `,
+                    countTitle: "1,204",
+                  },
+                  { label: "Attribution", href: "#", badge: Badge({ label: "Pro", variant: "neutral" }) },
+                ],
+              }),
+            ),
+            c(
+              "active = second",
+              Tabs({
+                id: "cat-tabs-2",
+                active: "b",
+                items: [{ id: "a", label: "First", content: lorem }, { id: "b", label: "Second", content: lorem }],
+              }),
+            ),
+          ],
+        },
+        {
+          name: "textarea",
+          cases: [
+            c(
+              "counter (maxLength 280)",
+              Textarea({ id: "cat-ta-cnt", name: "note", maxLength: 280, counter: true, rows: 3, value: "Ship it." }),
+            ),
+            c(
+              "autosize — grows with the content",
+              Textarea({ id: "cat-ta-auto", name: "note", autosize: true, rows: 2, placeholder: "Type a few lines…" }),
+            ),
+            c(
+              "plain / rows / states",
+              row(
+                Textarea({ placeholder: "Plain" }),
+                Textarea({ rows: 6, value: "Six rows" }),
+                Textarea({ value: "Disabled", disabled: true }),
+                Textarea({ value: "Readonly", readonly: true }),
+                Textarea({ required: true, placeholder: "Required" }),
+                Textarea({ value: "bad", invalid: true }),
+              ),
+            ),
+          ],
+        },
+        {
+          name: "timeline",
+          cases: [
+            c(
+              "every status + meta",
+              Timeline({
+                id: "cat-tl",
+                items: [
+                  ...timelineStatuses.map((status) => ({
+                    title: status as string,
+                    meta: `meta for ${status}`,
+                    status,
+                  })),
+                  { title: "No status" },
+                ],
+              }),
+            ),
+            c(
+              "tones, icons and text",
+              Timeline({
+                id: "cat-tl-tones",
+                attrs: { class: "cat-tl", "data-kind": "tones" },
+                items: timelineTones.map((tone) => ({
+                  attrs: { class: `cat-tl-${tone}` },
+                  title: `tone ${tone}`,
+                  meta: "Sep 14",
+                  text: "What happened, and what happens next.",
+                  tone,
+                  icon: tone === "danger"
+                    ? Icon("x", { size: 12 })
+                    : tone === "info"
+                    ? Icon("info", { size: 12 })
+                    : undefined,
+                  status: "done" as const,
+                })),
+              }),
+            ),
+          ],
+        },
+        {
+          name: "toast",
+          cases: [
+            c(
+              routes.toast === "#"
+                ? "Show toast — data-toast-open clones a <template> into #toast-region (no server on this page)"
+                : "from the server — data-action appends into #toast-region",
+              routes.toast === "#"
+                ? html`
+                  ${Button({
+                    label: "Show toast",
+                    attrs: { "data-toast-open": "#cat-toast-template" },
+                  })}<template id="cat-toast-template">${Toast({
+                    variant: "success",
+                    body: "Saved.",
+                    meta: "just now",
+                    dismissible: true,
+                    autoDismissMs: 6000,
+                  })}</template>
+                `
+                : Button({
+                  label: "Show toast",
+                  attrs: { "data-action": routes.toast, "data-target": "#toast-region", "data-swap": "append" },
+                }),
+            ),
+            c(
+              "Toast variants",
+              html`
+                <div class="stack stack--sm">${toastVariants.map((variant) =>
+                  Toast({ variant, body: `${variant} toast`, meta: "just now" })
+                )}</div>
+              `,
+            ),
+            c(
+              "icon / no icon / action / dismissible / autoDismiss",
+              html`
+                <div class="stack stack--sm">${Toast({ body: "Custom icon", icon: Icon("bell", { size: 13 }) })}${Toast(
+                  { body: "No icon", icon: false },
+                )}${Toast({
+                  variant: "ink",
+                  body: "With action",
+                  action: { label: "Undo", attrs: { "data-undo": "" } },
+                })}${Toast({ body: "Not dismissible", dismissible: false })}${Toast({
+                  body: "Auto-dismiss 60s",
+                  autoDismissMs: 60000,
+                })}</div>
+              `,
+            ),
+            c(
+              "ToastRegion with max",
+              ToastRegion({ id: "cat-toast-region", max: 3, toasts: [Toast({ body: "In a region" })] }),
+            ),
+          ],
+        },
+        {
+          name: "consent",
+          cases: [
+            c(
+              "ConsentBanner + a Cookie settings link — shown until a choice is stored, loads its loader on Accept (#cat-consent-banner)",
+              html`
+                ${Button({
+                  label: "Cookie settings",
+                  variant: "outline",
+                  attrs: { "data-consent-open": "#cat-consent-banner" },
+                })}${ConsentBanner({
+                  id: "cat-consent-banner",
+                  title: "Cookies for analytics?",
+                  body: html`
+                    Acme would use a sample analytics script to count visits. Nothing loads unless you accept. <a
+                      href="#"
+                    >Privacy notice</a>
+                  `,
+                  accept: "Accept",
+                  reject: "Reject",
+                  variant: "outline",
+                  storageKey: "cat-consent",
+                  loaders: [{ src: routes.consentLoader, attrs: { "data-id": "sample" } }],
+                  cookies: ["_ga*", "_gid", "cat_*"],
+                })}
+              `,
+            ),
+          ],
+        },
+        {
+          name: "toolbar",
+          cases: [
+            c(
+              "start + end",
+              Toolbar({
+                start: html`
+                  ${Input({ type: "search", placeholder: "Search", size: "sm" })}${Select({
+                    options: [{ value: "all", label: "All" }],
+                  })}
+                `,
+                end: html`
+                  ${Button({ label: "Export", size: "sm", variant: "outline" })}${Button({ label: "New", size: "sm" })}
+                `,
+              }),
+            ),
+          ],
+        },
+        {
+          name: "tooltip",
+          cases: [
+            c(
+              "hover trigger (#cat-tip)",
+              Tooltip({
+                id: "cat-tip",
+                trigger: Button({ label: "Hover me", variant: "outline", attrs: { "aria-describedby": "cat-tip" } }),
+                content: "Helpful context",
+              }),
+            ),
+            c(
+              "side top / bottom / start / end — flips when there is no room (#cat-tip-side-top…)",
+              row(
+                ...tooltipSides.map((side) =>
+                  Tooltip({
+                    id: `cat-tip-side-${side}`,
+                    side,
+                    trigger: Button({
+                      label: side,
+                      variant: "outline",
+                      size: "sm",
+                      attrs: { "aria-describedby": `cat-tip-side-${side}` },
+                    }),
+                    content: `Shown on the ${side}`,
+                  })
+                ),
+              ),
+            ),
+            c(
+              "long content wraps; delay 0 (#cat-tip-long)",
+              Tooltip({
+                id: "cat-tip-long",
+                delay: 0,
+                trigger: Button({
+                  label: "Why is this disabled?",
+                  variant: "ghost",
+                  attrs: { "aria-describedby": "cat-tip-long" },
+                }),
+                content:
+                  "Invoices that have been sent cannot be deleted; void them instead, and the client gets a credit note.",
+              }),
+            ),
+            c(
+              "at the viewport edge — shifted back on screen (#cat-tip-edge)",
+              html`
+                <div class="cat-tip-edge">${Tooltip({
+                  id: "cat-tip-edge",
+                  trigger: Button({
+                    iconOnly: true,
+                    variant: "outline",
+                    size: "sm",
+                    iconStart: Icon("info", { size: 14 }),
+                    attrs: { "aria-label": "About this", "aria-describedby": "cat-tip-edge" },
+                  }),
+                  content: "A bubble that would run off the right edge is pulled back inside the viewport.",
+                })}</div>
+              `,
+            ),
+          ],
+        },
+        {
+          name: "wizard",
+          cases: [
+            c(
+              "every step status",
+              Wizard({
+                id: "cat-wz",
+                steps: wizardStatuses.map((status) => ({ label: status, status })),
+                content: lorem,
+              }),
+            ),
+            c(
+              "steps only — no content (a flow whose pages carry their own)",
+              Wizard({
+                id: "cat-wz-steps",
+                label: "Import steps",
+                listAttrs: { class: "cat-wz-list" },
+                steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, {
+                  label: "Results",
+                }],
+              }),
+            ),
+          ],
+        },
+      ];
+    }
 
-/** Harness-only layout for the catalogue page — not part of the library. */
-export const catalogueCss =
-  `.cat-nav { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-4) 0; font-size: var(--font-size-sm); }
+    /** Every entry, grouped — `routes` decides where the server-driven cases point. */
+    export function catalogue(routes: DemoRoutes = staticRoutes, state: CatalogueState = {}): CatalogueEntry[] {
+      return [...entries(routes, state), ...splitEntries.map((make) => make(routes, state))].map((e) => {
+        const group = GROUP_OF[e.name];
+        if (!group) throw new Error(`catalogue: components/${e.name} has no group in GROUP_OF`);
+        return { ...e, group };
+      });
+    }
+
+    /** The whole catalogue (or one group of it) as one page body. */
+    export function catalogueHtml(list: CatalogueEntry[] = catalogue()): Html {
+      const entries = list;
+      return html`
+        <nav class="cat-nav" aria-label="Components">${entries.map((e) =>
+          html`
+            <a href="#cat-${e.name}">${e.name}</a>
+          `
+        )}</nav>${entries.map((e) =>
+          html`
+            <section class="cat-section" id="cat-${e.name}" data-catalogue="${e.name}">
+              <h2 class="cat-section__title">
+                ${e
+                  .name} <span class="text-mono text-2xs">components/${e.name}</span>
+              </h2>${e.cases.map((k) =>
+                html`
+                  <div class="cat-case" data-case="${k.label}">
+                    <p class="cat-case__label">${k.label}</p>
+                    <div class="cat-case__body">${k.html}</div>
+                  </div>
+                `
+              )}
+            </section>
+          `
+        )}
+      `;
+    }
+
+    /** Harness-only layout for the catalogue page — not part of the library. */
+    export const catalogueCss =
+      `.cat-nav { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-4) 0; font-size: var(--font-size-sm); }
 .cat-section { display: flex; flex-direction: column; gap: var(--space-4); padding-top: var(--space-6); }
 .cat-section__title { display: flex; align-items: baseline; gap: var(--space-3); padding-bottom: var(--space-2); border-bottom: var(--border-width) solid var(--color-border); font-size: var(--font-size-xl); }
 .cat-section__title .text-2xs { color: var(--color-text-subtle); font-weight: var(--font-weight-normal); }
@@ -2805,9 +3211,13 @@ export const catalogueCss =
 .cat-case__body { padding: var(--space-4); border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
 .cat-narrow { max-width: 320px; }
+.cat-room { padding-bottom: 9rem; }
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-row-muted { color: var(--color-text-muted); }
 .cat-alert-before-icon { --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3)); }
 .cat-alert-before-icon::before { content: ""; flex: 0 0 var(--alert-icon-size); height: var(--alert-icon-size); border-radius: var(--radius-full); background: currentColor; opacity: 0.6; }
+.cat-tip-edge { display: flex; justify-content: flex-end; }
+.cat-banner-scroll { max-height: 8rem; overflow-y: auto; border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
+.cat-banner-scroll p { padding: var(--space-3) var(--space-4); margin: 0; }
 .cat-swatch { background: var(--color-surface-alt); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-2); text-align: center; font-size: var(--font-size-xs); }
 `;

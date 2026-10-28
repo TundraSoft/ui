@@ -15,14 +15,25 @@
   flex-shrink: 0;
   background: var(--color-primary);
   color: var(--color-primary-contrast);
-  box-shadow: var(--shadow-inset-top), var(--shadow-sm);
+  box-shadow:
+    var(--shadow-inset-top),
+    var(--shadow-sm);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast),
-    color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 
   &:hover {
     background: var(--color-primary-strong);
     border-color: var(--color-primary-strong);
+  }
+
+  /* Pressed: a touch smaller, so a click is felt before the page answers. */
+  &:active:not(:disabled, [aria-disabled="true"], .btn--loading) {
+    transform: scale(0.97);
   }
 
   &:focus-visible {
@@ -206,7 +217,7 @@
 
   /* The focus ring must paint over the overlapping sibling border. */
   > .btn:focus-visible,
-   > .dropdown > .btn:focus-visible {
+  > .dropdown > .btn:focus-visible {
     position: relative;
     z-index: 1;
   }

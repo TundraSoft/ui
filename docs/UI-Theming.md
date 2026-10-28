@@ -83,7 +83,9 @@ heights are fixed, not padding-derived); `--container-max-width`.
 
 **Focus**: `--ring-color`, `--ring-width`, `--ring-offset` (`--focus-ring-*` are aliases).
 
-**Motion and stacking**: `--transition-fast|base|slow`; `--z-dropdown|sticky|popover|overlay|modal|toast`.
+**Motion and stacking**: `--duration-fast|base|slow|enter|exit` and `--ease-out|in|in-out|spring` (the
+`--transition-fast|base|slow` shorthands are built from them); `--z-dropdown|sticky|popover|overlay|modal|toast`. See
+[Motion](#motion) below.
 
 **Layout**: `--layout-max-width`, `--layout-measure`, `--layout-focus-width`, `--layout-sidebar-width`,
 `--layout-rail-width`, `--layout-aside-width`, `--layout-pane-width`, `--layout-gutter`, `--scroll-padding-top`.
@@ -170,6 +172,36 @@ A dark-first theme (Console) can make `:root` _and_ `[data-theme="dark"]` the da
 light preference and its first click is a no-op.
 
 ---
+
+## Motion
+
+Every panel in the kit enters and leaves the same way, and every move is built from five durations and four curves, so a
+theme retunes the whole feel from the tokens alone — `--duration-enter: 160ms` makes everything snappier,
+`--ease-spring: linear` takes the bounce out of the segmented thumb and the tab indicator.
+
+- **Floating panels** (dropdown, popover, select and combobox lists, date and time pickers, the rail flyout) fade and
+  rise from their trigger (`ui-float-in`, 220ms, `--ease-out`) and leave the same way, quicker (`ui-float-out`, 150ms,
+  `--ease-in`). Modal, command palette, sheet and lightbox scale from 96% with a backdrop fade (`ui-scale-in`); toasts
+  and banners rise in (`ui-rise-in`); a side sheet slides in from its edge.
+- **Leaving is a convention, not a special case.** A component hides a panel with `uiMotion.exit(el, done)`
+  (`shared/js/motion.js`): the element gets `.is-closing`, its stylesheet's `.is-closing` rule plays the `*-out`
+  keyframes, and `done` runs after `animationend`. Give any custom partial an `.is-closing` rule and the same helper
+  animates it out; leave the rule out and it is hidden at once. The generic `[data-toggle]` and `[data-dismiss]`
+  behaviours already go through it.
+- **Height** (collapsible, accordion) animates the panel's grid row from `0fr` to `1fr`, so nothing is measured.
+- **Indicators** (segmented thumb, tabs underline) are one surface that glides to the selected option; the selected
+  tab's own border is the fallback until the script has measured.
+- **The theme toggle** cross-fades the palette: a View Transition where the browser has one, otherwise one beat of
+  colour transitions on every element (`html.theme-changing`).
+- **Pressed** buttons and clickable cards scale to 97%; table rows carry a `view-transition-name` from their key, so a
+  sorted table re-orders under rAPId's swap transition instead of cross-fading.
+- **Reduced motion** is one switch: `styles/reset.css` zeroes every animation and transition under
+  `prefers-reduced-motion`, the scripts check the same query, and spinners alone keep turning (slowly).
+
+The keyframes live in `styles/motion.css` (`ui-fade-in|out`, `ui-float-in|out`, `ui-float-up-in|out`, `ui-scale-in|out`,
+`ui-rise-in`, `ui-sink-out`, `ui-slide-in|out-start|end|bottom`, `ui-reveal`). They animate `transform`; a panel's
+static offset (centring, the shift `shared/js/float.js` writes when a panel would leave the viewport) goes on
+`translate`, so the two never fight.
 
 ## Charts, images, media
 

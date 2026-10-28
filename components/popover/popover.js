@@ -7,9 +7,39 @@
   function setOpen(pop, on) {
     const panel = pop.querySelector(".popover__panel");
     const trigger = pop.querySelector("[data-popover-trigger]");
-    if (panel) panel.hidden = !on;
     if (trigger) trigger.setAttribute("aria-expanded", on ? "true" : "false");
+    if (!panel) return;
+    if (on) {
+      globalThis.uiMotion?.cancelExit(panel);
+      pop.classList.remove("popover--above");
+      panel.hidden = false;
+      // Keep it on screen: shifted sideways into the viewport, flipped
+      // above the trigger when the room below runs out (shared/js/float.js).
+      const fit = globalThis.uiFloat?.fit(panel, { anchor: trigger ?? pop, flip: true });
+      if (fit && !fit.below) pop.classList.add("popover--above");
+      return;
+    }
+    const hide = () => {
+      panel.hidden = true;
+      globalThis.uiFloat?.clear(panel);
+      pop.classList.remove("popover--above");
+    };
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(panel, hide);
+    else hide();
   }
+
+  // A panel open across a resize is re-fitted; a scroll is left alone
+  // (it is absolutely positioned, so it moves with its trigger).
+  addEventListener("resize", () => {
+    document.querySelectorAll("[data-popover] .popover__panel:not([hidden])").forEach((panel) => {
+      const pop = panel.closest("[data-popover]");
+      const fit = globalThis.uiFloat?.fit(panel, {
+        anchor: pop.querySelector("[data-popover-trigger]") ?? pop,
+        flip: true,
+      });
+      pop.classList.toggle("popover--above", !!fit && !fit.below);
+    });
+  }, { passive: true });
 
   const openPanels = () => document.querySelectorAll("[data-popover] .popover__panel:not([hidden])");
 

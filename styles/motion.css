@@ -1,0 +1,153 @@
+/*
+ * The kit's shared keyframes. Every floating or overlaid surface enters
+ * and leaves with one of these — a component's CSS only picks the pair
+ * and the origin, so every panel in a page moves the same way.
+ *
+ * Convention (shared/js/motion.js): a component shows a panel by clearing
+ * `hidden` (or adding its open class) — the `*-in` animation plays on
+ * its own because the element just started being rendered. To hide it, a
+ * script calls `uiMotion.exit(el, done)`: that adds `.is-closing`, the
+ * component's `.is-closing` rule plays a `*-out` animation with
+ * `forwards`, and `done` runs (hide, remove) after `animationend`. An
+ * element whose `.is-closing` rule animates nothing is hidden at once, as
+ * is everything under `prefers-reduced-motion` (reset.css zeroes every
+ * duration, and animationend still fires).
+ *
+ * The keyframes animate `transform`; a static offset a panel needs
+ * (centring, a shift into the viewport from shared/js/float.js) goes on
+ * the separate `translate` property, so the two compose instead of one
+ * overwriting the other.
+ */
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* A panel that hangs off a trigger: dropdown, popover, select list, date
+   and time pickers. Set `transform-origin` towards the trigger. */
+@keyframes ui-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes ui-float-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* A panel that opens upwards (flipped above its trigger). */
+@keyframes ui-float-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+@keyframes ui-float-up-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+/* Centred surfaces: modal, command palette, lightbox. */
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes ui-scale-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Something arriving from the edge: toasts, banners. */
+@keyframes ui-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@keyframes ui-sink-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@keyframes ui-slide-in-end {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-slide-out-end {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-slide-in-start {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes ui-slide-out-start {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes ui-slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ui-slide-out-bottom {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Content revealed on scroll (components/reveal). */
+@keyframes ui-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-4));
+  }
+}
+
+/* Switching the palette: theme-toggle.js adds this class for one beat so
+   colours cross-fade instead of snapping (a View Transition where the
+   browser has one; this is the fallback). */
+html.theme-changing,
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition:
+    background-color var(--duration-base) var(--ease-in-out),
+    border-color var(--duration-base) var(--ease-in-out),
+    color var(--duration-base) var(--ease-in-out),
+    fill var(--duration-base) var(--ease-in-out),
+    stroke var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out) !important;
+}

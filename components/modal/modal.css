@@ -21,6 +21,27 @@
   background: var(--color-overlay);
 }
 
+/* Enter: a short scale-up with the backdrop fading in; leave (modal.js
+   adds .is-closing and waits for the animation before `close()`): the
+   reverse, quicker. `::backdrop` reads the custom properties from :root
+   in current browsers; an older one that cannot resolve them simply
+   skips the backdrop's fade. */
+.modal[open] {
+  animation: ui-scale-in var(--duration-enter) var(--ease-out);
+}
+
+.modal[open]::backdrop {
+  animation: ui-fade-in var(--duration-enter) var(--ease-out);
+}
+
+.modal.is-closing {
+  animation: ui-scale-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.modal.is-closing::backdrop {
+  animation: ui-fade-out var(--duration-exit) var(--ease-in) forwards;
+}
+
 .modal__header {
   display: flex;
   align-items: center;

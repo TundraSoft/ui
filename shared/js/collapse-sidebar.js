@@ -23,11 +23,16 @@
     sublist.style.removeProperty("top");
     sublist.querySelector(".menu__flyout-title")?.remove();
     document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)?.setAttribute("aria-expanded", "false");
+    // The sidebar only outranks the content while a flyout is open
+    // (sidebar.css), otherwise it would cover a dropdown near its edge.
+    const sidebar = sublist.closest(".sidebar");
+    if (sidebar && !sidebar.querySelector(`.${FLYOUT}`)) sidebar.classList.remove("sidebar--flyout-open");
   }
   const closeFlyouts = () => flyouts().forEach(closeFlyout);
 
   function openFlyout(sublist, trigger, sidebar) {
     flyouts().forEach((other) => other !== sublist && closeFlyout(other));
+    sidebar.classList.add("sidebar--flyout-open");
     if (!sublist.querySelector(".menu__flyout-title")) {
       const title = document.createElement("li");
       title.className = "menu__flyout-title";

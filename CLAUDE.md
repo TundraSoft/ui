@@ -1262,6 +1262,54 @@ checks the sprite holds every name.
   `ci-health` issue; `report` creates or comments on one using `.github/ISSUE_TEMPLATE/ci_health.md` as the body (single
   source of truth) with the failing job names and run URL.
 
+**The v3 round (2026-10-28): motion, floating panels, phone layouts, and eighteen new components.** A full walk of the
+demos (every page at 1440 and 375, light and dark, every panel driven open) found that almost nothing animated, floating
+panels had no viewport awareness, and phone layouts were desktop layouts stacked. What changed, and the rules that fell
+out of it:
+
+- **Motion is tokens + two conventions.** `tokens/default.css` has `--duration-fast|base|slow|enter|exit` and
+  `--ease-out|in|in-out|spring` (`--transition-*` are built from them); `styles/motion.css` (layer base) holds the
+  shared keyframes (`ui-float-in|out`, `ui-float-up-in|out`, `ui-scale-in|out`, `ui-rise-in`, `ui-sink-out`,
+  `ui-fade-in|out`, `ui-slide-*`, `ui-reveal`). Convention one: **showing is free** — clearing `hidden` (or adding the
+  open class) starts the `*-in` keyframes on the panel's own rule. Convention two: **hiding goes through
+  `uiMotion.exit(el, done)`** (`shared/js/motion.js`): it adds `.is-closing`, the component's `.is-closing` rule plays
+  the `*-out` keyframes with `forwards`, and `done` (set `hidden`, `remove()`, `dialog.close()`) runs on `animationend`
+  — at once when the rule animates nothing, the node is detached, or reduced motion is on. `toggle.js`, `dismiss.js`,
+  modal (incl. the native Escape `cancel` event, intercepted in capture), dropdown, popover, combobox/select lists, date
+  and time pickers, the command palette, toasts and the rail flyout all use it. **Keyframes animate `transform`; a
+  static offset goes on `translate`** (popover centring, the `--float-shift-x` nudge) so they compose.
+  Collapsible/accordion animate `grid-template-rows: 0fr → 1fr` (the panel is a one-row grid, the padding moved to
+  `.collapsible__inner`; collapsible.js runs in the capture phase and stops the click so toggle.js does not also act —
+  accordion exclusivity moved there too). Tabs got the segmented thumb's idiom (`--tabs-x/--tabs-w` on the list,
+  `::after` indicator, `data-tabs-ready`, ResizeObserver); the theme toggle cross-fades (View Transition when available,
+  else one beat of `html.theme-changing` colour transitions); `.btn:active` and `.card--clickable:active` scale to
+  97%/99.5%; `data-table.js` gives rows a `view-transition-name` from their key (CSSOM) so a sort swap re-orders instead
+  of cross-fading. Adding a component: pick the pair, set `transform-origin` towards the trigger, write the
+  `.is-closing` rule, hide through `uiMotion.exit`.
+- **Floating panels fit the viewport** (`shared/js/float.js`): `uiFloat.fit(panel, { anchor, flip })` measures an
+  absolutely positioned panel and writes `--float-shift-x` (CSSOM) when it would run off the side, reporting
+  `below: false` when it should flip (popover adds `popover--above`; the arrow counter-shifts with
+  `translate: calc(-50% - var(--float-shift-x))`); `uiFloat.place(anchor, panel, { side, align, offset })` positions a
+  `position: fixed` panel with flip + shift and sets `data-side` + `--float-anchor` for an arrow (tooltip.js uses it);
+  `follow()` re-places on scroll/resize; `clear()` resets. Dropdown applies `fit()` to its absolute panel and keeps its
+  own `place()` for the clipped (fixed) case.
+- **The rail flyout painted under the content** on the admin dashboard: a sticky sidebar is a stacking context, so the
+  flyout's `z-index` never reached the page and every later `position: relative` card covered it. collapse-sidebar.js
+  now sets `sidebar--flyout-open` (→ `z-index: var(--z-popover)` on the sidebar) only while a flyout is open, so the
+  sidebar does not otherwise cover a dropdown near its edge. The collapse toggle is hidden below 992 (a drawer has no
+  rail). Dark-mode borders went one step stronger (`#302d27` / `#413d36`), every `.card` carries `--shadow-inset-top` (a
+  hairline top highlight: invisible on white, the edge that lifts a dark card off the canvas), elevated cards use
+  `--shadow-lg`; the dropdown's search box no longer paints the field ring when the menu opens.
+- **Catalogue and usage split files**: `examples/shared/catalogue/<name>.ts` (`entry(routes, state)`) and
+  `examples/docs/usage/<name>.ts` (`usage` map) — one per new component, merged by catalogue.ts/usage.ts; the coverage
+  test and build-docs read them too. A new component adds two small files instead of growing the two big ones. New group
+  `marketing` ("Marketing & media", `demo/marketing.html`).
+- **Still plain HTML first.** Every new component renders as markup plus the bundle on the static demo pages with no
+  runtime; the rAPId hooks stay optional. Sheets and the lightbox are native `<dialog>`s, the carousel is scroll-snap
+  with the buttons as enhancement, the number input is a native `<input type="number">`, reveal/parallax are
+  IntersectionObserver + rAF and inert under reduced motion, a lazy section calls `window.rapid.swap` only when the
+  runtime exists and otherwise shows what it carries.
+
 ## Thinking ahead: rAPId's UI surface will grow
 
 rAPId's own docs describe this contract as intentionally minimal (§0) so that a component library — this one — has

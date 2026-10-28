@@ -33,8 +33,15 @@
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-  animation: toast-in var(--transition-base);
+  box-shadow:
+    var(--shadow-inset-top),
+    var(--shadow-lg);
+  animation: ui-rise-in var(--duration-enter) var(--ease-out);
+}
+
+/* Leaving (toast.js / dismiss.js add .is-closing and remove after). */
+.toast.is-closing {
+  animation: ui-sink-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 .toast__icon {
@@ -136,16 +143,4 @@
 .toast--info .toast__icon {
   background: var(--color-info-soft);
   color: var(--color-info);
-}
-
-@keyframes toast-in {
-  from {
-    transform: translateY(var(--space-2));
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }

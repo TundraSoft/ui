@@ -35,12 +35,22 @@ export type CommandProps = {
 };
 
 function withMatch(label: string, query?: string): Html {
-  if (!query) return html`${label}`;
+  if (!query) {
+    return html`
+      ${label}
+    `;
+  }
   const i = label.toLowerCase().indexOf(query.toLowerCase());
-  if (i < 0) return html`${label}`;
-  return html`${label.slice(0, i)}<strong class="command__match">${label.slice(i, i + query.length)}</strong>${
-    label.slice(i + query.length)
-  }`;
+  if (i < 0) {
+    return html`
+      ${label}
+    `;
+  }
+  return html`
+    ${label.slice(0, i)}<strong class="command__match">${label.slice(i, i + query.length)}</strong>${label.slice(
+      i + query.length,
+    )}
+  `;
 }
 
 export type CommandListProps = Pick<CommandProps, "id" | "items" | "query" | "emptyText">;
@@ -52,27 +62,45 @@ export function CommandList(props: CommandListProps): Html {
     const out: Html[] = [];
     if (item.group && item.group !== lastGroup) {
       lastGroup = item.group;
-      out.push(html`<div class="command__group" role="presentation">${item.group}</div>`);
+      out.push(html`
+        <div class="command__group" role="presentation">${item.group}</div>
+      `);
     }
-    const inner = html`${
-      item.badge
-        ? html`<span class="command__item-badge">${item.badge}</span>`
-        : html`<span class="command__item-icon">${Icon(item.icon ?? "chevronRight", { size: 16 })}</span>`
-    }<span class="command__item-label">${withMatch(item.label, props.query)}</span>${
-      item.meta ? html`<span class="command__item-meta">${item.meta}</span>` : ""
-    }${item.shortcut ? html`<span class="command__kbd">${item.shortcut}</span>` : ""}`;
+    const inner = html`
+      ${item.badge
+        ? html`
+          <span class="command__item-badge">${item.badge}</span>
+        `
+        : html`
+          <span class="command__item-icon">${Icon(item.icon ?? "chevronRight", { size: 16 })}</span>
+        `}<span class="command__item-label">${withMatch(item.label, props.query)}</span>${item.meta
+        ? html`
+          <span class="command__item-meta">${item.meta}</span>
+        `
+        : ""}${item.shortcut
+        ? html`
+          <span class="command__kbd">${item.shortcut}</span>
+        `
+        : ""}
+    `;
 
     out.push(
       item.href
-        ? html`<a class="command__item" id="${props.id}-item-${i}" href="${item.href}" role="option">${inner}</a>`
-        : html`<button type="button" class="command__item" id="${props.id}-item-${i}" role="option">${inner}</button>`,
+        ? html`
+          <a class="command__item" id="${props.id}-item-${i}" href="${item.href}" role="option">${inner}</a>
+        `
+        : html`
+          <button type="button" class="command__item" id="${props.id}-item-${i}" role="option">${inner}</button>
+        `,
     );
     return out;
   });
 
-  return html`${
-    rows.length ? rows : html`<div class="command__empty">${props.emptyText ?? "Nothing matches that."}</div>`
-  }`;
+  return html`
+    ${rows.length ? rows : html`
+      <div class="command__empty">${props.emptyText ?? "Nothing matches that."}</div>
+    `}
+  `;
 }
 
 export function Command(props: CommandProps): Html {
@@ -90,19 +118,36 @@ export function Command(props: CommandProps): Html {
         "aria-label": floating ? props.label ?? "Command palette" : undefined,
       })}>
         <div
-          class="command__search"><span class="command__search-icon">${Icon("search", {
+          class="command__search"
+        >
+          <span class="command__search-icon">${Icon("search", {
             size: 17,
-          })}</span><input class="command__input" type="text" role="combobox" autocomplete="off" aria-label="Run a command" aria-controls="${listId}" aria-expanded="true" value="${props
-            .query ?? ""}" placeholder="${props.placeholder ?? "Search commands"}"${renderAttrs({
+          })}</span><input
+            class="command__input"
+            type="text"
+            role="combobox"
+            autocomplete="off"
+            aria-label="Run a command"
+            aria-controls="${listId}"
+            aria-expanded="true"
+            value="${props
+              .query ?? ""}"
+            placeholder="${props.placeholder ?? "Search commands"}"
+            ${renderAttrs({
               "data-command-action": props.action,
               "data-command-target": props.action ? `#${listId}` : undefined,
-            })}><button type="button" class="command__kbd command__esc" data-command-dismiss>esc</button></div>
+            })}
+          ><button type="button" class="command__kbd command__esc" data-command-dismiss>esc</button>
+        </div>
         <div class="command__list" id="${listId}" role="listbox">${CommandList(props)}</div>
         <div
-          class="command__footer"><span>&uarr;&darr; move</span><span>&crarr; run</span><span class="command__count">${props
+          class="command__footer"
+        >
+          <span>&uarr;&darr; move</span><span>&crarr; run</span><span class="command__count">${props
               .items.length === 1
             ? "1 result"
-            : `${props.items.length} results`}</span></div>
+            : `${props.items.length} results`}</span>
+        </div>
       </div>
     </div>
   `;
