@@ -1,5 +1,13 @@
+/* A whole-page error sits in the middle of the viewport, text left-
+   aligned in a readable column, instead of top-left of an empty canvas. */
 .error-page {
-  padding-block: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 40rem;
+  min-height: calc(100vh - var(--scroll-padding-top));
+  margin-inline: auto;
+  padding: var(--space-16) var(--space-4);
 }
 
 .error-page__meta {

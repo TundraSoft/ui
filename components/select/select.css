@@ -5,9 +5,17 @@
  * no-JS pages show the native control and hide the UI.
  */
 .select {
+  --select-min-width: 12rem;
   position: relative;
   display: inline-block;
   width: 100%;
+  /* In a flex row a select otherwise shrinks to its placeholder; a field
+     needs room for a value. An InputGroup's code select opts out. */
+  min-width: var(--select-min-width);
+}
+
+.input-group .select {
+  min-width: 0;
 }
 
 .select__native {

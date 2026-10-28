@@ -51,6 +51,19 @@
   margin-inline-start: auto;
 }
 
+/* Inside a FormField the field's label names the slider, so the head
+   holds only the value: pull it up onto the label's own line (the label's
+   line-height plus the field's gap) instead of leaving an empty row. */
+.slider--value-only {
+  --slider-head-lift: calc(var(--font-size-sm) * var(--line-height-base) + var(--space-1));
+}
+
+.form-field > .form-field__label + .slider--value-only > .slider__head {
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--slider-head-lift));
+  pointer-events: none;
+}
+
 .slider__value {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);

@@ -32,9 +32,13 @@ const check = (cond: unknown, s: string) => {
 const pause = (ms = 150) => new Promise((r) => setTimeout(r, ms));
 
 /* ---------------------------------------------------------- coverage */
+const splitSources = await Promise.all(
+  (await Array.fromAsync(readDir("examples/shared/catalogue", { includeDirs: false, exts: [".ts"] })))
+    .map((e) => `examples/shared/catalogue/${e.name}`).sort().map((path) => readTextFile(path)),
+);
 const source = (await readTextFile("examples/shared/catalogue.ts")) +
   (await readTextFile("examples/shared/charts.ts")) +
-  (await readTextFile("examples/shared/data.ts"));
+  (await readTextFile("examples/shared/data.ts")) + splitSources.join("\n");
 const entries = catalogue();
 const catalogued = new Set(entries.map((e) => e.name));
 const unionNames =
@@ -905,6 +909,48 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "data") {
+    // A phone: responsive "cards" lays each row out as a labelled card, the
+    // eight-page pagination folds to prev · "Page 2 of 8" · next, and the
+    // page never scrolls sideways.
+    {
+      const phone = await browser.newPage();
+      await phone.setViewport({ width: 375, height: 800 });
+      await phone.goto(page.url(), { waitUntil: "networkidle0", timeout: 30000 });
+      const cards = await phone.evaluate(() => {
+        const t = document.getElementById("cat-dt-cards")!;
+        const row = t.querySelector("tbody tr.data-table__row") as HTMLElement;
+        const status = row.querySelector("td[data-label='Status']") as HTMLElement;
+        // Chrome reports `attr(data-label)` as the computed content; "none" means no label drawn.
+        const label = getComputedStyle(status, "::before").content;
+        const thead = t.querySelector("thead")!.getBoundingClientRect();
+        const pag = t.querySelector(".pagination")!;
+        const visiblePages = [...pag.querySelectorAll(".pagination__item--page")].filter((li) =>
+          (li as HTMLElement).offsetParent !== null
+        ).length;
+        const statusText = pag.querySelector(".pagination__status") as HTMLElement | null;
+        return {
+          rowHeight: row.getBoundingClientRect().height,
+          display: getComputedStyle(row).display,
+          label,
+          theadHidden: thead.width <= 1,
+          visiblePages,
+          status: statusText && statusText.offsetParent !== null ? statusText.textContent : "",
+          overflow: document.documentElement.scrollWidth - innerWidth,
+        };
+      });
+      check(
+        cards.rowHeight > 60 && cards.display === "grid" && cards.label !== "none" && cards.label !== "" &&
+          cards.theadHidden,
+        `data@375: responsive cards (${JSON.stringify(cards)})`,
+      );
+      check(
+        cards.visiblePages === 0 && cards.status === "Page 2 of 8",
+        `data@375: pagination folds to a status (${JSON.stringify(cards)})`,
+      );
+      check(cards.overflow <= 0, `data@375: page is ${cards.overflow}px wider than the viewport`);
+      await phone.close();
+    }
+
     const adv = await page.evaluate(() => {
       const t = document.getElementById("cat-dt-adv")!;
       return {

@@ -38,6 +38,7 @@
     "jsr:@tundralibs/utils@^1.6.0": "1.6.0",
     "npm:@jsr/tundralibs__compat@^2.7.2": "2.8.0",
     "npm:@jsr/tundralibs__rapid@0.14": "0.14.0",
+    "npm:@types/node@*": "24.2.0",
     "npm:esbuild@0.25.12": "0.25.12",
     "npm:postcss-import@16": "16.2.0_postcss@8.5.28",
     "npm:postcss-import@^16.1.0": "16.2.0_postcss@8.5.28",
@@ -826,10 +827,16 @@
     "@types/geojson@7946.0.16": {
       "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="
     },
+    "@types/node@24.2.0": {
+      "integrity": "sha512-3xyG3pMCq3oYCNg7/ZP+E1ooTaGB4cG8JWRsqqOYQdbWNY4zbaV0Ennrd7stjiJEFZCaybcIgpTjJWHRfBSIDw==",
+      "dependencies": [
+        "undici-types@7.10.0"
+      ]
+    },
     "@types/node@26.6.5": {
       "integrity": "sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==",
       "dependencies": [
-        "undici-types"
+        "undici-types@8.9.0"
       ]
     },
     "@types/webidl-conversions@7.0.3": {
@@ -1002,7 +1009,7 @@
       "integrity": "sha512-3m0vdfgRkjle5/9hHl4R7rlVvnDA7QfuFSNkdIAQNROWKOS0J3b9IQK9HaZSCGEVKiDUbFXFiINfC+cmR5P/aA==",
       "dependencies": [
         "@types/geojson",
-        "@types/node",
+        "@types/node@26.6.5",
         "denque",
         "iconv-lite",
         "lru-cache"
@@ -1068,7 +1075,7 @@
         "postcss-js",
         "postcss-simple-vars",
         "sugarss",
-        "tinyglobby"
+        "tinyglobby@0.2.17_picomatch@4.0.7"
       ]
     },
     "postcss-nesting@13.0.2_postcss@8.5.28": {
@@ -1180,6 +1187,13 @@
         "picomatch"
       ]
     },
+    "tinyglobby@0.2.17_picomatch@4.0.7": {
+      "integrity": "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==",
+      "dependencies": [
+        "fdir",
+        "picomatch"
+      ]
+    },
     "tr46@5.1.1": {
       "integrity": "sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==",
       "dependencies": [
@@ -1198,6 +1212,9 @@
     },
     "typed-query-selector@2.12.3": {
       "integrity": "sha512-/dtuMZyutHLlrxWhhC1uib00ELUr2dZ8C9B8YzZYsJmeE3V56OxRblrSM2UaF142pcMtak7ehZ6+poWGeehNIg=="
+    },
+    "undici-types@7.10.0": {
+      "integrity": "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag=="
     },
     "undici-types@8.9.0": {
       "integrity": "sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg=="
