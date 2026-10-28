@@ -61,9 +61,7 @@ export function Sheet(props: SheetProps): Html {
     `sheet--${side}`,
     `sheet--${size}`,
   );
-  const title = props.title
-    ? html`<h2 class="sheet__title" id="${titleId}">${props.title}</h2>`
-    : html`<span></span>`;
+  const title = props.title ? html`<h2 class="sheet__title" id="${titleId}">${props.title}</h2>` : html`<span></span>`;
   const close = closable
     ? html`<button type="button" class="sheet__close" data-sheet-close aria-label="Close">${
       Icon("x", { size: 16 })
@@ -73,5 +71,9 @@ export function Sheet(props: SheetProps): Html {
   const footer = props.footer ? html`<div class="sheet__footer">${props.footer}</div>` : "";
   const handle = html`<span class="sheet__handle" aria-hidden="true"></span>`;
   const body = html`<div class="sheet__body">${props.body}</div>`;
-  return html`<dialog${rootAttrs}><div class="sheet__panel">${handle}${header}${body}${footer}</div></dialog>`;
+  return html`
+    <dialog${rootAttrs}>
+      <div class="sheet__panel">${handle}${header}${body}${footer}</div>
+      </dialog>
+  `;
 }
