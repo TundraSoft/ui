@@ -17,6 +17,20 @@ export type InputSize = "sm" | "md" | "lg";
  */
 export type CountryCode = { code: string; label?: string; flag?: Html };
 
+/**
+ * Input masks (`Input({ mask })`): the value is formatted as it is typed.
+ * `phone` is lenient — digits grouped 3-3-4 (then fours), an optional
+ * leading `+` country code kept in front; it is a readability aid, not a
+ * validator, and every country's local grouping is not modelled. `date`
+ * follows the locale's day/month order (`maskLocale`, via `Intl`) and
+ * refuses an impossible month or day; `time` is `HH:MM`; `currency` groups
+ * thousands and keeps two decimals, with the symbol as a fixed addon and
+ * the raw number submitted; `card` groups a card number 4-4-4-4 (Amex
+ * 4-6-5); `postcode` upper-cases letters and digits with one space;
+ * `custom` follows `maskPattern`.
+ */
+export type InputMask = "phone" | "date" | "time" | "currency" | "card" | "postcode" | "custom";
+
 export type InputProps = {
   id?: string;
   name?: string;
@@ -101,6 +115,33 @@ export type InputProps = {
   reveal?: boolean;
   /** `type: "password"` only: the toggle's, strength levels' and Caps Lock notice's text, for translation. */
   passwordLabels?: Partial<PasswordLabels>;
+  /**
+   * Format the value as it is typed — see {@link InputMask}. The control
+   * stays a plain text input: without the script whatever was typed is
+   * submitted as is, so the server must parse leniently (it must anyway).
+   */
+  mask?: InputMask;
+  /**
+   * `mask: "custom"`: the shape, one character per position — `#` a
+   * digit, `A` a letter, `*` either, anything else a literal that is
+   * inserted for the person (`"AA-####"`, `"(###) ###-####"`).
+   */
+  maskPattern?: string;
+  /** BCP 47 locale for `date` (day/month order) and `currency` (separators, symbol). @default "en-US" */
+  maskLocale?: string;
+  /** `mask: "currency"`: the ISO 4217 code the symbol and decimals come from. @default "USD" */
+  maskCurrency?: string;
+  /**
+   * Submit the unformatted value: the script moves `name` to a hidden
+   * input it keeps filled with the raw digits (`1234.50`, `5551234567`),
+   * the visible field stays unnamed. @default true for `currency`, false otherwise
+   */
+  maskRaw?: boolean;
+  /**
+   * With no `placeholder`: show the mask's shape with this character in
+   * every slot (`"_"` → `__/__/____`).
+   */
+  maskPlaceholderChar?: string;
   /** Extra classes, e.g. `input-group__control` when nested in an InputGroup. */
   extraClass?: string;
   attrs?: Attrs;
@@ -121,6 +162,8 @@ export type ValidationMessages = {
   match?: string;
   /** For a password's `strengthMin`. */
   strength?: string;
+  /** For a `mask` that refuses an impossible value (a 13th month). */
+  mask?: string;
 };
 
 /** A number or string prop as an attribute value; undefined stays omitted. */
@@ -139,6 +182,7 @@ export function messageAttrs(messages?: ValidationMessages): Attrs {
     "data-msg-max": messages.max,
     "data-msg-step": messages.step,
     "data-msg-match": messages.match,
+    "data-msg-mask": messages.mask,
   };
 }
 
@@ -393,7 +437,91 @@ function UrlSchemeField(props: InputProps, scheme: string): Html {
   `;
 }
 
+/** The locale's day/month/year order, from Intl — `"dmy"`, `"mdy"` or `"ymd"`. */
+function dateOrder(locale: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(2024, 10, 25));
+    const order = parts.filter((p) => p.type === "day" || p.type === "month" || p.type === "year")
+      .map((p) => p.type[0]).join("");
+    return order.length === 3 ? order : "mdy";
+  } catch {
+    return "mdy";
+  }
+}
+
+/** The currency symbol a locale prints for a code, from Intl. */
+function currencySymbol(locale: string, currency: string): string {
+  try {
+    const parts = new Intl.NumberFormat(locale, { style: "currency", currency }).formatToParts(1);
+    return parts.find((p) => p.type === "currency")?.value ?? currency;
+  } catch {
+    return currency;
+  }
+}
+
+/** What a mask looks like, as a pattern (`#` digit, `A` letter, `*` either; the rest literal). */
+function maskPattern(props: InputProps): string | undefined {
+  switch (props.mask) {
+    case "custom":
+      return props.maskPattern;
+    case "date":
+      return dateOrder(props.maskLocale ?? "en-US").split("").map((p) => (p === "y" ? "####" : "##")).join("/");
+    case "time":
+      return "##:##";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * `Input({ mask })`: a text input input.js formats as it is typed. The
+ * markup carries the whole recipe in `data-mask-*`, so a swapped-in field
+ * works too; with `maskRaw` the script moves `name` to a hidden input
+ * holding the unformatted value (no script: the visible field keeps the
+ * name and submits what was typed).
+ */
+function MaskedField(props: InputProps): Html {
+  const mask = props.mask!;
+  const locale = props.maskLocale ?? "en-US";
+  const pattern = maskPattern(props);
+  const raw = props.maskRaw ?? mask === "currency";
+  const numeric = mask === "phone" || mask === "date" || mask === "time" || mask === "card" ||
+    (mask === "custom" && !!pattern && !/[A*]/.test(pattern));
+  const placeholder = props.placeholder ??
+    (props.maskPlaceholderChar && pattern ? pattern.replace(/[#A*]/g, props.maskPlaceholderChar) : undefined);
+  const control = (extraClass?: string) =>
+    nativeInput(props, {
+      type: "text",
+      placeholder,
+      extraClass: extraClass ?? props.extraClass,
+      autocomplete: props.autocomplete ?? (mask === "card" ? "cc-number" : mask === "phone" ? "tel" : "off"),
+    }, {
+      inputmode: numeric ? "numeric" : mask === "currency" ? "decimal" : undefined,
+      "data-mask": mask,
+      "data-mask-pattern": pattern,
+      "data-mask-locale": locale,
+      "data-mask-order": mask === "date" ? dateOrder(locale) : undefined,
+      "data-mask-currency": mask === "currency" ? props.maskCurrency ?? "USD" : undefined,
+      "data-mask-raw": raw ? "" : undefined,
+      "data-mask-placeholder": props.maskPlaceholderChar,
+    });
+  if (mask === "currency") {
+    return InputGroup({
+      start: currencySymbol(locale, props.maskCurrency ?? "USD"),
+      end: props.suffix,
+      control: control(groupControl(props)),
+      attrs: { "data-mask-group": "" },
+    });
+  }
+  if (props.prefix !== undefined || props.suffix !== undefined) {
+    return InputGroup({ start: props.prefix, end: props.suffix, control: control(groupControl(props)) });
+  }
+  return control();
+}
+
 export function Input(props: InputProps): Html {
+  if (props.mask) return MaskedField(props);
   if (props.type === "date") return DateInput(props);
   if (props.type === "time") return TimeInput(props);
   if (props.type === "password" && props.reveal !== false) return PasswordField(props);
