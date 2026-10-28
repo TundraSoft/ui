@@ -110,11 +110,11 @@
 /* Enter from the field's edge; leave the same way (combobox.js). */
 .combobox__list {
   transform-origin: top center;
-  animation: ui-float-in var(--duration-enter) var(--ease-out);
+  animation: ui-drop-in var(--duration-enter) var(--ease-out);
 }
 
 .combobox__list.is-closing {
-  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+  animation: ui-drop-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 /* Select's popup: a search box that stays put above a listbox that

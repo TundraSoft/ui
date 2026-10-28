@@ -47,6 +47,23 @@
   }
 }
 
+/* A list attached to its field (combobox, select, time slots): a rise with
+   no scale, so an option's position can be measured — and the list
+   scrolled to the pick — while it is still arriving. */
+@keyframes ui-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ui-drop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 /* A panel that opens upwards (flipped above its trigger). */
 @keyframes ui-float-up-in {
   from {

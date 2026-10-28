@@ -1166,6 +1166,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     await pause();
     const del = await confirmOpen();
     await clickIn("dialog[data-confirm-dialog] [data-modal-close]");
+    await pause();
     // A submit button: the replay carries the same submitter.
     await trapSubmits("#cat-confirm-form");
     await clickIn("#cat-confirm-form button");
@@ -2121,6 +2122,7 @@ for (const group of catalogueGroups) {
     check(jumped === "tp-basic-slot-0900", `forms: typing 9 in the slots jumps to 09:00 (${jumped})`);
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
+    await pause();
     const afterPick = {
       value: await value("#tp-basic-value"),
       focus: await focused(),

@@ -156,7 +156,7 @@
   inset-inline-start: 0;
   z-index: var(--z-popover);
   transform-origin: top left;
-  animation: ui-float-in var(--duration-enter) var(--ease-out);
+  animation: ui-drop-in var(--duration-enter) var(--ease-out);
   min-width: 100%;
   max-height: 16rem;
   overflow-y: auto;
@@ -183,7 +183,7 @@
 }
 
 .timepicker__list.is-closing {
-  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+  animation: ui-drop-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 /* The list must stay in its own box; the root steps above siblings while open. */

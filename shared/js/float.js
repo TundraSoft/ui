@@ -22,10 +22,26 @@
 (() => {
   const GUTTER = 8;
 
+  /**
+   * The panel's box as laid out, not as its enter animation is drawing it
+   * this frame (a scale from 98% would measure 2% small). The animation is
+   * switched off for the measurement and starts afresh after it.
+   */
+  function measure(panel) {
+    const prior = panel.style.animationName;
+    panel.style.animationName = "none";
+    const r = panel.getBoundingClientRect();
+    const w = panel.offsetWidth;
+    const h = panel.offsetHeight;
+    if (prior) panel.style.animationName = prior;
+    else panel.style.removeProperty("animation-name");
+    return { r, w, h };
+  }
+
   function fit(panel, { gutter = GUTTER, anchor, flip = false } = {}) {
     if (!panel) return { shift: 0, below: true };
     panel.style.setProperty("--float-shift-x", "0px");
-    const r = panel.getBoundingClientRect();
+    const { r } = measure(panel);
     const vw = document.documentElement.clientWidth;
     let shift = 0;
     if (r.right > vw - gutter) shift = vw - gutter - r.right;
@@ -48,8 +64,7 @@
     const a = anchor.getBoundingClientRect();
     const vw = document.documentElement.clientWidth;
     const vh = document.documentElement.clientHeight;
-    const w = panel.offsetWidth;
-    const h = panel.offsetHeight;
+    const { w, h } = measure(panel);
     const rtl = getComputedStyle(panel).direction === "rtl";
     const vertical = side === "top" || side === "bottom";
 

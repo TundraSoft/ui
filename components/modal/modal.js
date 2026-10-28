@@ -106,7 +106,10 @@
       };
       ok?.addEventListener("click", onOk);
       dialog.addEventListener("close", onClose, { once: true });
-      dialog.showModal();
+      // Asked again while the last answer is still animating out: keep
+      // the dialog (showModal() on an open dialog throws).
+      globalThis.uiMotion?.cancelExit(dialog);
+      if (!dialog.open) dialog.showModal();
       ok?.focus();
     });
   }
