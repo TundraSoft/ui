@@ -115,16 +115,17 @@ and [Recipes](./UI-Recipes.md) walks through complete pages in both flavours.
 `ui.css` declares its cascade layers up front and keeps everything inside them:
 
 ```css
-@layer tokens, reset, base, layouts, components;
+@layer tokens, reset, base, layouts, components, utilities;
 ```
 
 - **tokens** — every colour, size, radius, shadow, font and motion value as a custom property on `:root`, with the dark
   variants.
 - **reset** — a modern reset (box-sizing, margins, `dialog` centring, list padding for class-carrying lists).
-- **base** — typography and the handful of utilities (`.stack`, `.container`, `.sr-only`, `.skip-link`, `.js-only`,
-  `.mt-*`, `.hide-sm` / `.hide-md`, text helpers).
+- **base** — typography, the shared motion keyframes and the page plumbing (`.container`, `.sr-only`, `.skip-link`,
+  `.js-only`, text helpers).
 - **layouts** — the eight page frames.
 - **components** — every component's structural CSS, token-driven only.
+- **utilities** — the small utility set below; last, so a utility always beats a component's own rule.
 
 Plus one small unlayered block: the page-level `html` / `body` rules (font, line height, text colour, canvas,
 `color-scheme`), so a host page's own unlayered defaults cannot override them (see [Theming](./UI-Theming.md)).
@@ -134,8 +135,87 @@ Anything you write _outside_ a layer wins over all of it regardless of specifici
 
 `ui.js` is the concatenation of one small IIFE per component that needs behaviour, plus the shared ones (`enhance` adds
 `html.js` for progressive enhancement, `toggle`, `dismiss`, `theme-toggle`, `collapse-sidebar`, `filter`, `view-switch`,
-`busy`). Everything is delegated on `document` and keyed off `data-*` attributes or ARIA roles, so markup added later —
-by a rAPId swap or your own code — works without re-wiring. Scripts re-run their init on `rapid:swapped`.
+`busy`, `motion`, `float`). Everything is delegated on `document` and keyed off `data-*` attributes or ARIA roles, so
+markup added later — by a rAPId swap or your own code — works without re-wiring. Scripts re-run their init on
+`rapid:swapped`.
+
+### The grid and the utilities
+
+The grid is 12 columns. A cell's span is a number (`col-N`, applied from 768px; every cell is full width below that, or
+two-up with `phoneColumns: "2"`) or a span per breakpoint, mobile first — `xs` at every width, `sm` from 576px, `md`
+from 768px, `lg` from 992px, `xl` from 1400px:
+
+```ts
+Grid({
+  gap: "sm", // "sm" | "md" | "lg"
+  items: tiles.map((tile) => GridCol({ span: { xs: 6, md: 4, xl: 3 }, content: tile })),
+});
+// → <div class="grid grid--gap-sm"><div class="col-xs-6 col-md-4 col-xl-3">…
+```
+
+`styles/utilities.css` is a token-driven set of about 200 single-purpose classes with Bootstrap-shaped names, so a page
+composed from components rarely needs CSS of its own: display (`d-none`, `d-flex`, `d-grid`, with `d-md-*` breakpoint
+variants), flex (`flex-column`, `flex-wrap`, `flex-1`, `align-items-center`, `justify-content-between`, `flex-md-row`),
+`gap-0…8`, spacing (`m`/`p` × `t`/`b`/`s`/`e`/`x`/`y` × `0…8`, logical so RTL follows, plus `mx-auto`/`ms-auto`/
+`me-auto`), text (`text-center`, `text-truncate`, `text-nowrap`, `text-break`, `text-balance`), sizing (`w-100`,
+`mw-100`, `min-w-0`, `h-100`, `measure`), position (`sticky-top`, `position-relative`), borders and radii (`border`,
+`rounded`, `rounded-lg`, `shadow`), surfaces (`bg-surface`, `bg-sunken`), status text colours, the `.stack` / `.cluster`
+rhythm helpers and responsive visibility (`hide-sm` / `hide-md` / `hide-lg` hide _below_ a width; `hide-md-up` /
+`hide-lg-up` hide _from_ one). Every value is a token (`--space-*`, `--radius-*`, `--shadow-*`, `--color-*`), so a theme
+retunes the utilities with the components.
+
+---
+
+## Custom builds
+
+The published bundle carries every component. A site that uses a dozen can build its own `ui.css` / `ui.js` from the
+sources. The JSR package ships them (`styles/`, `tokens/`, `components/`, `layouts/`, `shared/`; the npm package carries
+only `dist/`, so install from JSR — `npx jsr add @tundralibs/ui` puts the files under `node_modules/@tundralibs/ui` — or
+vendor the directories from the repository). Each component is one `components/<name>/<name>.css` plus, where it has
+behaviour, one `components/<name>/<name>.js` IIFE with no imports between files.
+
+**CSS.** Write an entry that imports the layers in the order `styles/index.css` uses and only the components you need,
+then run it through PostCSS with `postcss-import`, `postcss-mixins` and `postcss-nesting` (the same three plugins
+`scripts/build-css.ts` uses; the sources rely on native nesting, which the build downlevels for 2022 browsers):
+
+```css
+/* my-ui.css — a custom build of @tundralibs/ui */
+@layer tokens, reset, base, layouts, components, utilities;
+
+@import "@tundralibs/ui/tokens/default.css" layer(tokens);
+@import "@tundralibs/ui/styles/reset.css" layer(reset);
+@import "@tundralibs/ui/styles/base.css" layer(base);
+@import "@tundralibs/ui/styles/typography.css" layer(base);
+@import "@tundralibs/ui/styles/motion.css" layer(base);
+@import "@tundralibs/ui/styles/page.css";
+
+@import "@tundralibs/ui/layouts/layout.css" layer(layouts);
+@import "@tundralibs/ui/layouts/stacked/stacked.css" layer(layouts);
+
+@import "@tundralibs/ui/components/button/button.css" layer(components);
+@import "@tundralibs/ui/components/card/card.css" layer(components);
+@import "@tundralibs/ui/components/input/input.css" layer(components);
+@import "@tundralibs/ui/components/form-field/form-field.css" layer(components);
+@import "@tundralibs/ui/components/modal/modal.css" layer(components);
+
+@import "@tundralibs/ui/styles/utilities.css" layer(utilities);
+```
+
+Keep `tokens`, `reset`, `base` (all three files), `page.css` and `layouts/layout.css`; everything else is optional. Some
+components style their neighbours' hooks — `skeleton.css` paints the `[data-busy]` veil every swap wears, `form-field`
+holds the error slot `input`, `select` and the pickers report into, `combobox` is what `select` and `datepicker` render
+their lists with — so take a component's dependencies with it (its stylesheet's class names say which). The
+`color-mix()` fallback lines and the `@layer` statement survive minification with esbuild; other minifiers may not keep
+either, so check the output for both.
+
+**JS.** Concatenate `shared/js/enhance.js`, `shared/js/motion.js` and `shared/js/float.js` first (every script that
+shows or hides a panel calls `uiMotion` / `uiFloat`), then the shared behaviours you use (`toggle`, `dismiss`, `busy`,
+`theme-toggle`, …) and each chosen component's `.js`. Each file is an IIFE that reads nothing from another at load time,
+so order among components does not matter — the same rule `scripts/build-js.ts` relies on. Serve it `defer`.
+
+**rAPId apps** need no custom build to drop unused _templates_: those are tree-shaken by the import graph. A custom
+build only trims the shipped CSS and JS, so do it when the ~35 KB gzipped of styles and ~40 KB of scripts the full
+bundle costs matters for the page.
 
 ---
 
