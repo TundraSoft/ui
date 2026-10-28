@@ -1,0 +1,135 @@
+/*
+ * A number field between two steppers. The group is the frame (like
+ * .input-group): the native input inside loses its own border and the
+ * browser's spin buttons; the steppers are plain buttons that
+ * number-input.js drives. Without JS: a native number field that still
+ * steps from the keyboard.
+ */
+.number-input {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+  height: var(--control-height-md);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 0 1px 2px rgb(var(--shadow-color) / 0.04);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.number-input:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.number-input--sm {
+  height: var(--control-height-sm);
+  border-radius: var(--radius-sm);
+}
+
+.number-input--lg {
+  height: var(--control-height-lg);
+}
+
+.number-input--invalid {
+  border-color: var(--color-danger);
+}
+
+.number-input--disabled {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.number-input > .number-input__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.number-input > .number-input__field:focus-visible {
+  outline: none;
+}
+
+.number-input__field::-webkit-inner-spin-button,
+.number-input__field::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.number-input__step {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-height-md);
+  padding: 0;
+  border: none;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  /* Hold-to-repeat: the pointer must not select text or open a menu. */
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.number-input--sm .number-input__step {
+  min-width: var(--control-height-sm);
+}
+
+.number-input--lg .number-input__step {
+  min-width: var(--control-height-lg);
+}
+
+.number-input__step:first-child {
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.number-input__step:last-child {
+  border-start-end-radius: inherit;
+  border-end-end-radius: inherit;
+  border-inline-start: var(--border-width) solid var(--color-border);
+}
+
+.number-input__step:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.number-input__step:active {
+  background: var(--color-border-strong);
+}
+
+.number-input__step:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+.number-input__step:disabled,
+.number-input__step[aria-disabled="true"] {
+  color: var(--color-disabled-text);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.number-input__unit {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding-inline-end: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}

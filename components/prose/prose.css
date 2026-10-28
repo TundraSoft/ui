@@ -1,0 +1,240 @@
+/*
+ * Prose: rendered Markdown and other flowing content, styled by element.
+ * Rhythm comes from margins below each block (nothing at the edges), a
+ * larger gap above a heading that follows content.
+ */
+.prose {
+  --prose-size: var(--font-size-base);
+  font-size: var(--prose-size);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.prose--sm {
+  --prose-size: var(--font-size-sm);
+}
+
+.prose--lg {
+  --prose-size: var(--font-size-lg);
+}
+
+.prose--measure {
+  max-width: var(--layout-measure);
+}
+
+.prose > * {
+  margin-block: 0 var(--space-4);
+}
+
+.prose > :last-child {
+  margin-block-end: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-block: var(--space-8) var(--space-3);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  text-wrap: pretty;
+}
+
+.prose > :first-child {
+  margin-block-start: 0;
+}
+
+.prose h1 {
+  font-size: var(--font-size-3xl);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.prose h2 {
+  font-size: var(--font-size-2xl);
+}
+
+.prose h3 {
+  font-size: var(--font-size-xl);
+}
+
+.prose h4 {
+  font-size: var(--font-size-lg);
+}
+
+.prose h5,
+.prose h6 {
+  font-size: var(--prose-size);
+}
+
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-block-start: 0;
+}
+
+.prose p {
+  margin-block: 0 var(--space-4);
+}
+
+.prose a {
+  color: var(--color-accent, var(--color-primary));
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: from-font;
+}
+
+.prose a:hover {
+  color: var(--color-accent-strong, var(--color-primary-strong));
+}
+
+.prose strong {
+  font-weight: var(--font-weight-semibold);
+}
+
+.prose ul,
+.prose ol {
+  padding-inline-start: var(--space-5);
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li {
+  margin-block-end: var(--space-1);
+  padding-inline-start: var(--space-1);
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-block: var(--space-1) 0;
+}
+
+.prose li::marker {
+  color: var(--color-text-muted);
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--space-4);
+  border-inline-start: var(--border-width-thick) solid var(--color-accent, var(--color-primary));
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.prose blockquote > :last-child {
+  margin-block-end: 0;
+}
+
+.prose code,
+.prose kbd {
+  font-family: var(--font-family-mono);
+  font-size: 0.875em;
+}
+
+.prose code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.prose kbd {
+  padding: 0.1em 0.45em;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-bottom-width: var(--border-width-thick);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.prose pre {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  border: var(--border-width) solid var(--color-border-subtle);
+  overflow-x: auto;
+  line-height: var(--line-height-base);
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  font-size: var(--font-size-sm);
+}
+
+.prose hr {
+  margin-block: var(--space-6);
+  border: none;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.prose img,
+.prose video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.prose figure {
+  margin-inline: 0;
+}
+
+.prose figcaption {
+  margin-block-start: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  vertical-align: top;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.prose th {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  border-bottom-color: var(--color-border-strong);
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose td {
+  font-variant-numeric: tabular-nums;
+}
+
+.prose dl {
+  margin: 0;
+}
+
+.prose dt {
+  font-weight: var(--font-weight-semibold);
+}
+
+.prose dd {
+  margin: 0 0 var(--space-2);
+}

@@ -1,0 +1,270 @@
+/*
+ * A month of events. Desktop: a 7-column grid of day cells, each a stack
+ * of event chips. Phone (< 768): the days that have events, as a list.
+ */
+.calendar {
+  --calendar-cell-min-height: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.calendar__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.calendar__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.calendar__grid {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.calendar__weekdays,
+.calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar__weekday {
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-alt);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-text-subtle);
+}
+
+.calendar__day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: var(--calendar-cell-min-height);
+  min-width: 0;
+  padding: var(--space-1);
+  border-inline-end: var(--border-width) solid var(--color-border-subtle);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.calendar__days > .calendar__day:nth-child(7n) {
+  border-inline-end: none;
+}
+
+.calendar__day--outside {
+  background: var(--color-surface-alt);
+}
+
+.calendar__day--outside .calendar__day-number {
+  color: var(--color-text-subtle);
+}
+
+.calendar__day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.calendar__day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+a.calendar__day-number:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+a.calendar__day-number:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+.calendar__day--today .calendar__day-number {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-weight: var(--font-weight-semibold);
+}
+
+.calendar__today-label {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent, var(--color-primary));
+}
+
+.calendar__events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calendar__event {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+  border-inline-start: var(--border-width-thick) solid var(--color-border-strong);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
+  text-decoration: none;
+  transition: filter var(--transition-fast);
+}
+
+a.calendar__event:hover {
+  filter: brightness(0.95);
+}
+
+a.calendar__event:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+.calendar__time {
+  flex: 0 0 auto;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+}
+
+.calendar__event-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar__event--accent {
+  border-inline-start-color: var(--color-accent, var(--color-primary));
+  background: var(--color-surface-sunken);
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 14%, var(--color-surface));
+}
+
+.calendar__event--success {
+  border-inline-start-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success-soft-text);
+}
+
+.calendar__event--warning {
+  border-inline-start-color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-soft-text);
+}
+
+.calendar__event--danger {
+  border-inline-start-color: var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-soft-text);
+}
+
+.calendar__event--info {
+  border-inline-start-color: var(--color-info);
+  background: var(--color-info-soft);
+  color: var(--color-info-soft-text);
+}
+
+.calendar__more {
+  align-self: flex-start;
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.calendar__more:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.calendar__more:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+/* Unfolded: the hidden chips show (calendar.js clears their `hidden`). */
+.calendar__more[aria-expanded="true"] {
+  display: none;
+}
+
+/* Phone: the days with events, as a list. */
+@media screen and (max-width: 767px) {
+  .calendar__weekdays {
+    display: none;
+  }
+
+  .calendar__days {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .calendar__day {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: 0;
+    padding: var(--space-2) var(--space-3);
+    border-inline-end: none;
+  }
+
+  .calendar__day--empty,
+  .calendar__day--outside {
+    display: none;
+  }
+
+  .calendar__day-head {
+    flex: 0 0 3.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .calendar__day-number {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-sm);
+  }
+
+  .calendar__events {
+    flex: 1 1 auto;
+  }
+
+  .calendar__event-title {
+    white-space: normal;
+  }
+}
