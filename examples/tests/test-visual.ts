@@ -8,6 +8,10 @@
  * screenshot to look at. `--update` (deno task test:visual:update)
  * rewrites the baseline from the current build.
  *
+ * Renders run CONCURRENCY at a time (`TEST_CONCURRENCY`, default 4), each in a
+ * browser context of its own; results are kept in page order, so the baseline
+ * file is the same whatever order the renders finish in.
+ *
  * The hash is a block average: the full-page screenshot is drawn onto a
  * 16-column canvas whose row count follows the page's aspect (16–96 rows),
  * each cell's average grey is quantised to 16 levels — one hex digit per
@@ -21,7 +25,7 @@
  */
 import { ensureDir, pathExists, readTextFile, realPath, writeFile, writeTextFile } from "@tundralibs/compat/file";
 import { exit, getEnv } from "@tundralibs/compat/runtime";
-import { launch } from "./browser.ts";
+import { closeIsolated, CONCURRENCY, isolatedPage, launch, pool } from "./browser.ts";
 
 const env = getEnv();
 const args = (globalThis as { Deno?: { args: string[] } }).Deno?.args ??
@@ -104,7 +108,8 @@ async function settle(path: string): Promise<void> {
 
 /** Renders one page at one width in both themes; returns key → { hash, png }. */
 async function render(path: string, width: number): Promise<Record<string, { hash: string; png: string }> | string> {
-  const page = await browser.newPage();
+  // Its own context: renders run side by side (pool), and no tab's storage may reach another's.
+  const page = await isolatedPage(browser);
   await page.emulateMediaFeatures([
     { name: "prefers-color-scheme", value: "light" },
     { name: "prefers-reduced-motion", value: "reduce" },
@@ -114,7 +119,7 @@ async function render(path: string, width: number): Promise<Record<string, { has
   try {
     await page.goto(`file://${root}/${path}`, { waitUntil: "networkidle0", timeout: 30000 });
   } catch (e) {
-    await page.close();
+    await closeIsolated(page);
     return `${path}@${width}: load failed: ${e}`;
   }
   const out: Record<string, { hash: string; png: string }> = {};
@@ -132,7 +137,7 @@ async function render(path: string, width: number): Promise<Record<string, { has
     const png = await page.screenshot({ encoding: "base64", fullPage: true });
     out[`${path}@${width}-${theme}`] = { hash: await hashOf(png), png };
   }
-  await page.close();
+  await closeIsolated(page);
   return out;
 }
 
@@ -157,30 +162,41 @@ function drift(key: string, hash: string): string | undefined {
   return undefined;
 }
 
-for (const path of pages) {
-  if (only.length && !only.some((o) => path.includes(o))) continue;
-  for (const width of widths) {
-    let renders = await render(path, width);
-    if (typeof renders === "string") {
-      issues.push(renders);
-      continue;
-    }
-    const drifted = Object.entries(renders).filter(([key, r]) => drift(key, r.hash));
-    if (drifted.length) {
-      // A capture can land on a one-off state (a list measured before layout,
-      // a late-decoded image). One fresh render decides; a drift that repeats
-      // is a real change.
-      const again = await render(path, width);
-      if (typeof again !== "string") renders = again;
-    }
-    for (const [key, r] of Object.entries(renders)) {
-      current[key] = r.hash;
-      if (saveAll) await keep(key, r.png);
-      if (!update && baseline[platform]?.[key]) compared++;
-      const d = drift(key, r.hash);
-      if (d) issues.push(`${d} — ${await keep(key, r.png)}`);
-    }
+/** One render job per page × width, run CONCURRENCY at a time; results land in job order. */
+const jobs = pages.filter((path) => !only.length || only.some((o) => path.includes(o)))
+  .flatMap((path) => widths.map((width) => ({ path, width })));
+type Outcome = { hashes: [string, string][]; issues: string[] };
+const outcomes: Outcome[] = new Array(jobs.length);
+console.log(`${jobs.length} page × width renders, ${CONCURRENCY} at a time.`);
+await pool(jobs, async ({ path, width }, i) => {
+  let renders = await render(path, width);
+  if (typeof renders === "string") {
+    outcomes[i] = { hashes: [], issues: [renders] };
+    return;
   }
+  const drifted = Object.entries(renders).filter(([key, r]) => drift(key, r.hash));
+  if (drifted.length) {
+    // A capture can land on a one-off state (a list measured before layout,
+    // a late-decoded image). One fresh render decides; a drift that repeats
+    // is a real change.
+    const again = await render(path, width);
+    if (typeof again !== "string") renders = again;
+  }
+  const outcome: Outcome = { hashes: [], issues: [] };
+  for (const [key, r] of Object.entries(renders)) {
+    outcome.hashes.push([key, r.hash]);
+    if (saveAll) await keep(key, r.png);
+    const d = drift(key, r.hash);
+    if (d) outcome.issues.push(`${d} — ${await keep(key, r.png)}`);
+  }
+  outcomes[i] = outcome;
+});
+for (const { hashes, issues: found } of outcomes) {
+  for (const [key, hash] of hashes) {
+    current[key] = hash;
+    if (!update && baseline[platform]?.[key]) compared++;
+  }
+  issues.push(...found);
 }
 
 await browser.close();

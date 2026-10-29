@@ -19,7 +19,7 @@
 import { ensureDir, pathExists, readTextFile, realPath } from "@tundralibs/compat/file";
 import { exit } from "@tundralibs/compat/runtime";
 import type { Page } from "puppeteer-core";
-import { isBlockedRequest, isNetworkNoise, launch } from "./browser.ts";
+import { closeIsolated, isBlockedRequest, isNetworkNoise, isolatedPage, launch, pool } from "./browser.ts";
 
 const outDir = ".test-output/all-pages";
 await ensureDir(outDir);
@@ -108,8 +108,10 @@ async function siteChrome(page: Page, path: string): Promise<void> {
   }
 }
 
-for (const path of pages) {
-  const page = await browser.newPage();
+// CONCURRENCY pages at a time, each tab in a context of its own (shared
+// file:// storage would carry one page's state into another).
+await pool(pages, async (path) => {
+  const page = await isolatedPage(browser);
   await page.evaluateOnNewDocument(() => localStorage.clear());
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
   await page.setViewport({ width: 1440, height: 900 });
@@ -129,8 +131,8 @@ for (const path of pages) {
     await page.goto(`file://${root}/${path}`, { waitUntil: "networkidle0", timeout: 20000 });
   } catch (e) {
     fail(path, "load-failed", String(e));
-    await page.close();
-    continue;
+    await closeIsolated(page);
+    return;
   }
   await pause(200);
 
@@ -153,8 +155,8 @@ for (const path of pages) {
   if (bgAfter === bgBefore) {
     fail(path, "dark-mode-no-op", `body background-color unchanged after data-theme=dark (${bgBefore})`);
   }
-  await page.close();
-}
+  await closeIsolated(page);
+});
 
 /* Every site page is in the sidebar once; every sidebar link exists. */
 for (const path of manifest.site) {
@@ -274,6 +276,9 @@ for (const target of Object.keys(linkedFrom)) {
 
 await browser.close();
 
+// Pages finish in any order; report them in the manifest's.
+const order = (page: string) => (pages.indexOf(page) + 1 || pages.length + 1);
+issues.sort((a, b) => order(a.page) - order(b.page));
 if (issues.length > 0) console.log(JSON.stringify(issues, null, 2));
 console.log(`\n${issues.length} issue(s) found across ${pages.length} pages. Screenshots in ${outDir}/`);
 if (issues.length > 0) exit(1);
