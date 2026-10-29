@@ -645,18 +645,19 @@ async function brevilyDesignFixes(group: string): Promise<void> {
   }
 
   if (group === "cards") {
-    // An accordion row is a deep-link target: open on arrival (already at
-    // DOMContentLoaded, no transition), the rest of the accordion closed,
-    // a target inside the row scrolled under scroll-padding-top.
+    // Collapsible is a native <details>: an accordion row is a deep-link
+    // target — open on arrival (already at DOMContentLoaded, no
+    // transition), the rest of the accordion closed, a target inside the
+    // row scrolled under scroll-padding-top.
     const p = await browser.newPage();
     await p.setViewport({ width: 1280, height: 800 });
     p.on("pageerror", (e) => fail(`${fileOf("collapsible")} (deep link): pageerror: ${e}`));
     await p.evaluateOnNewDocument(() => {
       document.addEventListener("DOMContentLoaded", () => {
-        const panel = document.getElementById("cat-faq-cancel-panel");
-        (globalThis as { atReady?: unknown }).atReady = panel && {
-          hidden: panel.hidden,
-          animating: panel.classList.contains("is-animating"),
+        const row = document.getElementById("cat-faq-cancel") as HTMLDetailsElement | null;
+        (globalThis as { atReady?: unknown }).atReady = row && {
+          open: row.open,
+          animating: !!row.querySelector(".is-animating, .is-collapsed"),
         };
       });
     });
@@ -669,13 +670,8 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       p.evaluate(() =>
         Object.fromEntries(
           ["refunds", "plans", "cancel"].map((k) => {
-            const row = document.getElementById(`cat-faq-${k}`)!;
-            const t = row.querySelector(".collapsible__trigger")!;
-            return [
-              k,
-              row.classList.contains("collapsible") && t.getAttribute("aria-expanded") === "true" &&
-              !document.getElementById(`cat-faq-${k}-panel`)!.hidden,
-            ];
+            const row = document.getElementById(`cat-faq-${k}`) as HTMLDetailsElement;
+            return [k, row.matches("details.collapsible") && row.open];
           }),
         )
       );
@@ -690,7 +686,7 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       `cards: a hash inside an accordion row did not open only that row (${JSON.stringify(onLoad)})`,
     );
     check(
-      JSON.stringify(land.ready) === JSON.stringify({ hidden: false, animating: false }),
+      JSON.stringify(land.ready) === JSON.stringify({ open: true, animating: false }),
       `cards: the deep-linked row was not open, without a transition, by DOMContentLoaded (${
         JSON.stringify(land.ready)
       })`,
@@ -706,7 +702,61 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       onChange.plans && !onChange.cancel && !onChange.refunds,
       `cards: hashchange to an accordion row did not open it alone (${JSON.stringify(onChange)})`,
     );
+
+    // A click animates: the row opens at once and grows; a closing row keeps
+    // `open` (and loses the turned icon) until its panel has shut; the row
+    // it replaces in the accordion closes the same way.
+    const click = await p.evaluate(async () => {
+      const row = (id: string) => document.getElementById(id) as HTMLDetailsElement;
+      const named = !!document.querySelector("details.collapsible[name]");
+      const adopted = row("cat-faq-refunds").getAttribute("data-collapsible-name");
+      (row("cat-faq-refunds").querySelector("summary") as HTMLElement).click();
+      const during = {
+        refunds: row("cat-faq-refunds").open,
+        plans: row("cat-faq-plans").open,
+        plansClosing: row("cat-faq-plans").classList.contains("is-closing"),
+      };
+      await new Promise((r) => setTimeout(r, 700));
+      const after = { refunds: row("cat-faq-refunds").open, plans: row("cat-faq-plans").open };
+      (row("cat-faq-refunds").querySelector("summary") as HTMLElement).click();
+      const closing = row("cat-faq-refunds").open && row("cat-faq-refunds").classList.contains("is-closing");
+      await new Promise((r) => setTimeout(r, 700));
+      return { named, adopted, during, after, closing, shut: !row("cat-faq-refunds").open };
+    });
+    check(
+      !click.named && click.adopted === "cat-faq",
+      `cards: the accordion's native name was not adopted (${JSON.stringify(click)})`,
+    );
+    check(
+      click.during.refunds && click.during.plans && click.during.plansClosing && click.after.refunds &&
+        !click.after.plans && click.closing && click.shut,
+      `cards: an accordion click did not animate open/closed (${JSON.stringify(click)})`,
+    );
     await p.close();
+
+    // Without JS the rows still open and close: <details>, natively exclusive by name.
+    const nojs = await browser.newPage();
+    await nojs.setJavaScriptEnabled(false);
+    await nojs.setViewport({ width: 1280, height: 800 });
+    await nojs.goto(`file://${root}/${fileOf("collapsible")}`, { waitUntil: "load", timeout: 30000 });
+    const opened = async (id: string) => await nojs.$eval(`#${id}`, (el) => (el as HTMLDetailsElement).open);
+    const names = await nojs.$$eval(
+      "#cat-faq > details.collapsible",
+      (rows) => rows.map((r) => r.getAttribute("name")),
+    );
+    await nojs.$eval("#cat-faq-plans > summary", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await nojs.click("#cat-faq-plans > summary");
+    const plansOpen = await opened("cat-faq-plans");
+    const refundsOpen = await opened("cat-faq-refunds");
+    await nojs.click("#cat-faq-plans > summary");
+    const plansShut = !(await opened("cat-faq-plans"));
+    check(
+      names.every((n) => n === "cat-faq") && plansOpen && !refundsOpen && plansShut,
+      `cards: without JS an accordion row does not open/close natively (${
+        JSON.stringify({ names, plansOpen, refundsOpen, plansShut })
+      })`,
+    );
+    await nojs.close();
   }
 
   if (group === "navigation") {

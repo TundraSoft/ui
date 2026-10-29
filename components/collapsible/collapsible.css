@@ -15,8 +15,18 @@
   border-radius: inherit;
   font: inherit;
   font-weight: var(--font-weight-medium);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
+  list-style: none;
+}
+
+/* The summary's own disclosure marker: the icon is the marker. */
+.collapsible__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible__trigger::marker {
+  content: "";
 }
 
 .collapsible__trigger:hover {
@@ -46,15 +56,16 @@
   color: var(--color-text);
 }
 
-.collapsible__trigger[aria-expanded="true"] .collapsible__icon {
+.collapsible[open]:not(.is-closing) > .collapsible__trigger .collapsible__icon {
   transform: rotate(180deg);
 }
 
 /* The panel is a one-row grid whose row goes 0fr → 1fr: a height
    animation with no measuring. The inner box carries the padding and
    the rule, so a closed row is truly zero. collapsible.js drives the
-   `is-collapsed` class; with the script absent `hidden` alone shows and
-   hides the panel. */
+   `is-collapsed` class while `<details open>` is set (and removes `open`
+   only once a closing row has finished); with the script absent the
+   details element alone shows and hides the panel, without motion. */
 .collapsible__panel {
   display: grid;
   grid-template-rows: 1fr;
@@ -95,11 +106,13 @@
   border-bottom-right-radius: var(--radius-md);
 }
 
-/* The heading is only a landmark around the trigger — no rhythm and no
-   type of its own. Without the font reset it took the global h3 rules
-   (display family, --font-size-2xl, tight tracking), and the trigger's
-   `font: inherit` passed them on: FAQ rows at heading size. */
+/* The heading inside the summary is a landmark for heading navigation —
+   no rhythm and no type of its own. Without the font reset it took the
+   global h3 rules (display family, --font-size-2xl, tight tracking): FAQ
+   rows at heading size. It takes the row's free space; the icon ends it. */
 .collapsible__heading {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   font: inherit;
   letter-spacing: inherit;

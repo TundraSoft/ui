@@ -12,49 +12,55 @@ export type CollapsibleProps = {
   title: string | Html;
   content: Html;
   defaultOpen?: boolean;
+  /**
+   * Rows sharing a name are exclusive: opening one closes the others — the
+   * native `<details name>`, so it holds without the script in a browser
+   * that supports it. `Accordion` sets it to its own id.
+   */
+  name?: string;
   attrs?: Attrs;
 };
 
+/**
+ * A disclosure row: a native `<details>` whose `<summary>` is the trigger,
+ * so it opens and closes with no script at all. collapsible.js adds the
+ * height animation, animated accordion exclusivity and hash deep links.
+ */
 export function Collapsible(props: CollapsibleProps): Html {
-  const panelId = `${props.id}-panel`;
-  const open = Boolean(props.defaultOpen);
-
   return html`
-    <div ${classAttrs("collapsible", mergeAttrs(props.attrs, { id: props.id }))}>
-      <h3
-        class="collapsible__heading"
-      >
-        <button
-          type="button"
-          class="collapsible__trigger"
-          data-toggle="#${panelId}"
-          aria-expanded="${open ? "true" : "false"}"
-          aria-controls="${panelId}"
-        >
-          ${props
-            .title}<span class="collapsible__icon" aria-hidden="true">${Icon("chevronDown", {
-              size: 14,
-            })}</span>
-        </button>
-      </h3>
-      <div class="collapsible__panel" id="${panelId}" data-toggle-panel${open ? "" : html`
-        hidden
-      `}>
+    <details ${classAttrs(
+      "collapsible",
+      mergeAttrs(props.attrs, {
+        id: props.id,
+        name: props.name,
+        open: props.defaultOpen ? "" : undefined,
+      }),
+    )}>
+      <summary class="collapsible__trigger">
+        <h3 class="collapsible__heading">${props.title}</h3><span class="collapsible__icon" aria-hidden="true">${Icon(
+          "chevronDown",
+          { size: 14 },
+        )}</span>
+      </summary>
+      <div class="collapsible__panel" id="${props.id}-panel">
         <div class="collapsible__inner">${props.content}</div>
       </div>
-    </div>
+    </details>
   `;
 }
 
 export type AccordionProps = {
   id: string;
   /** Each row's `id` (default `<accordion id>-<index>`) is its deep-link target. */
-  items: Array<Omit<CollapsibleProps, "id" | "attrs"> & { id?: string }>;
+  items: Array<Omit<CollapsibleProps, "id" | "name" | "attrs"> & { id?: string }>;
   attrs?: Attrs;
 };
 
+/** Rows of which one is open at a time: `Collapsible`s sharing the accordion's id as their `name`. */
 export function Accordion(props: AccordionProps): Html {
-  const panels = props.items.map((item, index) => Collapsible({ ...item, id: item.id ?? `${props.id}-${index}` }));
+  const panels = props.items.map((item, index) =>
+    Collapsible({ ...item, id: item.id ?? `${props.id}-${index}`, name: props.id })
+  );
 
   return html`
     <div ${classAttrs(
