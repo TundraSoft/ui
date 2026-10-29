@@ -170,23 +170,33 @@ for (const target of Object.keys(linkedFrom)) {
 {
   const path = "index.html";
   const page = await browser.newPage();
-  await page.evaluateOnNewDocument(() => {
-    if (!sessionStorage.getItem("cleared")) {
-      localStorage.clear();
-      sessionStorage.setItem("cleared", "1");
-    }
-  });
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
   await page.setViewport({ width: 1440, height: 900 });
   page.on("pageerror", (err) => fail(path, "pageerror", String(err)));
+  // Clear storage once, then load clean: the reload below must keep what
+  // the page stores (sessionStorage is not a reliable flag on file:// —
+  // CI's Chrome dropped it across the reload, so a guarded clear wiped
+  // the collapsed state it was meant to keep).
   await page.goto(`file://${root}/${path}`, { waitUntil: "networkidle0" });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: "networkidle0" });
 
   // Collapse to the rail: narrower, labels hidden, persisted across a reload.
   const width = () => page.$eval("#site-sidebar", (el) => el.getBoundingClientRect().width);
-  const full = await width();
+  /** The sidebar's width once its width transition has finished (two equal reads in a row). */
+  const settledWidth = async () => {
+    let last = await width();
+    for (let i = 0; i < 40; i++) {
+      await pause(100);
+      const now = await width();
+      if (now === last) return now;
+      last = now;
+    }
+    return last;
+  };
+  const full = await settledWidth();
   await page.click("#site-sidebar [data-collapse]");
-  await pause(400);
-  const rail = await width();
+  const rail = await settledWidth();
   if (!(rail < full / 2)) fail(path, "chrome", `collapse did not shrink the sidebar (${full} → ${rail})`);
   // A rail parent opens its group as a flyout.
   await page.hover("#site-sidebar .menu__link[data-toggle]");
@@ -198,11 +208,15 @@ for (const target of Object.keys(linkedFrom)) {
   if (!flyout?.shown || flyout.width < 120) fail(path, "chrome", `no rail flyout on hover (${JSON.stringify(flyout)})`);
   await page.mouse.move(900, 500);
   await page.reload({ waitUntil: "networkidle0" });
-  await pause(300);
-  if (!((await width()) < full / 2)) fail(path, "chrome", "the collapsed rail did not persist across a reload");
+  const restored = await settledWidth();
+  if (!(restored < full / 2)) {
+    fail(path, "chrome", `the collapsed rail did not persist across a reload (${full} → ${restored})`);
+  }
   await page.click("#site-sidebar [data-collapse]");
-  await pause(400);
-  if (Math.abs((await width()) - full) > 2) fail(path, "chrome", "expanding the rail did not restore the sidebar");
+  const expanded = await settledWidth();
+  if (Math.abs(expanded - full) > 2) {
+    fail(path, "chrome", `expanding the rail did not restore the sidebar (${expanded}, expected ${full})`);
+  }
 
   // Theme: the header switch loads one stylesheet after the bundle and repaints.
   const canvas = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
