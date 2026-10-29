@@ -112,9 +112,21 @@
       const sidebar = trigger.closest(".sidebar");
       const sublist = document.querySelector(trigger.getAttribute("data-toggle"));
       if (!sublist || !sidebar) return;
+      // Hover may already have opened the flyout, in which case toggle.js
+      // has just hidden it again: a click on a rail parent always ends with
+      // its children showing (Escape, an outside click or leaving closes).
+      const wasOpen = sublist.classList.contains(FLYOUT);
       setTimeout(() => {
-        if (sublist.hidden) closeFlyout(sublist);
-        else openFlyout(sublist, trigger, sidebar);
+        if (sublist.hidden && !wasOpen) {
+          closeFlyout(sublist);
+          return;
+        }
+        // toggle.js hides through uiMotion.exit, whose `hidden` lands on
+        // animationend — cancel that or it closes the flyout a beat later.
+        globalThis.uiMotion?.cancelExit(sublist);
+        sublist.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        openFlyout(sublist, trigger, sidebar);
       }, 0);
       return;
     }
