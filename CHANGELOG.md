@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.0](https://github.com/TundraSoft/ui/compare/v0.25.3...v0.26.0) (2026-10-29)
+
+
+### Features
+
+* **sidebar:** head, sections, foot, navLabel and an edge collapse toggle ([#93](https://github.com/TundraSoft/ui/issues/93)) ([10f7a4c](https://github.com/TundraSoft/ui/commit/10f7a4c8f95a9e17e63daf41a2b3cf5e40b84744))
+
 ## [0.25.3](https://github.com/TundraSoft/ui/compare/v0.25.2...v0.25.3) (2026-10-29)
 
 
