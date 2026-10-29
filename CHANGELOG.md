@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/TundraSoft/ui/compare/v0.24.0...v0.25.0) (2026-10-29)
+
+
+### Features
+
+* v3 round — motion, floating panels, ~40 new components, theme builder, rebuilt demo site ([#84](https://github.com/TundraSoft/ui/issues/84)) ([17be7f5](https://github.com/TundraSoft/ui/commit/17be7f55adec425c09a92b31368e7f7fac4b4acc))
+
 ## [0.24.0](https://github.com/TundraSoft/ui/compare/v0.23.0...v0.24.0) (2026-10-27)
 
 
