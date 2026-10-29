@@ -2,7 +2,7 @@
 // Regenerate with `deno task build` (Node: `npm run build`, Bun: `bun run bun:build`).
 
 /** The package version, as published to JSR and npm. */
-export const VERSION: string = "0.25.2"; // x-release-please-version
+export const VERSION: string = "0.25.3"; // x-release-please-version
 
 /** One distributable file and where to load it from. */
 export type UiAsset = {
@@ -15,24 +15,24 @@ export type UiAsset = {
 };
 
 /** Versioned CDN base for the compiled bundle (jsDelivr, from npm). */
-export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.2/dist"; // x-release-please-version
+export const CDN_BASE: string = "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.3/dist"; // x-release-please-version
 
 export const UI_CSS: UiAsset = {
   file: "ui.css",
-  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.2/dist/ui.css", // x-release-please-version
+  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.3/dist/ui.css", // x-release-please-version
   integrity: "sha384-YDlzi4WtU+m8WRIAbfNhzCEvHfosUG8gLPmPLooPUqhw4gBj8FqHD8TAd0T7637X",
 };
 
 export const UI_JS: UiAsset = {
   file: "ui.js",
-  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.2/dist/ui.js", // x-release-please-version
+  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.3/dist/ui.js", // x-release-please-version
   integrity: "sha384-97m/ql6KCB1vC3oDNWajf5EjD2e1Oml+1LEwQSt5ltC33DSCBtYUPIzVQNMdw4Wl",
 };
 
 /** The icon set as an SVG sprite (`<use href="…/icons.svg#icon-<name>">`, same-origin only). */
 export const UI_ICONS: UiAsset = {
   file: "icons.svg",
-  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.2/dist/icons.svg", // x-release-please-version
+  url: "https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.25.3/dist/icons.svg", // x-release-please-version
   integrity: "sha384-y4GI3r+3hjYFE664hMevOo6FYNAkVFUh73YTMjQc8cRQ2CYsLrGRr9K1IMUILOV3",
 };
 
