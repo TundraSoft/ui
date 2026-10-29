@@ -181,7 +181,7 @@ export const COMPONENTS: Record<string, ComponentInfo> = {
   collapsible: {
     label: "Collapsible & accordion",
     icon: "chevronDown",
-    blurb: "Disclosure built on details/summary, alone or as an accordion.",
+    blurb: "Disclosure with a height animation, alone or as an accordion; a deep link opens a row.",
   },
   wizard: { label: "Wizard", icon: "chevronsRight", blurb: "Numbered steps with done, current and pending states." },
   prose: { label: "Prose", icon: "alignLeft", blurb: "Long-form typography for content you did not mark up yourself." },

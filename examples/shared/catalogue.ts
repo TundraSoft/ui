@@ -876,6 +876,26 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             }],
           }),
         ),
+        c(
+          "deep links — a row's id is on its root; #cat-faq-plans (or #cat-faq-cancel-note, inside a row) opens it on arrival and on hashchange (#cat-faq)",
+          html`
+            <p><a href="#cat-faq-plans">Can I change plans?</a> · <a href="#cat-faq-cancel-note"
+              >The cancellation note</a></p>${Accordion({
+                id: "cat-faq",
+                items: [
+                  { id: "cat-faq-refunds", title: "How do refunds work?", content: lorem, defaultOpen: true },
+                  { id: "cat-faq-plans", title: "Can I change plans?", content: lorem },
+                  {
+                    id: "cat-faq-cancel",
+                    title: "How do I cancel?",
+                    content: html`
+                      ${lorem}<p id="cat-faq-cancel-note">Cancelling keeps your links until the period ends.</p>
+                    `,
+                  },
+                ],
+              })}
+          `,
+        ),
       ],
     },
     {

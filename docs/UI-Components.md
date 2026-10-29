@@ -687,7 +687,9 @@ Wizard({
 
 Tabs have roving tabindex, Home/End, and a `#tab-<id>` deep link that activates the tab on load (blurring it, so a
 sidebar link does not paint a focus ring). A collapsible's `<h3>` is a landmark only: its trigger reads in the
-surrounding text's type (an FAQ row, not a heading), so set the size on the container if a row should be larger.
+surrounding text's type (an FAQ row, not a heading), so set the size on the container if a row should be larger. A row's
+`id` is on its root, so `/faq#plans` lands on it; with the script, a hash naming a row (or anything inside one) opens it
+on arrival — before first paint, with no transition — and on hashchange, closing the rest of its accordion.
 
 ### [Prose](./reference/components-prose.md)
 
