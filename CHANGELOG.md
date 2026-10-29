@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.2](https://github.com/TundraSoft/ui/compare/v0.25.1...v0.25.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* **collapsible:** deep links — a row's id is on its root, a hash opens it ([#89](https://github.com/TundraSoft/ui/issues/89)) ([406d5f3](https://github.com/TundraSoft/ui/commit/406d5f3854e0477a23c24045a07be9daf54f5491))
+
 ## [0.25.1](https://github.com/TundraSoft/ui/compare/v0.25.0...v0.25.1) (2026-10-29)
 
 
