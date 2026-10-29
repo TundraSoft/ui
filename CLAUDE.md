@@ -945,6 +945,18 @@ Not rebuilt: the admin example app's content (its sidebar gained Profile and the
 `examples/shared/` case library, themes and layout samples — they are the content the site presents, and the regression
 suites are written against them.
 
+**Collapsible is `<details>` again (0.25.3, 2026-10-29).** Asked for by Website FE moving Brevily's FAQ off native
+`<details>`: 0.25.2 gave a row its `id` on the root and opened the row a hash names, but a closed row still needed
+script to open at all (a `<button data-toggle>` + `hidden` panel). Now the root is `<details class="collapsible">`, the
+trigger `<summary class="collapsible__trigger">` holding `<h3 class="collapsible__heading">` + the icon, and the panel
+`.collapsible__panel > .collapsible__inner` as before — every class keeps its role, because Brevily's website and
+console style `.collapsible*` directly. An `Accordion` passes its id as the rows' `name` (native exclusivity, no
+script). collapsible.js takes over a summary click (preventDefault) to animate the grid row and removes `open` only once
+a closing row has finished (`.is-closing` on the row, which also un-turns the icon); it moves `name` into
+`data-collapsible-name` on init and after `rapid:swapped` so the row an accordion closes can animate too, and a
+capture-phase `toggle` listener keeps the group exclusive when the browser opens a row itself (find-in-page, a
+fragment). `test-catalogue.ts` drives it with JS off as well.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

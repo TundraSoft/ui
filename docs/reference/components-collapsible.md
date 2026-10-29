@@ -14,11 +14,17 @@ Shown on its demo page (`deno task build:demos`, then `demo/components/collapsib
 Collapsible(props: CollapsibleProps): Html
 ```
 
+A disclosure row: a native `<details>` whose `<summary>` is the trigger,
+so it opens and closes with no script at all. collapsible.js adds the
+height animation, animated accordion exclusivity and hash deep links.
+
 ### `Accordion`
 
 ```ts
 Accordion(props: AccordionProps): Html
 ```
+
+Rows of which one is open at a time: `Collapsible`s sharing the accordion's id as their `name`.
 
 ## Types
 
@@ -30,6 +36,7 @@ Accordion(props: AccordionProps): Html
 | `title` | `string | Html` | yes |  |
 | `content` | `Html` | yes |  |
 | `defaultOpen` | `boolean` |  |  |
+| `name` | `string` |  | Rows sharing a name are exclusive: opening one closes the others — the native `<details name>`, so it holds without the script in a browser that supports it. `Accordion` sets it to its own id. |
 | `attrs` | `Attrs` |  |  |
 
 ### `AccordionProps`
@@ -57,21 +64,19 @@ Collapsible({
 ```
 
 ```html
-<div class="collapsible" id="terms">
-  <h3 class="collapsible__heading">
-    <button type="button" class="collapsible__trigger" data-toggle="#terms-panel" aria-expanded="false" aria-controls="terms-panel">
-      Terms and conditions
-      <span class="collapsible__icon" aria-hidden="true">
-        <svg width="14" height="14" width="2" …>…</svg>
-      </span>
-    </button>
-  </h3>
-  <div class="collapsible__panel" id="terms-panel" data-toggle-panel hidden>
+<details class="collapsible" id="terms">
+  <summary class="collapsible__trigger">
+    <h3 class="collapsible__heading">Terms and conditions</h3>
+    <span class="collapsible__icon" aria-hidden="true">
+      <svg width="14" height="14" width="2" …>…</svg>
+    </span>
+  </summary>
+  <div class="collapsible__panel" id="terms-panel">
     <div class="collapsible__inner">
       <p>Net 30, 2% late fee.</p>
     </div>
   </div>
-</div>
+</details>
 ```
 
 ### An FAQ accordion — /faq#plans opens the second row
@@ -101,36 +106,32 @@ Accordion({
 
 ```html
 <div class="accordion" id="faq" data-accordion-group="">
-  <div class="collapsible" id="refunds">
-    <h3 class="collapsible__heading">
-      <button type="button" class="collapsible__trigger" data-toggle="#refunds-panel" aria-expanded="true" aria-controls="refunds-panel">
-        How do refunds work?
-        <span class="collapsible__icon" aria-hidden="true">
-          <svg width="14" height="14" width="2" …>…</svg>
-        </span>
-      </button>
-    </h3>
-    <div class="collapsible__panel" id="refunds-panel" data-toggle-panel>
+  <details class="collapsible" id="refunds" name="faq" open="">
+    <summary class="collapsible__trigger">
+      <h3 class="collapsible__heading">How do refunds work?</h3>
+      <span class="collapsible__icon" aria-hidden="true">
+        <svg width="14" height="14" width="2" …>…</svg>
+      </span>
+    </summary>
+    <div class="collapsible__panel" id="refunds-panel">
       <div class="collapsible__inner">
         <p>Within 14 days, in full.</p>
       </div>
     </div>
-  </div>
-  <div class="collapsible" id="plans">
-    <h3 class="collapsible__heading">
-      <button type="button" class="collapsible__trigger" data-toggle="#plans-panel" aria-expanded="false" aria-controls="plans-panel">
-        Can I change plans?
-        <span class="collapsible__icon" aria-hidden="true">
-          <svg width="14" height="14" width="2" …>…</svg>
-        </span>
-      </button>
-    </h3>
-    <div class="collapsible__panel" id="plans-panel" data-toggle-panel hidden>
+  </details>
+  <details class="collapsible" id="plans" name="faq">
+    <summary class="collapsible__trigger">
+      <h3 class="collapsible__heading">Can I change plans?</h3>
+      <span class="collapsible__icon" aria-hidden="true">
+        <svg width="14" height="14" width="2" …>…</svg>
+      </span>
+    </summary>
+    <div class="collapsible__panel" id="plans-panel">
       <div class="collapsible__inner">
         <p>Any time; the difference is prorated.</p>
       </div>
     </div>
-  </div>
+  </details>
 </div>
 ```
 
@@ -138,10 +139,12 @@ Accordion({
 
 Classes defined by `components/collapsible/collapsible.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.accordion`, `.collapsible`, `.collapsible__heading`, `.collapsible__icon`, `.collapsible__inner`, `.collapsible__panel`, `.collapsible__trigger`, `.is-animating`, `.is-collapsed`
+`.accordion`, `.collapsible`, `.collapsible__heading`, `.collapsible__icon`, `.collapsible__inner`, `.collapsible__panel`, `.collapsible__trigger`, `.is-animating`, `.is-closing`, `.is-collapsed`
 
 ## Behaviour
 
 `components/collapsible/collapsible.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-accordion-group`, `data-toggle`.
+Attributes it reads or writes: `data-accordion-group`, `data-collapsible-name`.
+
+Events: `rapid:swapped`.

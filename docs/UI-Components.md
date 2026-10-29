@@ -686,10 +686,14 @@ Wizard({
 ```
 
 Tabs have roving tabindex, Home/End, and a `#tab-<id>` deep link that activates the tab on load (blurring it, so a
-sidebar link does not paint a focus ring). A collapsible's `<h3>` is a landmark only: its trigger reads in the
-surrounding text's type (an FAQ row, not a heading), so set the size on the container if a row should be larger. A row's
-`id` is on its root, so `/faq#plans` lands on it; with the script, a hash naming a row (or anything inside one) opens it
-on arrival — before first paint, with no transition — and on hashchange, closing the rest of its accordion.
+sidebar link does not paint a focus ring). A collapsible row is a native `<details>` whose `<summary>` is the trigger,
+so it opens and closes with no script at all; an accordion's rows share a `name` (the accordion's id), which browsers
+that support it make exclusive natively. The script adds the height animation, animated exclusivity and deep links. The
+`<h3>` inside the summary is for heading navigation only: the row reads in the surrounding text's type (an FAQ row, not
+a heading), so set the size on the container if a row should be larger. A row's `id` is on its root, so `/faq#plans`
+lands on it (and Chromium opens a closed row for a fragment inside it, even without the script); with the script, a hash
+naming a row (or anything inside one) opens it on arrival — before first paint, with no transition — and on hashchange,
+closing the rest of its accordion.
 
 ### [Prose](./reference/components-prose.md)
 
