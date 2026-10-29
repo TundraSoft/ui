@@ -53,18 +53,23 @@ function node(item: TreeNode, path: string, level: number, index: number, count:
       },
     )}>
       <div class="tree__row">${hasChildren
-        ? html`<button type="button" class="tree__toggle" tabindex="-1" aria-label="Toggle" aria-controls="${groupId}" data-tree-toggle>${Icon(
-          "chevronRight",
-          { size: 14 },
-        )}</button>`
+        ? html`
+          <button type="button" class="tree__toggle" tabindex="-1" aria-label="Toggle" aria-controls="${groupId}"
+            data-tree-toggle>${Icon(
+              "chevronRight",
+              { size: 14 },
+            )}</button>
+        `
         : html`<span class="tree__spacer"></span>`}${item.href
-        ? html`<a class="tree__link" href="${item.href}" tabindex="-1"${renderAttrs({
-          "aria-current": item.selected ? "page" : undefined,
-        })}>${row}</a>`
+        ? html`
+          <a class="tree__link" href="${item.href}" tabindex="-1" ${renderAttrs({
+            "aria-current": item.selected ? "page" : undefined,
+          })}>${row}</a>
+        `
         : html`<span class="tree__link">${row}</span>`}</div>${hasChildren
-        ? html`<ul class="tree__group" role="group" id="${groupId}">${item.children!.map((child, i) =>
-          node(child, `${id}-${i}`, level + 1, i, item.children!.length)
-        )}</ul>`
+        ? html`<ul class="tree__group" role="group" id="${groupId}">${
+          item.children!.map((child, i) => node(child, `${id}-${i}`, level + 1, i, item.children!.length))
+        }</ul>`
         : ""}
     </li>
   `;

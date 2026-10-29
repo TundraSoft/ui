@@ -143,6 +143,13 @@ export const caseRow = (...items: Html[]): Html =>
   html`
     <div class="cat-row">${items}</div>
   `;
+/**
+ * A visually hidden `<label for>` — an accessible name for a control shown
+ * bare, where the component has no prop that reaches the control itself
+ * (an Editor's markdown textarea, a NumberInput's field).
+ */
+export const srLabel = (forId: string, text: string): Html =>
+  html`<label class="sr-only" for="${forId}">${text}</label>`;
 /** A paragraph of body copy for a case. */
 export const caseCopy: Html = html`
   <p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>
@@ -717,10 +724,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           )
         ),
         c(
-          "selected + footerSplit + avatar + actions",
+          "selected + footerSplit + avatar + actions (not interactive: a card holding its own controls is never one control)",
           Card({
             selected: true,
-            interactive: true,
             avatar: Avatar({ initials: "GH", size: "sm" }),
             title: "Grace Hopper",
             subtitle: "Admin",
@@ -961,14 +967,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "total — one page of a larger result set ends with a note (#cat-cb-total)",
-          Combobox({
-            id: "cat-cb-total",
-            name: "office",
-            label: "Office",
-            open: true,
-            total: 9812,
-            options: cityOptions.slice(0, 5),
-          }),
+          html`
+            <div class="cat-room cat-room--lg">${Combobox({
+              id: "cat-cb-total",
+              name: "office",
+              label: "Office",
+              open: true,
+              total: 9812,
+              options: cityOptions.slice(0, 5),
+            })}</div>
+          `,
         ),
         c(
           "selectedOptions — a pick the page of options does not hold keeps its label (#cat-cb-selopts)",
@@ -1056,12 +1064,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
-          "ComboboxList fragment",
-          ComboboxList({
-            id: "cat-cb-5",
-            query: "gr",
-            options: [{ value: "g", label: "Grace" }, { value: "gb", label: "Graham" }],
-          }),
+          "ComboboxList fragment — what a route returns for a swap of the listbox (shown inside a bare listbox here)",
+          html`
+            <div class="combobox__list combobox__list--static" role="listbox" aria-label="Fragment sample">${ComboboxList(
+              {
+                id: "cat-cb-5",
+                query: "gr",
+                options: [{ value: "g", label: "Grace" }, { value: "gb", label: "Graham" }],
+              },
+            )}</div>
+          `,
         ),
       ],
     },
@@ -1105,8 +1117,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c("floating (closed; ⌘K opens)", Command({ id: "cat-cmd-3", items: [{ label: "Only in the palette" }] })),
         c(
-          "CommandList fragment",
-          CommandList({ id: "cat-cmd-4", query: "in", items: [{ label: "Invite", icon: "users" }] }),
+          "CommandList fragment — what a route returns for a swap of the list (shown inside a bare listbox here)",
+          html`
+            <div class="command__list" role="listbox" aria-label="Fragment sample">${CommandList({
+              id: "cat-cmd-4",
+              query: "in",
+              items: [{ label: "Invite", icon: "users" }],
+            })}</div>
+          `,
         ),
       ],
     },
@@ -1544,7 +1562,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               Button({ label: "Download" }),
               Dropdown({
                 id: "cat-dd-split",
-                trigger: Icon("chevronDown", { size: 15 }),
+                trigger: html`${Icon("chevronDown", { size: 15 })}<span class="sr-only">More download formats</span>`,
                 triggerClass: "btn btn--primary",
                 content: Menu({ items: [{ label: "PDF", href: "#" }, { label: "CSV", href: "#" }] }),
               }),
@@ -1679,13 +1697,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "maxLength — the status bar counts down; uploadAction — a dropped or pasted image is stored by the server (#cat-ed-max, #cat-ed-up)",
           row(
-            Editor({
-              id: "cat-ed-max",
-              name: "summary",
-              maxLength: 120,
-              rows: 4,
-              value: "A summary that may not run past one hundred and twenty characters.",
-            }),
+            html`
+              ${srLabel("cat-ed-max", "Summary")}${Editor({
+                id: "cat-ed-max",
+                name: "summary",
+                maxLength: 120,
+                rows: 4,
+                value: "A summary that may not run past one hundred and twenty characters.",
+              })}
+            `,
             Editor({
               id: "cat-ed-up",
               name: "post",
@@ -1698,8 +1718,24 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "disabled / invalid",
           row(
-            Editor({ id: "cat-ed-dis", name: "d", value: "Read-only", disabled: true, rows: 3 }),
-            Editor({ id: "cat-ed-inv", name: "i", value: "Too short", invalid: true, rows: 3 }),
+            html`
+              ${srLabel("cat-ed-dis", "Disabled editor")}${Editor({
+                id: "cat-ed-dis",
+                name: "d",
+                value: "Read-only",
+                disabled: true,
+                rows: 3,
+              })}
+            `,
+            html`
+              ${srLabel("cat-ed-inv", "Invalid editor")}${Editor({
+                id: "cat-ed-inv",
+                name: "i",
+                value: "Too short",
+                invalid: true,
+                rows: 3,
+              })}
+            `,
           ),
         ),
       ],
@@ -1786,7 +1822,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     {
       name: "form",
       cases: [
-        c("plain", Form({ id: "cat-form-1", action: "#", content: FormField({ label: "Name", control: Input({}) }) })),
+        c(
+          "plain",
+          Form({
+            id: "cat-form-1",
+            action: "#",
+            content: FormField({ id: "cat-form-1-name", label: "Name", control: Input({ id: "cat-form-1-name" }) }),
+          }),
+        ),
         c(
           "csrfToken — the hidden field a no-JS POST carries; CsrfField for a hand-built form",
           html`
@@ -1794,7 +1837,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               id: "cat-form-csrf",
               action: "?save",
               csrfToken: "demo-token",
-              content: FormField({ label: "Name", control: Input({ name: "name" }) }),
+              content: FormField({
+                id: "cat-form-csrf-name",
+                label: "Name",
+                control: Input({ id: "cat-form-csrf-name", name: "name" }),
+              }),
             })}<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${Button({
               label: "Revoke",
               size: "sm",
@@ -1844,7 +1891,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             action: "#",
             method: "get",
             error: formError,
-            content: FormField({ label: "Email", control: Input({ type: "email", invalid: true }) }),
+            content: FormField({
+              id: "cat-form-2-email",
+              label: "Email",
+              control: Input({ id: "cat-form-2-email", type: "email", invalid: true }),
+            }),
           }),
         ),
         c(
@@ -2088,7 +2139,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               type: "email",
               domains: ["acme.com", "acme.io"],
               value: "ada@acme.io",
-            })}${Input({ id: "cat-em-2", name: "email", type: "email", domains: ["acme.com"] })}</div>
+              attrs: { "aria-label": "Email (two domains)" },
+            })}${Input({
+              id: "cat-em-2",
+              name: "email",
+              type: "email",
+              domains: ["acme.com"],
+              attrs: { "aria-label": "Email (one domain)" },
+            })}</div>
           `,
         ),
         c(
@@ -2099,15 +2157,30 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             type: "tel",
             countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }, { code: "+91", label: "IN" }],
             value: "+44 20 7946 0958",
+            attrs: { "aria-label": "Phone number" },
           }),
         ),
         c(
           "type tel + countries with flags — the library ships none; the demo draws five (examples/shared/flags.ts)",
-          Input({ id: "cat-tel-2", name: "phone", type: "tel", countries: sampleCountries, value: "+49 30 901820" }),
+          Input({
+            id: "cat-tel-2",
+            name: "phone",
+            type: "tel",
+            countries: sampleCountries,
+            value: "+49 30 901820",
+            attrs: { "aria-label": "Phone number (with flags)" },
+          }),
         ),
         c(
           "type url + scheme — https:// fixed, the rest typed",
-          Input({ id: "cat-url-1", name: "website", type: "url", scheme: "https://", value: "https://acme.com/team" }),
+          Input({
+            id: "cat-url-1",
+            name: "website",
+            type: "url",
+            scheme: "https://",
+            value: "https://acme.com/team",
+            attrs: { "aria-label": "Website" },
+          }),
         ),
         c(
           "prefix / suffix",
@@ -2120,13 +2193,25 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               suffix: "per seat",
               min: 0,
               step: "any",
-            })}${Input({ id: "cat-px-2", name: "weight", type: "number", suffix: "kg" })}</div>
+              attrs: { "aria-label": "Amount per seat" },
+            })}${Input({
+              id: "cat-px-2",
+              name: "weight",
+              type: "number",
+              suffix: "kg",
+              attrs: { "aria-label": "Weight" },
+            })}</div>
           `,
         ),
         c(
           "Counter() alone — for a custom control that sets data-counter itself",
           html`
-            ${Input({ id: "cat-cnt-2", name: "tag", maxLength: 10, attrs: { "data-counter": "" } })}${Counter(
+            ${Input({
+              id: "cat-cnt-2",
+              name: "tag",
+              maxLength: 10,
+              attrs: { "data-counter": "", "aria-label": "Tag" },
+            })}${Counter(
               "cat-cnt-2",
               10,
             )}
@@ -2134,7 +2219,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "counter (maxLength 40)",
-          Input({ id: "cat-cnt-1", name: "title", maxLength: 40, counter: true, value: "Quarterly invoice run" }),
+          Input({
+            id: "cat-cnt-1",
+            name: "title",
+            maxLength: 40,
+            counter: true,
+            value: "Quarterly invoice run",
+            attrs: { "aria-label": "Title" },
+          }),
         ),
         c(
           "type search — clear button (clearable: false to drop it)",
@@ -2162,18 +2254,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "states",
           row(
-            Input({ value: "Disabled", disabled: true }),
-            Input({ value: "Readonly", readonly: true }),
+            Input({ value: "Disabled", disabled: true, attrs: { "aria-label": "Disabled input" } }),
+            Input({ value: "Readonly", readonly: true, attrs: { "aria-label": "Read-only input" } }),
             Input({ placeholder: "Required", required: true }),
-            Input({ value: "bad", invalid: true }),
+            Input({ value: "bad", invalid: true, attrs: { "aria-label": "Invalid input" } }),
           ),
         ),
         c(
           "types",
           row(
             Input({ type: "email", placeholder: "email" }),
-            Input({ type: "password", value: "secret" }),
-            Input({ type: "number", value: "3" }),
+            Input({ type: "password", value: "secret", attrs: { "aria-label": "Password" } }),
+            Input({ type: "number", value: "3", attrs: { "aria-label": "Quantity" } }),
             Input({ type: "search", placeholder: "search" }),
             Input({ type: "date" }),
           ),
@@ -2209,22 +2301,49 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "InputGroup start / end / both / select",
           row(
-            InputGroup({ start: "$", control: Input({ extraClass: "input-group__control" }) }),
-            InputGroup({ end: "USD", control: Input({ extraClass: "input-group__control" }) }),
-            InputGroup({ start: "https://", end: ".com", control: Input({ extraClass: "input-group__control" }) }),
             InputGroup({
-              start: Select({ options: [{ value: "1", label: "+1" }], extraClass: "input-group__control" }),
-              control: Input({ extraClass: "input-group__control" }),
+              start: "$",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Amount" } }),
+            }),
+            InputGroup({
+              end: "USD",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Price in USD" } }),
+            }),
+            InputGroup({
+              start: "https://",
+              end: ".com",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Domain name" } }),
+            }),
+            InputGroup({
+              start: Select({
+                id: "cat-ig-country",
+                options: [{ value: "1", label: "+1" }],
+                extraClass: "input-group__control",
+                attrs: { "aria-label": "Country code" },
+              }),
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Phone number" } }),
             }),
           ),
         ),
         c(
           'Input({ type: "password" }) — the password field with its Show/Hide toggle',
-          Input({ id: "cat-pw-1", name: "password", type: "password", required: true }),
+          Input({
+            id: "cat-pw-1",
+            name: "password",
+            type: "password",
+            required: true,
+            attrs: { "aria-label": "Password" },
+          }),
         ),
         c(
           "reveal: false — the bare native control",
-          Input({ id: "cat-pw-0", name: "password", type: "password", reveal: false }),
+          Input({
+            id: "cat-pw-0",
+            name: "password",
+            type: "password",
+            reveal: false,
+            attrs: { "aria-label": "Password (no toggle)" },
+          }),
         ),
         c(
           "new password — strength bar (type to see it), strengthMin 3",
@@ -2236,6 +2355,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             autocomplete: "new-password",
             strength: true,
             strengthMin: 3,
+            attrs: { "aria-label": "New password" },
           }),
         ),
         c(
@@ -2246,6 +2366,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             name: "password",
             value: "correct horse battery",
             strength: true,
+            attrs: { "aria-label": "Password (prefilled)" },
           }),
         ),
         c(
@@ -2255,6 +2376,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-pw-4",
             name: "confirm",
             match: "#cat-pw-2",
+            attrs: { "aria-label": "Confirm password" },
           }),
         ),
         c(
@@ -2265,6 +2387,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             name: "password",
             reveal: false,
             disabled: true,
+            attrs: { "aria-label": "Password (disabled)" },
           }),
         ),
         c(
@@ -2348,6 +2471,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           Input({
             id: "cat-mask-custom",
             name: "ref",
+            attrs: { "aria-label": "Reference" },
             mask: "custom",
             maskPattern: "##-AAA-####",
             maskPlaceholderChar: "_",
@@ -2854,6 +2978,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-sel-lead",
             name: "market",
             value: "de",
+            attrs: { "aria-label": "Market" },
             options: [
               { value: "fr", label: "France", lead: flags.fr },
               { value: "de", label: "Germany", lead: flags.de },
@@ -2868,6 +2993,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-sel-long",
             name: "city",
             value: "tokyo",
+            attrs: { "aria-label": "City" },
             options: cityOptions,
             searchPlaceholder: "Search cities…",
             emptyText: "No city matches.",
@@ -2880,6 +3006,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               "cat-req-plain",
               false,
               FormField({
+                id: "cat-req-plain-sel",
                 label: "City (plain form)",
                 control: Select({
                   id: "cat-req-plain-sel",
@@ -2894,6 +3021,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               "cat-req-val",
               true,
               FormField({
+                id: "cat-req-val-sel",
                 label: "City (validated)",
                 control: Select({
                   id: "cat-req-val-sel",
@@ -2909,24 +3037,60 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "searchable: false — typing on the field jumps to the first option starting with it",
-          Select({ id: "cat-sel-plain", searchable: false, options: cityOptions.slice(0, 8) }),
+          Select({
+            id: "cat-sel-plain",
+            searchable: false,
+            options: cityOptions.slice(0, 8),
+            attrs: { "aria-label": "City (type-ahead)" },
+          }),
         ),
         c(
           "plain / placeholder / value",
           row(
-            Select({ id: "cat-sel", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
-            Select({ placeholder: "Pick one", options: [{ value: "a", label: "Alpha" }] }),
-            Select({ value: "b", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
+            Select({
+              id: "cat-sel",
+              options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }],
+              attrs: { "aria-label": "Plain select" },
+            }),
+            Select({
+              id: "cat-sel-placeholder",
+              placeholder: "Pick one",
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Select with a placeholder" },
+            }),
+            Select({
+              id: "cat-sel-value",
+              value: "b",
+              options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }],
+              attrs: { "aria-label": "Select with a value" },
+            }),
           ),
         ),
         c(
           "disabled / required / invalid / disabled option",
           row(
-            Select({ disabled: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ required: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ invalid: true, options: [{ value: "a", label: "Alpha" }] }),
             Select({
+              id: "cat-sel-disabled",
+              disabled: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Disabled select" },
+            }),
+            Select({
+              id: "cat-sel-required",
+              required: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Required select" },
+            }),
+            Select({
+              id: "cat-sel-invalid",
+              invalid: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Invalid select" },
+            }),
+            Select({
+              id: "cat-sel-disabled-option",
               options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta (off)", disabled: true }],
+              attrs: { "aria-label": "Select with a disabled option" },
             }),
           ),
         ),
@@ -3181,7 +3345,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "counter (maxLength 280)",
-          Textarea({ id: "cat-ta-cnt", name: "note", maxLength: 280, counter: true, rows: 3, value: "Ship it." }),
+          Textarea({
+            id: "cat-ta-cnt",
+            name: "note",
+            maxLength: 280,
+            counter: true,
+            rows: 3,
+            value: "Ship it.",
+            attrs: { "aria-label": "Note" },
+          }),
         ),
         c(
           "autosize — grows with the content",
@@ -3191,11 +3363,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "plain / rows / states",
           row(
             Textarea({ placeholder: "Plain" }),
-            Textarea({ rows: 6, value: "Six rows" }),
-            Textarea({ value: "Disabled", disabled: true }),
-            Textarea({ value: "Readonly", readonly: true }),
+            Textarea({ rows: 6, value: "Six rows", attrs: { "aria-label": "Six rows" } }),
+            Textarea({ value: "Disabled", disabled: true, attrs: { "aria-label": "Disabled textarea" } }),
+            Textarea({ value: "Readonly", readonly: true, attrs: { "aria-label": "Read-only textarea" } }),
             Textarea({ required: true, placeholder: "Required" }),
-            Textarea({ value: "bad", invalid: true }),
+            Textarea({ value: "bad", invalid: true, attrs: { "aria-label": "Invalid textarea" } }),
           ),
         ),
       ],
@@ -3368,7 +3540,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           Toolbar({
             start: html`
               ${Input({ type: "search", placeholder: "Search", size: "sm" })}${Select({
+                id: "cat-toolbar-filter",
                 options: [{ value: "all", label: "All" }],
+                attrs: { "aria-label": "Filter" },
               })}
             `,
             end: html`
@@ -3515,6 +3689,7 @@ export const catalogueCss =
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
 .cat-narrow { max-width: 320px; }
 .cat-room { padding-bottom: 9rem; }
+.cat-room--lg { padding-bottom: 18rem; } /* an open list of five rows plus its notes */
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-row-muted { color: var(--color-text-muted); }
 .cat-alert-before-icon { --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3)); }

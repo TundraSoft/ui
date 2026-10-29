@@ -39,12 +39,12 @@ export function Lightbox(props: LightboxProps): Html {
   return html`
     <dialog${classAttrs("lightbox", attrs)}>
       <div class="lightbox__chrome"><span class="lightbox__counter" data-lightbox-counter>1 / ${String(
-          props.items.length,
-        )}</span><button type="button" class="btn btn--ghost btn--icon lightbox__close" data-lightbox-close
+        props.items.length,
+      )}</span><button type="button" class="btn btn--ghost btn--icon lightbox__close" data-lightbox-close
           aria-label="Close">${Icon("x", { size: 18 })}</button></div>
       <figure class="lightbox__figure" data-lightbox-figure><img class="lightbox__image" data-lightbox-image${renderAttrs(
-          { src: first?.src, alt: first?.alt ?? "" },
-        )}><figcaption class="lightbox__caption" data-lightbox-caption>${first?.caption ?? ""}</figcaption></figure>
+        { src: first?.src, alt: first?.alt ?? "" },
+      )}><figcaption class="lightbox__caption" data-lightbox-caption>${first?.caption ?? ""}</figcaption></figure>
       <button type="button" class="btn btn--outline btn--icon lightbox__nav lightbox__nav--prev" data-lightbox-prev
         aria-label="Previous image">${Icon("chevronLeft", { size: 18 })}</button><button type="button"
         class="btn btn--outline btn--icon lightbox__nav lightbox__nav--next" data-lightbox-next

@@ -308,7 +308,7 @@
   border-top: var(--border-width) solid var(--color-border-subtle);
   background: var(--color-surface-sunken, var(--color-surface-alt));
   font-size: var(--font-size-xs);
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted); /* on the sunken ground, subtle is under 4.5:1 */
   font-variant-numeric: tabular-nums;
 }
 

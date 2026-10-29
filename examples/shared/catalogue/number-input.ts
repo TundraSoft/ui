@@ -2,7 +2,7 @@
 import { html } from "@tundralibs/rapid/ui";
 import { NumberInput } from "../../../components/number-input/number-input.ts";
 import { FormField } from "../../../components/form-field/form-field.ts";
-import { caseOf, caseRow, type CatalogueEntryInput, type CatalogueState } from "../catalogue.ts";
+import { caseOf, caseRow, type CatalogueEntryInput, type CatalogueState, srLabel } from "../catalogue.ts";
 import type { DemoRoutes } from "../data.ts";
 
 const sizes = ["sm", "md", "lg"] as const;
@@ -17,7 +17,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         caseRow(
           ...sizes.map((size) =>
             html`
-              <div class="cat-narrow">${NumberInput({
+              <div class="cat-narrow">${srLabel(`cat-ni-${size}`, `Quantity (${size})`)}${NumberInput({
                 id: `cat-ni-${size}`,
                 name: `qty-${size}`,
                 size,
@@ -34,7 +34,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         caseRow(
           ...formats.map((format) =>
             html`
-              <div class="cat-narrow">${NumberInput({
+              <div class="cat-narrow">${srLabel(`cat-ni-${format}`, `Amount (${format})`)}${NumberInput({
                 id: `cat-ni-${format}`,
                 name: `amount-${format}`,
                 format,
@@ -59,7 +59,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
             })}</div>
           `,
           html`
-            <div class="cat-narrow">${NumberInput({
+            <div class="cat-narrow">${srLabel("cat-ni-invalid", "Invalid number")}${NumberInput({
               id: "cat-ni-invalid",
               name: "bad",
               value: 0,
@@ -68,7 +68,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
             })}</div>
           `,
           html`
-            <div class="cat-narrow">${NumberInput({
+            <div class="cat-narrow">${srLabel("cat-ni-disabled", "Disabled number")}${NumberInput({
               id: "cat-ni-disabled",
               name: "off",
               value: 3,

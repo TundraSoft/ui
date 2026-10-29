@@ -57,8 +57,8 @@ export function Hero(props: HeroProps): Html {
       <div class="container hero__inner">
         <div class="hero__body">${props.eyebrow && html`<p class="hero__eyebrow">${props.eyebrow}</p>`}<h1
             class="hero__title">${props.title}</h1>${props.text && html`<p class="hero__text">${props.text}</p>`}${props
-            .actions && html`<div class="hero__actions">${props.actions}</div>`}</div>${media}
+              .actions && html`<div class="hero__actions">${props.actions}</div>`}</div>${media}
       </div>
-    </section>
+      </section>
   `;
 }

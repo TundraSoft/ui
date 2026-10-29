@@ -28,6 +28,17 @@ whose HTML is mirrored into the hidden textarea that submits.
 - `"markdown"`
 - `"html"`
 
+### `EditorToolbar`
+
+Which toolbar groups render. `full` is everything the mode supports;
+`basic` is text, headings, lists, quote, code and link (a comment box);
+`minimal` is bold, italic and link (a caption). The status bar and the
+Preview view follow their own props.
+
+- `"full"`
+- `"basic"`
+- `"minimal"`
+
 ### `EditorProps`
 
 | Prop | Type | Required | Description |
@@ -37,11 +48,16 @@ whose HTML is mirrored into the hidden textarea that submits.
 | `mode` | `EditorMode` |  |  |
 | `value` | `string` |  | Markdown source, or (html mode) trusted HTML the server already sanitised. |
 | `placeholder` | `string` |  |  |
+| `label` | `string` |  | Accessible name of the editing surface in html mode (a `<label for>` reaches the textarea, not the surface). @default the placeholder, else "Editor" |
 | `rows` | `number` |  |  |
 | `disabled` | `boolean` |  |  |
 | `required` | `boolean` |  |  |
 | `invalid` | `boolean` |  |  |
 | `previewAction` | `string` |  | Markdown only: a route that renders `text` (posted as a form field) to an HTML fragment for the Preview view — swapped in through rAPId's runtime. Without it (or without the runtime) Preview shows the raw text. |
+| `uploadAction` | `string` |  | A route that stores an image dropped or pasted into the editor: it receives the file as multipart `file` (with the CSRF header read from `<body data-*>`) and answers with the stored image's URL as plain text. The editor shows an "Uploading…" placeholder meanwhile and then inserts `![name](url)` (markdown) or an `<img>` (html). Plain `fetch`, so it works without the runtime; without this prop a dropped file is ignored. |
+| `toolbar` | `EditorToolbar` |  | Which toolbar groups render. @default "full" |
+| `statusBar` | `boolean` |  | The footer with the live word and character count. @default true |
+| `maxLength` | `number` |  | Longest text accepted: the status bar counts down to it and the textarea carries `maxlength` (markdown mode — in html mode the limit applies to the visible text and is reported in the status bar only). |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -65,41 +81,173 @@ Editor({
 ```html
 <div class="editor editor--markdown" id="notes-editor" data-editor data-editor-mode="markdown" data-editor-preview="/fragments/preview">
   <div class="editor__toolbar" role="toolbar" aria-label="Formatting">
-    <button type="button" class="editor__tool" data-editor-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)">
-      <b>B</b>
+    <button type="button" class="editor__tool" data-editor-cmd="undo" aria-label="Undo" title="Undo (Ctrl+Z)">
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
-    <button type="button" class="editor__tool" data-editor-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)">
-      <i>I</i>
+    <button type="button" class="editor__tool" data-editor-cmd="redo" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
-    <button type="button" class="editor__tool" data-editor-cmd="strike" aria-label="Strikethrough" title="Strikethrough">
-      <s>S</s>
-    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <select class="editor__select" data-editor-level aria-label="Block style">
+      <option value="p">Paragraph</option>
+      <option value="h1">Heading 1</option>
+      <option value="h2">Heading 2</option>
+      <option value="h3">Heading 3</option>
+    </select>
     <button type="button" class="editor__tool" data-editor-cmd="heading" aria-label="Heading" title="Heading">
-      <b>H</b>
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
     <button type="button" class="editor__tool" data-editor-cmd="quote" aria-label="Quote" title="Quote">
-      <span class="text-mono">“</span>
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
     <button type="button" class="editor__tool" data-editor-cmd="code" aria-label="Code" title="Code">
-      <span class="text-mono">&lt;&gt;</span>
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
-    <button type="button" class="editor__tool" data-editor-cmd="link" aria-label="Link" title="Link (Ctrl+K)">
-      <span class="text-mono">[ ]</span>
+    <button type="button" class="editor__tool" data-editor-cmd="codeblock" aria-label="Code block" title="Code block">
+      <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
     </button>
-    <button type="button" class="editor__tool" data-editor-cmd="image" aria-label="Image" title="Image">
-      <span class="text-mono">[img]</span>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)">
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
+    <button type="button" class="editor__tool" data-editor-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="strike" aria-label="Strikethrough" title="Strikethrough">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
     <button type="button" class="editor__tool" data-editor-cmd="ul" aria-label="Bulleted list" title="Bulleted list">
       <svg width="15" height="15" width="2" …>…</svg>
     </button>
     <button type="button" class="editor__tool" data-editor-cmd="ol" aria-label="Numbered list" title="Numbered list">
-      <span class="text-mono">1.</span>
+      <span class="editor__glyph" aria-hidden="true">1.</span>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="task" aria-label="Task list" title="Task list">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="link" aria-label="Link" title="Link (Ctrl+K)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="image" aria-label="Image" title="Image">
+      <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="table" aria-label="Table" title="Table">
+      <svg width="15" height="15" width="2" width="18" height="16" …>…</svg>
     </button>
     <button type="button" class="editor__tool" data-editor-cmd="hr" aria-label="Horizontal rule" title="Horizontal rule">
-      <span class="text-mono">—</span>
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
+    <span class="editor__sep" aria-hidden="true"></span>
     <button type="button" class="editor__tool" data-editor-cmd="clear" aria-label="Clear formatting" title="Clear formatting">
-      <span class="text-mono">Tx</span>
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__spacer"></span>
+    <span class="editor__views" role="group" aria-label="View">
+      <button type="button" class="editor__view" data-editor-view="write" aria-pressed="true">Write</button>
+      <button type="button" class="editor__view" data-editor-view="preview" aria-pressed="false">Preview</button>
+    </span>
+    <button type="button" class="editor__tool" data-editor-fullscreen aria-pressed="false" aria-label="Full screen" title="Full screen (Esc leaves)">
+      <span class="editor__icon-on">
+        <svg width="15" height="15" width="2" …>…</svg>
+      </span>
+      <span class="editor__icon-off">
+        <svg width="15" height="15" width="2" …>…</svg>
+      </span>
+    </button>
+  </div>
+  <div class="editor__popover" data-editor-popover hidden>
+    <div class="editor__dialog" data-editor-dialog role="group" aria-label="Insert">
+      <label class="editor__dialog-field" data-editor-field-wrap="url">
+        <span class="editor__dialog-label" data-editor-dialog-label="url">URL</span>
+        <input class="input input--sm" type="text" data-editor-field="url" placeholder="https://" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="text">
+        <span class="editor__dialog-label" data-editor-dialog-label="text">Text</span>
+        <input class="input input--sm" type="text" data-editor-field="text" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="lang" hidden>
+        <span class="editor__dialog-label">Language</span>
+        <select class="input input--sm" data-editor-field="lang">
+          <option value="plain">plain</option>
+          <option value="js">js</option>
+          <option value="ts">ts</option>
+          <option value="html">html</option>
+          <option value="css">css</option>
+          <option value="json">json</option>
+          <option value="bash">bash</option>
+          <option value="sql">sql</option>
+          <option value="python">python</option>
+        </select>
+      </label>
+      <div class="editor__dialog-actions">
+        <button type="button" class="btn btn--ghost btn--sm" data-editor-dialog-cancel>Cancel</button>
+        <button type="button" class="btn btn--sm" data-editor-dialog-ok>Insert</button>
+      </div>
+    </div>
+  </div>
+  <textarea class="input textarea editor__source" id="notes" name="notes" placeholder="Write in Markdown…" rows="8"></textarea>
+  <div class="editor__preview" data-editor-preview-panel hidden aria-live="polite"></div>
+  <div class="editor__status">
+    <span class="editor__count" data-editor-count aria-live="off">0 words · 0 characters</span>
+    <span class="editor__message" data-editor-message role="status" aria-live="polite"></span>
+  </div>
+</div>
+```
+
+### A comment box: the basic toolbar, a limit, and image uploads
+
+`toolbar: "basic"` keeps text, headings, lists, quote, code and link; `maxLength` counts down in the status bar; `uploadAction` receives a dropped or pasted image as multipart `file` and answers with its URL.
+
+```ts
+Editor({
+  id: "comment",
+  name: "comment",
+  toolbar: "basic",
+  maxLength: 2000,
+  uploadAction: "/fragments/upload",
+  rows: 5,
+  placeholder: "Leave a comment…",
+})
+```
+
+```html
+<div class="editor editor--markdown" id="comment-editor" data-editor data-editor-mode="markdown" data-editor-upload="/fragments/upload" data-editor-max="2000">
+  <div class="editor__toolbar" role="toolbar" aria-label="Formatting">
+    <button type="button" class="editor__tool" data-editor-cmd="heading" aria-label="Heading" title="Heading">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="quote" aria-label="Quote" title="Quote">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="code" aria-label="Code" title="Code">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="strike" aria-label="Strikethrough" title="Strikethrough">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="ul" aria-label="Bulleted list" title="Bulleted list">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="ol" aria-label="Numbered list" title="Numbered list">
+      <span class="editor__glyph" aria-hidden="true">1.</span>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="link" aria-label="Link" title="Link (Ctrl+K)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="clear" aria-label="Clear formatting" title="Clear formatting">
+      <svg width="15" height="15" width="2" …>…</svg>
     </button>
     <span class="editor__spacer"></span>
     <span class="editor__views" role="group" aria-label="View">
@@ -107,8 +255,114 @@ Editor({
       <button type="button" class="editor__view" data-editor-view="preview" aria-pressed="false">Preview</button>
     </span>
   </div>
-  <textarea class="input textarea editor__source" id="notes" name="notes" placeholder="Write in Markdown…" rows="8"></textarea>
+  <div class="editor__popover" data-editor-popover hidden>
+    <div class="editor__dialog" data-editor-dialog role="group" aria-label="Insert">
+      <label class="editor__dialog-field" data-editor-field-wrap="url">
+        <span class="editor__dialog-label" data-editor-dialog-label="url">URL</span>
+        <input class="input input--sm" type="text" data-editor-field="url" placeholder="https://" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="text">
+        <span class="editor__dialog-label" data-editor-dialog-label="text">Text</span>
+        <input class="input input--sm" type="text" data-editor-field="text" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="lang" hidden>
+        <span class="editor__dialog-label">Language</span>
+        <select class="input input--sm" data-editor-field="lang">
+          <option value="plain">plain</option>
+          <option value="js">js</option>
+          <option value="ts">ts</option>
+          <option value="html">html</option>
+          <option value="css">css</option>
+          <option value="json">json</option>
+          <option value="bash">bash</option>
+          <option value="sql">sql</option>
+          <option value="python">python</option>
+        </select>
+      </label>
+      <div class="editor__dialog-actions">
+        <button type="button" class="btn btn--ghost btn--sm" data-editor-dialog-cancel>Cancel</button>
+        <button type="button" class="btn btn--sm" data-editor-dialog-ok>Insert</button>
+      </div>
+    </div>
+  </div>
+  <textarea class="input textarea editor__source" maxlength="2000" id="comment" name="comment" placeholder="Leave a comment…" rows="5"></textarea>
   <div class="editor__preview" data-editor-preview-panel hidden aria-live="polite"></div>
+  <div class="editor__status">
+    <span class="editor__count" data-editor-count aria-live="off">0 words · 0 characters</span>
+    <span class="editor__message" data-editor-message role="status" aria-live="polite"></span>
+  </div>
+</div>
+```
+
+### A WYSIWYG profile bio
+
+`mode: "html"` edits a contenteditable surface whose HTML is mirrored into the textarea that submits; `value` is HTML the server already sanitised.
+
+```ts
+Editor({
+  id: "bio",
+  name: "bio",
+  mode: "html",
+  value: "<p>Hello <strong>world</strong></p>",
+  toolbar: "minimal",
+  statusBar: false,
+  rows: 4,
+})
+```
+
+```html
+<div class="editor editor--html" id="bio-editor" data-editor data-editor-mode="html">
+  <div class="editor__toolbar" role="toolbar" aria-label="Formatting">
+    <button type="button" class="editor__tool" data-editor-cmd="bold" aria-label="Bold" title="Bold (Ctrl+B)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <button type="button" class="editor__tool" data-editor-cmd="italic" aria-label="Italic" title="Italic (Ctrl+I)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__sep" aria-hidden="true"></span>
+    <button type="button" class="editor__tool" data-editor-cmd="link" aria-label="Link" title="Link (Ctrl+K)">
+      <svg width="15" height="15" width="2" …>…</svg>
+    </button>
+    <span class="editor__spacer"></span>
+  </div>
+  <div class="editor__table-tools" data-editor-table-tools role="group" aria-label="Table" hidden>
+    <button type="button" class="editor__tool editor__tool--text" data-editor-table="row-add">+ Row</button>
+    <button type="button" class="editor__tool editor__tool--text" data-editor-table="col-add">+ Column</button>
+    <button type="button" class="editor__tool editor__tool--text" data-editor-table="row-del">− Row</button>
+    <button type="button" class="editor__tool editor__tool--text" data-editor-table="col-del">− Column</button>
+  </div>
+  <div class="editor__popover" data-editor-popover hidden>
+    <div class="editor__dialog" data-editor-dialog role="group" aria-label="Insert">
+      <label class="editor__dialog-field" data-editor-field-wrap="url">
+        <span class="editor__dialog-label" data-editor-dialog-label="url">URL</span>
+        <input class="input input--sm" type="text" data-editor-field="url" placeholder="https://" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="text">
+        <span class="editor__dialog-label" data-editor-dialog-label="text">Text</span>
+        <input class="input input--sm" type="text" data-editor-field="text" autocomplete="off">
+      </label>
+      <label class="editor__dialog-field" data-editor-field-wrap="lang" hidden>
+        <span class="editor__dialog-label">Language</span>
+        <select class="input input--sm" data-editor-field="lang">
+          <option value="plain">plain</option>
+          <option value="js">js</option>
+          <option value="ts">ts</option>
+          <option value="html">html</option>
+          <option value="css">css</option>
+          <option value="json">json</option>
+          <option value="bash">bash</option>
+          <option value="sql">sql</option>
+          <option value="python">python</option>
+        </select>
+      </label>
+      <div class="editor__dialog-actions">
+        <button type="button" class="btn btn--ghost btn--sm" data-editor-dialog-cancel>Cancel</button>
+        <button type="button" class="btn btn--sm" data-editor-dialog-ok>Insert</button>
+      </div>
+    </div>
+  </div>
+  <textarea class="input textarea editor__source" id="bio" name="bio" rows="4">&lt;p&gt;Hello &lt;strong&gt;world&lt;/strong&gt;&lt;/p&gt;</textarea>
+  <div class="input textarea editor__surface" role="textbox" aria-multiline="true" tabindex="0" data-editor-surface aria-label="Editor"></div>
 </div>
 ```
 
@@ -116,12 +370,12 @@ Editor({
 
 Classes defined by `components/editor/editor.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.editor`, `.editor--disabled`, `.editor--html`, `.editor--invalid`, `.editor__preview`, `.editor__preview-note`, `.editor__preview-raw`, `.editor__source`, `.editor__spacer`, `.editor__surface`, `.editor__tool`, `.editor__toolbar`, `.editor__view`, `.editor__views`, `.js`
+`.editor`, `.editor--disabled`, `.editor--fullscreen`, `.editor--html`, `.editor--invalid`, `.editor__count--over`, `.editor__dialog`, `.editor__dialog-actions`, `.editor__dialog-field`, `.editor__dialog-label`, `.editor__glyph`, `.editor__icon-off`, `.editor__icon-on`, `.editor__message`, `.editor__popover`, `.editor__preview`, `.editor__preview-note`, `.editor__preview-raw`, `.editor__select`, `.editor__sep`, `.editor__source`, `.editor__spacer`, `.editor__status`, `.editor__surface`, `.editor__table-tools`, `.editor__tool`, `.editor__tool--text`, `.editor__toolbar`, `.editor__view`, `.editor__views`, `.js`
 
 ## Behaviour
 
 `components/editor/editor.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-editor`, `data-editor-`, `data-editor-cmd`, `data-editor-mode`, `data-editor-preview`, `data-editor-preview-panel`, `data-editor-surface`, `data-editor-view`.
+Attributes it reads or writes: `data-editor`, `data-editor-cmd`, `data-editor-count`, `data-editor-dialog`, `data-editor-dialog-cancel`, `data-editor-dialog-label`, `data-editor-dialog-ok`, `data-editor-field`, `data-editor-field-wrap`, `data-editor-fullscreen`, `data-editor-level`, `data-editor-max`, `data-editor-message`, `data-editor-mode`, `data-editor-popover`, `data-editor-preview`, `data-editor-preview-panel`, `data-editor-ready`, `data-editor-surface`, `data-editor-table`, `data-editor-table-tools`, `data-editor-upload`, `data-editor-uploading`, `data-editor-view`.
 
-Events: `rapid:swapped`.
+Events: `editor:upload`, `rapid:swapped`.

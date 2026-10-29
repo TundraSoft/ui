@@ -131,14 +131,13 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
       isStart && "datepicker__day--start",
       isEnd && "datepicker__day--end",
     );
-    const a11y = {
-      "aria-label": `${d} ${MONTHS[m]} ${y}`,
-      "aria-current": key === today ? "date" : undefined,
-      "aria-pressed": isStart || isEnd ? "true" : undefined,
-    };
+    const selected = isStart || isEnd;
+    const label = `${d} ${MONTHS[m]} ${y}`;
 
     days.push(
       props.buildDayHref && !disabled
+        // A link may not carry aria-pressed: the picked day is aria-current
+        // (over "date" for today — the selection is the state that matters).
         ? html`
           <a
             class="${cls}"
@@ -149,12 +148,17 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
             )}"
             data-target="#${props.id}"
             data-swap="outer"
-            data-push${renderAttrs(a11y)}
+            data-push${renderAttrs({
+              "aria-label": label,
+              "aria-current": selected ? "true" : key === today ? "date" : undefined,
+            })}
           >${d}</a>
         `
         : html`
           <button type="button" class="${cls}" data-day="${key}" ${renderAttrs({
-            ...a11y,
+            "aria-label": label,
+            "aria-current": key === today ? "date" : undefined,
+            "aria-pressed": selected ? "true" : undefined,
             disabled: disabled ? "" : undefined,
           })}>${d}</button>
         `,

@@ -161,17 +161,18 @@
 }
 
 /* Switching the palette: theme-toggle.js adds this class for one beat so
-   colours cross-fade instead of snapping (a View Transition where the
-   browser has one; this is the fallback). */
-html.theme-changing,
-html.theme-changing *,
-html.theme-changing *::before,
-html.theme-changing *::after {
+   the page's surfaces cross-fade instead of snapping (not a View
+   Transition, which swallows every click while it runs). The rule names
+   the surfaces rather than `*`: a universal descendant rule under a class
+   that toggles on <html> re-styles every element twice, which took two
+   seconds on a 13,000-element page. Text follows `body`'s colour as it
+   animates (inherited values animate with their parent); grounds that
+   paint their own background are listed. Nothing under reduced motion
+   (the class is never added). */
+html.theme-changing :is(body, .layout__header, .layout__sidebar, .layout__content, .layout__aside, .layout__footer, .navbar, .sidebar, .card, .alert, .banner, .data-table, .data-table__table th, .data-table__table td, .btn, .input, .textarea, .combobox__field, .segmented, .badge, .chip, .modal, .sheet__panel, .dropdown__panel, .popover, .toast, .code, .prose, .hero, .site-footer) {
   transition:
     background-color var(--duration-base) var(--ease-in-out),
     border-color var(--duration-base) var(--ease-in-out),
     color var(--duration-base) var(--ease-in-out),
-    fill var(--duration-base) var(--ease-in-out),
-    stroke var(--duration-base) var(--ease-in-out),
     box-shadow var(--duration-base) var(--ease-in-out) !important;
 }

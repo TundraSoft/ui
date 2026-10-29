@@ -97,7 +97,6 @@ export function CardHeader(
 ): Html {
   if (!props.avatar && !props.title && !props.subtitle && !props.actions) {
     return html`
-
     `;
   }
 
@@ -192,10 +191,8 @@ export function Card(props: CardProps): Html {
     titleHref: useStretchLink && props.title ? props.href : undefined,
   });
   const body = props.body !== undefined ? CardBody(props.body) : html`
-
   `;
   const footer = props.footer ? CardFooter({ content: props.footer, split: props.footerSplit }) : html`
-
   `;
 
   const stretchFallback = useStretchLink && !props.title
@@ -203,7 +200,6 @@ export function Card(props: CardProps): Html {
       <a class="card__stretch-link" href="${props.href}"><span class="sr-only">View</span></a>
     `
     : html`
-
     `;
 
   const inner = html`

@@ -185,6 +185,8 @@ export function Editor(props: EditorProps): Html {
     placeholder: props.placeholder,
     rows: props.rows ?? 8,
     disabled: props.disabled,
+    // `label` names the markdown textarea the way it names the html surface.
+    attrs: props.label ? { "aria-label": props.label } : undefined,
     required: props.required,
     invalid: props.invalid,
     maxLength: mode === "markdown" ? props.maxLength : undefined,

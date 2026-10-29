@@ -48,13 +48,17 @@ export function FeatureGrid(props: FeatureGridProps): Html {
     html`
       <div class="${cx("feature-grid__item", f.href && "feature-grid__item--link")}">${f.icon &&
         html`<span class="feature-grid__icon" aria-hidden="true">${f.icon}</span>`}<h3 class="feature-grid__title">${f
-          .href ? html`<a class="feature-grid__link" href="${f.href}">${f.title}</a>` : f.title}</h3><p
+          .href
+        ? html`<a class="feature-grid__link" href="${f.href}">${f.title}</a>`
+        : f.title}</h3><p
           class="feature-grid__text">${f.text}</p></div>
     `;
   return html`
     <section${classAttrs(cls, props.attrs)}>${props.title &&
-      html`<div class="feature-grid__head"><h2 class="feature-grid__heading">${props.title}</h2>${props.text &&
-        html`<p class="feature-grid__lead">${props.text}</p>`}</div>`}<div class="feature-grid__items">${props.items.map(
+      html`<div class="feature-grid__head"><h2 class="feature-grid__heading">${props.title}</h2>${
+        props.text &&
+        html`<p class="feature-grid__lead">${props.text}</p>`
+      }</div>`}<div class="feature-grid__items">${props.items.map(
         item,
       )}</div></section>
   `;

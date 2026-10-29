@@ -67,7 +67,6 @@ const MONTHS = [
 ];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-
 /**
  * A month of events: a 7-column grid with a weekday header, leading and
  * trailing days from the neighbouring months muted, today ringed
@@ -176,6 +175,14 @@ export function Calendar(props: CalendarProps): Html {
     `);
   }
 
+  // Rows of seven: a grid's cells must sit in role=row parents.
+  const weeks: Html[] = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(html`
+      <div class="calendar__week" role="row">${cells.slice(i, i + 7)}</div>
+    `);
+  }
+
   const titleId = `${props.id}-title`;
   return html`
     <div ${classAttrs("calendar", mergeAttrs(props.attrs, { id: props.id }))} data-calendar>
@@ -193,7 +200,7 @@ export function Calendar(props: CalendarProps): Html {
             <div class="calendar__weekday" role="columnheader">${d}</div>
           `
         )}</div>
-        <div class="calendar__days">${cells}</div>
+        <div class="calendar__days">${weeks}</div>
       </div>
     </div>
   `;

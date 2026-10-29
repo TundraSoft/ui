@@ -43,56 +43,6 @@
   display: inline-flex;
 }
 
-/* Spacing utilities — the few steps a composed page needs between
-   stacked partials; anything more is a theme's own layout CSS. */
-.mt-1 {
-  margin-top: var(--space-1);
-}
-
-.mt-2 {
-  margin-top: var(--space-2);
-}
-
-.mt-3 {
-  margin-top: var(--space-3);
-}
-
-.mt-4 {
-  margin-top: var(--space-4);
-}
-
-/* Responsive visibility — hide a non-essential label on narrow screens
-   (e.g. the user's name next to their avatar in a navbar). hide-sm is
-   phones in portrait (< 576px); hide-md is every width where the navbar
-   collapses (< 768px) — the pair for a control a Navbar's menuActions
-   shows there instead. */
-@media screen and (max-width: 575px) {
-  .hide-sm {
-    display: none !important;
-  }
-}
-
-@media screen and (max-width: 767px) {
-  .hide-md {
-    display: none !important;
-  }
-}
-
-/* Vertical rhythm for stacked partials inside a slot. */
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.stack--sm {
-  gap: var(--space-3);
-}
-
-.stack--lg {
-  gap: var(--space-6);
-}
-
 /* Density — compact rows and controls for dense screens, roomier ones
    for touch. Only the control heights read --density (tokens/default.css);
    spacing tokens are left alone so a theme's rhythm survives. The heights

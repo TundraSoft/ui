@@ -141,4 +141,4 @@ Hero({
 
 Classes defined by `components/hero/hero.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.hero`, `.hero--accent`, `.hero--center`, `.hero--inverse`, `.hero--md`, `.hero--split`, `.hero__actions`, `.hero__body`, `.hero__eyebrow`, `.hero__inner`, `.hero__media`, `.hero__text`, `.hero__title`
+`.btn--outline`, `.hero`, `.hero--accent`, `.hero--center`, `.hero--inverse`, `.hero--md`, `.hero--split`, `.hero__actions`, `.hero__body`, `.hero__eyebrow`, `.hero__inner`, `.hero__media`, `.hero__text`, `.hero__title`

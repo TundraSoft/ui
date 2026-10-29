@@ -66,6 +66,23 @@ field's error, pinned until the value changes.
 the field; `InputGroup({ start, end, control })` adds prefix/suffix addons — text, or a `Select` (give the inner control
 `extraClass: "input-group__control"`).
 
+### Masked inputs (`Input({ mask })`)
+
+```ts
+Input({ id: "phone", name: "phone", mask: "phone" });
+Input({ id: "amount", name: "amount", mask: "currency", maskCurrency: "EUR", maskLocale: "de-DE" });
+Input({ id: "dob", name: "dob", mask: "date", maskLocale: "en-GB", messages: { mask: "Use dd/mm/yyyy." } });
+Input({ id: "sku", name: "sku", mask: "custom", maskPattern: "AA-####" });
+```
+
+`mask` is `phone`, `date`, `time`, `currency`, `card`, `postcode` or `custom` (`maskPattern`: `#` digit, `A` letter, `*`
+either, the rest literal). input.js formats as you type from the significant characters, so typing, pasting and dropping
+all land the same way; the caret stays after the same count of typed characters and steps over a separator the person
+typed; Backspace over a literal skips it. A date's slot order and a currency's separators follow `maskLocale` through
+`Intl`; an impossible date or time (month 13, Feb 30) is a custom validity form.js reports. `currency` submits the raw
+number (`1234.50`) through a hidden input (`maskRaw`, default on for currency only). Without the script the plain text
+field submits whatever was typed, so the server parses leniently either way.
+
 ### [Textarea](./reference/components-textarea.md)
 
 ```ts
@@ -334,14 +351,30 @@ and yours to decide.
 ### [Editor](./reference/components-editor.md)
 
 ```ts
-Editor({ id: "notes", name: "notes", mode: "markdown", value, previewAction: "/preview" });
-Editor({ id: "bio", name: "bio", mode: "html", value: "<p>Trusted, <strong>sanitised</strong> HTML</p>" });
+Editor({
+  id: "post",
+  name: "body",
+  mode: "markdown",
+  label: "Post body",
+  toolbar: "full", // "full" | "basic" | "minimal"
+  previewAction: "/preview",
+  uploadAction: "/uploads",
+  maxLength: 5000,
+});
+Editor({ id: "bio", name: "bio", mode: "html", toolbar: "basic", statusBar: false, label: "Bio", value: trustedHtml });
 ```
 
-Markdown: a textarea with a toolbar (bold, italic, strikethrough, heading, quote, code, link, image, lists, rule, clear
-— every command toggles; Ctrl/Cmd+B/I/K) and a Preview view the **server** renders: `previewAction` receives `text` and
-answers an HTML fragment. HTML: a WYSIWYG surface (same toolbar plus underline; block formats toggle) mirrored into the
-textarea that submits. Sanitise on the server; the initial HTML value is trusted.
+Markdown: a textarea with a grouped icon toolbar — a block-style picker (paragraph, H1–H3), bold/italic/strikethrough,
+quote, code, link and image through a small popover form (URL + text, Ctrl/Cmd+K; never `prompt()`), bullet, numbered
+and task lists, a 3×3 table (Tab hops its cells), a fenced code block with a language, a rule, clear, undo/redo (its own
+history, since programmatic edits break the browser's) and fullscreen (Escape leaves). Enter continues a list and an
+empty item ends it; Tab/Shift+Tab indent list lines. The Preview view is what the **server** renders: `previewAction`
+receives `text` and answers an HTML fragment. HTML: a WYSIWYG surface with the same tools plus underline, align,
+indent/outdent, tables with contextual row/column tools and task lists whose checkboxes mirror into the submitted
+markup; paste is plain text by default (Ctrl/Cmd+Shift+V keeps formatting through a whitelist that drops scripts,
+`style` and `on*`), and the HTML that submits carries no inline styles. Both modes show a status bar with word and
+character counts (`maxLength` counts down) and drop or paste an image to `uploadAction` (a multipart `file`, answered
+with the URL as text) with a placeholder while it uploads. Sanitise on the server; the initial HTML value is trusted.
 
 ### [FormField](./reference/components-form-field.md), [Form](./reference/components-form.md)
 
@@ -389,6 +422,33 @@ the browser validates natively, and the server validates regardless — the clie
 `Form({ error })` renders rAPId's `RapidFormError` as a banner (`FormErrorAlert`), `FormField({ error })` wires
 `aria-describedby` and `aria-invalid` through the `control` callback, `FormGrid` is a 12-column field grid,
 `FormActions` the button row.
+
+---
+
+### [Transfer](./reference/components-transfer.md), [ColorPicker](./reference/components-color-picker.md), [Rating](./reference/components-rating.md)
+
+```ts
+Transfer({
+  id: "members",
+  name: "members",
+  options: [{ value: "ada", label: "Ada" }, { value: "grace", label: "Grace", selected: true }],
+  sourceTitle: "Available",
+  targetTitle: "In the team",
+});
+ColorPicker({ id: "brand", name: "brand", label: "Brand colour", value: "#2563eb", presets: ["#2563eb", "#16a34a"] });
+ColorPicker({ id: "overlay", name: "overlay", label: "Overlay", alpha: true, format: "rgb" });
+Rating({ id: "stars", name: "stars", label: "Your rating", value: 4, clearable: true });
+Rating({ id: "avg", label: "Average rating", value: 4.5, readOnly: true, size: "sm" });
+```
+
+A transfer list is a native `<select multiple name>` (what a page without the script shows and posts) enhanced into two
+listboxes with search, move buttons, Space to mark, Enter or a double-click to move, Ctrl+A, and a `required` that
+reports like a Select's; it stacks below 768px. The colour picker is a native `<input type="color">` enhanced with a
+saturation square (drag or arrow keys), hue and alpha ranges, a text field in the format you choose and a contrast
+readout against the surface; `alpha` or a non-hex `format` submits the formatted value through a hidden input. A rating
+is a radio group of stars that works without a script (the DOM order is reversed so CSS can fill "every star up to the
+checked one"); `readOnly` renders a half-star display with one accessible label, `clearable` lets a second click on the
+chosen star clear it.
 
 ---
 
@@ -476,6 +536,7 @@ Chip({ label: "Design", removable: true });
 Chip({ label: "Read-only", static: true });
 Avatar({ initials: "GH", size: "sm" });
 Avatar({ src, alt: "Grace" });
+Avatar({ initials: "JS", status: "online" }); // presence dot: online | away | busy | offline
 AvatarGroup({ avatars: [a, b, c] });
 Stat({ label: "Revenue", value: "$48.2k", icon: Icon("coin"), tone: "success", trend: { label: "+12.4%", up: true } });
 ```
@@ -535,6 +596,23 @@ pairs). The calendar is a month grid with event chips (multi-day spans fill each
 today is ringed), prev/next as links — or swaps with `target` — and it becomes a list of the days that have events below
 768px.
 
+### [CodeBlock](./reference/components-code.md), [DiffView](./reference/components-diff.md)
+
+```ts
+CodeBlock({ code: "deno add jsr:@tundralibs/ui", language: "bash", title: "Install", lineNumbers: true });
+CodeBlock({ highlighted: codeHtml(shikiOutput), language: "ts", highlightLines: [3, 4], maxHeight: "md" });
+DiffView({ title: "deno.json", view: "split", lines: diffLines(before, after) });
+```
+
+A code block renders every line as a `.code__line`, so line numbers (CSS counters) and highlighted rows never reach the
+clipboard, with a header (title, language chip, copy button) and `wrap` or a `maxHeight` that scrolls. Pass `code`
+(escaped) or `highlighted` (server-tokenised markup wrapped with `codeHtml()`): the stylesheet colours the kit's own
+`.tok-*` classes and maps Prism's `.token.*` and highlight.js's `.hljs-*` names onto the same tokens, so either
+library's server output is themed by the same custom properties. On a plain page `code.js` runs a small regex tokeniser
+(json, bash, css, html, js/ts) over `<code data-highlight>` blocks that carry no token markup. The diff view takes
+`DiffLine` rows (`add`, `remove`, `context`, `meta`) — `diffLines(before, after)` computes them for short texts — as a
+unified or split table with number gutters, markers drawn by CSS and `+N −M` stats.
+
 ---
 
 ## Cards & structure
@@ -570,6 +648,7 @@ ratios, lazy by default, an overlay caption), header avatar/actions, split foote
 
 ```ts
 Grid({ items: [GridCol({ span: 8, content }), GridCol({ span: 4, content: aside })] }); // 12 columns, 1 below md
+Grid({ gap: "sm", items: tiles.map((tile) => GridCol({ span: { xs: 6, md: 4, xl: 3 }, content: tile })) }); // per breakpoint
 PageHeader({
   title: "Projects",
   subtitle: "All of them.",
@@ -578,6 +657,11 @@ PageHeader({
 });
 Toolbar({ start: html`${searchInput}${statusSelect}`, end: html`${exportButton}${newButton}` });
 ```
+
+A number span applies from 768px (`col-N`); an object is mobile first — `xs` at every width, `sm` from 576px, `md` from
+768px, `lg` from 992px, `xl` from 1400px (`col-xs-6 col-md-4 col-xl-3`). `gap` is `sm`, `md` or `lg`. For the layout
+classes that go with it (`d-flex`, `gap-3`, `mt-4`, `text-truncate`, `hide-md` …) see the utilities layer in
+[Getting Started](./UI-Getting-Started.md#the-grid-and-the-utilities).
 
 ### [Tabs](./reference/components-tabs.md), [Collapsible](./reference/components-collapsible.md), [Wizard](./reference/components-wizard.md)
 
@@ -609,6 +693,32 @@ Styles for rendered Markdown — headings with rhythm, lists, quotes, code, tabl
 tokens. `proseHtml()` wraps an HTML string the **server has already sanitised**; never hand it user input.
 
 ---
+
+### [ScrollArea](./reference/components-scroll-area.md), [SplitPane](./reference/components-split-pane.md)
+
+```ts
+ScrollArea({ content: changelog, maxHeight: "md", label: "Changelog" });
+SplitPane({ id: "editor", start: source, end: preview, initial: 40, min: 25, storageKey: "editor-split" });
+```
+
+A scroll area is a scroll box with themed thin scrollbars and edge fades; `label` makes it a focusable region so the
+keyboard can scroll content with no focusable children. A split pane is two panes and a `role="separator"` grip: pointer
+drag, arrow keys (Shift for bigger steps), Home/End, double-click or Enter to reset, the share remembered per
+`storageKey`; it stacks below 768px unless `keep`.
+
+### [Separator](./reference/components-separator.md), [Ratio](./reference/components-ratio.md), [Figure](./reference/components-figure.md), [Kbd](./reference/components-kbd.md)
+
+```ts
+Separator({ label: "or" });
+Separator({ orientation: "vertical" }); // in a toolbar
+Ratio({ ratio: "16x9", content: html`<iframe src="…" title="Talk"></iframe>` });
+Figure({ media: html`<img src="…" alt="" />`, caption: "The old pier at dawn.", align: "wide" });
+Kbd({ keys: ["⌘", "K"] });
+```
+
+A separator is a rule with an optional centred label (`role="separator"`, or decorative); a ratio box keeps an
+`<iframe>`, `<video>` or image at `16x9`, `4x3`, `1x1`, `21x9`, `3x4` or `9x16`; a figure is media with a caption at
+`start`, `center`, `end` or `wide` (bleeds to the container) in three size steps; `Kbd` renders keycaps for a shortcut.
 
 ## Navigation
 
@@ -695,6 +805,35 @@ A floating palette (⌘K or any `[data-command-open]` opens it; overlay click or
 
 ---
 
+### [ListGroup](./reference/components-list-group.md), [ScrollSpy](./reference/components-scrollspy.md), [BackToTop](./reference/components-back-to-top.md), [Menubar](./reference/components-menubar.md)
+
+```ts
+ListGroup({
+  items: [
+    { label: "Inbox", href: "/inbox", icon: Icon("mail"), badge: Badge({ label: "12" }), active: true },
+    { label: "Archive", href: "/archive", text: "Older than 30 days" },
+  ],
+});
+ListGroup({ variant: "flush", numbered: true, items: steps }); // inside a card
+ScrollSpy({ id: "toc", items: [{ label: "Install", href: "#install" }, { label: "Usage", href: "#usage" }] });
+BackToTop({ threshold: 800 });
+Menubar({
+  id: "app-menu",
+  label: "Application",
+  items: [{ label: "File", items: [{ label: "New", href: "/new" }] }, {
+    label: "Edit",
+    items: [{ label: "Undo", href: "#" }],
+  }],
+});
+```
+
+A list group is a real list of links, buttons or text rows with an active row, secondary text, icons, badges and
+right-aligned meta. A scroll spy is a nav of hash links that lights up (`aria-current`, a parent opens for its child) as
+the page scrolls past the sections — any element with `data-scrollspy` gets the behaviour, and the DocsLayout's TOC
+carries it. Back-to-top appears past `threshold` pixels, scrolls up and moves focus to the main content. A menubar is
+desktop-app chrome: `role="menubar"` buttons whose panels are `Menu`s, with hover switching while one is open,
+Left/Right between menus, Down to open, Escape to close.
+
 ## Actions
 
 ### [Button](./reference/components-button.md)
@@ -749,6 +888,31 @@ readable measure, flip when there is no room on their `side`, and fall back to a
 
 ---
 
+### [Toggle, ToggleGroup](./reference/components-toggle.md), [Fab](./reference/components-fab.md), [ContextMenu](./reference/components-context-menu.md)
+
+```ts
+ToggleGroup({
+  id: "view",
+  label: "View",
+  exclusive: true,
+  items: [
+    { label: "Grid", icon: Icon("dashboard"), iconOnly: true, name: "view", value: "grid", pressed: true },
+    { label: "List", icon: Icon("list"), iconOnly: true, name: "view", value: "list" },
+  ],
+});
+Toggle({ label: "Bold", icon: Icon("bold"), iconOnly: true, variant: "outline" });
+Fab({ icon: Icon("plus"), label: "New message", href: "/compose", hideOnScroll: true });
+Fab({ icon: Icon("plus"), label: "Compose", extended: true, variant: "accent" });
+ContextMenu({ id: "row-menu", content: Menu({ items: [{ label: "Rename", href: "#" }] }) });
+html`<tr data-context-menu="#row-menu">…</tr>`;
+```
+
+A toggle is a `<button aria-pressed>`; with `name` and `value` a hidden mirror input submits it only while pressed. An
+`exclusive` group behaves like radios (arrow keys move within the group) and fires `toggle:change`. The FAB is a fixed
+round action in a corner (`position`, `extended` for a pill with its label, `hideOnScroll` tucks it away while scrolling
+down). A context menu opens on right-click, Shift+F10 or a long press on any element pointing at it, placed at the
+pointer and flipped to stay on screen, with arrow keys over its items and focus returned on close.
+
 ## Feedback
 
 ### [Alert](./reference/components-alert.md), [Toast](./reference/components-toast.md), [Modal](./reference/components-modal.md)
@@ -762,7 +926,7 @@ Toast({
   body: "3 rows deleted",
   action: { label: "Undo", attrs: { "data-action": "/undo", "data-target": "#rows" } },
 });
-ToastRegion({ max: 3 }); // the core template renders one per page as #toast-region
+ToastRegion({ max: 3, position: "top-end" }); // the core template renders one per page as #toast-region
 Button({ label: "Delete", attrs: { "data-modal-open": "#confirm" } });
 Modal({
   id: "confirm",
@@ -773,7 +937,9 @@ Modal({
 ```
 
 Toasts append into the region (`data-swap="append"` from the server, or `[data-toast-open="#template"]` client-side) and
-auto-dismiss. Modals are native `<dialog>`s: centred, backdrop click closes, Escape closes, focus returns.
+auto-dismiss; the region sits at any of six positions (`bottom-end` by default; `createCoreTemplate({ toastPosition })`
+in a rAPId app) and, where the Popover API exists, shows as a manual popover so a toast paints above an open modal.
+Modals are native `<dialog>`s: centred, backdrop click closes, Escape closes, focus returns.
 
 ### [Sheet](./reference/components-sheet.md), [Banner](./reference/components-banner.md)
 
@@ -803,6 +969,25 @@ every phone, where it becomes a bottom sheet with a drag handle. Backdrop click,
 it out before it closes; `open` opens it on load and after a swap, the way a modal does. A banner is the page-level
 strip an alert is not: full width, centred text, one action, an optional close that `storageKey` remembers across
 visits; `sticky` keeps it at the top.
+
+### [Tour](./reference/components-tour.md)
+
+```ts
+Tour({
+  id: "welcome",
+  storageKey: "tour-v1",
+  steps: [
+    { target: "#search", title: "Search", body: "Press ⌘K from anywhere.", placement: "bottom" },
+    { target: "#new-project", title: "Start here", body: "Your first project." },
+  ],
+});
+Button({ label: "Take the tour", attrs: { "data-tour-start": "#welcome" } });
+```
+
+A spotlight walkthrough: a scrim with a cut-out sized to each step's target and a card placed beside it (`placement`
+flips when there is no room; a step without a target centres its card), Back/Next/Done/Skip, arrow keys, Escape, focus
+trapped in the card and returned to the starter, `tour:step` and `tour:done` events. `storageKey` remembers completion
+and `startOn: "load"` runs it once for a new visitor.
 
 ### [ConsentBanner](./reference/components-consent.md)
 
@@ -930,6 +1115,20 @@ IntersectionObserver (already-visible blocks reveal on load; `once: false` repla
 set through the CSSOM; parallax is a rAF-throttled transform, off under reduced motion and on coarse pointers. A lazy
 section calls `window.rapid.swap()` as it nears the viewport when the runtime is present — on a plain page it simply
 shows what it carries.
+
+### [ScrollProgress, CountUp, ScrollSteps](./reference/components-reveal.md)
+
+```ts
+ScrollProgress({ position: "top" });
+CountUp({ value: 48200, format: "currency:USD" });
+ScrollSteps({ id: "story", steps: [{ content: step1, media: shot1 }, { content: step2, media: shot2 }] });
+```
+
+A reading-progress bar driven by `--scroll-progress` (pure CSS where scroll-driven animations exist, a rAF script
+elsewhere). A count-up renders its final `Intl`-formatted value in the markup and animates from `from` once, when it
+first enters the viewport, ending on the exact server text — never a 0 at rest. Scroll steps pin a stage while the page
+scrolls through the steps' text, cross-fading each step's media and marking the current one `aria-current`; on a phone
+the stage unpins and every step shows its media in order.
 
 ---
 

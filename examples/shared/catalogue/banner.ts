@@ -55,7 +55,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
       caseOf(
         "sticky — stays at the top of the scroll box it sits in",
         html`
-          <div class="cat-banner-scroll">
+          <div class="cat-banner-scroll" role="region" aria-label="Sticky banner sample" tabindex="0">
             ${Banner({
               id: "cat-banner-sticky",
               variant: "warning",

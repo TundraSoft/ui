@@ -55,6 +55,8 @@
  * is what form.js re-checks a shown error on.
  */
 (() => {
+  // The "no matches" note is a disabled option (a listbox must own one), never a pick.
+  const OPTION = '[role="option"]:not(.combobox__empty)';
   const ACTIVE = "data-active";
   const TUCKED = "data-combobox-tucked";
   const X_ICON =
@@ -77,7 +79,7 @@
     slot.classList.remove("select__text--placeholder");
   }
   const shown = (o) => !o.hidden && !o.hasAttribute(TUCKED);
-  const options = (root) => Array.from(root.querySelectorAll('[role="option"]')).filter(shown);
+  const options = (root) => Array.from(root.querySelectorAll(OPTION)).filter(shown);
 
   const hidesPicks = (root) => root.hasAttribute("data-combobox-hide-selected");
   const typeOnly = (input) => input?.getAttribute("data-combobox-open-on") === "type";
@@ -196,7 +198,7 @@
     if (!input || !list) return;
     const q = input.value.trim().toLowerCase();
 
-    root.querySelectorAll('[role="option"]').forEach((o) => {
+    root.querySelectorAll(OPTION).forEach((o) => {
       const label = o.querySelector(".combobox__option-label")?.textContent ?? o.textContent;
       o.hidden = !!q && !label.toLowerCase().includes(q);
     });
@@ -208,15 +210,13 @@
 
   /** Tuck every picked option away — or bring it back once un-picked. */
   function tuckPicks(root) {
-    root.querySelectorAll('[role="option"]').forEach((o) =>
-      o.toggleAttribute(TUCKED, o.getAttribute("aria-selected") === "true")
-    );
+    root.querySelectorAll(OPTION).forEach((o) => o.toggleAttribute(TUCKED, o.getAttribute("aria-selected") === "true"));
   }
 
   /** A swapped-in list knows only `q`: tick what is picked on the new rows. */
   function markPicks(root) {
     const picked = pickedValues(root);
-    root.querySelectorAll('[role="option"]').forEach((o) =>
+    root.querySelectorAll(OPTION).forEach((o) =>
       o.setAttribute("aria-selected", String(picked.has(o.getAttribute("data-value") ?? "")))
     );
   }
@@ -227,7 +227,7 @@
     if (!list) return;
     let visible = 0;
     let tucked = 0;
-    root.querySelectorAll('[role="option"]').forEach((o) => {
+    root.querySelectorAll(OPTION).forEach((o) => {
       if (o.hidden) return;
       if (o.hasAttribute(TUCKED)) tucked++;
       else visible++;
@@ -237,7 +237,7 @@
       let el = group.nextElementSibling;
       let any = false;
       while (el && !el.classList.contains("combobox__group") && !el.classList.contains("combobox__hints")) {
-        if (el.matches('[role="option"]') && shown(el)) {
+        if (el.matches(OPTION) && shown(el)) {
           any = true;
           break;
         }
@@ -257,6 +257,8 @@
       if (!el) {
         el = document.createElement("div");
         el.className = "combobox__empty";
+        el.setAttribute("role", "option");
+        el.setAttribute("aria-disabled", "true");
         if (attr === "data-combobox-selected-text") el.setAttribute("data-combobox-note", "");
         el.textContent = list.getAttribute(attr) ?? fallback;
         list.insertBefore(el, list.querySelector(".combobox__more, .combobox__hints"));
@@ -305,7 +307,7 @@
     const label = (opt.querySelector(".combobox__option-label")?.textContent ?? opt.textContent).trim();
     if (input) showLabel(input, label);
     if (hidden) hidden.value = opt.getAttribute("data-value") ?? label;
-    root.querySelectorAll('[role="option"]').forEach((o) => o.setAttribute("aria-selected", String(o === opt)));
+    root.querySelectorAll(OPTION).forEach((o) => o.setAttribute("aria-selected", String(o === opt)));
     // A pointer pick from a searchable popup leaves focus nowhere (an
     // option takes none): the field gets it back, as a keyboard pick does.
     const searching = searchOf(root) &&
@@ -362,7 +364,7 @@
     root.querySelectorAll(".combobox__token").forEach((t) => {
       if (t.querySelector("input")?.value === value) t.remove();
     });
-    root.querySelectorAll(`[role="option"][data-value="${CSS.escape(value)}"]`).forEach((o) => {
+    root.querySelectorAll(`${OPTION}[data-value="${CSS.escape(value)}"]`).forEach((o) => {
       o.setAttribute("aria-selected", "false");
       o.removeAttribute(TUCKED);
     });

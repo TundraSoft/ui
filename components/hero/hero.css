@@ -107,6 +107,21 @@
   color: var(--color-accent-inverse, var(--color-accent));
 }
 
+/* An outline button keeps its light surface, which the re-mapped text
+   colour would vanish on: on the inverse ground it is a ghost outline. */
+.hero--inverse .btn--outline {
+  background: transparent;
+  border-color: var(--color-text-inverse);
+  color: var(--color-text-inverse);
+  box-shadow: none;
+}
+
+.hero--inverse .btn--outline:hover {
+  background: var(--color-surface-inverse);
+  background: color-mix(in oklab, var(--color-text-inverse) 12%, var(--color-surface-inverse));
+  border-color: var(--color-text-inverse);
+}
+
 .hero--accent {
   background: var(--color-surface-sunken);
   background: linear-gradient(

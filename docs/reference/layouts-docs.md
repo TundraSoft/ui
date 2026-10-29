@@ -90,7 +90,7 @@ DocsLayout({
       <nav class="layout__toc" aria-label="On this page">
         <button type="button" class="layout__toc-toggle js-only" data-toggle="#main-content-toc" data-toggle-class aria-expanded="false" aria-controls="main-content-toc">On this page</button>
         <p class="layout__toc-title">On this page</p>
-        <div class="layout__toc-body" id="main-content-toc">
+        <div class="layout__toc-body" id="main-content-toc" data-scrollspy>
           <ul class="menu__list">
             <li>
               <a class="menu__link" href="#install">

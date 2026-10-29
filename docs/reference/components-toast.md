@@ -21,10 +21,13 @@ rather than any bespoke JS; toast.js only adds the auto-dismiss timer.
 ### `ToastRegion`
 
 ```ts
-ToastRegion(props = …: { id?: string; toasts?: Html[]; max?: number }): Html
+ToastRegion(props = …: ToastRegionProps): Html
 ```
 
-The fixed-position container a page renders once; toasts get appended into it.
+The fixed-position container a page renders once; toasts get appended
+into it. Where the browser has the Popover API, toast.js shows the
+region as a manual popover so it sits in the top layer above any open
+`<dialog>`; elsewhere it is a fixed element under the toast z-index.
 
 ## Types
 
@@ -50,6 +53,26 @@ The fixed-position container a page renders once; toasts get appended into it.
 | `dismissible` | `boolean` |  |  |
 | `autoDismissMs` | `number` |  | Auto-remove after this many ms (see toast.js). |
 | `attrs` | `Attrs` |  |  |
+
+### `ToastPosition`
+
+Which viewport corner (or edge middle) the toast stack grows from.
+
+- `"bottom-end"`
+- `"bottom-start"`
+- `"bottom-center"`
+- `"top-end"`
+- `"top-start"`
+- `"top-center"`
+
+### `ToastRegionProps`
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` |  |  |
+| `toasts` | `Html[]` |  | Toasts rendered with the page. |
+| `max` | `number` |  | Most toasts shown at once; the oldest leave first. @default 4 |
+| `position` | `ToastPosition` |  |  |
 
 ## Usage
 
@@ -97,14 +120,26 @@ ToastRegion()
 ```
 
 ```html
-<div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+<div class="toast-region" id="toast-region" role="status" aria-live="polite" data-toast-position="bottom-end"></div>
+```
+
+### Toasts at the top, centred
+
+`createCoreTemplate({ toastPosition })` sets the same on the shared region.
+
+```ts
+ToastRegion({ position: "top-center", max: 3 })
+```
+
+```html
+<div class="toast-region toast-region--top-center" id="toast-region" role="status" aria-live="polite" data-toast-max="3" data-toast-position="top-center"></div>
 ```
 
 ## CSS hooks
 
 Classes defined by `components/toast/toast.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.is-closing`, `.toast`, `.toast--danger`, `.toast--info`, `.toast--ink`, `.toast--success`, `.toast--warning`, `.toast-region`, `.toast__action`, `.toast__body`, `.toast__close`, `.toast__icon`, `.toast__meta`
+`.is-closing`, `.toast`, `.toast--danger`, `.toast--info`, `.toast--ink`, `.toast--success`, `.toast--warning`, `.toast-region`, `.toast-region--bottom-center`, `.toast-region--bottom-start`, `.toast-region--top-center`, `.toast-region--top-end`, `.toast-region--top-start`, `.toast__action`, `.toast__body`, `.toast__close`, `.toast__icon`, `.toast__meta`
 
 ## Behaviour
 

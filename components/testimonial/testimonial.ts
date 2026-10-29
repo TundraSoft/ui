@@ -27,7 +27,10 @@ function stars(rating: number): Html {
   return html`
     <span class="testimonial__rating" role="img" aria-label="${String(n)} out of 5 stars">${Array.from(
       { length: 5 },
-      (_, i) => html`<span class="${cx("testimonial__star", i < n && "testimonial__star--on")}">${Icon("star", { size: 14 })}</span>`,
+      (_, i) =>
+        html`<span class="${cx("testimonial__star", i < n && "testimonial__star--on")}">${
+          Icon("star", { size: 14 })
+        }</span>`,
     )}</span>
   `;
 }
@@ -41,7 +44,7 @@ export function Testimonial(props: TestimonialProps): Html {
       stars(props.rating)}<blockquote class="testimonial__quote">${props.quote}</blockquote><figcaption
         class="testimonial__by">${props.avatar && html`<span class="testimonial__avatar">${props.avatar}</span>`}<span
           class="testimonial__who"><span class="testimonial__name">${props.name}</span>${props.role &&
-          html`<span class="testimonial__role">${props.role}</span>`}</span></figcaption></figure>
+            html`<span class="testimonial__role">${props.role}</span>`}</span></figcaption></figure>
   `;
 }
 
@@ -55,8 +58,9 @@ export type TestimonialGridProps = {
 /** Several testimonials in columns (one on a phone). */
 export function TestimonialGrid(props: TestimonialGridProps): Html {
   return html`
-    <div${classAttrs(cx("testimonial-grid", `testimonial-grid--${props.columns ?? "3"}`), props.attrs)}>${props.items.map(
-      (item) => Testimonial({ variant: "card", ...item }),
-    )}</div>
+    <div${classAttrs(cx("testimonial-grid", `testimonial-grid--${props.columns ?? "3"}`), props.attrs)}>${props.items
+      .map(
+        (item) => Testimonial({ variant: "card", ...item }),
+      )}</div>
   `;
 }

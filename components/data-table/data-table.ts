@@ -331,9 +331,9 @@ export function DataTable<T extends Record<string, unknown>>(
               { checked: isSelected ? "" : undefined },
             )} data-select-row value="${key}"></td>
         `
-        : html`<td class="data-table__select"></td>`}${props.columns.map((col) => cellOf(col, row, cards))}${props.rowActions
-        ? html`<td class="data-table__actions">${props.rowActions(row)}</td>`
-        : ""}</tr>
+        : html`<td class="data-table__select"></td>`}${props.columns.map((col) =>
+          cellOf(col, row, cards)
+        )}${props.rowActions ? html`<td class="data-table__actions">${props.rowActions(row)}</td>` : ""}</tr>
     `;
   });
 
@@ -372,9 +372,13 @@ export function DataTable<T extends Record<string, unknown>>(
 
   // The bulk bar lives inside the scroll box, sticky over the header row,
   // so it never takes up flow space: rows stay put when a selection starts.
+  // A capped box scrolls, so it is focusable: the keyboard can scroll it.
   const region = html`
     <div
-      class="${scrollCls}">${bulk}<table class="data-table__table"><thead>${head}</thead><tbody>${props.rows.length
+      class="${scrollCls}"
+      ${renderAttrs({
+        tabindex: props.maxHeight ? "0" : undefined,
+      })}>${bulk}<table class="data-table__table"><thead>${head}</thead><tbody>${props.rows.length
         ? body
         : ""}</tbody></table>${props.rows.length
         ? ""

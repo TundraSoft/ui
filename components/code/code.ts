@@ -140,7 +140,9 @@ export function CodeBlock(props: CodeBlockProps): Html {
       props.maxHeight && `code--${props.maxHeight}`,
     )} data-code>${header}<pre ${renderAttrs({
       class: "code__pre",
-      tabindex: props.maxHeight ? "0" : undefined,
+      // A capped block scrolls vertically and an unwrapped one sideways:
+      // either way the keyboard needs a way in.
+      tabindex: props.maxHeight || !props.wrap ? "0" : undefined,
     })}><code ${renderAttrs({
       class: cx("code__body", props.language && `language-${props.language}`),
       "data-highlight": tokenize ? lang : undefined,

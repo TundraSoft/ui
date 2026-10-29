@@ -35,7 +35,7 @@
 }
 
 .calendar__weekdays,
-.calendar__days {
+.calendar__week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
@@ -64,7 +64,7 @@
   border-bottom: var(--border-width) solid var(--color-border-subtle);
 }
 
-.calendar__days > .calendar__day:nth-child(7n) {
+.calendar__week > .calendar__day:last-child {
   border-inline-end: none;
 }
 
@@ -154,7 +154,7 @@ a.calendar__event:focus-visible {
   flex: 0 0 auto;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
-  color: var(--color-text-muted);
+  color: inherit; /* the chip's own tone text; muted fell under 4.5:1 on tinted grounds */
 }
 
 .calendar__event-title {
@@ -229,7 +229,7 @@ a.calendar__event:focus-visible {
     display: none;
   }
 
-  .calendar__days {
+  .calendar__week {
     display: flex;
     flex-direction: column;
   }

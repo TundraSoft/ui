@@ -18,7 +18,7 @@
  *    background, light and dark (forms).
  */
 import { ensureDir, readDir, readTextFile, realPath, writeTextFile } from "@tundralibs/compat/file";
-import { exit } from "@tundralibs/compat/runtime";
+import { exit, getEnv } from "@tundralibs/compat/runtime";
 import type { Page } from "puppeteer-core";
 import { catalogue, catalogueGroups } from "../shared/catalogue.ts";
 import { iconNames } from "../../shared/icons.ts";
@@ -730,7 +730,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
         const seen = (el: Element | null) => !!el && (el as HTMLElement).offsetParent !== null;
         return {
           open: !list.hidden,
-          rows: Array.from(list.querySelectorAll('[role="option"]')).filter(seen).map((o) =>
+          rows: Array.from(list.querySelectorAll('[role="option"]:not(.combobox__empty)')).filter(seen).map((o) =>
             o.getAttribute("data-value")
           ),
           empty: seen(list.querySelector(".combobox__empty:not([data-combobox-note])")),
@@ -1373,7 +1373,10 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 }
 
+// CATALOGUE_GROUPS=forms,data runs only those pages (a debugging aid; CI runs all).
+const onlyGroups = (getEnv().CATALOGUE_GROUPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 for (const group of catalogueGroups) {
+  if (onlyGroups.length && !onlyGroups.includes(group.id)) continue;
   const file = `${group.id}.html`;
   const page = await openPage(file);
   const expected = entries.filter((e) => e.group === group.id);
@@ -1627,7 +1630,7 @@ for (const group of catalogueGroups) {
       const v = box.getBoundingClientRect();
       return {
         search: (document.getElementById("cat-sel-long-search") as HTMLInputElement).value,
-        all: [...box.querySelectorAll("[role=option]")].every((o) => !(o as HTMLElement).hidden),
+        all: [...box.querySelectorAll("[role=option]:not(.combobox__empty)")].every((o) => !(o as HTMLElement).hidden),
         inView: !!r && r.top >= v.top - 1 && r.bottom <= v.bottom + 1,
         scrolled: box.scrollTop > 0,
         active: active?.getAttribute("data-value"),

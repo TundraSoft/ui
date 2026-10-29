@@ -66,12 +66,15 @@ function feature(f: PricingFeature): Html {
 
 function plan(p: PricingPlan, yearly: boolean): Html {
   const prices = yearly && p.priceYearly !== undefined
-    ? html`<span class="pricing__price" data-period="monthly">${p.price}</span><span class="pricing__price"
-        data-period="yearly">${p.priceYearly}</span>`
+    ? html`
+      <span class="pricing__price" data-period="monthly">${p.price}</span><span class="pricing__price"
+        data-period="yearly">${p.priceYearly}</span>
+    `
     : html`<span class="pricing__price">${p.price}</span>`;
   return html`
-    <div class="${cx("pricing__plan", p.featured && "pricing__plan--featured")}">${p.badge &&
-      html`<span class="pricing__badge">${p.badge}</span>`}<div class="pricing__head"><h3 class="pricing__name">${p
+    <div
+      class="${cx("pricing__plan", p.featured && "pricing__plan--featured")}">${p.badge &&
+        html`<span class="pricing__badge">${p.badge}</span>`}<div class="pricing__head"><h3 class="pricing__name">${p
         .name}</h3>${p.description && html`<p class="pricing__description">${p.description}</p>`}</div><div
         class="pricing__amount">${prices}${p.period && html`<span class="pricing__period">${p.period}</span>`}</div><ul
         class="pricing__features">${p.features.map(feature)}</ul><div class="pricing__action">${p.action}</div></div>
@@ -98,7 +101,7 @@ export function PricingTable(props: PricingTableProps): Html {
               .monthly}</span></label><label class="pricing__toggle-option"><input class="pricing__toggle-input"
             type="radio" name="${name}" value="yearly" data-pricing-period><span class="pricing__toggle-label">${props
               .toggle.yearly}</span></label>${props.toggle.note &&
-          html`<span class="pricing__toggle-note">${props.toggle.note}</span>`}</div>
+              html`<span class="pricing__toggle-note">${props.toggle.note}</span>`}</div>
     `;
   return html`
     <div${classAttrs(cx("pricing", `pricing--${props.columns ?? "3"}`), attrs)}>${toggle}<div

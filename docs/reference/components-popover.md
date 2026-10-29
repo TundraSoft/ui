@@ -105,3 +105,5 @@ Classes defined by `components/popover/popover.css` — structural, token-driven
 `components/popover/popover.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
 Attributes it reads or writes: `data-popover`, `data-popover-trigger`.
+
+Events: `rapid:swapped`.

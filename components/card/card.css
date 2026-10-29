@@ -84,8 +84,8 @@
   background: var(--color-surface-alt);
 
   > img,
-  > video,
-  > svg {
+   > video,
+   > svg {
     display: block;
     width: 100%;
     height: 100%;

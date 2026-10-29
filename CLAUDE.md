@@ -1311,6 +1311,69 @@ out of it:
   IntersectionObserver + rAF and inert under reduced motion, a lazy section calls `window.rapid.swap` only when the
   runtime exists and otherwise shows what it carries.
 
+**Round 2 (2026-10-28/29): nineteen components, the editor, masks, grid per breakpoint, utilities, cleanliness.** Six
+agents built the batch in parallel against the same hard rules; what changed and the rules that came out of it:
+
+- **Grid per breakpoint + a utilities layer.** `GridCol({ span })` takes a number (`col-N`, from 768px as before) or a
+  mobile-first map `{ xs, sm, md, lg, xl }` → `col-xs-N … col-xl-N` (576/768/992/1400; `gridColClasses()` is the
+  helper); `Grid({ gap: "sm" | "md" | "lg" })`. Tracks are `minmax(0, 1fr)` — a bare `1fr` is `minmax(auto, 1fr)`, so
+  twelve tracks plus eleven gaps could never shrink below their content, and a `gap-lg` grid pushed a phone past the
+  viewport (the phone column gap also falls back to the default below 768). `styles/utilities.css` is a new `utilities`
+  cascade layer after `components` (~200 Bootstrap-shaped, token-driven classes: `d-*` with breakpoint variants, flex,
+  `gap-*`, logical `m*`/`p*` 0–8, text, sizing, position, borders, surfaces, `hide-*`/`hide-*-up`, `.stack`,
+  `.cluster`); `.mt-*`, `.stack` and `.hide-*` left base.css for it. Getting Started documents the grid, the utilities
+  and **custom builds** (import tokens + reset + base + chosen components through the same three PostCSS plugins;
+  concatenate enhance/motion/float first for JS).
+- **New components** (each `components/<name>/`, catalogued and with usage): list-group, toggle (+ ToggleGroup, hidden
+  mirror input, `toggle:change`), kbd, rating (CSS-only star radios, DOM reversed so `~` fills "up to the checked one";
+  rating.js remaps arrow keys to visual order), separator, ratio, figure, fab (`hideOnScroll`), scrollspy
+  (`[data-scrollspy]` behaviour; the DocsLayout TOC carries it), back-to-top, context-menu (right-click, Shift+F10, long
+  press; `uiFloat.place` at the pointer via a fake anchor rect), menubar (fixed panels placed with `uiFloat.follow` —
+  the bar scrolls sideways below 768, which clipped absolute panels), split-pane (`--split-start` via CSSOM from
+  `data-split-initial`/storage/drag/keys), scroll-area, transfer (native `<select multiple>` enhanced into two
+  listboxes), color-picker (native `<input type="color">` enhanced; the literal colours in its CSS are colour science —
+  black/white fades, hue spectrum, checkerboard — as custom properties with a comment), tour (spotlight = a fixed box
+  with a 200vmax box-shadow scrim sized through the CSSOM; `startOn: "load"` + `storageKey`), code (per-line markup,
+  `.tok-*` plus Prism/highlight.js class mappings on one set of `--code-*` properties, a regex tokeniser for plain
+  pages, `codeHtml()` for trusted highlighter output), diff (`diffLines()` LCS for short texts; split pairs runs row by
+  row). Reveal gained ScrollProgress (pure CSS under `@supports (animation-timeline:
+  scroll())`), CountUp (final value
+  in the markup; the script only animates once in view) and ScrollSteps (sticky stage, middle band of the viewport picks
+  the step). Toast gained `position` (six) and the top-layer fix: with the Popover API the region shows as a manual
+  popover re-raised when a toast lands or a dialog opens (visible above a modal, not clickable — a modal makes
+  everything outside it inert; browser behaviour). Avatar gained `status`. `Input({ mask })`:
+  phone/date/time/currency/card/postcode/custom, formatted from the significant characters with caret preservation,
+  impossible dates/times as custom validities, `maskRaw` hidden value for currency.
+- **Editor** grew a block-style select, popover forms for link/image/code (never `prompt()`; a `div`, not a nested
+  `form`), tables with contextual row/column tools, task lists, fenced code with language, its own undo/redo in
+  markdown, list continuation on Enter, Tab indent, fullscreen, a status bar (word/char counts, `maxLength`), image
+  upload by drop/paste (`uploadAction`, multipart `file`, CSRF + swap headers from `<body data-*>`), align/indent in
+  html mode, plain-text paste by default with a sanitising whitelist for Ctrl/Cmd+Shift+V, and `sync()` strips the
+  inline styles Chrome's `execCommand` writes (keeping `text-align` as the `align` attribute) so the submitted HTML
+  stays CSP-showable. `toolbar: "full" | "basic" | "minimal"`, `statusBar`, `label`.
+- **The theme cross-fade was a two-second freeze on big pages.** `html.theme-changing *` (plus `*::before/::after`)
+  under a class that toggles on `<html>` re-styles every element twice; on the 13,000-element forms catalogue the toggle
+  took 1.7 s (134 ms without the class), which is why the suite's theme checks failed only there. The rule now names the
+  surfaces that paint their own ground (body, layout regions, navbar, sidebar, card, alert, data-table cells, controls,
+  panels…) — text follows `body`'s animated colour through inheritance — and the switch is 190 ms. Never put a universal
+  descendant rule under a class that toggles on the root.
+- **axe findings fixed at the source, not allowlisted** (the harness agent had allowlisted 21 with owner files):
+  calendar weeks are `role="row"` wrappers (a grid's cells need row parents; `.calendar__week` is the 7-column grid), a
+  capped DataTable scroll box and an unwrapped or capped code block are `tabindex="0"`, the combobox/command "no
+  matches" note is a disabled `role="option"` (a listbox holding only text fails `aria-required-children`; the scripts'
+  option queries exclude it via one `OPTION` selector constant), server-mode date links carry `aria-current` instead of
+  `aria-pressed` (not allowed on `<a>`), the inverse hero's outline button is a ghost outline (its light surface
+  vanished under the re-mapped text colour), the editor status bar and calendar time chip use colours that clear 4.5:1
+  on their grounds, a card holding its own controls is not `interactive`, and every bare catalogue control carries an
+  `aria-label` (a `<button role="combobox">` cannot take its name from content). What remains allowlisted is listed in
+  `examples/tests/axe-allowlist.json` with its owner.
+- **Cleanliness pass** (`scratchpad/audit`-style script, rerun on the final bundle): seven selectors declared twice in
+  their own stylesheet were merged, four scripts' private `prefers-reduced-motion` checks became `uiMotion.reduced()`,
+  and `.combobox__list--static` exists only for the catalogue's bare fragment sample.
+  `CATALOGUE_GROUPS=forms,data deno task test:catalogue` runs one or two pages (a debugging aid).
+- Harness lesson: an always-open panel in one catalogue case overlaps the next case's control, and a Puppeteer click at
+  those coordinates lands on the panel's hints bar — wrap such cases in `.cat-room--lg`.
+
 **Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
 
 - **`demo/theme-builder.html`** (`examples/shared/theme-builder.ts` + `examples/pages/build-theme-builder.ts`,

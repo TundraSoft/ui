@@ -119,242 +119,252 @@ Calendar({
       <div class="calendar__weekday" role="columnheader">Sun</div>
     </div>
     <div class="calendar__days">
-      <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-28">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-09-28" aria-label="28 September 2026">28</a>
+      <div class="calendar__week" role="row">
+        <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-28">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-09-28" aria-label="28 September 2026">28</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-29">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-09-29" aria-label="29 September 2026">29</a>
+        <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-29">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-09-29" aria-label="29 September 2026">29</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-30">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-09-30" aria-label="30 September 2026">30</a>
+        <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-09-30">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-09-30" aria-label="30 September 2026">30</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-01">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-01" aria-label="1 October 2026">1</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-01">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-01" aria-label="1 October 2026">1</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-02">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-02" aria-label="2 October 2026">2</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-02">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-02" aria-label="2 October 2026">2</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-03">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-03" aria-label="3 October 2026">3</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-03">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-03" aria-label="3 October 2026">3</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-04">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-04" aria-label="4 October 2026">4</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-05">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-05" aria-label="5 October 2026">5</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day" role="gridcell" data-date="2026-10-06">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-06" aria-label="6 October 2026">6</a>
-        </div>
-        <div class="calendar__events">
-          <span class="calendar__event calendar__event--info">
-            <span class="calendar__event-title">Offsite</span>
-          </span>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-04">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-04" aria-label="4 October 2026">4</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
       </div>
-      <div class="calendar__day" role="gridcell" data-date="2026-10-07">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-07" aria-label="7 October 2026">7</a>
+      <div class="calendar__week" role="row">
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-05">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-05" aria-label="5 October 2026">5</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events">
-          <span class="calendar__event calendar__event--info">
-            <span class="calendar__event-title">Offsite</span>
-          </span>
+        <div class="calendar__day" role="gridcell" data-date="2026-10-06">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-06" aria-label="6 October 2026">6</a>
+          </div>
+          <div class="calendar__events">
+            <span class="calendar__event calendar__event--info">
+              <span class="calendar__event-title">Offsite</span>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="calendar__day" role="gridcell" data-date="2026-10-08">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-08" aria-label="8 October 2026">8</a>
+        <div class="calendar__day" role="gridcell" data-date="2026-10-07">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-07" aria-label="7 October 2026">7</a>
+          </div>
+          <div class="calendar__events">
+            <span class="calendar__event calendar__event--info">
+              <span class="calendar__event-title">Offsite</span>
+            </span>
+          </div>
         </div>
-        <div class="calendar__events">
-          <span class="calendar__event calendar__event--info">
-            <span class="calendar__event-title">Offsite</span>
-          </span>
+        <div class="calendar__day" role="gridcell" data-date="2026-10-08">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-08" aria-label="8 October 2026">8</a>
+          </div>
+          <div class="calendar__events">
+            <span class="calendar__event calendar__event--info">
+              <span class="calendar__event-title">Offsite</span>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="calendar__day" role="gridcell" data-date="2026-10-09">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-09" aria-label="9 October 2026">9</a>
+        <div class="calendar__day" role="gridcell" data-date="2026-10-09">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-09" aria-label="9 October 2026">9</a>
+          </div>
+          <div class="calendar__events">
+            <span class="calendar__event calendar__event--info">
+              <span class="calendar__event-title">Offsite</span>
+            </span>
+          </div>
         </div>
-        <div class="calendar__events">
-          <span class="calendar__event calendar__event--info">
-            <span class="calendar__event-title">Offsite</span>
-          </span>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-10">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-10" aria-label="10 October 2026">10</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-10">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-10" aria-label="10 October 2026">10</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-11">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-11" aria-label="11 October 2026">11</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-12">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-12" aria-label="12 October 2026">12</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-13">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-13" aria-label="13 October 2026">13</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--today" role="gridcell" data-date="2026-10-14" aria-current="date">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-14" aria-label="14 October 2026">14</a>
-          <span class="calendar__today-label">Today</span>
-        </div>
-        <div class="calendar__events">
-          <a class="calendar__event calendar__event--success" href="/events/2">
-            <span class="calendar__time">11:00</span>
-            <span class="calendar__event-title">Design review</span>
-          </a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-11">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-11" aria-label="11 October 2026">11</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
       </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-15">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-15" aria-label="15 October 2026">15</a>
+      <div class="calendar__week" role="row">
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-12">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-12" aria-label="12 October 2026">12</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-16">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-16" aria-label="16 October 2026">16</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-13">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-13" aria-label="13 October 2026">13</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-17">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-17" aria-label="17 October 2026">17</a>
+        <div class="calendar__day calendar__day--today" role="gridcell" data-date="2026-10-14" aria-current="date">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-14" aria-label="14 October 2026">14</a>
+            <span class="calendar__today-label">Today</span>
+          </div>
+          <div class="calendar__events">
+            <a class="calendar__event calendar__event--success" href="/events/2">
+              <span class="calendar__time">11:00</span>
+              <span class="calendar__event-title">Design review</span>
+            </a>
+          </div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-18">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-18" aria-label="18 October 2026">18</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-15">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-15" aria-label="15 October 2026">15</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-19">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-19" aria-label="19 October 2026">19</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-16">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-16" aria-label="16 October 2026">16</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-20">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-20" aria-label="20 October 2026">20</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-17">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-17" aria-label="17 October 2026">17</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-21">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-21" aria-label="21 October 2026">21</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day" role="gridcell" data-date="2026-10-22">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-22" aria-label="22 October 2026">22</a>
-        </div>
-        <div class="calendar__events">
-          <span class="calendar__event calendar__event--danger">
-            <span class="calendar__time">08:00</span>
-            <span class="calendar__event-title">Payroll</span>
-          </span>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-18">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-18" aria-label="18 October 2026">18</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
       </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-23">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-23" aria-label="23 October 2026">23</a>
+      <div class="calendar__week" role="row">
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-19">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-19" aria-label="19 October 2026">19</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-20">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-20" aria-label="20 October 2026">20</a>
+          </div>
+          <div class="calendar__events"></div>
+        </div>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-21">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-21" aria-label="21 October 2026">21</a>
+          </div>
+          <div class="calendar__events"></div>
+        </div>
+        <div class="calendar__day" role="gridcell" data-date="2026-10-22">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-22" aria-label="22 October 2026">22</a>
+          </div>
+          <div class="calendar__events">
+            <span class="calendar__event calendar__event--danger">
+              <span class="calendar__time">08:00</span>
+              <span class="calendar__event-title">Payroll</span>
+            </span>
+          </div>
+        </div>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-23">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-23" aria-label="23 October 2026">23</a>
+          </div>
+          <div class="calendar__events"></div>
+        </div>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-24">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-24" aria-label="24 October 2026">24</a>
+          </div>
+          <div class="calendar__events"></div>
+        </div>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-25">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-25" aria-label="25 October 2026">25</a>
+          </div>
+          <div class="calendar__events"></div>
+        </div>
       </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-24">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-24" aria-label="24 October 2026">24</a>
+      <div class="calendar__week" role="row">
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-26">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-26" aria-label="26 October 2026">26</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-25">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-25" aria-label="25 October 2026">25</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-27">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-27" aria-label="27 October 2026">27</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-26">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-26" aria-label="26 October 2026">26</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-28">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-28" aria-label="28 October 2026">28</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-27">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-27" aria-label="27 October 2026">27</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-29">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-29" aria-label="29 October 2026">29</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-28">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-28" aria-label="28 October 2026">28</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-30">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-30" aria-label="30 October 2026">30</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-29">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-29" aria-label="29 October 2026">29</a>
+        <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-31">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-10-31" aria-label="31 October 2026">31</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-30">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-30" aria-label="30 October 2026">30</a>
+        <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-11-01">
+          <div class="calendar__day-head">
+            <a class="calendar__day-number" href="/events/new?on=2026-11-01" aria-label="1 November 2026">1</a>
+          </div>
+          <div class="calendar__events"></div>
         </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--empty" role="gridcell" data-date="2026-10-31">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-10-31" aria-label="31 October 2026">31</a>
-        </div>
-        <div class="calendar__events"></div>
-      </div>
-      <div class="calendar__day calendar__day--outside calendar__day--empty" role="gridcell" data-date="2026-11-01">
-        <div class="calendar__day-head">
-          <a class="calendar__day-number" href="/events/new?on=2026-11-01" aria-label="1 November 2026">1</a>
-        </div>
-        <div class="calendar__events"></div>
       </div>
     </div>
   </div>
@@ -365,7 +375,7 @@ Calendar({
 
 Classes defined by `components/calendar/calendar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.calendar`, `.calendar__actions`, `.calendar__day`, `.calendar__day--empty`, `.calendar__day--outside`, `.calendar__day--today`, `.calendar__day-head`, `.calendar__day-number`, `.calendar__days`, `.calendar__event`, `.calendar__event--accent`, `.calendar__event--danger`, `.calendar__event--info`, `.calendar__event--success`, `.calendar__event--warning`, `.calendar__event-title`, `.calendar__events`, `.calendar__grid`, `.calendar__header`, `.calendar__more`, `.calendar__time`, `.calendar__title`, `.calendar__today-label`, `.calendar__weekday`, `.calendar__weekdays`
+`.calendar`, `.calendar__actions`, `.calendar__day`, `.calendar__day--empty`, `.calendar__day--outside`, `.calendar__day--today`, `.calendar__day-head`, `.calendar__day-number`, `.calendar__event`, `.calendar__event--accent`, `.calendar__event--danger`, `.calendar__event--info`, `.calendar__event--success`, `.calendar__event--warning`, `.calendar__event-title`, `.calendar__events`, `.calendar__grid`, `.calendar__header`, `.calendar__more`, `.calendar__time`, `.calendar__title`, `.calendar__today-label`, `.calendar__week`, `.calendar__weekday`, `.calendar__weekdays`
 
 ## Behaviour
 

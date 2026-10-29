@@ -98,7 +98,7 @@ export function CommandList(props: CommandListProps): Html {
 
   return html`
     ${rows.length ? rows : html`
-      <div class="command__empty">${props.emptyText ?? "Nothing matches that."}</div>
+      <div class="command__empty" role="option" aria-disabled="true">${props.emptyText ?? "Nothing matches that."}</div>
     `}
   `;
 }

@@ -5,10 +5,12 @@ HTML + CSS + JS component and layout library, and the first-class UI layer for
 rAPId app gets typed, escaped-by-default templates for every component and layout, plus a document shell and error pages
 that plug straight into `Application.initialize`.
 
-- **Components** (62): buttons, inputs, forms, data table (cards on a phone), combobox, command palette, date picker,
-  calendar, OTP, modal, sheet, toasts, banner, tabs, menus, tree, charts (every ApexCharts type, pinned, on the
-  library's tokens), and a marketing set — hero, feature grid, pricing, testimonials, carousel, lightbox, scroll reveal
-  — all moving on one set of motion tokens.
+- **Components** (81): buttons, toggles, inputs (with masks), forms, a markdown/WYSIWYG editor, data table (cards on a
+  phone), combobox, transfer list, colour picker, rating, command palette, date picker, calendar, OTP, modal, sheet,
+  toasts, banner, tour, tabs, menus, menubar, context menu, tree, list group, scroll spy, split pane, scroll area, code
+  block and diff viewer, charts (every ApexCharts type, pinned, on the library's tokens), and a marketing set — hero,
+  feature grid, pricing, testimonials, carousel, lightbox, scroll reveal, count-up, pinned scroll steps — all moving on
+  one set of motion tokens, plus a 12-column grid with spans per breakpoint and a small utilities layer.
 - **Layouts** (8): stacked, sidebar, rail, split, article, docs, auth, focus — each defined at every viewport band from
   phones to ultrawide.
 - **Themes**: tokens only. A theme is one stylesheet loaded after the bundle; dark mode is built in.
