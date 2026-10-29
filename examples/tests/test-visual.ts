@@ -202,8 +202,17 @@ if (update) {
     }.`,
   );
 }
+// Every hash this run computed, for the artifact: the committed baseline is
+// CI's Linux Chrome, which a contributor's machine cannot reproduce.
+await writeTextFile(`${outDir}/current.json`, JSON.stringify({ [platform]: current }, null, 2) + "\n");
 if (issues.length) {
   console.log(issues.map((i) => `  - ${i}`).join("\n"));
+  // One line per drifted render, `VISUAL-HASH <platform>|<key> <hash>`: the
+  // new hashes straight from the job log, to merge into the baseline when
+  // the change is wanted (no artifact download needed).
+  for (const [key, hash] of Object.entries(current)) {
+    if (drift(key, hash)) console.log(`VISUAL-HASH ${platform}|${key} ${hash}`);
+  }
   console.log("A wanted change: review the screenshot, then `deno task test:visual:update` and commit the baseline.");
   exit(1);
 }
