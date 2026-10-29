@@ -1,5 +1,6 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
+import { cx } from "../../shared/classnames.ts";
 
 export type PaginationProps = {
   id?: string;
@@ -41,7 +42,19 @@ export function Pagination(props: PaginationProps): Html {
   const { page, totalPages, buildHref, siblingCount = 1 } = props;
   const target = props.target ?? (props.swappable && props.id ? `#${props.id}` : undefined);
 
-  function link(pageNo: number, label: string | Html, ariaLabel?: string) {
+  // Every item carries its kind on the <li>, so a phone can fold the row
+  // (pagination.css hides the other page numbers and the ellipses below
+  // 576px and shows the status instead): prev · "Page 2 of 8" · next.
+  const item = (kind: "page" | "nav" | "ellipsis", current: boolean, body: Html) =>
+    html`
+      <li class="${cx(
+        "pagination__item",
+        `pagination__item--${kind}`,
+        current && "pagination__item--current",
+      )}">${body}</li>
+    `;
+
+  function link(pageNo: number, label: string | Html, ariaLabel?: string, kind: "page" | "nav" = "page") {
     const href = buildHref(pageNo);
     const attrs: Attrs = {
       ...props.linkAttrs,
@@ -52,29 +65,81 @@ export function Pagination(props: PaginationProps): Html {
       "data-swap": target ? "outer" : undefined,
       "data-push": target ? "" : undefined,
     };
-    return html`<li><a href="${href}"${classAttrs("pagination__link", attrs)}>${label}</a></li>`;
+    return item(
+      kind,
+      pageNo === page,
+      html`
+        <a href="${href}" ${classAttrs("pagination__link", attrs)}>${label}</a>
+      `,
+    );
   }
 
   // Disabled prev/next are not links at all — a focusable `href="#"`
   // that does nothing is a trap for keyboard and screen-reader users.
   const disabled = (label: Html, ariaLabel: string) =>
-    html`<li><span class="pagination__link pagination__link--disabled" aria-disabled="true" aria-label="${ariaLabel}">${label}</span></li>`;
+    item(
+      "nav",
+      false,
+      html`
+        <span class="pagination__link pagination__link--disabled" aria-disabled="true" aria-label="${ariaLabel}"
+        >${label}</span>
+      `,
+    );
 
   const pages = totalPages <= 1
-    ? [html`<li><span class="pagination__link" aria-current="page">1</span></li>`]
+    ? [item(
+      "page",
+      true,
+      html`
+        <span class="pagination__link" aria-current="page">1</span>
+      `,
+    )]
     : pageRange(page, totalPages, siblingCount).map((entry) =>
       entry === "ellipsis"
-        ? html`<li><span class="pagination__ellipsis" aria-hidden="true">&hellip;</span></li>`
+        ? item(
+          "ellipsis",
+          false,
+          html`
+            <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
+          `,
+        )
         : link(entry, String(entry), `Page ${entry}`)
     );
+  const status = html`
+    <li class="pagination__status" aria-hidden="true">Page ${String(page)} of ${String(Math.max(totalPages, 1))}</li>
+  `;
 
   return html`
     <nav aria-label="Pagination" ${classAttrs(undefined, mergeAttrs(props.attrs, { id: props.id }))}>
       <ul class="pagination">${page <= 1
-        ? disabled(html`&#8249;`, "Previous page")
-        : link(page - 1, html`&#8249;`, "Previous page")}${pages}${page >= totalPages
-        ? disabled(html`&#8250;`, "Next page")
-        : link(page + 1, html`&#8250;`, "Next page")}</ul>
+        ? disabled(
+          html`
+            &#8249;
+          `,
+          "Previous page",
+        )
+        : link(
+          page - 1,
+          html`
+            &#8249;
+          `,
+          "Previous page",
+          "nav",
+        )}${pages}${status}${page >= totalPages
+        ? disabled(
+          html`
+            &#8250;
+          `,
+          "Next page",
+        )
+        : link(
+          page + 1,
+          html`
+            &#8250;
+          `,
+          "Next page",
+          "nav",
+        )}</ul>
     </nav>
   `;
 }

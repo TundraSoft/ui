@@ -17,15 +17,26 @@ export function Collapsible(props: CollapsibleProps): Html {
   return html`
     <div ${classAttrs("collapsible", props.attrs ?? {})}>
       <h3
-        class="collapsible__heading"><button type="button" class="collapsible__trigger" data-toggle="#${panelId}" aria-expanded="${open
-          ? "true"
-          : "false"}" aria-controls="${panelId}">${props
-          .title}<span class="collapsible__icon" aria-hidden="true">${Icon("chevronDown", {
-            size: 14,
-          })}</span></button></h3>
+        class="collapsible__heading"
+      >
+        <button
+          type="button"
+          class="collapsible__trigger"
+          data-toggle="#${panelId}"
+          aria-expanded="${open ? "true" : "false"}"
+          aria-controls="${panelId}"
+        >
+          ${props
+            .title}<span class="collapsible__icon" aria-hidden="true">${Icon("chevronDown", {
+              size: 14,
+            })}</span>
+        </button>
+      </h3>
       <div class="collapsible__panel" id="${panelId}" data-toggle-panel${open ? "" : html`
         hidden
-      `}>${props.content}</div>
+      `}>
+        <div class="collapsible__inner">${props.content}</div>
+      </div>
     </div>
   `;
 }

@@ -1,10 +1,12 @@
-@layer tokens, reset, base, layouts, components;
+@layer tokens, reset, base, layouts, components, utilities;
 
 @import "../tokens/default.css" layer(tokens);
 @import "./reset.css" layer(reset);
 @import "./base.css" layer(base);
 @import "./typography.css" layer(base);
+@import "./motion.css" layer(base);
 @import "./page.css";
+@import "./utilities.css" layer(utilities);
 
 @import "../layouts/layout.css" layer(layouts);
 @import "../layouts/stacked/stacked.css" layer(layouts);
@@ -66,3 +68,41 @@
 @import "../components/card-fields/card-fields.css" layer(components);
 @import "../components/editor/editor.css" layer(components);
 @import "../components/consent/consent.css" layer(components);
+
+/* v3 additions (2026-10-28) */
+@import "../components/sheet/sheet.css" layer(components);
+@import "../components/banner/banner.css" layer(components);
+@import "../components/description-list/description-list.css" layer(components);
+@import "../components/number-input/number-input.css" layer(components);
+@import "../components/prose/prose.css" layer(components);
+@import "../components/tree/tree.css" layer(components);
+@import "../components/calendar/calendar.css" layer(components);
+@import "../components/carousel/carousel.css" layer(components);
+@import "../components/lightbox/lightbox.css" layer(components);
+@import "../components/hero/hero.css" layer(components);
+@import "../components/feature-grid/feature-grid.css" layer(components);
+@import "../components/pricing/pricing.css" layer(components);
+@import "../components/testimonial/testimonial.css" layer(components);
+@import "../components/site-footer/site-footer.css" layer(components);
+@import "../components/reveal/reveal.css" layer(components);
+
+/* v3.1 additions (2026-10-28) */
+@import "../components/list-group/list-group.css" layer(components);
+@import "../components/toggle/toggle.css" layer(components);
+@import "../components/kbd/kbd.css" layer(components);
+@import "../components/rating/rating.css" layer(components);
+@import "../components/separator/separator.css" layer(components);
+@import "../components/ratio/ratio.css" layer(components);
+@import "../components/figure/figure.css" layer(components);
+@import "../components/scrollspy/scrollspy.css" layer(components);
+@import "../components/back-to-top/back-to-top.css" layer(components);
+@import "../components/context-menu/context-menu.css" layer(components);
+@import "../components/menubar/menubar.css" layer(components);
+@import "../components/split-pane/split-pane.css" layer(components);
+@import "../components/scroll-area/scroll-area.css" layer(components);
+@import "../components/transfer/transfer.css" layer(components);
+@import "../components/color-picker/color-picker.css" layer(components);
+@import "../components/tour/tour.css" layer(components);
+@import "../components/fab/fab.css" layer(components);
+@import "../components/code/code.css" layer(components);
+@import "../components/diff/diff.css" layer(components);

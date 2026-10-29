@@ -304,3 +304,22 @@
   align-items: flex-end;
   gap: var(--space-2);
 }
+
+/* The Forms page's Density control: the Segmented's value lands in
+   data-view on #forms-density (shared/js/view-switch.js). The region
+   re-derives the control heights from its own factor the way
+   [data-density] does in styles/base.css — a factor alone changes nothing,
+   the :root heights already resolved theirs. */
+#forms-density[data-view] {
+  --control-height-sm: calc(var(--control-height-sm-base) * var(--density));
+  --control-height-md: calc(var(--control-height-md-base) * var(--density));
+  --control-height-lg: calc(var(--control-height-lg-base) * var(--density));
+}
+
+#forms-density[data-view="compact"] {
+  --density: 0.85;
+}
+
+#forms-density[data-view="comfortable"] {
+  --density: 1;
+}

@@ -1,0 +1,242 @@
+/*
+ * Transfer: two listboxes with the move buttons between them. The native
+ * <select multiple> is the control (no-JS pages show it alone); the UI is
+ * drawn only once enhance.js has marked the page `.js`. Below 768px the
+ * lists stack and the buttons turn sideways into a row.
+ */
+.transfer {
+  --transfer-height: 16rem;
+  display: block;
+  width: 100%;
+}
+
+.transfer--sm {
+  --transfer-height: 12rem;
+}
+
+.transfer--lg {
+  --transfer-height: 24rem;
+}
+
+.transfer__native {
+  width: 100%;
+  min-height: var(--transfer-height);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.js .transfer__native {
+  display: none;
+}
+
+.transfer__ui {
+  display: none;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.js .transfer__ui {
+  display: grid;
+}
+
+.transfer__list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.transfer__list:focus-within {
+  border-color: var(--color-primary);
+}
+
+.transfer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-subtle, var(--color-border));
+  background: var(--color-surface-sunken);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.transfer__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.transfer__count {
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.transfer__search {
+  margin: var(--space-2) var(--space-2) 0;
+  width: auto;
+}
+
+.transfer__items {
+  flex: 1 1 auto;
+  height: var(--transfer-height);
+  margin: 0;
+  padding: var(--space-1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.transfer__items:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.transfer__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.transfer__item:hover {
+  background: var(--color-surface-sunken);
+}
+
+.transfer__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+.transfer__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-accent-contrast, var(--color-primary-contrast));
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.transfer__check > svg {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.transfer__item[aria-selected="true"] {
+  background: var(--color-surface-sunken);
+  background: color-mix(in srgb, var(--color-accent, var(--color-primary)) 10%, var(--color-surface));
+}
+
+.transfer__item[aria-selected="true"] .transfer__check {
+  border-color: var(--color-accent, var(--color-primary));
+  background: var(--color-accent, var(--color-primary));
+}
+
+.transfer__item[aria-selected="true"] .transfer__check > svg {
+  opacity: 1;
+}
+
+.transfer__item[aria-disabled="true"] {
+  color: var(--color-text-disabled, var(--color-text-muted));
+  cursor: not-allowed;
+}
+
+.transfer__item[aria-disabled="true"]:hover {
+  background: none;
+}
+
+.transfer__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfer__empty {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.transfer__items:not(:empty) + .transfer__empty {
+  display: none;
+}
+
+.transfer__controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.transfer__move:disabled {
+  opacity: 0.5;
+}
+
+[data-transfer-disabled] .transfer__list {
+  pointer-events: none;
+}
+
+[data-transfer-disabled] .transfer__item,
+[data-transfer-disabled] .transfer__search {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* A proxied required select reports on the chosen listbox (form.js). */
+.transfer__items[aria-invalid="true"] {
+  outline: var(--ring-width) solid var(--color-danger);
+  outline-offset: -2px;
+}
+
+@media (max-width: 767.98px) {
+  .transfer__ui {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .transfer__controls {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .transfer__move > svg {
+    transform: rotate(90deg);
+  }
+
+  .transfer__items {
+    height: calc(var(--transfer-height) * 0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transfer__item,
+  .transfer__check,
+  .transfer__check > svg {
+    transition: none;
+  }
+}

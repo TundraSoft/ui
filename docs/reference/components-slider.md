@@ -4,7 +4,7 @@
 
 Import: `import { Slider } from "@tundralibs/ui/slider"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/slider.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -91,7 +91,7 @@ FormField({
 ```html
 <div class="form-field">
   <label class="form-field__label" for="size">Position size</label>
-  <div class="slider" data-slider>
+  <div class="slider slider--value-only" data-slider>
     <div class="slider__head">
       <output class="slider__value" for="size" data-slider-output>150</output>
     </div>
@@ -113,7 +113,7 @@ FormField({
 
 Classes defined by `components/slider/slider.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.slider`, `.slider--range`, `.slider--stepped`, `.slider__control`, `.slider__fill`, `.slider__head`, `.slider__input`, `.slider__label`, `.slider__scale`, `.slider__scale-item--active`, `.slider__thumb`, `.slider__thumb--from`, `.slider__thumb--to`, `.slider__tick`, `.slider__ticks`, `.slider__track`, `.slider__value`
+`.form-field`, `.form-field__label`, `.js`, `.slider`, `.slider--range`, `.slider--stepped`, `.slider--value-only`, `.slider__control`, `.slider__fill`, `.slider__head`, `.slider__input`, `.slider__label`, `.slider__scale`, `.slider__scale-item--active`, `.slider__thumb`, `.slider__thumb--from`, `.slider__thumb--to`, `.slider__tick`, `.slider__ticks`, `.slider__track`, `.slider__value`
 
 ## Behaviour
 

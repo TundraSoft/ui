@@ -40,3 +40,27 @@
   padding-inline: var(--space-2);
   color: var(--color-text-muted);
 }
+
+/* The folded row for a phone: prev · "Page 2 of 8" · next. Every other
+   page number and the ellipses go; the status (aria-hidden — the links'
+   own aria-current already says which page) takes their place. Pages
+   with one page keep their single number. */
+.pagination__status {
+  display: none;
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 575px) {
+  .pagination__item--page,
+  .pagination__item--ellipsis {
+    display: none;
+  }
+
+  .pagination__status {
+    display: block;
+  }
+}

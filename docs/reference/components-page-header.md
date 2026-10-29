@@ -4,7 +4,7 @@
 
 Import: `import { PageHeader } from "@tundralibs/ui/page-header"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/page-header.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -41,9 +41,9 @@ PageHeader({
   title: "INV-2048",
   subtitle: "Northwind Traders · due 15 Oct",
   breadcrumb: Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-2048" }] }),
-  actions: html`${Button({ label: "Send reminder", variant: "outline" })}${
-    Button({ label: "Record payment" })
-  }`,
+  actions: html`
+    ${Button({ label: "Send reminder", variant: "outline" })}${Button({ label: "Record payment" })}
+  `,
 })
 ```
 

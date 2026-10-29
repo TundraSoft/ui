@@ -4,7 +4,7 @@
 
 Import: `import { Button, ButtonGroup, CopyButton } from "@tundralibs/ui/button"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/button.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -142,7 +142,9 @@ ButtonGroup({
     Dropdown({
       id: "export-more",
       align: "end",
-      trigger: html`${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>`,
+      trigger: html`
+        ${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>
+      `,
       triggerClass: "btn btn--outline btn--icon",
       content: Menu({ items: [{ label: "CSV", href: "/export.csv" }, { label: "PDF", href: "/export.pdf" }] }),
     }),

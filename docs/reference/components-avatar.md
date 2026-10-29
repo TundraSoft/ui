@@ -4,7 +4,7 @@
 
 Import: `import { Avatar, AvatarGroup } from "@tundralibs/ui/avatar"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/avatar.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -28,6 +28,15 @@ AvatarGroup(props: { avatars: Html[]; attrs?: Attrs }): Html
 - `"md"`
 - `"lg"`
 
+### `AvatarStatus`
+
+Presence, shown as a dot on the avatar's corner.
+
+- `"online"`
+- `"away"`
+- `"busy"`
+- `"offline"`
+
 ### `AvatarProps`
 
 | Prop | Type | Required | Description |
@@ -36,6 +45,8 @@ AvatarGroup(props: { avatars: Html[]; attrs?: Attrs }): Html
 | `alt` | `string` |  |  |
 | `initials` | `string | Html` |  | Shown without `src`: initials, or markup (an icon for a pending invite, a removed person). |
 | `size` | `AvatarSize` |  |  |
+| `status` | `AvatarStatus` |  | A presence dot — green, amber, red or grey — with its name for screen readers. |
+| `statusLabel` | `string` |  | What a screen reader hears for the dot. @default the status, capitalised |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -51,6 +62,23 @@ Avatar({ src: "/photos/ada.jpg", alt: "Ada Lovelace", size: "md" })
 ```html
 <span class="avatar">
   <img src="/photos/ada.jpg" alt="Ada Lovelace">
+</span>
+```
+
+### Presence
+
+The dot carries sr-only text ("Online" by default); `statusLabel` words it.
+
+```ts
+Avatar({ initials: "AL", status: "online", statusLabel: "Active now" })
+```
+
+```html
+<span class="avatar avatar--status">
+  AL
+  <span class="avatar__status avatar__status--online">
+    <span class="sr-only">Active now</span>
+  </span>
 </span>
 ```
 
@@ -72,4 +100,4 @@ AvatarGroup({ avatars: [Avatar({ initials: "AL" }), Avatar({ initials: "GH" }), 
 
 Classes defined by `components/avatar/avatar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.avatar`, `.avatar--lg`, `.avatar--sm`, `.avatar-group`
+`.avatar`, `.avatar--lg`, `.avatar--sm`, `.avatar--status`, `.avatar-group`, `.avatar__status`, `.avatar__status--away`, `.avatar__status--busy`, `.avatar__status--online`

@@ -4,7 +4,7 @@
 
 Import: `import { CsrfField, Form } from "@tundralibs/ui/form"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/form.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -51,24 +51,27 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 `autosubmit` submits on a pick or a radio, never on typing (Enter does that); with `data-action` the list swaps in place. `csrfToken` (`view.csrfToken`) renders the `_csrf` field a no-JS POST needs; `CsrfField` does the same for a form you build by hand.
 
 ```ts
-html`${
-  Form({
+html`
+  ${Form({
     id: "filters",
     action: "/links",
     method: "get",
     autosubmit: true,
     attrs: { "data-action": "/links", "data-target": "#links", "data-swap": "outer", "data-push": "" },
-    content: html`${Input({ type: "search", name: "q", attrs: { "aria-label": "Search links" } })}${
-      Select({
+    content: html`
+      ${Input({ type: "search", name: "q", attrs: { "aria-label": "Search links" } })}${Select({
         name: "status",
         options: [{ value: "", label: "Any status" }, { value: "active", label: "Active" }],
         attrs: { "aria-label": "Status" },
-      })
-    }`,
-  })
-}<form method="post" action="/keys/revoke">${CsrfField({ token: "masked-token" })}${
-  Button({ label: "Revoke", variant: "danger", type: "submit", attrs: { "data-confirm": "Revoke this key?" } })
-}</form>`
+      })}
+    `,
+  })}<form method="post" action="/keys/revoke">${CsrfField({ token: "masked-token" })}${Button({
+    label: "Revoke",
+    variant: "danger",
+    type: "submit",
+    attrs: { "data-confirm": "Revoke this key?" },
+  })}</form>
+`
 ```
 
 ```html
@@ -139,8 +142,8 @@ Form({
   validate: true,
   guard: true,
   attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
-  content: html`${
-    FormGrid({
+  content: html`
+    ${FormGrid({
       fields: [
         FormField({
           id: "invite-email",
@@ -175,8 +178,8 @@ Form({
             }),
         }),
       ],
-    })
-  }${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}`,
+    })}${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}
+  `,
 })
 ```
 
@@ -211,8 +214,8 @@ Form({
   id: "profile",
   action: "/profile",
   attrs: { "data-action": "/profile", "data-target": "#profile", "data-swap": "outer" },
-  content: html`${
-    FormGrid({
+  content: html`
+    ${FormGrid({
       fields: [
         FormField({
           id: "name",
@@ -221,8 +224,8 @@ Form({
           control: (a) => Input({ id: a.id, name: "name", value: "Ada Lovelace" }),
         }),
       ],
-    })
-  }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+    })}${FormActions({ content: Button({ label: "Save", type: "submit" }) })}
+  `,
 })
 ```
 

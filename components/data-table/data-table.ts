@@ -49,9 +49,20 @@ export type DataTableSelectAll = {
   clearLabel?: string;
 };
 
+/**
+ * How the table behaves on a phone: `scroll` (default) keeps the grid and
+ * scrolls it sideways, edge fades showing there is more; `cards` re-lays
+ * every row out as a card below 768px — each cell labelled with its column
+ * heading (`data-label`, CSS only), the first column as the card's title,
+ * numbers right-aligned, the checkbox and the actions at the corners.
+ */
+export type DataTableResponsive = "scroll" | "cards";
+
 export type DataTableProps<T> = {
   /** Required: history push refuses a region with no id. */
   id: string;
+  /** Phone layout — see {@link DataTableResponsive}. @default "scroll" */
+  responsive?: DataTableResponsive;
   title?: string;
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -196,7 +207,7 @@ export type RowActionsProps = {
 function rowItem(i: RowAction, props: RowActionsProps): Html {
   const cls = cx("btn btn--sm", i.danger && "btn--danger");
   const attrs: Attrs = mergeAttrs(i.attrs, { "data-confirm": i.confirm });
-  if (i.href) return html`<a${classAttrs(cls, { ...attrs, href: i.href })}>${i.label}</a>`;
+  if (i.href) return html`<a ${classAttrs(cls, { ...attrs, href: i.href })}>${i.label}</a>`;
   if (!i.post) return html`<button type="button" ${classAttrs(cls, attrs)}>${i.label}</button>`;
   const fields = Object.entries(i.fields ?? {}).map(([name, value]) =>
     html`<input type="hidden" name="${name}" value="${value}">`
@@ -252,7 +263,7 @@ function cell(value: unknown): string {
 }
 
 /** A body cell's attributes: the column's own, with its class merged in. */
-function cellOf<T extends Record<string, unknown>>(col: DataTableColumn<T>, row: T): Html {
+function cellOf<T extends Record<string, unknown>>(col: DataTableColumn<T>, row: T, labelled: boolean): Html {
   const own = typeof col.cellAttrs === "function" ? col.cellAttrs(row) : col.cellAttrs ?? {};
   const { class: extraClass, ...extra } = own;
   return html`
@@ -261,7 +272,9 @@ function cellOf<T extends Record<string, unknown>>(col: DataTableColumn<T>, row:
       col.mono && "data-table__mono",
       col.numeric && "data-table__num",
       extraClass,
-    )}" ${renderAttrs(extra)}>${col.render ? col.render(row) : cell(row[col.key])}</td>
+    )}" ${renderAttrs({ "data-label": labelled ? col.label : undefined, ...extra })}>${col.render
+      ? col.render(row)
+      : cell(row[col.key])}</td>
   `;
 }
 
@@ -280,6 +293,7 @@ export function DataTable<T extends Record<string, unknown>>(
     selectableRows.every((row) => selected.has(props.rowKey(row)));
 
   const selectName = props.selectName ?? "selected";
+  const cards = props.responsive === "cards";
   const head = html`<tr>${
     selectable
       ? html`<th class="data-table__select"><input type="checkbox" aria-label="Select all rows"${
@@ -317,9 +331,9 @@ export function DataTable<T extends Record<string, unknown>>(
               { checked: isSelected ? "" : undefined },
             )} data-select-row value="${key}"></td>
         `
-        : html`<td class="data-table__select"></td>`}${props.columns.map((col) => cellOf(col, row))}${props.rowActions
-        ? html`<td class="data-table__actions">${props.rowActions(row)}</td>`
-        : ""}</tr>
+        : html`<td class="data-table__select"></td>`}${props.columns.map((col) =>
+          cellOf(col, row, cards)
+        )}${props.rowActions ? html`<td class="data-table__actions">${props.rowActions(row)}</td>` : ""}</tr>
     `;
   });
 
@@ -358,9 +372,13 @@ export function DataTable<T extends Record<string, unknown>>(
 
   // The bulk bar lives inside the scroll box, sticky over the header row,
   // so it never takes up flow space: rows stay put when a selection starts.
+  // A capped box scrolls, so it is focusable: the keyboard can scroll it.
   const region = html`
     <div
-      class="${scrollCls}">${bulk}<table class="data-table__table"><thead>${head}</thead><tbody>${props.rows.length
+      class="${scrollCls}"
+      ${renderAttrs({
+        tabindex: props.maxHeight ? "0" : undefined,
+      })}>${bulk}<table class="data-table__table"><thead>${head}</thead><tbody>${props.rows.length
         ? body
         : ""}</tbody></table>${props.rows.length
         ? ""
@@ -377,7 +395,8 @@ export function DataTable<T extends Record<string, unknown>>(
     `
     : region;
 
-  return html`<div${classAttrs("data-table", mergeAttrs(props.attrs, { id: props.id }))}>${
+  const rootAttrs = classAttrs("data-table", mergeAttrs(props.attrs, { id: props.id }), cards && "data-table--cards");
+  return html`<div ${rootAttrs}>${
     props.title || props.toolbar
       ? html`<div class="data-table__toolbar">${
         props.title ? html`<span class="data-table__title">${props.title}</span>` : ""

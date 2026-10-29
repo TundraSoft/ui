@@ -35,10 +35,17 @@
   outline-offset: -2px;
 }
 
-.menu__link--active {
+.menu__link--active,
+.menu__link.is-active {
   background: var(--color-surface-alt);
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);
+}
+
+/* menu.js marks the parent of the current child: expanded it is a quiet
+   hint, in the collapsed rail (sidebar.css) it is the only mark left. */
+.menu__link--current-parent {
+  color: var(--color-primary);
 }
 
 .menu__icon {

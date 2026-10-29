@@ -4,7 +4,7 @@
 
 Import: `import { FormField, FormGrid, FormActions } from "@tundralibs/ui/form-field"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/form-field.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -122,8 +122,8 @@ FormField({
 ### Two fields side by side, then the actions
 
 ```ts
-html`${
-  FormGrid({
+html`
+  ${FormGrid({
     fields: [
       FormField({
         id: "first",
@@ -138,12 +138,12 @@ html`${
         control: (a) => Input({ id: a.id, name: "last" }),
       }),
     ],
-  })
-}${
-  FormActions({
-    content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}`,
-  })
-}`
+  })}${FormActions({
+    content: html`
+      ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}
+    `,
+  })}
+`
 ```
 
 ```html

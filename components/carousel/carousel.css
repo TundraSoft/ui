@@ -1,0 +1,136 @@
+/*
+ * The track is the component: a snapping scroll container that works by
+ * hand, by wheel and by touch with no script at all. carousel.js only
+ * drives it (buttons, dots, keys, autoplay), so the bar is hidden until
+ * the script is there.
+ */
+.carousel {
+  --carousel-gap: var(--space-4);
+  --carousel-peek: 0px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.carousel--gap-sm {
+  --carousel-gap: var(--space-2);
+}
+
+.carousel--gap-lg {
+  --carousel-gap: var(--space-6);
+}
+
+.carousel--peek {
+  --carousel-peek: var(--space-8);
+}
+
+.carousel__track {
+  display: flex;
+  gap: var(--carousel-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* Snap points at the start padding, so a peeking slide still aligns. */
+  scroll-padding-inline: var(--space-1);
+  padding-inline: var(--space-1);
+  padding-block: var(--space-1);
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel__track:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+  border-radius: var(--radius-md);
+}
+
+.carousel__slide {
+  flex: 0 0 calc(100% - var(--carousel-peek));
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.carousel--per-auto .carousel__slide {
+  flex-basis: auto;
+}
+
+.carousel__slide > * {
+  height: 100%;
+}
+
+.carousel__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+html:not(.js) .carousel__bar {
+  display: none;
+}
+
+.carousel__dots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.carousel__dot {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: -4px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+}
+
+/* The visible dot is a pseudo-element, the hit area stays 24px. */
+.carousel__dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin: auto;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  transition: width var(--transition-base), background var(--transition-base);
+}
+
+.carousel__dot[aria-current="true"]::before {
+  width: 20px;
+  background: var(--color-primary);
+}
+
+.carousel__dot:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+.carousel__controls {
+  display: flex;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+/* A paused autoplay shows it is paused: the active dot dims a touch. */
+.carousel[data-carousel-paused] .carousel__dot[aria-current="true"]::before {
+  opacity: 0.6;
+}
+
+@media screen and (min-width: 768px) {
+  .carousel--per-2 .carousel__slide {
+    flex-basis: calc((100% - var(--carousel-gap) - var(--carousel-peek)) / 2);
+  }
+
+  .carousel--per-3 .carousel__slide {
+    flex-basis: calc((100% - 2 * var(--carousel-gap) - var(--carousel-peek)) / 3);
+  }
+}

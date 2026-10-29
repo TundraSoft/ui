@@ -4,7 +4,7 @@
 
 Import: `import { CardMedia, CardHeader, CardBody, CardFooter, Card } from "@tundralibs/ui/card"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/card.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -123,7 +123,9 @@ Card({
   title: "Northwind Traders",
   subtitle: "12 open invoices",
   href: "/clients/northwind",
-  body: html`<p>Last payment received 2 days ago.</p>`,
+  body: html`
+    <p>Last payment received 2 days ago.</p>
+  `,
   footer: Badge({ label: "Active", variant: "success", dot: true }),
 })
 ```

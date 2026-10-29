@@ -9,7 +9,7 @@ import {
 } from "@tundralibs/rapid/ui";
 import { ConsentBanner, type ConsentBannerProps } from "../components/consent/consent.ts";
 import { ConfirmModal } from "../components/modal/modal.ts";
-import { ToastRegion } from "../components/toast/toast.ts";
+import { type ToastPosition, ToastRegion } from "../components/toast/toast.ts";
 import { type Attrs, renderAttrs } from "../shared/attrs.ts";
 import { UI_CSS, UI_JS } from "../version.ts";
 
@@ -53,6 +53,8 @@ export type CoreOptions = {
   head?: Html;
   /** Render the shared `ToastRegion` every page gets. @default true */
   toastRegion?: boolean;
+  /** Where that region stacks its toasts. @default "bottom-end" */
+  toastPosition?: ToastPosition;
   /**
    * Also load rAPId's opt-in history module (`/__rapid/history.js`) —
    * pair with `ui: { history: true }`. @default false
@@ -169,7 +171,9 @@ export function createCoreTemplate(options: CoreOptions = {}): RapidTemplate<Rap
       // in place before any of them evaluate.
       body: html`
         ${raw('<a class="skip-link" href="#main-content">Skip to content</a>')}${data
-          .body}${options.toastRegion === false ? "" : ToastRegion()}${options.confirmDialog === false
+          .body}${options.toastRegion === false
+          ? ""
+          : ToastRegion({ position: options.toastPosition })}${options.confirmDialog === false
           ? ""
           : ConfirmModal()}${options.consent ? ConsentBanner(options.consent) : ""}<script src="${view.runtimePath}"
           defer></script>${options.history ? html`<script src="${HISTORY_PATH}" defer></script>` : ""}${options.live

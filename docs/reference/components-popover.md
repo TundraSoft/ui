@@ -4,7 +4,7 @@
 
 Import: `import { Popover, PopoverTrigger } from "@tundralibs/ui/popover"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/popover.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -98,10 +98,12 @@ Popover({
 
 Classes defined by `components/popover/popover.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.popover`, `.popover--end`, `.popover--start`, `.popover__arrow`, `.popover__body`, `.popover__footer`, `.popover__header`, `.popover__panel`, `.popover__stat`, `.popover__stat-label`, `.popover__stat-value`, `.popover__stats`, `.popover__subtitle`, `.popover__title`
+`.btn`, `.popover`, `.popover--above`, `.popover--end`, `.popover--start`, `.popover__arrow`, `.popover__body`, `.popover__footer`, `.popover__header`, `.popover__panel`, `.popover__stat`, `.popover__stat-label`, `.popover__stat-value`, `.popover__stats`, `.popover__subtitle`, `.popover__title`
 
 ## Behaviour
 
 `components/popover/popover.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
 Attributes it reads or writes: `data-popover`, `data-popover-trigger`.
+
+Events: `rapid:swapped`.

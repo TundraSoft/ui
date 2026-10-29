@@ -177,7 +177,11 @@ export function ComboboxList(props: ComboboxListProps): Html {
   const matches = total ?? shown;
 
   return html`
-    ${rows.length ? rows : html`<div class="combobox__empty">${props.emptyText ?? "No matches."}</div>`}${more}<div
+    ${rows.length
+      ? rows
+      : html`<div class="combobox__empty" role="option" aria-disabled="true">${
+        props.emptyText ?? "No matches."
+      }</div>`}${more}<div
       class="combobox__hints"><span>&uarr;&darr; navigate</span><span>&crarr; select</span><span class="combobox__count"${renderAttrs(
         { "data-combobox-total": total === undefined ? undefined : String(total) },
       )}>${matches === 1 ? "1 match" : `${count(matches)} matches`}</span></div>

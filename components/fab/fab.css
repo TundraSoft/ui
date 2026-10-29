@@ -1,0 +1,92 @@
+/*
+ * FAB: a round primary action fixed to a bottom corner, clear of a
+ * phone's home indicator. `--static` puts it in flow for docs.
+ */
+.fab {
+  --fab-size: 56px;
+  position: fixed;
+  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: calc(var(--space-4) + env(safe-area-inset-right, 0px));
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: var(--fab-size);
+  height: var(--fab-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-inset-top), var(--shadow-lg);
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-fast), background var(--transition-fast),
+    opacity var(--transition-base);
+
+  &:hover {
+    background: var(--color-primary-strong);
+    box-shadow: var(--shadow-inset-top), var(--shadow-xl);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.fab--accent {
+  background: var(--color-accent, var(--color-primary));
+  color: var(--color-accent-contrast, var(--color-primary-contrast));
+
+  &:hover {
+    background: var(--color-accent-strong, var(--color-primary-strong));
+  }
+}
+
+.fab--lg {
+  --fab-size: 64px;
+}
+
+.fab--extended {
+  width: auto;
+  padding-inline: var(--space-5) var(--space-6);
+}
+
+.fab--start {
+  inset-inline-end: auto;
+  inset-inline-start: calc(var(--space-4) + env(safe-area-inset-left, 0px));
+}
+
+.fab--center {
+  inset-inline-end: auto;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+}
+
+.fab__icon {
+  display: inline-flex;
+}
+
+/* fab.js: out of the way while the page scrolls down. */
+.fab--hidden {
+  transform: translateY(calc(var(--fab-size) + var(--space-8)));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* In flow, for a catalogue or a docs page. */
+.fab--static {
+  position: static;
+  translate: none;
+}

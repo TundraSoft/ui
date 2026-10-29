@@ -554,6 +554,24 @@ for (const name of pages) {
     await pause(300);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     if (overflow > 0) fail("mobile-overflow", `page is ${overflow}px wider than a 375px viewport`);
+    // The tables are responsive "cards" on a phone: a row is a card with
+    // its column labels, and the brand shows only its mark.
+    const cards = await page.evaluate(([table, column]) => {
+      const row = document.querySelector(`${table} tbody tr.data-table__row`) as HTMLElement | null;
+      const labelled = row?.querySelector(`td[data-label="${column}"]`) as HTMLElement | null;
+      const brandText = document.querySelector(".navbar__brand .hide-sm") as HTMLElement | null;
+      return {
+        height: row?.getBoundingClientRect().height ?? 0,
+        display: row ? getComputedStyle(row).display : "",
+        // Chrome reports `attr(data-label)` as the computed content; "none" means no label drawn.
+        label: labelled ? getComputedStyle(labelled, "::before").content : "",
+        brandHidden: !!brandText && brandText.offsetParent === null,
+      };
+    }, name === "tables" ? ["#team-table", "Role"] : ["#recent-orders", "Customer"]);
+    if (!(cards.height > 60 && cards.display === "grid" && cards.label !== "none" && cards.label !== "")) {
+      fail("mobile-cards", `table rows are not cards at 375px (${JSON.stringify(cards)})`);
+    }
+    if (!cards.brandHidden) fail("mobile-brand", "the brand text is not hidden at 375px");
     const toggle = await page.$(".navbar__toggle--sidebar");
     if (!toggle) fail("mobile-nav", "no sidebar toggle rendered at 375px — navigation unreachable");
     else {

@@ -1,0 +1,231 @@
+.pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* The monthly / yearly switch: radios under labels, the checked one
+   raised on a surface — the Segmented idiom, without its script. */
+.pricing__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.pricing__toggle-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--control-height-sm) - 6px);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pricing__toggle-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pricing__toggle-input:checked + .pricing__toggle-label {
+  color: var(--color-text);
+}
+
+.pricing__toggle-option:has(.pricing__toggle-input:checked) {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.pricing__toggle-option:has(.pricing__toggle-input:focus-visible) {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+.pricing__toggle-note {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-success);
+}
+
+.pricing__plans {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  width: 100%;
+  align-items: stretch;
+}
+
+.pricing__plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow:
+    var(--shadow-inset-top),
+    var(--shadow-sm);
+}
+
+.pricing__plan--featured {
+  border-color: var(--color-accent, var(--color-primary));
+  box-shadow: 0 0 0 1px var(--color-accent, var(--color-primary)), var(--shadow-lg);
+}
+
+.pricing__badge {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-accent, var(--color-primary));
+  color: var(--color-accent-contrast, var(--color-primary-contrast));
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pricing__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.pricing__name {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.pricing__description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.pricing__amount {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pricing__price {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tighter);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pricing__period {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* The toggle's job: with JS, pricing.js keeps data-billing on the root
+   and only the matching price shows; without it both show, and the
+   second is labelled by its period attribute. */
+.pricing[data-billing="monthly"] .pricing__price[data-period="yearly"],
+.pricing[data-billing="yearly"] .pricing__price[data-period="monthly"] {
+  display: none;
+}
+
+html:not(.js) .pricing__price[data-period="yearly"]::after {
+  content: " / yr";
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+}
+
+.pricing__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.pricing__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.pricing__feature-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.pricing__feature--off {
+  color: var(--color-text-subtle);
+}
+
+.pricing__feature--off .pricing__feature-icon {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-subtle);
+}
+
+.pricing__action {
+  margin-top: auto;
+}
+
+.pricing__action > .btn {
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .pricing--2 .pricing__plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing--3 .pricing__plans {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pricing--4 .pricing__plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The featured plan stands a little proud of its neighbours. */
+  .pricing__plan--featured {
+    translate: 0 calc(-1 * var(--space-2));
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .pricing--4 .pricing__plans {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

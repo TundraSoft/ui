@@ -4,7 +4,7 @@
 
 Import: `import { Modal, ConfirmModal } from "@tundralibs/ui/modal"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/modal.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -66,14 +66,14 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Render `ConfirmModal` once per page (the core template does); then any link, button or submit button with `data-confirm` asks there first, and Confirm carries on with the same click — the same submitter, the same swap.
 
 ```ts
-html`${
-  Button({
+html`
+  ${Button({
     label: "Delete project",
     variant: "danger",
     type: "submit",
     attrs: { "data-confirm": "Delete the project and its 42 links?", "data-confirm-label": "Delete" },
-  })
-}${ConfirmModal()}`
+  })}${ConfirmModal()}
+`
 ```
 
 ```html
@@ -104,7 +104,9 @@ Modal({
   id: "new-key",
   title: "New API key",
   open: true,
-  body: html`<p>Name the key so you can tell it apart later.</p>`,
+  body: html`
+    <p>Name the key so you can tell it apart later.</p>
+  `,
 })
 ```
 
@@ -127,15 +129,19 @@ Modal({
 A native `<dialog>`; any `[data-modal-open="#id"]` opens it, Escape and the backdrop close it.
 
 ```ts
-html`${
-  Button({ label: "Delete invoice", variant: "danger", attrs: { "data-modal-open": "#confirm-delete" } })
-}${
-  Modal({
+html`
+  ${Button({
+    label: "Delete invoice",
+    variant: "danger",
+    attrs: { "data-modal-open": "#confirm-delete" },
+  })}${Modal({
     id: "confirm-delete",
     title: "Delete INV-2048?",
-    body: html`<p>This cannot be undone.</p>`,
-    footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-dismiss": "" } })}${
-      Button({
+    body: html`
+      <p>This cannot be undone.</p>
+    `,
+    footer: html`
+      ${Button({ label: "Cancel", variant: "ghost", attrs: { "data-dismiss": "" } })}${Button({
         label: "Delete",
         variant: "danger",
         attrs: {
@@ -144,10 +150,10 @@ html`${
           "data-target": "#invoices",
           "data-swap": "outer",
         },
-      })
-    }`,
-  })
-}`
+      })}
+    `,
+  })}
+`
 ```
 
 ```html
@@ -173,7 +179,7 @@ html`${
 
 Classes defined by `components/modal/modal.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox--open`, `.datepicker--open`, `.modal`, `.modal--confirm`, `.modal__body`, `.modal__close`, `.modal__footer`, `.modal__header`, `.modal__text`, `.modal__title`, `.timepicker--open`
+`.combobox--open`, `.datepicker--open`, `.is-closing`, `.modal`, `.modal--confirm`, `.modal__body`, `.modal__close`, `.modal__footer`, `.modal__header`, `.modal__text`, `.modal__title`, `.timepicker--open`
 
 ## Behaviour
 

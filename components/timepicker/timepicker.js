@@ -155,6 +155,7 @@
       const t = toMin(s.getAttribute("data-value"));
       s.hidden = (lo !== undefined && t < lo) || (hi !== undefined && t > hi);
     });
+    globalThis.uiMotion?.cancelExit(list);
     list.hidden = false;
     root.classList.add("timepicker--open");
     toggle?.setAttribute("aria-expanded", "true");
@@ -172,7 +173,11 @@
   function close(root, restoreFocus) {
     const { list, toggle, hour } = parts(root);
     if (!list) return;
-    list.hidden = true;
+    if (isOpen(root) && globalThis.uiMotion) {
+      globalThis.uiMotion.exit(list, () => {
+        list.hidden = true;
+      });
+    } else list.hidden = true;
     root.classList.remove("timepicker--open");
     toggle?.setAttribute("aria-expanded", "false");
     setActive(root, null);

@@ -1,0 +1,53 @@
+/* Ratio: the child fills the box; the box keeps the shape. */
+.ratio {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.ratio > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+}
+
+/* What shows before an embed loads, or in a mock-up. */
+.ratio__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.ratio--16x9 {
+  aspect-ratio: 16 / 9;
+}
+
+.ratio--4x3 {
+  aspect-ratio: 4 / 3;
+}
+
+.ratio--1x1 {
+  aspect-ratio: 1 / 1;
+}
+
+.ratio--21x9 {
+  aspect-ratio: 21 / 9;
+}
+
+.ratio--3x4 {
+  aspect-ratio: 3 / 4;
+}
+
+.ratio--9x16 {
+  aspect-ratio: 9 / 16;
+}

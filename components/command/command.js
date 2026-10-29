@@ -11,11 +11,12 @@
  * first hit made active.
  */
 (() => {
+  const OPTION = '[role="option"]:not(.command__empty)'; // the empty note is a disabled option
   const ACTIVE = "data-active";
   const openers = new WeakMap();
 
   const inputOf = (root) => root.querySelector(".command__input");
-  const options = (root) => Array.from(root.querySelectorAll('[role="option"]')).filter((o) => !o.hidden);
+  const options = (root) => Array.from(root.querySelectorAll(OPTION)).filter((o) => !o.hidden);
 
   function activeIndex(root) {
     return options(root).findIndex((o) => o.hasAttribute(ACTIVE));
@@ -49,7 +50,7 @@
     const q = input.value.trim().toLowerCase();
 
     let visible = 0;
-    root.querySelectorAll('[role="option"]').forEach((o) => {
+    root.querySelectorAll(OPTION).forEach((o) => {
       const label = o.querySelector(".command__item-label")?.textContent ?? o.textContent;
       const hit = !q || label.toLowerCase().includes(q);
       o.hidden = !hit;
@@ -61,7 +62,7 @@
       let el = group.nextElementSibling;
       let any = false;
       while (el && !el.classList.contains("command__group")) {
-        if (el.matches('[role="option"]') && !el.hidden) {
+        if (el.matches(OPTION) && !el.hidden) {
           any = true;
           break;
         }
@@ -77,6 +78,8 @@
     if (!empty) {
       empty = document.createElement("div");
       empty.className = "command__empty";
+      empty.setAttribute("role", "option");
+      empty.setAttribute("aria-disabled", "true");
       empty.textContent = "Nothing matches that.";
       list.append(empty);
     }
@@ -110,9 +113,13 @@
 
   function close(root) {
     if (!isFloating(root)) return;
-    root.hidden = true;
     const opener = openers.get(root);
     openers.delete(root);
+    const hide = () => {
+      root.hidden = true;
+    };
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(root, hide);
+    else hide();
     if (opener?.isConnected) opener.focus();
   }
 
@@ -129,6 +136,7 @@
 
   function open(palette, opener) {
     openers.set(palette, opener ?? document.activeElement);
+    globalThis.uiMotion?.cancelExit(palette);
     palette.hidden = false;
     inputOf(palette)?.focus();
   }

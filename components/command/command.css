@@ -29,6 +29,25 @@
   display: none;
 }
 
+/* The overlay fades and the sheet scales in from just under full size;
+   command.js adds .is-closing and waits before hiding. */
+.command:not(.command--inline) {
+  animation: ui-fade-in var(--duration-enter) var(--ease-out);
+}
+
+.command:not(.command--inline) .command__sheet {
+  transform-origin: top center;
+  animation: ui-scale-in var(--duration-enter) var(--ease-out);
+}
+
+.command.is-closing {
+  animation: ui-fade-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.command.is-closing .command__sheet {
+  animation: ui-scale-out var(--duration-exit) var(--ease-in) forwards;
+}
+
 /* Embedded (docs/demo) variant: no overlay, sits in normal flow. */
 .command--inline {
   position: static;

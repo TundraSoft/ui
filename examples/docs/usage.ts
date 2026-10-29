@@ -67,6 +67,40 @@ import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { SplitLayout } from "../../layouts/split/split.ts";
 import { StackedLayout } from "../../layouts/stacked/stacked.ts";
 import { Icon } from "../../shared/icons.ts";
+import { usage as sheetUsage } from "./usage/sheet.ts";
+import { usage as bannerUsage } from "./usage/banner.ts";
+import { usage as descriptionListUsage } from "./usage/description-list.ts";
+import { usage as calendarUsage } from "./usage/calendar.ts";
+import { usage as numberInputUsage } from "./usage/number-input.ts";
+import { usage as proseUsage } from "./usage/prose.ts";
+import { usage as treeUsage } from "./usage/tree.ts";
+import { usage as carouselUsage } from "./usage/carousel.ts";
+import { usage as lightboxUsage } from "./usage/lightbox.ts";
+import { usage as heroUsage } from "./usage/hero.ts";
+import { usage as featureGridUsage } from "./usage/feature-grid.ts";
+import { usage as pricingUsage } from "./usage/pricing.ts";
+import { usage as testimonialUsage } from "./usage/testimonial.ts";
+import { usage as siteFooterUsage } from "./usage/site-footer.ts";
+import { usage as revealUsage } from "./usage/reveal.ts";
+import { usage as listGroupUsage } from "./usage/list-group.ts";
+import { usage as toggleUsage } from "./usage/toggle.ts";
+import { usage as kbdUsage } from "./usage/kbd.ts";
+import { usage as ratingUsage } from "./usage/rating.ts";
+import { usage as separatorUsage } from "./usage/separator.ts";
+import { usage as ratioUsage } from "./usage/ratio.ts";
+import { usage as figureUsage } from "./usage/figure.ts";
+import { usage as scrollspyUsage } from "./usage/scrollspy.ts";
+import { usage as backToTopUsage } from "./usage/back-to-top.ts";
+import { usage as contextMenuUsage } from "./usage/context-menu.ts";
+import { usage as menubarUsage } from "./usage/menubar.ts";
+import { usage as splitPaneUsage } from "./usage/split-pane.ts";
+import { usage as scrollAreaUsage } from "./usage/scroll-area.ts";
+import { usage as transferUsage } from "./usage/transfer.ts";
+import { usage as colorPickerUsage } from "./usage/color-picker.ts";
+import { usage as tourUsage } from "./usage/tour.ts";
+import { usage as fabUsage } from "./usage/fab.ts";
+import { usage as codeUsage } from "./usage/code.ts";
+import { usage as diffUsage } from "./usage/diff.ts";
 
 export type UsageExample = {
   title: string;
@@ -75,13 +109,55 @@ export type UsageExample = {
   render: () => Html;
 };
 
+/**
+ * Examples kept in files of their own (`./usage/<name>.ts`, one per
+ * component, each exporting a `usage` map with the same keys): merged
+ * below; scripts/build-docs.ts cuts their snippets from those files too.
+ */
+const splitUsage: Record<string, UsageExample[]>[] = [
+  sheetUsage,
+  bannerUsage,
+  descriptionListUsage,
+  calendarUsage,
+  numberInputUsage,
+  proseUsage,
+  treeUsage,
+  carouselUsage,
+  lightboxUsage,
+  heroUsage,
+  featureGridUsage,
+  pricingUsage,
+  testimonialUsage,
+  siteFooterUsage,
+  revealUsage,
+  listGroupUsage,
+  toggleUsage,
+  kbdUsage,
+  ratingUsage,
+  separatorUsage,
+  ratioUsage,
+  figureUsage,
+  scrollspyUsage,
+  backToTopUsage,
+  contextMenuUsage,
+  menubarUsage,
+  splitPaneUsage,
+  scrollAreaUsage,
+  transferUsage,
+  colorPickerUsage,
+  tourUsage,
+  fabUsage,
+  codeUsage,
+  diffUsage,
+];
+
 type Invoice = { id: string; client: string; total: string };
 const invoices: Invoice[] = [
   { id: "INV-2048", client: "Northwind Traders", total: "$12,400.00" },
   { id: "INV-2047", client: "Contoso Ltd", total: "$3,120.00" },
 ];
 
-export const usage: Record<string, UsageExample[]> = {
+const ownUsage: Record<string, UsageExample[]> = {
   /* ------------------------------------------------------- components */
   "components/alert": [
     {
@@ -103,6 +179,11 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "A person, by photo or initials",
       render: () => Avatar({ src: "/photos/ada.jpg", alt: "Ada Lovelace", size: "md" }),
+    },
+    {
+      title: "Presence",
+      note: 'The dot carries sr-only text ("Online" by default); `statusLabel` words it.',
+      render: () => Avatar({ initials: "AL", status: "online", statusLabel: "Active now" }),
     },
     {
       title: "Who is on the project",
@@ -145,7 +226,9 @@ export const usage: Record<string, UsageExample[]> = {
             Dropdown({
               id: "export-more",
               align: "end",
-              trigger: html`${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>`,
+              trigger: html`
+                ${Icon("chevronDown", { size: 14 })}<span class="sr-only">More export options</span>
+              `,
               triggerClass: "btn btn--outline btn--icon",
               content: Menu({ items: [{ label: "CSV", href: "/export.csv" }, { label: "PDF", href: "/export.pdf" }] }),
             }),
@@ -162,7 +245,9 @@ export const usage: Record<string, UsageExample[]> = {
           title: "Northwind Traders",
           subtitle: "12 open invoices",
           href: "/clients/northwind",
-          body: html`<p>Last payment received 2 days ago.</p>`,
+          body: html`
+            <p>Last payment received 2 days ago.</p>
+          `,
           footer: Badge({ label: "Active", variant: "success", dot: true }),
         }),
     },
@@ -173,14 +258,14 @@ export const usage: Record<string, UsageExample[]> = {
       note:
         "Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode.",
       render: () =>
-        html`${ChartScript()}${
-          Chart({
+        html`
+          ${ChartScript()}${Chart({
             id: "revenue",
             type: "area",
             series: [{ name: "Revenue", data: [12, 19, 14, 22, 28] }],
             categories: ["May", "Jun", "Jul", "Aug", "Sep"],
-          })
-        }`,
+          })}
+        `,
     },
     {
       title: "Money on the value axis",
@@ -223,7 +308,13 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "A details section",
       render: () =>
-        Collapsible({ id: "terms", title: "Terms and conditions", content: html`<p>Net 30, 2% late fee.</p>` }),
+        Collapsible({
+          id: "terms",
+          title: "Terms and conditions",
+          content: html`
+            <p>Net 30, 2% late fee.</p>
+          `,
+        }),
     },
     {
       title: "An FAQ accordion",
@@ -231,8 +322,19 @@ export const usage: Record<string, UsageExample[]> = {
         Accordion({
           id: "faq",
           items: [
-            { title: "How do refunds work?", content: html`<p>Within 14 days, in full.</p>`, defaultOpen: true },
-            { title: "Can I change plans?", content: html`<p>Any time; the difference is prorated.</p>` },
+            {
+              title: "How do refunds work?",
+              content: html`
+                <p>Within 14 days, in full.</p>
+              `,
+              defaultOpen: true,
+            },
+            {
+              title: "Can I change plans?",
+              content: html`
+                <p>Any time; the difference is prorated.</p>
+              `,
+            },
           ],
         }),
     },
@@ -290,17 +392,19 @@ export const usage: Record<string, UsageExample[]> = {
       note:
         "Rendered hidden: consent.js shows it to a visitor who has not chosen and loads the scripts only after Accept. A `[data-consent-open]` link anywhere reopens it.",
       render: () =>
-        html`${
-          ConsentBanner({
+        html`
+          ${ConsentBanner({
             title: "Cookies for analytics?",
-            body: html`We would use Google Analytics to see which pages help. <a href="/privacy">Privacy notice</a>`,
+            body: html`
+              We would use Google Analytics to see which pages help. <a href="/privacy">Privacy notice</a>
+            `,
             loaders: [
               { src: "https://www.googletagmanager.com/gtag/js?id=G-XXXX", async: true },
               { src: "/public/ga.js", attrs: { "data-id": "G-XXXX" } },
             ],
             storageKey: "acme-consent",
-          })
-        }<a href="#" data-consent-open>Cookie settings</a>`,
+          })}<a href="#" data-consent-open>Cookie settings</a>
+        `,
     },
   ],
   "components/command": [
@@ -308,10 +412,13 @@ export const usage: Record<string, UsageExample[]> = {
       title: "A ⌘K palette",
       note: '`⌘K` or any `[data-command-open="#palette"]` opens it; `action` makes the results server-side.',
       render: () =>
-        html`${
-          Button({ label: "Search", variant: "outline", size: "sm", attrs: { "data-command-open": "#palette" } })
-        }${
-          Command({
+        html`
+          ${Button({
+            label: "Search",
+            variant: "outline",
+            size: "sm",
+            attrs: { "data-command-open": "#palette" },
+          })}${Command({
             id: "palette",
             action: "/fragments/commands",
             placeholder: "Jump to…",
@@ -319,8 +426,8 @@ export const usage: Record<string, UsageExample[]> = {
               { label: "New invoice", group: "Actions", icon: "plus", shortcut: "N" },
               { label: "Contoso Ltd", group: "Clients", badge: "CL", href: "/clients/contoso" },
             ],
-          })
-        }`,
+          })}
+        `,
     },
     {
       title: "The fragment the route returns",
@@ -336,10 +443,11 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "Members: per-row selection, select all, POST row actions, cells a phone layout can read",
       note:
-        "`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `cellAttrs` marks cells for a CSS-only card layout below 768px.",
+        '`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `responsive: "cards"` lays every row out as a labelled card below 768px.',
       render: () =>
         DataTable<Invoice>({
           id: "members",
+          responsive: "cards",
           selectable: true,
           rowSelectable: (r) => r.client !== "Northwind",
           selectAll: { total: 312, fields: { q: "north" } },
@@ -383,9 +491,14 @@ export const usage: Record<string, UsageExample[]> = {
           ],
           rows: invoices,
           rowKey: (r) => r.id,
-          bulkActions: html`${
-            Button({ label: "Archive", size: "sm", type: "submit", attrs: { name: "op", value: "archive" } })
-          }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
+          bulkActions: html`
+            ${Button({
+              label: "Archive",
+              size: "sm",
+              type: "submit",
+              attrs: { name: "op", value: "archive" },
+            })}${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}
+          `,
           rowActions: (r) =>
             RowActions({
               id: `inv-${r.id}`,
@@ -531,6 +644,36 @@ export const usage: Record<string, UsageExample[]> = {
           placeholder: "Write in Markdown…",
         }),
     },
+    {
+      title: "A comment box: the basic toolbar, a limit, and image uploads",
+      note:
+        '`toolbar: "basic"` keeps text, headings, lists, quote, code and link; `maxLength` counts down in the status bar; `uploadAction` receives a dropped or pasted image as multipart `file` and answers with its URL.',
+      render: () =>
+        Editor({
+          id: "comment",
+          name: "comment",
+          toolbar: "basic",
+          maxLength: 2000,
+          uploadAction: "/fragments/upload",
+          rows: 5,
+          placeholder: "Leave a comment…",
+        }),
+    },
+    {
+      title: "A WYSIWYG profile bio",
+      note:
+        '`mode: "html"` edits a contenteditable surface whose HTML is mirrored into the textarea that submits; `value` is HTML the server already sanitised.',
+      render: () =>
+        Editor({
+          id: "bio",
+          name: "bio",
+          mode: "html",
+          value: "<p>Hello <strong>world</strong></p>",
+          toolbar: "minimal",
+          statusBar: false,
+          rows: 4,
+        }),
+    },
   ],
   "components/empty": [
     {
@@ -554,24 +697,27 @@ export const usage: Record<string, UsageExample[]> = {
       note:
         "`autosubmit` submits on a pick or a radio, never on typing (Enter does that); with `data-action` the list swaps in place. `csrfToken` (`view.csrfToken`) renders the `_csrf` field a no-JS POST needs; `CsrfField` does the same for a form you build by hand.",
       render: () =>
-        html`${
-          Form({
+        html`
+          ${Form({
             id: "filters",
             action: "/links",
             method: "get",
             autosubmit: true,
             attrs: { "data-action": "/links", "data-target": "#links", "data-swap": "outer", "data-push": "" },
-            content: html`${Input({ type: "search", name: "q", attrs: { "aria-label": "Search links" } })}${
-              Select({
+            content: html`
+              ${Input({ type: "search", name: "q", attrs: { "aria-label": "Search links" } })}${Select({
                 name: "status",
                 options: [{ value: "", label: "Any status" }, { value: "active", label: "Active" }],
                 attrs: { "aria-label": "Status" },
-              })
-            }`,
-          })
-        }<form method="post" action="/keys/revoke">${CsrfField({ token: "masked-token" })}${
-          Button({ label: "Revoke", variant: "danger", type: "submit", attrs: { "data-confirm": "Revoke this key?" } })
-        }</form>`,
+              })}
+            `,
+          })}<form method="post" action="/keys/revoke">${CsrfField({ token: "masked-token" })}${Button({
+            label: "Revoke",
+            variant: "danger",
+            type: "submit",
+            attrs: { "data-confirm": "Revoke this key?" },
+          })}</form>
+        `,
     },
     {
       title: "Client-side validation, inline",
@@ -584,8 +730,8 @@ export const usage: Record<string, UsageExample[]> = {
           validate: true,
           guard: true,
           attrs: { "data-action": "/team/invite", "data-target": "#invite", "data-swap": "outer" },
-          content: html`${
-            FormGrid({
+          content: html`
+            ${FormGrid({
               fields: [
                 FormField({
                   id: "invite-email",
@@ -620,8 +766,8 @@ export const usage: Record<string, UsageExample[]> = {
                     }),
                 }),
               ],
-            })
-          }${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}`,
+            })}${FormActions({ content: Button({ label: "Send invite", type: "submit" }) })}
+          `,
         }),
     },
     {
@@ -633,8 +779,8 @@ export const usage: Record<string, UsageExample[]> = {
           id: "profile",
           action: "/profile",
           attrs: { "data-action": "/profile", "data-target": "#profile", "data-swap": "outer" },
-          content: html`${
-            FormGrid({
+          content: html`
+            ${FormGrid({
               fields: [
                 FormField({
                   id: "name",
@@ -643,8 +789,8 @@ export const usage: Record<string, UsageExample[]> = {
                   control: (a) => Input({ id: a.id, name: "name", value: "Ada Lovelace" }),
                 }),
               ],
-            })
-          }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+            })}${FormActions({ content: Button({ label: "Save", type: "submit" }) })}
+          `,
         }),
     },
   ],
@@ -702,8 +848,8 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "Two fields side by side, then the actions",
       render: () =>
-        html`${
-          FormGrid({
+        html`
+          ${FormGrid({
             fields: [
               FormField({
                 id: "first",
@@ -718,25 +864,39 @@ export const usage: Record<string, UsageExample[]> = {
                 control: (a) => Input({ id: a.id, name: "last" }),
               }),
             ],
-          })
-        }${
-          FormActions({
-            content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}`,
-          })
-        }`,
+          })}${FormActions({
+            content: html`
+              ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save", type: "submit" })}
+            `,
+          })}
+        `,
     },
   ],
   "components/grid": [
     {
       title: "Three stat tiles in a row",
-      note: "12 columns; every column collapses to full width below `md`.",
+      note:
+        '12 columns; every column collapses to full width below `md` — `phoneColumns: "2"` keeps tiles two-up on a phone.',
       render: () =>
         Grid({
+          phoneColumns: "2",
           items: [
             GridCol({ span: 4, content: Stat({ label: "Revenue", value: "$48,200" }) }),
             GridCol({ span: 4, content: Stat({ label: "Open", value: "12" }) }),
             GridCol({ span: 4, content: Stat({ label: "Overdue", value: "3", tone: "danger" }) }),
           ],
+        }),
+    },
+    {
+      title: "A span per breakpoint",
+      note:
+        "An object span is mobile first: `{ xs: 6, md: 4, xl: 3 }` is two-up on a phone, three across from 768px and four from 1400px (`col-xs-6 col-md-4 col-xl-3`). A main column and an aside: `{ sm: 6, lg: 8 }` beside `{ sm: 6, lg: 4 }`.",
+      render: () =>
+        Grid({
+          gap: "sm",
+          items: ["Revenue", "Open", "Overdue", "Paid"].map((label) =>
+            GridCol({ span: { xs: 6, md: 4, xl: 3 }, content: Stat({ label, value: "12" }) })
+          ),
         }),
     },
   ],
@@ -852,8 +1012,8 @@ export const usage: Record<string, UsageExample[]> = {
       note:
         "`strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.",
       render: () =>
-        html`${
-          FormField({
+        html`
+          ${FormField({
             id: "new-password",
             label: "Password",
             required: true,
@@ -870,9 +1030,7 @@ export const usage: Record<string, UsageExample[]> = {
                 strengthMin: 3,
                 messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
               }),
-          })
-        }${
-          FormField({
+          })}${FormField({
             id: "confirm",
             label: "Confirm password",
             required: true,
@@ -886,8 +1044,33 @@ export const usage: Record<string, UsageExample[]> = {
                 match: "#new-password",
                 messages: { match: "The passwords do not match." },
               }),
-          })
-        }`,
+          })}
+        `,
+    },
+    {
+      title: "Masked fields: a card number and a price",
+      note:
+        "`mask` formats as you type and keeps the caret; `currency` posts the raw number through a hidden input when the script runs, the text as typed without it. `custom` follows `maskPattern` (`#` digit, `A` letter, `*` either).",
+      render: () =>
+        html`
+          <div class="stack stack--sm">${Input({
+            id: "card",
+            name: "card",
+            mask: "card",
+            autocomplete: "cc-number",
+          })}${Input({
+            id: "price",
+            name: "price",
+            mask: "currency",
+            maskCurrency: "EUR",
+            maskLocale: "de-DE",
+          })}${Input({
+            id: "ref",
+            name: "ref",
+            mask: "custom",
+            maskPattern: "AA-####",
+          })}</div>
+        `,
     },
   ],
   "components/menu": [
@@ -915,14 +1098,14 @@ export const usage: Record<string, UsageExample[]> = {
       note:
         "Render `ConfirmModal` once per page (the core template does); then any link, button or submit button with `data-confirm` asks there first, and Confirm carries on with the same click — the same submitter, the same swap.",
       render: () =>
-        html`${
-          Button({
+        html`
+          ${Button({
             label: "Delete project",
             variant: "danger",
             type: "submit",
             attrs: { "data-confirm": "Delete the project and its 42 links?", "data-confirm-label": "Delete" },
-          })
-        }${ConfirmModal()}`,
+          })}${ConfirmModal()}
+        `,
     },
     {
       title: "Reopen a modal after a failed submit",
@@ -932,22 +1115,28 @@ export const usage: Record<string, UsageExample[]> = {
           id: "new-key",
           title: "New API key",
           open: true,
-          body: html`<p>Name the key so you can tell it apart later.</p>`,
+          body: html`
+            <p>Name the key so you can tell it apart later.</p>
+          `,
         }),
     },
     {
       title: "A confirmation dialog",
       note: 'A native `<dialog>`; any `[data-modal-open="#id"]` opens it, Escape and the backdrop close it.',
       render: () =>
-        html`${
-          Button({ label: "Delete invoice", variant: "danger", attrs: { "data-modal-open": "#confirm-delete" } })
-        }${
-          Modal({
+        html`
+          ${Button({
+            label: "Delete invoice",
+            variant: "danger",
+            attrs: { "data-modal-open": "#confirm-delete" },
+          })}${Modal({
             id: "confirm-delete",
             title: "Delete INV-2048?",
-            body: html`<p>This cannot be undone.</p>`,
-            footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-dismiss": "" } })}${
-              Button({
+            body: html`
+              <p>This cannot be undone.</p>
+            `,
+            footer: html`
+              ${Button({ label: "Cancel", variant: "ghost", attrs: { "data-dismiss": "" } })}${Button({
                 label: "Delete",
                 variant: "danger",
                 attrs: {
@@ -956,10 +1145,10 @@ export const usage: Record<string, UsageExample[]> = {
                   "data-target": "#invoices",
                   "data-swap": "outer",
                 },
-              })
-            }`,
-          })
-        }`,
+              })}
+            `,
+          })}
+        `,
     },
   ],
   "components/navbar": [
@@ -993,16 +1182,17 @@ export const usage: Record<string, UsageExample[]> = {
           title: "INV-2048",
           subtitle: "Northwind Traders · due 15 Oct",
           breadcrumb: Breadcrumb({ items: [{ label: "Invoices", href: "/invoices" }, { label: "INV-2048" }] }),
-          actions: html`${Button({ label: "Send reminder", variant: "outline" })}${
-            Button({ label: "Record payment" })
-          }`,
+          actions: html`
+            ${Button({ label: "Send reminder", variant: "outline" })}${Button({ label: "Record payment" })}
+          `,
         }),
     },
   ],
   "components/pagination": [
     {
       title: "Pages of a table, swapped in place",
-      note: "`target` makes every link a rAPId swap of that region with history push; leave it out for plain links.",
+      note:
+        '`target` makes every link a rAPId swap of that region with history push; leave it out for plain links. Below 576px the row folds to prev · "Page 3 of 12" · next.',
       render: () =>
         Pagination({ page: 3, totalPages: 12, buildHref: (p) => `/invoices?page=${p}`, target: "#invoices" }),
     },
@@ -1125,9 +1315,12 @@ export const usage: Record<string, UsageExample[]> = {
       title: "A table region while it loads",
       note: "Render it as the initial content of a `data-load` region; the server's fragment replaces it.",
       render: () =>
-        html`<div id="orders" data-load data-action="/fragments/orders">${
-          SkeletonTable({ rows: 3, columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]] })
-        }</div>`,
+        html`
+          <div id="orders" data-load data-action="/fragments/orders">${SkeletonTable({
+            rows: 3,
+            columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]],
+          })}</div>
+        `,
     },
     { title: "A card placeholder", render: () => SkeletonCard() },
   ],
@@ -1160,6 +1353,31 @@ export const usage: Record<string, UsageExample[]> = {
     {
       title: "A KPI with its trend",
       render: () => Stat({ label: "Revenue (30d)", value: "$48,200", trend: { label: "+12.4%", up: true } }),
+    },
+    {
+      title: "With a sparkline",
+      note: "The line is an inline SVG the server draws from the numbers — no chart engine on the page.",
+      render: () =>
+        Stat({
+          label: "Signups (30d)",
+          value: "1,284",
+          tone: "primary",
+          trend: { label: "+8.2%", up: true },
+          sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40],
+          sparklineLabel: "Daily signups over the last 30 days, rising",
+          sparklineLabels: [
+            "1 Sep",
+            "4 Sep",
+            "7 Sep",
+            "10 Sep",
+            "13 Sep",
+            "16 Sep",
+            "19 Sep",
+            "22 Sep",
+            "25 Sep",
+            "28 Sep",
+          ],
+        }),
     },
   ],
   "components/switch": [
@@ -1200,8 +1418,20 @@ export const usage: Record<string, UsageExample[]> = {
         Tabs({
           id: "settings",
           items: [
-            { id: "general", label: "General", content: html`<p>Company name, timezone.</p>` },
-            { id: "billing", label: "Billing", content: html`<p>Plan and invoices.</p>` },
+            {
+              id: "general",
+              label: "General",
+              content: html`
+                <p>Company name, timezone.</p>
+              `,
+            },
+            {
+              id: "billing",
+              label: "Billing",
+              content: html`
+                <p>Plan and invoices.</p>
+              `,
+            },
           ],
         }),
     },
@@ -1288,20 +1518,28 @@ export const usage: Record<string, UsageExample[]> = {
         }),
     },
     { title: "The region the shell renders once", render: () => ToastRegion() },
+    {
+      title: "Toasts at the top, centred",
+      note: "`createCoreTemplate({ toastPosition })` sets the same on the shared region.",
+      render: () => ToastRegion({ position: "top-center", max: 3 }),
+    },
   ],
   "components/toolbar": [
     {
       title: "Search and filters, with the primary action at the end",
       render: () =>
         Toolbar({
-          start: html`${
-            Input({ type: "search", size: "sm", placeholder: "Search invoices", attrs: { "data-table-search": "" } })
-          }${
-            Select({
+          start: html`
+            ${Input({
+              type: "search",
+              size: "sm",
+              placeholder: "Search invoices",
+              attrs: { "data-table-search": "" },
+            })}${Select({
               placeholder: "All statuses",
               options: [{ value: "open", label: "Open" }, { value: "paid", label: "Paid" }],
-            })
-          }`,
+            })}
+          `,
           end: Button({ label: "New invoice", size: "sm" }),
         }),
     },
@@ -1309,7 +1547,8 @@ export const usage: Record<string, UsageExample[]> = {
   "components/tooltip": [
     {
       title: "A hint on an icon button",
-      note: "CSS-only. Point the trigger's `aria-describedby` at the tooltip's id.",
+      note:
+        "Point the trigger's `aria-describedby` at the tooltip's id. tooltip.js keeps the bubble on screen; without JS it still shows on hover and focus.",
       render: () =>
         Tooltip({
           id: "archive-tip",
@@ -1322,6 +1561,21 @@ export const usage: Record<string, UsageExample[]> = {
           content: "Archive this invoice",
         }),
     },
+    {
+      title: "Why a control is disabled",
+      note: "`side` picks the edge; it flips when there is no room. A longer sentence wraps.",
+      render: () =>
+        Tooltip({
+          id: "delete-tip",
+          side: "bottom",
+          trigger: Button({
+            label: "Delete",
+            variant: "danger",
+            attrs: { disabled: "", "aria-describedby": "delete-tip" },
+          }),
+          content: "Sent invoices cannot be deleted — void it and the client gets a credit note.",
+        }),
+    },
   ],
   "components/wizard": [
     {
@@ -1330,7 +1584,9 @@ export const usage: Record<string, UsageExample[]> = {
         Wizard({
           id: "checkout",
           steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }, { label: "Review" }],
-          content: html`<p>Card details go here.</p>`,
+          content: html`
+            <p>Card details go here.</p>
+          `,
         }),
     },
   ],
@@ -1366,13 +1622,13 @@ export const usage: Record<string, UsageExample[]> = {
           content: Form({
             id: "signin",
             action: "/signin",
-            content: html`${
-              FormField({
+            content: html`
+              ${FormField({
                 id: "email",
                 label: "Email",
                 control: (a) => Input({ id: a.id, name: "email", type: "email" }),
-              })
-            }${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}`,
+              })}${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}
+            `,
           }),
         }),
     },
@@ -1401,11 +1657,15 @@ export const usage: Record<string, UsageExample[]> = {
       title: "A checkout with no distractions",
       render: () =>
         FocusLayout({
-          header: html`<a class="navbar__brand" href="/">Acme</a>`,
+          header: html`
+            <a class="navbar__brand" href="/">Acme</a>
+          `,
           content: Wizard({
             id: "checkout",
             steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }],
-            content: html`<p>…</p>`,
+            content: html`
+              <p>…</p>
+            `,
           }),
         }),
     },
@@ -1422,7 +1682,9 @@ export const usage: Record<string, UsageExample[]> = {
             { href: "/settings", label: "Settings", icon: Icon("settings", { size: 20 }) },
           ],
           end: Avatar({ initials: "AL", size: "sm" }),
-          content: html`<h1>Home</h1>`,
+          content: html`
+            <h1>Home</h1>
+          `,
         }),
     },
   ],
@@ -1442,7 +1704,9 @@ export const usage: Record<string, UsageExample[]> = {
             collapsible: true,
             items: [{ label: "Dashboard", href: "/", active: true }, { label: "Invoices", href: "/invoices" }],
           }),
-          content: html`${PageHeader({ title: "Dashboard" })}<p>…</p>`,
+          content: html`
+            ${PageHeader({ title: "Dashboard" })}<p>…</p>
+          `,
         }),
     },
   ],
@@ -1478,8 +1742,12 @@ export const usage: Record<string, UsageExample[]> = {
             brand: "Acme",
             links: [{ href: "/", label: "Home", active: true }, { href: "/pricing", label: "Pricing" }],
           }),
-          content: html`<h1>Invoices your customers pay on time</h1>`,
-          footer: html`<p>© Acme</p>`,
+          content: html`
+            <h1>Invoices your customers pay on time</h1>
+          `,
+          footer: html`
+            <p>© Acme</p>
+          `,
         }),
     },
     {
@@ -1490,7 +1758,9 @@ export const usage: Record<string, UsageExample[]> = {
         StackedLayout({
           width: "bleed",
           header: Navbar({ brand: "Acme", links: [{ href: "/how", label: "How it works" }] }),
-          subheader: html`<p class="text-sm">Markets close early on Friday.</p>`,
+          subheader: html`
+            <p class="text-sm">Markets close early on Friday.</p>
+          `,
           content: html`
             <section class="hero">
               <div class="container">
@@ -1502,3 +1772,5 @@ export const usage: Record<string, UsageExample[]> = {
     },
   ],
 };
+
+export const usage: Record<string, UsageExample[]> = Object.assign({}, ownUsage, ...splitUsage);

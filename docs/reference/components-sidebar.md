@@ -4,7 +4,7 @@
 
 Import: `import { Sidebar, SidebarToggle } from "@tundralibs/ui/sidebar"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/sidebar.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -102,4 +102,4 @@ SidebarToggle({ targetId: "nav", label: "Menu" })
 
 Classes defined by `components/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.menu__caret`, `.menu__flyout-title`, `.menu__link`, `.menu__link-label`, `.menu__sublist`, `.menu__sublist--flyout`, `.sidebar`, `.sidebar--collapsed`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`
+`.js`, `.menu__caret`, `.menu__flyout-title`, `.menu__link`, `.menu__link--current-parent`, `.menu__link-label`, `.menu__sublist`, `.menu__sublist--flyout`, `.sidebar`, `.sidebar--collapsed`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`

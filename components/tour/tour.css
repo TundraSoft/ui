@@ -1,0 +1,160 @@
+/*
+ * Tour: a page scrim with a spotlight cut out around the step's target
+ * (the spot's huge box-shadow is the scrim), and a card the script places
+ * beside the target (position: fixed, left/top from shared/js/float.js;
+ * data-side for the arrow). A step without a target centres the card.
+ * tour.js sizes the spot through the CSSOM; it glides between steps.
+ */
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+}
+
+/* Hiding goes through uiMotion.exit(root): the whole overlay fades. */
+.tour.is-closing {
+  animation: ui-fade-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.tour__scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.tour__spot {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 200vmax var(--color-overlay);
+  pointer-events: none;
+  transition: left var(--transition-base), top var(--transition-base), width var(--transition-base),
+    height var(--transition-base);
+  animation: ui-fade-in var(--duration-enter) var(--ease-out);
+}
+
+.tour__card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(22rem, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100vh - 2 * var(--space-4));
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+  animation: ui-scale-in var(--duration-enter) var(--ease-out);
+}
+
+/* The card takes focus on every step; it is the dialog, not a control,
+   so it draws no ring of its own (its buttons draw theirs). */
+.tour__card:focus,
+.tour__card:focus-visible {
+  outline: none;
+}
+
+/* Placed by the script: left/top are set, so the centring translate goes. */
+.tour__card[data-side] {
+  translate: 0 0;
+}
+
+.tour__steps {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  overflow: auto;
+  list-style: none;
+}
+
+.tour__step {
+  animation: ui-fade-in var(--duration-base) var(--ease-out);
+}
+
+.tour__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-family-display, inherit);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight, 1.3);
+}
+
+.tour__body {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.tour__body > :last-child {
+  margin-bottom: 0;
+}
+
+.tour__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
+.tour__progress {
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-subtle, var(--color-text-muted));
+}
+
+.tour__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* The arrow: a rotated square on the edge facing the target, at the
+   target's centre (--float-anchor, from float.js). */
+.tour__card[data-side]::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  rotate: 45deg;
+}
+
+.tour__card[data-side="top"]::after {
+  bottom: -6px;
+  left: calc(var(--float-anchor, 50%) - 5px);
+  border-top: none;
+  border-left: none;
+}
+
+.tour__card[data-side="bottom"]::after {
+  top: -6px;
+  left: calc(var(--float-anchor, 50%) - 5px);
+  border-bottom: none;
+  border-right: none;
+}
+
+.tour__card[data-side="left"]::after {
+  right: -6px;
+  top: calc(var(--float-anchor, 50%) - 5px);
+  border-bottom: none;
+  border-left: none;
+}
+
+.tour__card[data-side="right"]::after {
+  left: -6px;
+  top: calc(var(--float-anchor, 50%) - 5px);
+  border-top: none;
+  border-right: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour__spot {
+    transition: none;
+  }
+}

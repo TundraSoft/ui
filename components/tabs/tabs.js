@@ -60,5 +60,46 @@
     tabs.querySelectorAll(":scope > .tabs__panel").forEach((panel) => {
       panel.toggleAttribute("hidden", panel.id !== tab.getAttribute("aria-controls"));
     });
+    place(tab.parentElement);
   }
+
+  /* ------------------------------------------------ sliding indicator */
+  // The selected tab's position and width go onto the list as custom
+  // properties (CSSOM, CSP-clean); tabs.css paints the bar from them.
+  // Measured in the list's content box, so a scrolled strip still lines up.
+  function place(list) {
+    if (!list?.classList.contains("tabs__list")) return;
+    const tab = list.querySelector(
+      ':scope > .tabs__tab[aria-selected="true"], :scope > .tabs__tab[aria-current="page"]',
+    );
+    if (!tab) {
+      list.style.setProperty("--tabs-w", "0px");
+      return;
+    }
+    const l = list.getBoundingClientRect();
+    const t = tab.getBoundingClientRect();
+    const rtl = getComputedStyle(list).direction === "rtl";
+    const x = rtl ? l.right - t.right - list.scrollLeft : t.left - l.left + list.scrollLeft;
+    list.style.setProperty("--tabs-x", `${rtl ? -x : x}px`);
+    list.style.setProperty("--tabs-w", `${t.width}px`);
+    list.setAttribute("data-tabs-ready", "");
+  }
+
+  const watched = new WeakSet();
+  const observer = typeof ResizeObserver === "function"
+    ? new ResizeObserver((entries) => entries.forEach((e) => place(e.target)))
+    : null;
+  const placeAll = () =>
+    document.querySelectorAll(".tabs__list").forEach((list) => {
+      place(list);
+      if (observer && !watched.has(list)) {
+        watched.add(list);
+        observer.observe(list);
+      }
+    });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", placeAll);
+  else placeAll();
+  addEventListener("load", placeAll);
+  addEventListener("resize", placeAll, { passive: true });
+  document.addEventListener("rapid:swapped", placeAll);
 })();

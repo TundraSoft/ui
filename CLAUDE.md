@@ -894,6 +894,57 @@ wrapper and `bleed` at every band; each was verified to fail with its fix remove
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 
+**The demo site (2026-10-29) — rebuilt from scratch; the sidebar is the only navigation.** The user asked for the demo
+pages to be redone: every capability covered, navigation by a collapsible sidebar alone, grouped into sub-menus. The old
+builders (`build-catalogue.ts`, `build-layouts.ts`, `build-theme-builder.ts`, one page per catalogue group with a
+navbar, breadcrumbs, an "On this page" dropdown, an inline link index and a ⌘K jump palette, plus a separate layouts
+index with its own navbar) are gone. `examples/pages/build-demo.ts` (`deno task build:site`, first half of
+`build:demos`) writes one site:
+
+- **Map** — `examples/pages/site/nav.ts` is the whole information architecture: `COMPONENTS` (label, icon, one-line
+  blurb per component) and `COMPONENT_TREE` (eight groups → sections → components: Forms › Fields / Choices / Pickers /
+  Form layout, Data › Tables / Display / Loading & empty, Charts (a one-component group renders as a plain link),
+  Structure, Navigation, Actions, Feedback, Marketing & media), plus `FOUNDATIONS`, `LAYOUT_INFO`, `RAPID_PAGES`,
+  `ADMIN_PAGES`. `siteMenu(path, base)` renders it with the current leaf `aria-current` and every group above it open.
+  The build throws when a catalogued component is missing from the tree, listed twice, or unknown — a new component
+  needs a line here as well as its catalogue entry.
+- **Chrome** — `site/chrome.ts` `sitePage(meta, content)`: a `SidebarLayout` whose collapsible `Sidebar` (rail + flyouts
+  on desktop, drawer on phones) is the navigation; the header holds **no links** — a plain-text context line ("Forms ·
+  Choices"), a theme `Select` (Base / Console / Ledger / Portal / Sunset — swaps `#theme-css`), a density `Select` (sets
+  `data-density` on `<html>`), and the dark toggle. Theme and density persist in `localStorage` (`site-theme`,
+  `site-density`); every page carries `ToastRegion` + `ConfirmModal`; ApexCharts loads only where a page draws a chart.
+- **Pages** — `index.html` (overview: stats, quick start, what the sidebar holds, principles);
+  `foundations/{tokens,typography,icons,utilities,motion,theming,theme-builder}.html` (`site/foundations.ts` — the token
+  pages parse `tokens/default.css`, `styles/typography.css`, `styles/utilities.css` and `styles/motion.css` at build
+  time; swatches paint through generated `.tk-<token>` classes in site.css, values are read back live by site.js so a
+  theme/dark/density switch updates them; the motion page replays every shared keyframe); one `components/<name>.html`
+  per catalogue entry (`site/component-page.ts`: import line, the catalogued cases in
+  `section#cat-<name>[data-catalogue]` — the hooks `test-catalogue.ts` drives —, the usage examples as TypeScript +
+  rendered HTML in `Tabs` of `CodeBlock`s (snippets cut by `examples/docs/snippets.ts`, shared with
+  `scripts/build-docs.ts`), and an API list: exported functions with their JSDoc, CSS hooks, script attributes, events);
+  `layouts/<name>.html` (`site/pages.ts`: an iframe of `frames/<name>.html` at phone/tablet/desktop widths — a
+  `Segmented` writes `data-view` via view-switch.js, site.js scales a frame wider than its column — plus the bands and
+  the `--layout-*` tokens it reads); `rapid/{integration,errors}.html` (the data-* contract and events as `DataTable`s,
+  template snippets, and `ErrorTemplate` rendered as frames for 404/403/500-dev plus the compact part).
+- **Frames** — `demo/frames/*.html` are standalone documents (the eight layout samples, the error pages) loading
+  `frames/frame.js`, which applies the theme/density/mode the parent page posts (`postMessage` — `file://` pages are
+  opaque origins, so `contentDocument` is off limits). `test-layouts.ts` drives them directly.
+- **`demo/pages.json`** lists every page (`site`, `frames`, `admin`); `test-all-pages.ts` and `test-visual.ts` read it
+  instead of hand-kept lists. `test-all-pages.ts` also holds the navigation rule on every site page: one current link,
+  every group above it open, no header links, no breadcrumb or `.cat-nav` in the chrome, sub-groups present, every site
+  page linked from the sidebar exactly once and every link resolving; and drives the chrome once (collapse to the rail
+  and back, persisted; a rail flyout; theme and density switches; the phone drawer and Escape).
+- **`test-catalogue.ts` on per-component pages** — one tab; the render/axe/dark checks loop over every component page;
+  the behaviour blocks stay grouped and call `go(page, "<component>")` before each step (a no-op when already there, so
+  consecutive steps keep the page's state). Two lessons: a guarded form left dirty asks `beforeunload` before the tab
+  moves on — the tab accepts dialogs; and `about:blank` has no `localStorage`, so the new-document clear is guarded.
+- `menu.js` now marks every parent above the current link `menu__link--current-parent` (it did so only for a hash
+  match), so the collapsed rail shows which group the current page is in.
+
+Not rebuilt: the admin example app's content (its sidebar gained Profile and the link back; breadcrumbs went), the
+`examples/shared/` case library, themes and layout samples — they are the content the site presents, and the regression
+suites are written against them.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each
@@ -921,14 +972,15 @@ Rules that make them frames and keep them device-compatible:
   sidebar/aside/TOC sits under.
 - **No page CSS in demos.** The admin demo's `HEAD_EXTRA` `<style>` block is gone: what was generic became components
   (`PageHeader`, `Stat`, `Toolbar`, `.card--danger`, `.command__trigger`, the `.stack` utility); what was theme-specific
-  moved into `examples/themes/admin.css` as custom partials; the catalogue's harness CSS/JS is written to
-  `demo/catalogue.css|js` by its builder. `test-catalogue.ts`/`test-all-pages.ts` would flag any inline `style=`, and
-  the demo build prints nothing if none exist.
+  moved into `examples/themes/admin.css` as custom partials; the demo site's harness CSS/JS is written to
+  `demo/site.css|js` by its builder (`examples/pages/site/assets.ts`). `test-catalogue.ts`/`test-all-pages.ts` would
+  flag any inline `style=`, and the demo build prints nothing if none exist.
 - `examples/tests/test-layouts.ts` (`deno task test:layouts`) loads every layout at 375, 667×375, 768, 1024, 1440 and
   1920 and asserts: no horizontal overflow, `#main-content` present and within the viewport, reading/boxed frames not
   full-bleed on wide screens, navigation reachable (visible nav, or a drawer toggle that actually opens the sidebar
   on-screen and closes on Escape), rail is a full-width bottom bar on phones, split shows exactly one pane on phones,
-  article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to the demo builder and this list.
+  article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to `LAYOUT_INFO` (site/nav.ts),
+  the bands table in site/pages.ts, and this list.
 - **SidebarLayout 992–1199 is a grid, not a wrapping flex row (fixed 2026-10-05).** The range used `flex-wrap: wrap` so
   the aside could drop below the content, but the content's `auto` basis (its own width; 100% when boxed) wrapped the
   content itself onto a second line under the sticky sidebar, and a wrapped aside started at the row's edge, under the
@@ -958,20 +1010,18 @@ cards, navigation, actions, feedback — `catalogueGroups`), one case per export
 variant/size/tone/status and every meaningful state. Its server-driven cases (the projects and invoices tables, the
 `#reviewer` combobox, the `#palette` command, the `#period` picker, the "Show toast" button) come from
 `examples/shared/data.ts` and take a `DemoRoutes` — inert query strings on the static pages, real routes in the app —
-plus a `CatalogueState` so the app can render a pushed URL's state. `examples/pages/build-catalogue.ts` renders
-`demo/<group>.html` × 7 and `demo/index.html` — whose chrome is itself the library (a `SidebarLayout` with a nested
-`Sidebar` menu of every group and component, a `Navbar` with a ⌘K `Command` palette that jumps to any component, the
-theme switcher hidden below 576px, `PageHeader` + `Breadcrumb` + an "On this page" `Dropdown`, `Stat`s on the index);
-the app serves the same groups at `/components/<group>`. `examples/tests/test-catalogue.ts` (`deno task test:catalogue`,
-first in `test`) enforces it: **statically**, every `export function` under `components/` and every literal of every
+plus a `CatalogueState` so the app can render a pushed URL's state. The demo site renders each entry on its own page
+(`demo/components/<name>.html`, see "The demo site" below); the app serves the same groups at `/components/<group>`.
+`examples/tests/test-catalogue.ts` (`deno task test:catalogue`, first in `test`) enforces it: **statically**, every
+`export function` under `components/` and every literal of every
 `*Variant|*Size|*Tone|*Status|*Type|*Width|*Mode|
 Orientation|Tag|Ratio|Span` union must be referenced by `catalogue.ts`
-(+ `charts.ts`, `data.ts`), so a new component or variant fails CI until it is catalogued; **in Chrome**, every section
-and case is on its page and non-empty, every chart drew, no console/page errors, no inline styles, no horizontal
-overflow, the dark toggle changes the canvas — and the per-page behaviour and theme assertions that used to live in the
-gallery-v2 suite. `demo/` stays at the repo root (gitignored build output) so that a local build is easy to find and
-open. One harness lesson: `file://` pages share one origin, so a persisted theme toggle leaks between pages — clear
-`localStorage` in `evaluateOnNewDocument`, not after load.
+(+ `charts.ts`, `data.ts`), so a new component or variant fails CI until it is catalogued; **in Chrome**, every
+component page carries its section with every case, non-empty, every chart drew, no console/page errors, no inline
+styles, no horizontal overflow, the dark toggle changes the canvas — and the per-page behaviour and theme assertions
+that used to live in the gallery-v2 suite. `demo/` stays at the repo root (gitignored build output) so that a local
+build is easy to find and open. One harness lesson: `file://` pages share one origin, so a persisted theme toggle leaks
+between pages — clear `localStorage` in `evaluateOnNewDocument`, not after load.
 
 **Never delete `examples/` to "clean up"** — it is the regression suite. If a sample theme grows into a product, it
 lifts out into its own repo with no restructuring; that is the intended path.
@@ -979,9 +1029,10 @@ lifts out into its own repo with no restructuring; that is the intended path.
 **`examples/themes/*.css`** are source with no generator. An earlier layout nested them under `demo/themes/` and a
 same-session `rm -rf demo` deleted them **twice** before the fix was to relocate them, not just to remember more
 carefully. Reference them from a demo script with a relative path back to repo root (e.g. `demo/admin/dashboard.html` →
-`../../examples/themes/admin.css`, `demo/forms.html` → `../examples/themes/console.css`, `demo/card-themed.html` (gone)
-→ `../examples/themes/sunset.css`) — get the `../` count wrong and the browser just silently 404s the stylesheet, so
-re-run `deno task test:all` after touching any of these paths (it would have caught this exact class of mistake).
+`../../examples/themes/admin.css`, `demo/components/select.html` → `../../examples/themes/console.css`; the site chrome
+computes it from the page's depth — `data-themes` on `#theme-css`) — get the `../` count wrong and the browser just
+silently 404s the stylesheet, so re-run `deno task test:all` after touching any of these paths (it would have caught
+this exact class of mistake).
 
 `shared/icons.ts` is a small inline-SVG icon set (`Icon(name, opts)`, ~20 icons) — stroke-based, `currentColor`, built
 only from primitive shapes (circle/rect/line/polyline/straight-line paths, no hand-authored bezier curves) specifically
@@ -1001,17 +1052,13 @@ needed; it's a real, working filter, not a decorative input.
 Settings page so its sidebar submenu (General/Billing/Integrations) links to a specific tab rather than a dead `#`
 anchor.
 
-Demos (restructured 2026-09-16 — the galleries, the card deep-dive, the login page and the blog sample were dropped once
-the catalogue covered everything they showed): `demo/index.html` is the landing page;
-`demo/{forms,data,charts,
-cards,navigation,actions,feedback}.html` are the catalogue, one page per group (see "The
-catalogue" below), each with the theme switcher (Base / Console / Ledger / Portal / Sunset) and the dark toggle;
-`demo/layouts/*.html` are the eight frames; `demo/admin/*.html` is the one full sample theme (SidebarLayout +
-collapsible **dark** sidebar nav + icon set + stat cards + ApexCharts + working filtered/paginated tables + card-grid
-Projects/Team + deep-linked Settings tabs + modal + navbar search/notifications/dark-mode toggle, indigo palette — built
-from scratch with this library's own components, not a clone of any commercial template's assets). All generated by
-`examples/pages/build-*.ts` (`deno task build:demos` runs every one) — edit the script, not the generated HTML in
-`demo/`.
+Demos (rebuilt 2026-10-29, see "The demo site" below): one site under `demo/` whose sidebar is its only navigation, plus
+`demo/admin/*.html`, the one full sample theme (SidebarLayout + collapsible **dark** sidebar nav + icon set + stat
+cards + ApexCharts + working filtered/paginated tables + card-grid Projects/Team + deep-linked Settings tabs + modal +
+navbar search/notifications/dark-mode toggle, indigo palette — built from scratch with this library's own components,
+not a clone of any commercial template's assets; its own sidebar is its navigation, ending in a "Component library" link
+back to the site). All generated by `examples/pages/build-demo.ts` and `build-admin-theme.ts` (`deno task build:demos`
+runs both) — edit the scripts, not the generated HTML in `demo/`.
 
 `deno task test:admin` (`examples/tests/test-admin.ts`) drives the admin demo with a real headless Chrome (Puppeteer via
 `npm:puppeteer-core`, pointed at the system Chrome install — no bundled Chromium) and clicks through every interactive
@@ -1261,6 +1308,179 @@ checks the sprite holds every name.
   `version.ts` and verifies the sha384 matches — skips while the version is 0.0.0). `close-on-success` closes any open
   `ci-health` issue; `report` creates or comments on one using `.github/ISSUE_TEMPLATE/ci_health.md` as the body (single
   source of truth) with the failing job names and run URL.
+
+**The v3 round (2026-10-28): motion, floating panels, phone layouts, and eighteen new components.** A full walk of the
+demos (every page at 1440 and 375, light and dark, every panel driven open) found that almost nothing animated, floating
+panels had no viewport awareness, and phone layouts were desktop layouts stacked. What changed, and the rules that fell
+out of it:
+
+- **Motion is tokens + two conventions.** `tokens/default.css` has `--duration-fast|base|slow|enter|exit` and
+  `--ease-out|in|in-out|spring` (`--transition-*` are built from them); `styles/motion.css` (layer base) holds the
+  shared keyframes (`ui-float-in|out`, `ui-float-up-in|out`, `ui-scale-in|out`, `ui-rise-in`, `ui-sink-out`,
+  `ui-fade-in|out`, `ui-slide-*`, `ui-reveal`). Convention one: **showing is free** — clearing `hidden` (or adding the
+  open class) starts the `*-in` keyframes on the panel's own rule. Convention two: **hiding goes through
+  `uiMotion.exit(el, done)`** (`shared/js/motion.js`): it adds `.is-closing`, the component's `.is-closing` rule plays
+  the `*-out` keyframes with `forwards`, and `done` (set `hidden`, `remove()`, `dialog.close()`) runs on `animationend`
+  — at once when the rule animates nothing, the node is detached, or reduced motion is on. `toggle.js`, `dismiss.js`,
+  modal (incl. the native Escape `cancel` event, intercepted in capture), dropdown, popover, combobox/select lists, date
+  and time pickers, the command palette, toasts and the rail flyout all use it. **Keyframes animate `transform`; a
+  static offset goes on `translate`** (popover centring, the `--float-shift-x` nudge) so they compose.
+  Collapsible/accordion animate `grid-template-rows: 0fr → 1fr` (the panel is a one-row grid, the padding moved to
+  `.collapsible__inner`; collapsible.js runs in the capture phase and stops the click so toggle.js does not also act —
+  accordion exclusivity moved there too). Tabs got the segmented thumb's idiom (`--tabs-x/--tabs-w` on the list,
+  `::after` indicator, `data-tabs-ready`, ResizeObserver); the theme toggle cross-fades (one beat of
+  `html.theme-changing` colour transitions — not a View Transition, which paints a snapshot that swallows every click
+  while it runs and fights a concurrent rAPId swap); `.btn:active` and `.card--clickable:active` scale to 97%/99.5%;
+  `data-table.js` gives rows a `view-transition-name` from their key (CSSOM) so a sort swap re-orders instead of
+  cross-fading. Adding a component: pick the pair, set `transform-origin` towards the trigger, write the `.is-closing`
+  rule, hide through `uiMotion.exit`.
+- **Floating panels fit the viewport** (`shared/js/float.js`): `uiFloat.fit(panel, { anchor, flip })` measures an
+  absolutely positioned panel and writes `--float-shift-x` (CSSOM) when it would run off the side, reporting
+  `below: false` when it should flip (popover adds `popover--above`; the arrow counter-shifts with
+  `translate: calc(-50% - var(--float-shift-x))`); `uiFloat.place(anchor, panel, { side, align, offset })` positions a
+  `position: fixed` panel with flip + shift and sets `data-side` + `--float-anchor` for an arrow (tooltip.js uses it);
+  `follow()` re-places on scroll/resize; `clear()` resets. Dropdown applies `fit()` to its absolute panel and keeps its
+  own `place()` for the clipped (fixed) case.
+- **The rail flyout painted under the content** on the admin dashboard: a sticky sidebar is a stacking context, so the
+  flyout's `z-index` never reached the page and every later `position: relative` card covered it. collapse-sidebar.js
+  now sets `sidebar--flyout-open` (→ `z-index: var(--z-popover)` on the sidebar) only while a flyout is open, so the
+  sidebar does not otherwise cover a dropdown near its edge. The collapse toggle is hidden below 992 (a drawer has no
+  rail). Dark-mode borders went one step stronger (`#302d27` / `#413d36`), every `.card` carries `--shadow-inset-top` (a
+  hairline top highlight: invisible on white, the edge that lifts a dark card off the canvas), elevated cards use
+  `--shadow-lg`; the dropdown's search box no longer paints the field ring when the menu opens.
+- **Catalogue and usage split files**: `examples/shared/catalogue/<name>.ts` (`entry(routes, state)`) and
+  `examples/docs/usage/<name>.ts` (`usage` map) — one per new component, merged by catalogue.ts/usage.ts; the coverage
+  test and build-docs read them too. A new component adds two small files instead of growing the two big ones. New group
+  `marketing` ("Marketing & media", `demo/marketing.html`).
+- **Still plain HTML first.** Every new component renders as markup plus the bundle on the static demo pages with no
+  runtime; the rAPId hooks stay optional. Sheets and the lightbox are native `<dialog>`s, the carousel is scroll-snap
+  with the buttons as enhancement, the number input is a native `<input type="number">`, reveal/parallax are
+  IntersectionObserver + rAF and inert under reduced motion, a lazy section calls `window.rapid.swap` only when the
+  runtime exists and otherwise shows what it carries.
+
+**Round 2 (2026-10-28/29): nineteen components, the editor, masks, grid per breakpoint, utilities, cleanliness.** Six
+agents built the batch in parallel against the same hard rules; what changed and the rules that came out of it:
+
+- **Grid per breakpoint + a utilities layer.** `GridCol({ span })` takes a number (`col-N`, from 768px as before) or a
+  mobile-first map `{ xs, sm, md, lg, xl }` → `col-xs-N … col-xl-N` (576/768/992/1400; `gridColClasses()` is the
+  helper); `Grid({ gap: "sm" | "md" | "lg" })`. Tracks are `minmax(0, 1fr)` — a bare `1fr` is `minmax(auto, 1fr)`, so
+  twelve tracks plus eleven gaps could never shrink below their content, and a `gap-lg` grid pushed a phone past the
+  viewport (the phone column gap also falls back to the default below 768). `styles/utilities.css` is a new `utilities`
+  cascade layer after `components` (~200 Bootstrap-shaped, token-driven classes: `d-*` with breakpoint variants, flex,
+  `gap-*`, logical `m*`/`p*` 0–8, text, sizing, position, borders, surfaces, `hide-*`/`hide-*-up`, `.stack`,
+  `.cluster`); `.mt-*`, `.stack` and `.hide-*` left base.css for it. Getting Started documents the grid, the utilities
+  and **custom builds** (import tokens + reset + base + chosen components through the same three PostCSS plugins;
+  concatenate enhance/motion/float first for JS).
+- **New components** (each `components/<name>/`, catalogued and with usage): list-group, toggle (+ ToggleGroup, hidden
+  mirror input, `toggle:change`), kbd, rating (CSS-only star radios, DOM reversed so `~` fills "up to the checked one";
+  rating.js remaps arrow keys to visual order), separator, ratio, figure, fab (`hideOnScroll`), scrollspy
+  (`[data-scrollspy]` behaviour; the DocsLayout TOC carries it), back-to-top, context-menu (right-click, Shift+F10, long
+  press; `uiFloat.place` at the pointer via a fake anchor rect), menubar (fixed panels placed with `uiFloat.follow` —
+  the bar scrolls sideways below 768, which clipped absolute panels), split-pane (`--split-start` via CSSOM from
+  `data-split-initial`/storage/drag/keys), scroll-area, transfer (native `<select multiple>` enhanced into two
+  listboxes), color-picker (native `<input type="color">` enhanced; the literal colours in its CSS are colour science —
+  black/white fades, hue spectrum, checkerboard — as custom properties with a comment), tour (spotlight = a fixed box
+  with a 200vmax box-shadow scrim sized through the CSSOM; `startOn: "load"` + `storageKey`), code (per-line markup,
+  `.tok-*` plus Prism/highlight.js class mappings on one set of `--code-*` properties, a regex tokeniser for plain
+  pages, `codeHtml()` for trusted highlighter output), diff (`diffLines()` LCS for short texts; split pairs runs row by
+  row). Reveal gained ScrollProgress (pure CSS under `@supports (animation-timeline:
+  scroll())`), CountUp (final value
+  in the markup; the script only animates once in view) and ScrollSteps (sticky stage, middle band of the viewport picks
+  the step). Toast gained `position` (six) and the top-layer fix: with the Popover API the region shows as a manual
+  popover re-raised when a toast lands or a dialog opens (visible above a modal, not clickable — a modal makes
+  everything outside it inert; browser behaviour). Avatar gained `status`. `Input({ mask })`:
+  phone/date/time/currency/card/postcode/custom, formatted from the significant characters with caret preservation,
+  impossible dates/times as custom validities, `maskRaw` hidden value for currency.
+- **Editor** grew a block-style select, popover forms for link/image/code (never `prompt()`; a `div`, not a nested
+  `form`), tables with contextual row/column tools, task lists, fenced code with language, its own undo/redo in
+  markdown, list continuation on Enter, Tab indent, fullscreen, a status bar (word/char counts, `maxLength`), image
+  upload by drop/paste (`uploadAction`, multipart `file`, CSRF + swap headers from `<body data-*>`), align/indent in
+  html mode, plain-text paste by default with a sanitising whitelist for Ctrl/Cmd+Shift+V, and `sync()` strips the
+  inline styles Chrome's `execCommand` writes (keeping `text-align` as the `align` attribute) so the submitted HTML
+  stays CSP-showable. `toolbar: "full" | "basic" | "minimal"`, `statusBar`, `label`.
+- **The theme cross-fade was a two-second freeze on big pages.** `html.theme-changing *` (plus `*::before/::after`)
+  under a class that toggles on `<html>` re-styles every element twice; on the 13,000-element forms catalogue the toggle
+  took 1.7 s (134 ms without the class), which is why the suite's theme checks failed only there. The rule now names the
+  surfaces that paint their own ground (body, layout regions, navbar, sidebar, card, alert, data-table cells, controls,
+  panels…) — text follows `body`'s animated colour through inheritance — and the switch is 190 ms. Never put a universal
+  descendant rule under a class that toggles on the root.
+- **axe findings fixed at the source, not allowlisted** (the harness agent had allowlisted 21 with owner files):
+  calendar weeks are `role="row"` wrappers (a grid's cells need row parents; `.calendar__week` is the 7-column grid), a
+  capped DataTable scroll box and an unwrapped or capped code block are `tabindex="0"`, the combobox/command "no
+  matches" note is a disabled `role="option"` (a listbox holding only text fails `aria-required-children`; the scripts'
+  option queries exclude it via one `OPTION` selector constant), server-mode date links carry `aria-current` instead of
+  `aria-pressed` (not allowed on `<a>`), the inverse hero's outline button is a ghost outline (its light surface
+  vanished under the re-mapped text colour), the editor status bar and calendar time chip use colours that clear 4.5:1
+  on their grounds, a card holding its own controls is not `interactive`, and every bare catalogue control carries an
+  `aria-label` (a `<button role="combobox">` cannot take its name from content). What remains allowlisted is listed in
+  `examples/tests/axe-allowlist.json` with its owner.
+- **Cleanliness pass** (`scratchpad/audit`-style script, rerun on the final bundle): seven selectors declared twice in
+  their own stylesheet were merged, four scripts' private `prefers-reduced-motion` checks became `uiMotion.reduced()`,
+  and `.combobox__list--static` exists only for the catalogue's bare fragment sample.
+  `CATALOGUE_GROUPS=forms,data deno task test:catalogue` runs one or two groups (a debugging aid).
+- Harness lesson: an always-open panel in one catalogue case overlaps the next case's control, and a Puppeteer click at
+  those coordinates lands on the panel's hints bar — wrap such cases in `.cat-room--lg`.
+- **The user's walk of the demos (2026-10-29)** found what no suite had: a bare `ComboboxList` fragment wrapped in
+  `.combobox__list` is an absolutely positioned open list floating over the page (fragment samples now sit in a static
+  `.cat-listbox`); a read-only half star rendered as a small star because the overlay was a 50%-wide box and the reset's
+  `svg { max-width: 100% }` shrank the icon inside it (it is full size with `clip-path: inset(0 50% 0 0)` now); an
+  inline `DescriptionList` in a flex row wrapped its values letter by letter because `overflow-wrap:
+  anywhere` makes
+  the min-content one character (the value column has `min-width: 6rem`); a popover rendered `open` far down a page was
+  flipped above its trigger on load because `uiFloat.fit` measured room against the viewport the anchor was not in
+  (off-screen anchors never flip); and the collapsed sidebar rail gave no way to see a parent's children — hovering or
+  focusing a rail parent opens its flyout, every rail link carries its label as a `title`, and menu.js marks the parent
+  of the current child `menu__link--current-parent` (highlighted in the rail). A flyout closing restores the sublist's
+  own state (`data-flyout-restore`): the current section's sublist, rendered open, used to come back collapsed after a
+  hover; a flyout taller than the viewport scrolls. The catalogue's own sidebar carries `data-scrollspy` and renders the
+  current page's components as plain hash links, so the component being read lights up while scrolling
+  (`.menu__link.is-active` shares the active look). Stat sparklines have per-point hit columns (`sparklineLabels` names
+  the points): `stat.js` shows the label in a `.stat__spark-tip` the moment the pointer is over a column (a native
+  `<title>`, the no-script fallback, needs a second of stillness and never shows on touch — the user hovered and saw
+  only the column tint); with `preserveAspectRatio="none"` any circle or text inside the box would stretch, so the tip
+  is an HTML element placed through the CSSOM.
+
+**Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
+
+- **`demo/foundations/theme-builder.html`** (`examples/shared/theme-builder.ts`'s `themeBuilderContent()` placed in the
+  site chrome by `examples/pages/build-demo.ts`; Foundations › Theme builder; swept by `test:all` and `test:visual`):
+  colour pickers + hex fields for ten colour tokens, sliders for radius / control height / type size / motion (derived
+  tokens computed from the one slider), two font selects, a Light/Dark palette switch deciding which palette the colours
+  edit, a preview of real components, Export (changed tokens only, `:root` + the two dark blocks with the tokens file's
+  exact selectors) + Copy + Reset, state in localStorage and the URL hash. All through the CSSOM
+  (`documentElement.style.setProperty`) — no inline style attribute, so the catalogue's CSP check still holds. Two
+  lessons: `getComputedStyle(root).getPropertyValue("--color-x")` returns whatever syntax the sheet used (hex, `rgb()`,
+  `color-mix()`), so the builder resolves a token to rgb through a hidden probe span's `color`; and reflecting a slider
+  dispatches `input` (slider.js repaints its track from it), which the builder's own `input` listener must ignore
+  (`reflecting` flag) or the reflected default lands in the exported theme.
+- **axe-core in `test-catalogue.ts`** (`npm:axe-core@4.10.2`, injected from the package file with `page.addScriptTag`,
+  `preload: false` because axe otherwise XHRs every stylesheet, which `file://` refuses): WCAG 2.0/2.1 A + AA on each
+  catalogue page's untouched light render, serious + critical fail, `examples/tests/
+  axe-allowlist.json`
+  (`{ rule, target: <regex>, reason }`) names the known gaps with an owner file in the reason; the whole report goes to
+  `.test-output/catalogue/axe.json`. An allowlist entry is a to-do, not a silencer — work the file down.
+- **`examples/tests/test-visual.ts`** (`deno task test:visual`, after `test:all` in `test`; `test:visual:update`
+  rewrites): every demo page × {1440, 375} × {light, dark} under `prefers-reduced-motion: reduce` (reveal/parallax stay
+  inert, charts get 1.5 s), full-page screenshot → 16-column block-average hash (rows follow the aspect, 16–96) →
+  `examples/tests/visual-baseline.json`, keyed by `navigator.platform` so a macOS run never compares with a Linux
+  baseline (no baseline for the platform = pass with a note). A cell is one hex digit of grey (16 levels), changed when
+  it moved ≥ 2 levels — not an above-the-mean bit: a mostly white page sits at its mean everywhere and a hairline would
+  flip half the bits. Fails above 5% changed cells (`VISUAL_TOLERANCE`) or on a row-count change, **after one fresh
+  re-render of that page** (a first capture once landed with every inline command list collapsed, identically never
+  again — a one-off state is not a drift), saving the screenshot to `.test-output/visual/`. `VISUAL_PAGES=a,b` limits a
+  run or an update (which then merges) to matching paths, `VISUAL_SAVE=1` keeps every screenshot. **Any intended visual
+  change updates the baseline in the same PR**: run `deno task test:visual:update` on the platform the baseline carries
+  (CI's Linux Chrome is the committed one) and commit the JSON. A drift on a page nobody touched that repeats
+  identically across runs is a baseline captured mid-state: update it.
+- **Density**: `--control-height-{sm,md,lg}` are `calc(var(--control-height-<size>-base) * var(--density))` (bases
+  30/36/44, factor 1); `[data-density="compact|comfortable|default"]` (0.85 / 1.15 / 1, styles/base.css) on any ancestor
+  retunes the controls inside. **A custom property resolves its `var()`s where it is declared**, so the `:root` calc
+  bakes `:root`'s factor in and a factor changed on a descendant alone does nothing — `[data-density]` re-derives the
+  three heights from the bases, and a theme region doing its own density must do the same (`examples/themes/admin.css`
+  `#forms-density[data-view]` is the example; the first version set only `--density` and measured 36px in Compact). A
+  theme that sets a height to a plain px value opts that height out of density (portal.css does today — switch it to the
+  `-base` tokens if density should work there). The admin Forms page's Density segmented writes its value to
+  `#forms-density[data-view]` through `view-switch.js`; Compact gives a 36px control 30.6px.
 
 ## Thinking ahead: rAPId's UI surface will grow
 

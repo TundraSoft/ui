@@ -15,14 +15,25 @@
   flex-shrink: 0;
   background: var(--color-primary);
   color: var(--color-primary-contrast);
-  box-shadow: var(--shadow-inset-top), var(--shadow-sm);
+  box-shadow:
+    var(--shadow-inset-top),
+    var(--shadow-sm);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast),
-    color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 
   &:hover {
     background: var(--color-primary-strong);
     border-color: var(--color-primary-strong);
+  }
+
+  /* Pressed: a touch smaller, so a click is felt before the page answers. */
+  &:active:not(:disabled, [aria-disabled="true"], .btn--loading) {
+    transform: scale(0.97);
   }
 
   &:focus-visible {
@@ -43,6 +54,7 @@
 /* v2: the default is ink. --secondary is retained for v1 compatibility but
    --outline / --subtle / --ghost are the three you actually want. */
 .btn--secondary {
+  --btn-loading-color: var(--color-secondary-contrast);
   background: var(--color-secondary);
   border-color: var(--color-secondary);
   color: var(--color-secondary-contrast);
@@ -54,6 +66,7 @@
 }
 
 .btn--outline {
+  --btn-loading-color: var(--color-text);
   background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text);
@@ -66,6 +79,7 @@
 }
 
 .btn--subtle {
+  --btn-loading-color: var(--color-text);
   background: var(--color-surface-sunken);
   border-color: transparent;
   color: var(--color-text);
@@ -78,6 +92,7 @@
 }
 
 .btn--ghost {
+  --btn-loading-color: var(--color-text);
   background: transparent;
   border-color: transparent;
   color: var(--color-text-muted);
@@ -91,6 +106,7 @@
 }
 
 .btn--accent {
+  --btn-loading-color: var(--color-accent-contrast);
   background: var(--color-accent, var(--color-primary));
   border-color: var(--color-accent, var(--color-primary));
   color: var(--color-accent-contrast, var(--color-primary-contrast));
@@ -102,6 +118,7 @@
 }
 
 .btn--danger {
+  --btn-loading-color: var(--color-danger-contrast);
   background: var(--color-danger);
   border-color: var(--color-danger);
   color: var(--color-danger-contrast);
@@ -143,7 +160,8 @@
 }
 
 /* Declared after every variant so it wins on color without !important;
-   the ring takes the variant's own text colour via --btn-loading-color. */
+   the ring takes the variant's own text colour via --btn-loading-color,
+   which each variant sets on itself. */
 .btn--loading {
   position: relative;
   color: transparent;
@@ -159,24 +177,6 @@
     border-radius: var(--radius-full);
     animation: btn-spin 600ms linear infinite;
   }
-}
-
-.btn--outline,
-.btn--subtle,
-.btn--ghost {
-  --btn-loading-color: var(--color-text);
-}
-
-.btn--secondary {
-  --btn-loading-color: var(--color-secondary-contrast);
-}
-
-.btn--accent {
-  --btn-loading-color: var(--color-accent-contrast);
-}
-
-.btn--danger {
-  --btn-loading-color: var(--color-danger-contrast);
 }
 
 /* Split button: a primary action plus its own menu trigger. */

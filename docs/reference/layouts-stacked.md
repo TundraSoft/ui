@@ -4,7 +4,7 @@
 
 Import: `import { StackedLayout } from "@tundralibs/ui/layouts/stacked"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/layouts/stacked.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -44,8 +44,12 @@ StackedLayout({
     brand: "Acme",
     links: [{ href: "/", label: "Home", active: true }, { href: "/pricing", label: "Pricing" }],
   }),
-  content: html`<h1>Invoices your customers pay on time</h1>`,
-  footer: html`<p>© Acme</p>`,
+  content: html`
+    <h1>Invoices your customers pay on time</h1>
+  `,
+  footer: html`
+    <p>© Acme</p>
+  `,
 })
 ```
 
@@ -79,7 +83,9 @@ StackedLayout({
 StackedLayout({
   width: "bleed",
   header: Navbar({ brand: "Acme", links: [{ href: "/how", label: "How it works" }] }),
-  subheader: html`<p class="text-sm">Markets close early on Friday.</p>`,
+  subheader: html`
+    <p class="text-sm">Markets close early on Friday.</p>
+  `,
   content: html`
     <section class="hero">
       <div class="container">

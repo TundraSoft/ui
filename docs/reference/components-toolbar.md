@@ -4,7 +4,7 @@
 
 Import: `import { Toolbar } from "@tundralibs/ui/toolbar"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/toolbar.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -34,14 +34,17 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ```ts
 Toolbar({
-  start: html`${
-    Input({ type: "search", size: "sm", placeholder: "Search invoices", attrs: { "data-table-search": "" } })
-  }${
-    Select({
+  start: html`
+    ${Input({
+      type: "search",
+      size: "sm",
+      placeholder: "Search invoices",
+      attrs: { "data-table-search": "" },
+    })}${Select({
       placeholder: "All statuses",
       options: [{ value: "open", label: "Open" }, { value: "paid", label: "Paid" }],
-    })
-  }`,
+    })}
+  `,
   end: Button({ label: "New invoice", size: "sm" }),
 })
 ```

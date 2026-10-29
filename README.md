@@ -5,8 +5,12 @@ HTML + CSS + JS component and layout library, and the first-class UI layer for
 rAPId app gets typed, escaped-by-default templates for every component and layout, plus a document shell and error pages
 that plug straight into `Application.initialize`.
 
-- **Components** (44): buttons, inputs, forms, data table, combobox, command palette, date picker, OTP, modal, toasts,
-  tabs, menus, charts (every ApexCharts type, pinned, on the library's tokens), …
+- **Components** (81): buttons, toggles, inputs (with masks), forms, a markdown/WYSIWYG editor, data table (cards on a
+  phone), combobox, transfer list, colour picker, rating, command palette, date picker, calendar, OTP, modal, sheet,
+  toasts, banner, tour, tabs, menus, menubar, context menu, tree, list group, scroll spy, split pane, scroll area, code
+  block and diff viewer, charts (every ApexCharts type, pinned, on the library's tokens), and a marketing set — hero,
+  feature grid, pricing, testimonials, carousel, lightbox, scroll reveal, count-up, pinned scroll steps — all moving on
+  one set of motion tokens, plus a 12-column grid with spans per breakpoint and a small utilities layer.
 - **Layouts** (8): stacked, sidebar, rail, split, article, docs, auth, focus — each defined at every viewport band from
   phones to ultrawide.
 - **Themes**: tokens only. A theme is one stylesheet loaded after the bundle; dark mode is built in.
@@ -75,8 +79,11 @@ deno task test         # every browser suite (needs Chrome; CHROME_PATH)
 deno task app          # the rAPId example app on :8010
 ```
 
-`demo/index.html` links the catalogue (every component in every declared variant, size, tone and state, one page per
-group — CI fails if a component or variant is missing from it), the eight layouts, and the admin sample.
+`demo/` is a site built from the library itself. Its collapsible sidebar is the only navigation: groups → sections →
+pages, collapsing to an icon rail with flyouts. It holds the foundations (tokens, typography, icons, grid and utilities,
+motion, themes and dark mode, the theme builder), one page per component (every declared variant, size, tone and state,
+plus usage code and its CSS/JS hooks; CI fails if a component or variant is missing), the eight layouts previewed at
+phone, tablet and desktop widths, the rAPId integration and error pages, and the admin example app.
 
 The same tooling runs on Node (`npm run …` via tsx) and Bun (`bun run bun:…`). See `CLAUDE.md` for the full contract and
 conventions.

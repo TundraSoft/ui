@@ -4,7 +4,7 @@
 
 Import: `import { AuthLayout } from "@tundralibs/ui/layouts/auth"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/layouts/auth.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -46,13 +46,13 @@ AuthLayout({
   content: Form({
     id: "signin",
     action: "/signin",
-    content: html`${
-      FormField({
+    content: html`
+      ${FormField({
         id: "email",
         label: "Email",
         control: (a) => Input({ id: a.id, name: "email", type: "email" }),
-      })
-    }${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}`,
+      })}${FormActions({ content: Button({ label: "Sign in", type: "submit", block: true }) })}
+    `,
   }),
 })
 ```

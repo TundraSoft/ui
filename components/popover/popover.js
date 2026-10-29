@@ -7,9 +7,46 @@
   function setOpen(pop, on) {
     const panel = pop.querySelector(".popover__panel");
     const trigger = pop.querySelector("[data-popover-trigger]");
-    if (panel) panel.hidden = !on;
     if (trigger) trigger.setAttribute("aria-expanded", on ? "true" : "false");
+    if (!panel) return;
+    if (on) {
+      globalThis.uiMotion?.cancelExit(panel);
+      pop.classList.remove("popover--above");
+      panel.hidden = false;
+      // Keep it on screen: shifted sideways into the viewport, flipped
+      // above the trigger when the room below runs out (shared/js/float.js).
+      const fit = globalThis.uiFloat?.fit(panel, { anchor: trigger ?? pop, flip: true });
+      if (fit && !fit.below) pop.classList.add("popover--above");
+      return;
+    }
+    const hide = () => {
+      panel.hidden = true;
+      globalThis.uiFloat?.clear(panel);
+      pop.classList.remove("popover--above");
+    };
+    if (globalThis.uiMotion) globalThis.uiMotion.exit(panel, hide);
+    else hide();
   }
+
+  // Every open panel is fitted on load and after a swap (one rendered
+  // `open` by the server never went through setOpen) and again across a
+  // resize; a scroll is left alone (it is absolutely positioned, so it
+  // moves with its trigger).
+  function fitOpen() {
+    document.querySelectorAll("[data-popover] .popover__panel:not([hidden])").forEach((panel) => {
+      const pop = panel.closest("[data-popover]");
+      const fit = globalThis.uiFloat?.fit(panel, {
+        anchor: pop.querySelector("[data-popover-trigger]") ?? pop,
+        flip: true,
+      });
+      pop.classList.toggle("popover--above", !!fit && !fit.below);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fitOpen);
+  else fitOpen();
+  addEventListener("load", fitOpen);
+  document.addEventListener("rapid:swapped", fitOpen);
+  addEventListener("resize", fitOpen, { passive: true });
 
   const openPanels = () => document.querySelectorAll("[data-popover] .popover__panel:not([hidden])");
 

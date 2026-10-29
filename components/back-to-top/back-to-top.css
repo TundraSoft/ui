@@ -1,0 +1,57 @@
+/*
+ * Back to top: a round button in a bottom corner, shown by back-to-top.js
+ * once the page has scrolled past its threshold. It rises in and sinks out
+ * (.is-closing, through uiMotion.exit). Hidden with the script absent.
+ */
+.back-to-top {
+  position: fixed;
+  bottom: max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  inset-inline-end: max(var(--space-4), env(safe-area-inset-right, 0px));
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-lg);
+  height: var(--control-height-lg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-inset-top), var(--shadow-lg);
+  cursor: pointer;
+  animation: ui-rise-in var(--duration-enter) var(--ease-out);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.back-to-top:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border-strong);
+}
+
+.back-to-top:active {
+  transform: scale(0.96);
+}
+
+.back-to-top:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.back-to-top.is-closing {
+  animation: ui-sink-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.back-to-top--start {
+  inset-inline-end: auto;
+  inset-inline-start: max(var(--space-4), env(safe-area-inset-left, 0px));
+}
+
+/* In flow (a catalogue, a footer): no corner, always visible. */
+.back-to-top--static {
+  position: static;
+  animation: none;
+}
+
+html:not(.js) .back-to-top:not(.back-to-top--static) {
+  display: none;
+}

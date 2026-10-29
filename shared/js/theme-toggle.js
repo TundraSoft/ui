@@ -45,6 +45,16 @@
     const current = valid(root.dataset.theme) ? root.dataset.theme : fallback;
     const next = current === "dark" ? "light" : "dark";
 
+    // The palette cross-fades instead of snapping: one beat of colour
+    // transitions on every element (styles/motion.css `.theme-changing`).
+    // Not a View Transition: that paints a snapshot over the page and
+    // swallows every click until it finishes (and fights a rAPId swap
+    // running at the same moment). Nothing under reduced motion.
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      root.classList.add("theme-changing");
+      clearTimeout(root._themeTimer);
+      root._themeTimer = setTimeout(() => root.classList.remove("theme-changing"), 260);
+    }
     root.dataset.theme = next;
     try {
       localStorage.setItem(KEY, next);

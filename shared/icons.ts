@@ -93,6 +93,52 @@ const ICONS = {
     '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 4 2l-1.5 1.2v1.3"/><line x1="12" y1="17" x2="12" y2="17.1"/>',
   shield: '<path d="M12 3l8 3v6a9 9 0 0 1-8 9a9 9 0 0 1-8-9V6z"/>',
   tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7" cy="8" r="1.4"/>',
+  /* v3.1 (2026-10-28): editor toolbar, panes, scroll helpers. Primitives
+     and arcs only, like everything above. */
+  arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+  arrowDown: '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>',
+  arrowLeft: '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  arrowRight: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+  grip:
+    '<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
+  maximize:
+    '<polyline points="15 4 20 4 20 9"/><polyline points="9 20 4 20 4 15"/><line x1="20" y1="4" x2="14" y2="10"/><line x1="4" y1="20" x2="10" y2="14"/>',
+  minimize:
+    '<polyline points="4 14 9 14 9 19"/><polyline points="20 10 15 10 15 5"/><line x1="9" y1="14" x2="3" y2="20"/><line x1="15" y1="10" x2="21" y2="4"/>',
+  undo: '<polyline points="8 6 3 11 8 16"/><path d="M3 11h11a5 5 0 0 1 0 10h-3"/>',
+  redo: '<polyline points="16 6 21 11 16 16"/><path d="M21 11H10a5 5 0 0 0 0 10h3"/>',
+  listChecks:
+    '<polyline points="3 6 5 8 8 5"/><polyline points="3 12 5 14 8 11"/><polyline points="3 18 5 20 8 17"/><line x1="11" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/>',
+  alignLeft:
+    '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="10" x2="14" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="14" y2="18"/>',
+  alignCenter:
+    '<line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="7" y1="18" x2="17" y2="18"/>',
+  alignRight:
+    '<line x1="4" y1="6" x2="20" y2="6"/><line x1="10" y1="10" x2="20" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="10" y1="18" x2="20" y2="18"/>',
+  indent:
+    '<line x1="4" y1="6" x2="20" y2="6"/><line x1="11" y1="10" x2="20" y2="10"/><line x1="11" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="20" y2="18"/><polyline points="4 9 7 12 4 15"/>',
+  outdent:
+    '<line x1="4" y1="6" x2="20" y2="6"/><line x1="11" y1="10" x2="20" y2="10"/><line x1="11" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="20" y2="18"/><polyline points="7 9 4 12 7 15"/>',
+  link:
+    '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/>',
+  bold: '<path d="M7 4h6a4 4 0 0 1 0 8H7z"/><path d="M7 12h7a4 4 0 0 1 0 8H7z"/>',
+  italic:
+    '<line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/>',
+  underline: '<path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" y1="20" x2="20" y2="20"/>',
+  strike:
+    '<line x1="4" y1="12" x2="20" y2="12"/><path d="M16 6.5A5 3 0 0 0 8 7c0 2 2 3 4 3.5"/><path d="M8 17.5a5 3 0 0 0 8-.5c0-2-2-3-4-3.5"/>',
+  code: '<polyline points="8 7 3 12 8 17"/><polyline points="16 7 21 12 16 17"/>',
+  quote: '<path d="M6 11h4v6H5v-4a5 5 0 0 1 5-5"/><path d="M15 11h4v6h-5v-4a5 5 0 0 1 5-5"/>',
+  heading:
+    '<line x1="5" y1="4" x2="5" y2="20"/><line x1="19" y1="4" x2="19" y2="20"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  palette:
+    '<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.2"/><circle cx="12" cy="7" r="1.2"/><circle cx="16" cy="10" r="1.2"/><circle cx="10" cy="15" r="1.2"/>',
+  play: '<polygon points="7 4 20 12 7 20"/>',
+  pause: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+  sun:
+    '<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="7" y2="17"/><line x1="17" y1="7" x2="19.1" y2="4.9"/>',
+  columns: '<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/>',
+  cursor: '<polygon points="5 3 19 12 12 13 9 20"/>',
 } as const;
 
 export type IconName = keyof typeof ICONS;

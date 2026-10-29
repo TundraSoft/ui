@@ -1,0 +1,167 @@
+/*
+ * List group: rows in a bordered stack. Links and buttons fill their row;
+ * the active row carries an inset accent bar; `--flush` drops the frame
+ * for a list that sits inside a card.
+ */
+.list-group {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  counter-reset: list-group;
+}
+
+.list-group > li + li {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.list-group > li:first-child > .list-group__item {
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.list-group > li:last-child > .list-group__item {
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+.list-group > li:first-child {
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.list-group > li:last-child {
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+}
+
+.list-group__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: inherit;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+a.list-group__item,
+button.list-group__item {
+  cursor: pointer;
+}
+
+a.list-group__item:hover,
+button.list-group__item:hover {
+  background: var(--color-surface-alt);
+}
+
+a.list-group__item:focus-visible,
+button.list-group__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Active: a sunken ground and an inset accent bar on the start edge. */
+.list-group__item--active {
+  background: var(--color-surface-sunken);
+  box-shadow: inset var(--border-width-thick) 0 0 var(--color-accent, var(--color-primary));
+  font-weight: var(--font-weight-medium);
+}
+
+a.list-group__item--active:hover,
+button.list-group__item--active:hover {
+  background: var(--color-surface-sunken);
+}
+
+.list-group__item--disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+a.list-group__item--disabled:hover,
+button.list-group__item--disabled:hover {
+  background: none;
+}
+
+.list-group__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--color-text-muted);
+}
+
+.list-group__item--active .list-group__icon {
+  color: var(--color-accent, var(--color-primary));
+}
+
+.list-group__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.list-group__label {
+  overflow-wrap: anywhere;
+}
+
+.list-group__text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-muted);
+}
+
+.list-group__meta {
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-group__badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+}
+
+/* Numbered: a counter in the gutter, aligned with the label. */
+.list-group--numbered .list-group__item::before {
+  content: counter(list-group) ".";
+  counter-increment: list-group;
+  flex: 0 0 auto;
+  min-width: 1.5em;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-group--sm .list-group__item {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  gap: var(--space-2);
+}
+
+.list-group--flush {
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+.list-group--flush > li:first-child,
+.list-group--flush > li:first-child > .list-group__item,
+.list-group--flush > li:last-child,
+.list-group--flush > li:last-child > .list-group__item {
+  border-radius: 0;
+}

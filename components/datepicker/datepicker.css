@@ -25,6 +25,8 @@
      static — an inline panel must not outrank a sibling's floating one. */
   z-index: auto;
   margin-top: var(--space-3);
+  /* An inline panel is always there: nothing to animate. */
+  animation: none;
 }
 
 /* Client mode without JS: the native date field is the control (the
@@ -46,6 +48,11 @@ html:not(.js) .datepicker--client .datepicker__panel {
 .datepicker--end .datepicker__panel {
   inset-inline-start: auto;
   inset-inline-end: 0;
+  transform-origin: top right;
+}
+
+.datepicker:not(.datepicker--inline) .datepicker__panel.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
 }
 
 .datepicker__trigger:disabled {
@@ -84,6 +91,8 @@ html:not(.js) .datepicker--client .datepicker__panel {
   top: calc(100% + var(--space-1));
   inset-inline-start: 0;
   z-index: var(--z-popover);
+  transform-origin: top left;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
   max-width: calc(100vw - 2 * var(--space-4));
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);

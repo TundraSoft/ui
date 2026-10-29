@@ -39,7 +39,7 @@ export function DocsLayout(props: DocsLayoutProps): Html {
     props.toc &&
     html`
       <nav class="layout__toc"
-        aria-label="On this page"><button type="button" class="layout__toc-toggle js-only" data-toggle="#${tocId}" data-toggle-class aria-expanded="false" aria-controls="${tocId}">On this page</button><p class="layout__toc-title">On this page</p><div class="layout__toc-body" id="${tocId}">${props
+        aria-label="On this page"><button type="button" class="layout__toc-toggle js-only" data-toggle="#${tocId}" data-toggle-class aria-expanded="false" aria-controls="${tocId}">On this page</button><p class="layout__toc-title">On this page</p><div class="layout__toc-body" id="${tocId}" data-scrollspy>${props
           .toc}</div></nav>
     `
   }</main></div>${props.footer && html`<footer class="layout__footer">${props.footer}</footer>`}</div>`;

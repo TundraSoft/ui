@@ -1,0 +1,105 @@
+/*
+ * Key–value pairs. Each pair is a <div> holding its <dt> and <dd>, so the
+ * same markup lays out stacked, inline (term column) or in a grid.
+ */
+.description-list {
+  --description-list-term-width: 10rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.description-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.description-list__term {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.description-list__description {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-base);
+  overflow-wrap: anywhere;
+}
+
+/* Inline: the term in a fixed column, the value beside it. */
+.description-list--inline .description-list__item {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.description-list--inline .description-list__term {
+  flex: 0 0 var(--description-list-term-width);
+}
+
+.description-list--inline .description-list__description {
+  flex: 1 1 auto;
+  /* `overflow-wrap: anywhere` makes the min-content one character: in a
+     flex row of lists the value column would wrap letter by letter. */
+  min-width: 6rem;
+}
+
+/* Columns: pairs in a responsive grid. */
+.description-list--columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+
+.description-list--sm .description-list__description {
+  font-size: var(--font-size-sm);
+}
+
+.description-list--sm {
+  gap: var(--space-2);
+}
+
+/* A rule between pairs (stacked and inline). */
+.description-list--divided {
+  gap: 0;
+}
+
+.description-list--divided .description-list__item {
+  padding-block: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+}
+
+.description-list--divided .description-list__item:first-child {
+  padding-top: 0;
+}
+
+.description-list--divided .description-list__item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.description-list--divided.description-list--columns .description-list__item {
+  padding: 0;
+  border: none;
+}
+
+@media screen and (max-width: 575px) {
+  /* A phone has no room for a term column: fall back to stacked. */
+  .description-list--inline .description-list__item {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .description-list--inline .description-list__term {
+    flex-basis: auto;
+  }
+}

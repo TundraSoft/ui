@@ -57,34 +57,61 @@ export function Slider(props: SliderProps): Html {
   }
 
   const ticks = stepped
-    ? html`<span class="slider__ticks">${props.scale!.map(() => html`<span class="slider__tick"></span>`)}</span>`
+    ? html`
+      <span class="slider__ticks">${props.scale!.map(() =>
+        html`
+          <span class="slider__tick"></span>
+        `
+      )}</span>
+    `
     : "";
 
   return html`
-    <div class="${cx("slider", stepped && "slider--stepped")}"
-      data-slider${renderAttrs({
-        "data-slider-unit": props.unit,
-        "data-slider-unit-one": props.unitOne,
-        "data-slider-labels": stepped ? JSON.stringify(props.scale) : undefined,
-      })}>${props.label || props.showValue
+    <div class="${cx(
+      "slider",
+      stepped && "slider--stepped",
+      !props.label && props.showValue && "slider--value-only",
+    )}" data-slider${renderAttrs({
+      "data-slider-unit": props.unit,
+      "data-slider-unit-one": props.unitOne,
+      "data-slider-labels": stepped ? JSON.stringify(props.scale) : undefined,
+    })}>
+      ${props.label || props.showValue
         ? html`
           <div class="slider__head">${props.label &&
-            html`<label class="slider__label" for="${props.id}">${props.label}</label>`}${props.showValue === false
-            ? ""
-            : html`<output class="slider__value" for="${props.id}" data-slider-output>${initial}</output>`}</div>
+            html`
+              <label class="slider__label" for="${props.id}">${props.label}</label>
+            `}${props.showValue === false ? "" : html`
+            <output class="slider__value" for="${props.id}" data-slider-output>${initial}</output>
+          `}</div>
         `
-        : ""}<div class="slider__control"><input class="slider__input" id="${props.id}" name="${props
-        .name}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"${renderAttrs({
-          disabled: props.disabled ? "" : undefined,
-        })}><span class="slider__track"></span><span class="slider__fill"></span>${ticks}<span class="slider__thumb"></span></div>${props
+        : ""}<div class="slider__control">
+        <input
+          class="slider__input"
+          id="${props.id}"
+          name="${props
+            .name}"
+          type="range"
+          min="${min}"
+          max="${max}"
+          step="${step}"
+          value="${value}"
+          ${renderAttrs({
+            disabled: props.disabled ? "" : undefined,
+          })}
+        ><span class="slider__track"></span><span class="slider__fill"></span>${ticks}<span class="slider__thumb"></span>
+      </div>${props
           .scale?.length
-        ? html`<div class="slider__scale">${
-          props.scale.map((s, i) =>
-            html`<span class="${
-              cx("slider__scale-item", i === activeIndex && "slider__scale-item--active")
-            }">${s}</span>`
-          )
-        }</div>`
-        : html`<div class="slider__scale"><span>${min}</span><span>${max}</span></div>`}</div>
+        ? html`
+          <div class="slider__scale">${props.scale.map((s, i) =>
+            html`
+              <span class="${cx("slider__scale-item", i === activeIndex && "slider__scale-item--active")}">${s}</span>
+            `
+          )}</div>
+        `
+        : html`
+          <div class="slider__scale"><span>${min}</span><span>${max}</span></div>
+        `}
+    </div>
   `;
 }

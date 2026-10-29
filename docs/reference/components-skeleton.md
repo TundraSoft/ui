@@ -4,7 +4,7 @@
 
 Import: `import { Skeleton, SkeletonTable, SkeletonCard } from "@tundralibs/ui/skeleton"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/skeleton.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -68,9 +68,12 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Render it as the initial content of a `data-load` region; the server's fragment replaces it.
 
 ```ts
-html`<div id="orders" data-load data-action="/fragments/orders">${
-  SkeletonTable({ rows: 3, columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]] })
-}</div>`
+html`
+  <div id="orders" data-load data-action="/fragments/orders">${SkeletonTable({
+    rows: 3,
+    columns: [["lg", "sm", "xs"], ["lg", "sm", "xs"]],
+  })}</div>
+`
 ```
 
 ```html

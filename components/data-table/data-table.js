@@ -187,7 +187,24 @@
     event.stopPropagation();
   });
 
+  /**
+   * A stable `view-transition-name` per row (from its key, via the CSSOM —
+   * no style attribute), so a sort or page swap under rAPId's View
+   * Transition moves the rows that stayed instead of cross-fading the
+   * whole table. Set after every swap too: the names must be on the new
+   * rows before the browser captures the new state.
+   */
+  function nameRows(table) {
+    if (!("viewTransitionName" in document.documentElement.style)) return;
+    const id = (table.id || "table").replace(/[^a-zA-Z0-9_-]/g, "_");
+    table.querySelectorAll("tr[data-row-key]").forEach((row) => {
+      const key = (row.getAttribute("data-row-key") || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+      row.style.viewTransitionName = `${id}-${key}`;
+    });
+  }
+
   function initAll(keepSelection) {
+    document.querySelectorAll(".data-table").forEach(nameRows);
     document.querySelectorAll(".data-table").forEach((table) => {
       if (keepSelection) restore(table);
       refresh(table);

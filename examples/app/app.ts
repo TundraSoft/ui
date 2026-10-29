@@ -511,16 +511,41 @@ function inline(text: string): Html[] {
 function renderMarkdown(src: string): Html {
   const blocks: Html[] = [];
   const lines = src.replace(/\r/g, "").split("\n");
-  const isBlock = (l: string) => /^(#{1,3} |- |\d+\. |> |```|-{3,}\s*$)/.test(l);
+  const isBlock = (l: string) => /^(#{1,3} |- |\d+\. |> |```|\||-{3,}\s*$)/.test(l);
+  const isRow = (l: string) => /^\|.*\|\s*$/.test(l);
+  const cells = (l: string) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
     if (line.startsWith("```")) {
       const code: string[] = [];
+      const lang = line.slice(3).trim();
       i++;
       while (i < lines.length && !lines[i].startsWith("```")) code.push(lines[i++]);
       i++;
-      blocks.push(html`<pre><code>${code.join("\n")}</code></pre>`);
+      blocks.push(
+        /^[\w-]+$/.test(lang)
+          ? html`<pre><code class="language-${lang}">${code.join("\n")}</code></pre>`
+          : html`<pre><code>${code.join("\n")}</code></pre>`,
+      );
+      continue;
+    }
+    // A table: a header row, a `| --- |` rule, then body rows.
+    if (isRow(line) && i + 1 < lines.length && /^\|?\s*:?-{3,}/.test(lines[i + 1])) {
+      const head = cells(line);
+      i += 2;
+      const rows: Html[] = [];
+      while (i < lines.length && isRow(lines[i])) {
+        rows.push(html`<tr>${cells(lines[i++]).map((c) => html`<td>${inline(c)}</td>`)}</tr>`);
+      }
+      blocks.push(html`
+        <table>
+          <thead>
+            <tr>${head.map((c) => html`<th>${inline(c)}</th>`)}</tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `);
       continue;
     }
     const h = line.match(/^(#{1,3}) (.*)/);
@@ -538,11 +563,24 @@ function renderMarkdown(src: string): Html {
     }
     if (/^(- |\d+\. )/.test(line)) {
       const ordered = /^\d+\. /.test(line);
+      const tasks = /^- \[[ xX]\] /.test(line);
       const items: Html[] = [];
       while (i < lines.length && /^(- |\d+\. )/.test(lines[i])) {
-        items.push(html`<li>${inline(lines[i++].replace(/^(- |\d+\. )/, ""))}</li>`);
+        const text = lines[i++].replace(/^(- |\d+\. )/, "");
+        const task = text.match(/^\[([ xX])\] (.*)/);
+        items.push(
+          task
+            ? html`<li><input type="checkbox" disabled${
+              task[1] === " " ? "" : html`
+                checked
+              `
+            }> ${inline(task[2])}</li>`
+            : html`<li>${inline(text)}</li>`,
+        );
       }
-      blocks.push(ordered ? html`<ol>${items}</ol>` : html`<ul>${items}</ul>`);
+      blocks.push(
+        ordered ? html`<ol>${items}</ol>` : tasks ? html`<ul class="task-list">${items}</ul>` : html`<ul>${items}</ul>`,
+      );
       continue;
     }
     if (line.startsWith("> ")) {
@@ -595,6 +633,9 @@ const CommandsFragment = template<{ q: string }>(
 const favicon =
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#1c1c1e"/><text x="16" y="22" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">U</text></svg>`;
 
+const uploadedImage =
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" rx="12" fill="#e7e2d8"/><circle cx="96" cy="72" r="22" fill="#b8ae9e"/><path d="M40 150l70-60 50 40 40-30 80 50z" fill="#9d9282"/></svg>`;
+
 const css = `/* Example-app chrome — not part of the library. */
 ${catalogueCss}`;
 
@@ -646,6 +687,8 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
     headers: { "content-type": "text/javascript; charset=utf-8" },
   }));
   app.get("/favicon.svg", () => ({ content: favicon, headers: { "content-type": "image/svg+xml" } }));
+  // What the editor's image upload "stores": a placeholder picture (the demo keeps no files).
+  app.get("/uploads/placeholder.svg", () => ({ content: uploadedImage, headers: { "content-type": "image/svg+xml" } }));
 
   app.get(
     "/",
@@ -757,6 +800,13 @@ export async function createApp(options: AppOptions = {}): Promise<Application> 
   // the re-rendered Dropzone with the server's own rows for what landed.
   app.post("/fragments/upload", { template: UploadFragment }, async (ctx) => {
     const body = ((await ctx.payload) ?? {}) as Record<string, unknown>;
+    // The editor posts one image as `file` and expects its URL back as text.
+    const single = body.file as { name?: string } | undefined;
+    if (single && !body.files) {
+      return {
+        content: { files: [], url: `/uploads/placeholder.svg?name=${encodeURIComponent(String(single.name ?? ""))}` },
+      };
+    }
     const raw = body.files;
     const list = (Array.isArray(raw) ? raw : raw ? [raw] : []) as { name?: string; size?: number }[];
     const files: DropzoneFile[] = list.map((f) => ({
@@ -821,7 +871,10 @@ const InviteFragment = template<{ email: string; phone: string; website: string 
   "InviteFragment",
 );
 
-const UploadFragment = template<{ files: DropzoneFile[] }>(
-  (d) => Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB", files: d.files }),
+const UploadFragment = template<{ files: DropzoneFile[]; url?: string }>(
+  (d) =>
+    d.url
+      ? html`${d.url}`
+      : Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB", files: d.files }),
   "UploadFragment",
 );

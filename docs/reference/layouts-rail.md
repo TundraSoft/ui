@@ -4,7 +4,7 @@
 
 Import: `import { RailLayout } from "@tundralibs/ui/layouts/rail"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/layouts/rail.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -56,7 +56,9 @@ RailLayout({
     { href: "/settings", label: "Settings", icon: Icon("settings", { size: 20 }) },
   ],
   end: Avatar({ initials: "AL", size: "sm" }),
-  content: html`<h1>Home</h1>`,
+  content: html`
+    <h1>Home</h1>
+  `,
 })
 ```
 

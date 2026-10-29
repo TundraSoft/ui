@@ -131,23 +131,34 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
       isStart && "datepicker__day--start",
       isEnd && "datepicker__day--end",
     );
-    const a11y = {
-      "aria-label": `${d} ${MONTHS[m]} ${y}`,
-      "aria-current": key === today ? "date" : undefined,
-      "aria-pressed": isStart || isEnd ? "true" : undefined,
-    };
+    const selected = isStart || isEnd;
+    const label = `${d} ${MONTHS[m]} ${y}`;
 
     days.push(
       props.buildDayHref && !disabled
+        // A link may not carry aria-pressed: the picked day is aria-current
+        // (over "date" for today — the selection is the state that matters).
         ? html`
-          <a class="${cls}" href="${props.buildDayHref(key)}" data-day="${key}" data-action="${props.buildDayHref(
-            key,
-          )}" data-target="#${props.id}"
-            data-swap="outer" data-push${renderAttrs(a11y)}>${d}</a>
+          <a
+            class="${cls}"
+            href="${props.buildDayHref(key)}"
+            data-day="${key}"
+            data-action="${props.buildDayHref(
+              key,
+            )}"
+            data-target="#${props.id}"
+            data-swap="outer"
+            data-push${renderAttrs({
+              "aria-label": label,
+              "aria-current": selected ? "true" : key === today ? "date" : undefined,
+            })}
+          >${d}</a>
         `
         : html`
           <button type="button" class="${cls}" data-day="${key}" ${renderAttrs({
-            ...a11y,
+            "aria-label": label,
+            "aria-current": key === today ? "date" : undefined,
+            "aria-pressed": selected ? "true" : undefined,
             disabled: disabled ? "" : undefined,
           })}>${d}</button>
         `,
@@ -166,18 +177,34 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
     const href = props.buildMonthHref?.(ym[0], ym[1]);
     return href
       ? html`
-        <a class="datepicker__nav" href="${href}" aria-label="${label}" data-nav="${step}" data-action="${href}"
-          data-target="#${props.id}" data-swap="outer">${icon}</a>
+        <a
+          class="datepicker__nav"
+          href="${href}"
+          aria-label="${label}"
+          data-nav="${step}"
+          data-action="${href}"
+          data-target="#${props.id}"
+          data-swap="outer"
+        >${icon}</a>
       `
       : html`
-        <button type="button" class="datepicker__nav" aria-label="${label}" data-nav="${step}"
-          data-month="${ym[0]}-${ym[1]}">${icon}</button>
+        <button
+          type="button"
+          class="datepicker__nav"
+          aria-label="${label}"
+          data-nav="${step}"
+          data-month="${ym[0]}-${ym[1]}"
+        >
+          ${icon}
+        </button>
       `;
   };
 
   return html`
     <div
-      class="datepicker__header"><span class="datepicker__nav-group">${nav(
+      class="datepicker__header"
+    >
+      <span class="datepicker__nav-group">${nav(
         prevYear,
         "prev-year",
         "Previous year",
@@ -187,7 +214,8 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
         "prev",
         "Previous month",
         Icon("chevronLeft", { size: 14 }),
-      )}</span><span class="datepicker__month" aria-live="polite">${MONTHS[
+      )}</span><span class="datepicker__month" aria-live="polite"
+      >${MONTHS[
         month
       ]} ${year}</span><span class="datepicker__nav-group">${nav(
         next,
@@ -199,22 +227,32 @@ export function DatePickerPanel(props: DatePickerPanelProps): Html {
         "next-year",
         "Next year",
         Icon("chevronsRight", { size: 14 }),
-      )}</span></div><div
-      class="datepicker__grid">
+      )}</span>
+    </div><div
+      class="datepicker__grid"
+    >
       <div class="datepicker__weekdays" aria-hidden="true">${WEEKDAYS.map((w) =>
-        html`<span class="datepicker__weekday">${w}</span>`
+        html`
+          <span class="datepicker__weekday">${w}</span>
+        `
       )}</div>
       <div class="datepicker__days">${days}</div>
     </div>${props.presets?.length
-      ? html`<div class="datepicker__footer">${
-        props.presets.map((p) =>
+      ? html`
+        <div class="datepicker__footer">${props.presets.map((p) =>
           html`
-            <a class="datepicker__preset" href="${p.href}" data-action="${p.href}" data-target="#${props
-              .id}" data-swap="outer"
-              data-push>${p.label}</a>
+            <a
+              class="datepicker__preset"
+              href="${p.href}"
+              data-action="${p.href}"
+              data-target="#${props
+                .id}"
+              data-swap="outer"
+              data-push
+            >${p.label}</a>
           `
-        )
-      }<button type="submit" class="datepicker__apply">Apply</button></div>`
+        )}<button type="submit" class="datepicker__apply">Apply</button></div>
+      `
       : ""}
   `;
 }
@@ -230,9 +268,11 @@ export function DatePicker(props: DatePickerProps): Html {
   // page shows and posts — that datepicker.js turns hidden on enhance.
   const valueInput = (name: string, value: string | undefined, marker: string, label: string) =>
     serverMode
-      ? html`<input type="hidden" ${renderAttrs({ name, value: value ?? "", [marker]: "" })}>`
-      : html`<input ${
-        renderAttrs({
+      ? html`
+        <input type="hidden" ${renderAttrs({ name, value: value ?? "", [marker]: "" })}>
+      `
+      : html`
+        <input ${renderAttrs({
           type: "date",
           class: "input datepicker__native",
           name,
@@ -242,8 +282,8 @@ export function DatePicker(props: DatePickerProps): Html {
           disabled: props.disabled ? "" : undefined,
           "aria-label": label,
           [marker]: "",
-        })
-      }>`;
+        })}>
+      `;
 
   return html`
     <div class="${cx(
@@ -252,35 +292,49 @@ export function DatePicker(props: DatePickerProps): Html {
       props.inline && "datepicker--inline",
       props.open && "datepicker--open",
       !serverMode && "datepicker--client",
-    )}" id="${props.id}"
-      data-datepicker${renderAttrs({
-        // Client-mode state, read by datepicker.js when it re-renders.
-        "data-datepicker-range": props.range ? "" : undefined,
-        "data-datepicker-min": props.min,
-        "data-datepicker-max": props.max,
-        "data-datepicker-today": props.today,
-        "data-datepicker-server": serverMode ? "" : undefined,
-      })}><button type="button" class="datepicker__trigger"${props.disabled
-        ? html`
-          disabled
-        `
-        : ""} aria-expanded="${props.open ? "true" : "false"}" aria-controls="${props
-        .id}-panel" data-datepicker-trigger${renderAttrs({
+    )}" id="${props.id}" data-datepicker${renderAttrs({
+      // Client-mode state, read by datepicker.js when it re-renders.
+      "data-datepicker-range": props.range ? "" : undefined,
+      "data-datepicker-min": props.min,
+      "data-datepicker-max": props.max,
+      "data-datepicker-today": props.today,
+      "data-datepicker-server": serverMode ? "" : undefined,
+    })}>
+      <button
+        type="button"
+        class="datepicker__trigger"
+        ${props.disabled
+          ? html`
+            disabled
+          `
+          : ""}
+        aria-expanded="${props.open ? "true" : "false"}"
+        aria-controls="${props
+          .id}-panel"
+        data-datepicker-trigger${renderAttrs({
           "aria-label": triggerLabel ? undefined : "Pick a date",
-        })}><span class="datepicker__trigger-icon">${Icon("calendar", {
+        })}
+      >
+        <span class="datepicker__trigger-icon">${Icon("calendar", {
           size: 15,
         })}</span><span data-datepicker-label>${triggerLabel ||
-        "Pick a date"}</span></button>${valueInput(
-          props.name,
-          props.start,
-          "data-datepicker-start",
-          props.range ? "Start date" : "Date",
-        )}${props.range
-        ? valueInput(`${props.name}_end`, props.end, "data-datepicker-end", "End date")
-        : ""}<div class="datepicker__panel" id="${props.id}-panel" role="group" aria-label="Calendar"${props.open
-        ? ""
-        : html`
+          "Pick a date"}</span>
+      </button>${valueInput(
+        props.name,
+        props.start,
+        "data-datepicker-start",
+        props.range ? "Start date" : "Date",
+      )}${props.range ? valueInput(`${props.name}_end`, props.end, "data-datepicker-end", "End date") : ""}<div
+        class="datepicker__panel"
+        id="${props.id}-panel"
+        role="group"
+        aria-label="Calendar"
+        ${props.open ? "" : html`
           hidden
-        `}>${DatePickerPanel(props)}</div></div>
+        `}
+      >
+        ${DatePickerPanel(props)}
+      </div>
+    </div>
   `;
 }

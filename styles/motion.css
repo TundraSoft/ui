@@ -1,0 +1,178 @@
+/*
+ * The kit's shared keyframes. Every floating or overlaid surface enters
+ * and leaves with one of these — a component's CSS only picks the pair
+ * and the origin, so every panel in a page moves the same way.
+ *
+ * Convention (shared/js/motion.js): a component shows a panel by clearing
+ * `hidden` (or adding its open class) — the `*-in` animation plays on
+ * its own because the element just started being rendered. To hide it, a
+ * script calls `uiMotion.exit(el, done)`: that adds `.is-closing`, the
+ * component's `.is-closing` rule plays a `*-out` animation with
+ * `forwards`, and `done` runs (hide, remove) after `animationend`. An
+ * element whose `.is-closing` rule animates nothing is hidden at once, as
+ * is everything under `prefers-reduced-motion` (reset.css zeroes every
+ * duration, and animationend still fires).
+ *
+ * The keyframes animate `transform`; a static offset a panel needs
+ * (centring, a shift into the viewport from shared/js/float.js) goes on
+ * the separate `translate` property, so the two compose instead of one
+ * overwriting the other.
+ */
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* A panel that hangs off a trigger: dropdown, popover, select list, date
+   and time pickers. Set `transform-origin` towards the trigger. */
+@keyframes ui-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes ui-float-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* A list attached to its field (combobox, select, time slots): a rise with
+   no scale, so an option's position can be measured — and the list
+   scrolled to the pick — while it is still arriving. */
+@keyframes ui-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ui-drop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* A panel that opens upwards (flipped above its trigger). */
+@keyframes ui-float-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+@keyframes ui-float-up-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+/* Centred surfaces: modal, command palette, lightbox. */
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes ui-scale-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Something arriving from the edge: toasts, banners. */
+@keyframes ui-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@keyframes ui-sink-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+
+@keyframes ui-slide-in-end {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-slide-out-end {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-slide-in-start {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes ui-slide-out-start {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes ui-slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ui-slide-out-bottom {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Content revealed on scroll (components/reveal). */
+@keyframes ui-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-4));
+  }
+}
+
+/* A panel on its way out must not catch the click that follows — the
+   next tap lands on whatever is underneath, as if it were already gone. */
+.is-closing,
+.is-closing * {
+  pointer-events: none;
+}
+
+/* Switching the palette: theme-toggle.js adds this class for one beat so
+   the page's surfaces cross-fade instead of snapping (not a View
+   Transition, which swallows every click while it runs). The rule names
+   the surfaces rather than `*`: a universal descendant rule under a class
+   that toggles on <html> re-styles every element twice, which took two
+   seconds on a 13,000-element page. Text follows `body`'s colour as it
+   animates (inherited values animate with their parent); grounds that
+   paint their own background are listed. Nothing under reduced motion
+   (the class is never added). */
+html.theme-changing :is(body, .layout__header, .layout__sidebar, .layout__content, .layout__aside, .layout__footer, .navbar, .sidebar, .card, .alert, .banner, .data-table, .data-table__table th, .data-table__table td, .btn, .input, .textarea, .combobox__field, .segmented, .badge, .chip, .modal, .sheet__panel, .dropdown__panel, .popover, .toast, .code, .prose, .hero, .site-footer) {
+  transition:
+    background-color var(--duration-base) var(--ease-in-out),
+    border-color var(--duration-base) var(--ease-in-out),
+    color var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out) !important;
+}

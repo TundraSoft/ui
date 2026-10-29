@@ -4,7 +4,7 @@
 
 Import: `import { Wizard } from "@tundralibs/ui/wizard"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/wizard.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -51,7 +51,9 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 Wizard({
   id: "checkout",
   steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }, { label: "Review" }],
-  content: html`<p>Card details go here.</p>`,
+  content: html`
+    <p>Card details go here.</p>
+  `,
 })
 ```
 

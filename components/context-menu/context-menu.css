@@ -1,0 +1,50 @@
+/*
+ * Context menu: a fixed panel context-menu.js places at the pointer (or at
+ * the element, from the keyboard). The same surface as a dropdown; the
+ * items inside are a Menu's links and buttons.
+ */
+.context-menu {
+  position: fixed;
+  z-index: var(--z-popover);
+  width: max-content;
+  min-width: 10rem;
+  max-width: min(20rem, calc(100vw - 2 * var(--space-4)));
+  max-height: var(--dropdown-max-height);
+  overflow-y: auto;
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-inset-top), var(--shadow-lg);
+  transform-origin: top left;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
+}
+
+.context-menu:focus {
+  outline: none;
+}
+
+/* Opened upwards (no room below the pointer). */
+.context-menu[data-side="top"] {
+  transform-origin: bottom left;
+  animation-name: ui-float-up-in;
+}
+
+.context-menu.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.context-menu[data-side="top"].is-closing {
+  animation-name: ui-float-up-out;
+}
+
+/* An element that opens one shows it: no text selection on a long press. */
+[data-context-menu] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.context-menu .menu__link {
+  white-space: nowrap;
+}

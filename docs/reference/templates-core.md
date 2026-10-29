@@ -54,6 +54,7 @@ runtime's `<body data-*>` overrides, a page class.
 | `scripts` | `typeOperator` |  | Extra scripts after ui.js, same path rules as `stylesheets`. An object form carries a subresource-integrity hash for a third-party CDN script (e.g. `APEXCHARTS` from `@tundralibs/ui/chart`). |
 | `head` | `Html` |  | Extra `<head>` markup (preconnects, icons) — constant, not per-request. |
 | `toastRegion` | `boolean` |  | Render the shared `ToastRegion` every page gets. @default true |
+| `toastPosition` | `ToastPosition` |  | Where that region stacks its toasts. @default "bottom-end" |
 | `history` | `boolean` |  | Also load rAPId's opt-in history module (`/__rapid/history.js`) — pair with `ui: { history: true }`. @default false |
 | `live` | `boolean` |  | Also load rAPId's live bridge (`/__rapid/live.js`) — pair with `ui: { live: true }`. @default false |
 | `viewport` | `string` |  | The viewport meta's content — `"width=device-width, initial-scale=1, viewport-fit=cover"` for a layout that reads `env(safe-area-inset-*)`. |

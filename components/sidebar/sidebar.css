@@ -80,8 +80,21 @@
     justify-content: center;
   }
 
+  .sidebar--collapsed .menu__link--current-parent {
+    background: var(--color-surface-alt);
+    font-weight: var(--font-weight-medium);
+  }
+
   .sidebar--collapsed .sidebar__collapse-icon {
     transform: rotate(180deg);
+  }
+
+  /* While a flyout is open the sidebar itself steps above the content.
+     Sticky positioning makes the sidebar a stacking context, so the
+     flyout's own z-index never reaches the page: a later `position:
+     relative` card painted over it. collapse-sidebar.js sets the class. */
+  .sidebar.sidebar--flyout-open {
+    z-index: var(--z-popover);
   }
 
   /* A parent's sublist opened from the collapsed rail floats beside it
@@ -90,8 +103,12 @@
     display: flex;
     position: fixed;
     z-index: var(--z-popover);
+    transform-origin: left center;
+    animation: ui-float-in var(--duration-enter) var(--ease-out);
     min-width: 12rem;
     max-width: calc(100vw - 2 * var(--space-4));
+    max-height: calc(100vh - 2 * var(--space-4));
+    overflow-y: auto;
     margin: 0;
     padding: var(--space-2);
     background: var(--color-surface);
@@ -119,6 +136,12 @@
 }
 
 @media screen and (max-width: 991px) {
+  /* The icon-rail collapse is a desktop affordance; in the drawer it
+     would only shrink the drawer's own labels away. */
+  .sidebar__collapse-toggle {
+    display: none;
+  }
+
   /* No JS means no way to open it again once hidden off-screen, so only
      the enhanced (JS-available) case gets the fixed drawer treatment —
      otherwise the sidebar just stays in normal flow, always visible. */

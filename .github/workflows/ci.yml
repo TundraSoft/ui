@@ -153,5 +153,8 @@ jobs:
         with:
           name: screenshots-${{ matrix.name }}
           path: .test-output/
+          # .test-output is a dot-directory: upload-artifact v4 skips hidden
+          # paths unless told otherwise, so failed runs uploaded nothing.
+          include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

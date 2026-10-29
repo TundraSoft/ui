@@ -34,8 +34,8 @@ const pages = [
   "demo/admin/dashboard.html",
   "demo/admin/tables.html",
   "demo/admin/forms.html",
-  "demo/data.html",
-  "demo/charts.html",
+  "demo/components/data-table.html",
+  "demo/components/chart.html",
 ];
 
 const size = async (p: string) => (await stat(p)).size;

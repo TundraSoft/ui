@@ -1,0 +1,222 @@
+/*
+ * Scroll effects. A reveal block is hidden only under `html.js`
+ * (shared/js/enhance.js): a page without the script shows everything, a
+ * page with it reveals each block as reveal.js sees it enter the
+ * viewport. The transition is one of the motion tokens; reset.css zeroes
+ * it under reduced motion, and reveal.js then reveals everything at once.
+ */
+.js .reveal[data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+.js .reveal[data-reveal="rise"]:not(.is-revealed) {
+  transform: translateY(var(--space-5));
+}
+
+.js .reveal[data-reveal="scale"]:not(.is-revealed) {
+  transform: scale(0.96);
+}
+
+.js .reveal[data-reveal="blur"]:not(.is-revealed) {
+  filter: blur(6px);
+}
+
+.js .reveal[data-reveal] {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
+  transition-delay: calc(var(--reveal-step, 80ms) * var(--reveal-index, 0));
+  will-change: opacity, transform;
+}
+
+.js .reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Fixed delays (steps of 80 ms), for a block that follows a sibling. */
+.reveal--delay-1 {
+  --reveal-index: 1;
+}
+
+.reveal--delay-2 {
+  --reveal-index: 2;
+}
+
+.reveal--delay-3 {
+  --reveal-index: 3;
+}
+
+.reveal-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.reveal-group > .reveal {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+/* A parallax block: reveal.js writes the transform through the CSSOM; the
+   stylesheet only promises the browser it will move. */
+.parallax {
+  will-change: transform;
+}
+
+.lazy-section {
+  min-height: var(--part-min-height);
+}
+
+/* ------------------------------------------------- reading progress */
+.scroll-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  height: var(--border-width-thick);
+  z-index: var(--z-toast);
+  pointer-events: none;
+  background: transparent;
+}
+
+.scroll-progress--bottom {
+  top: auto;
+  bottom: 0;
+}
+
+.scroll-progress__bar {
+  height: 100%;
+  width: 100%;
+  background: var(--color-accent, var(--color-primary));
+  transform-origin: 0 50%;
+  transform: scaleX(var(--scroll-progress, 0));
+}
+
+[dir="rtl"] .scroll-progress__bar {
+  transform-origin: 100% 50%;
+}
+
+/* A browser with scroll-driven animations draws the page-wide bar itself;
+   reveal.js leaves `[data-scroll-progress=""]` alone where this is supported. */
+@keyframes ui-scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress[data-scroll-progress=""] .scroll-progress__bar {
+    animation: ui-scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+/* ------------------------------------------------------------ count-up */
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------- scrollytelling */
+.scroll-steps {
+  --scroll-steps-band: 80vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.scroll-steps--sm {
+  --scroll-steps-band: 60vh;
+}
+
+.scroll-steps--lg {
+  --scroll-steps-band: 100vh;
+}
+
+.scroll-steps__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scroll-steps__step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  transition: color var(--duration-slow) var(--ease-out);
+}
+
+.scroll-steps__step.is-active {
+  color: var(--color-text);
+}
+
+.scroll-steps__inline-media {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* The stage and its stacked media: one visible at a time, cross-faded. */
+.scroll-steps__stage {
+  display: none;
+  position: sticky;
+  top: var(--scroll-padding-top, var(--space-4));
+  height: calc(100vh - 2 * var(--scroll-padding-top, var(--space-4)));
+  max-height: var(--scroll-steps-band);
+  align-self: start;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.scroll-steps__media {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-in-out);
+}
+
+.scroll-steps__media.is-active {
+  opacity: 1;
+}
+
+.scroll-steps__media > img,
+.scroll-steps__media > video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  .scroll-steps {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+
+  .scroll-steps--stage-start .scroll-steps__list {
+    order: 2;
+  }
+
+  .scroll-steps__step {
+    min-height: var(--scroll-steps-band);
+    justify-content: center;
+  }
+
+  .scroll-steps__inline-media {
+    display: none;
+  }
+
+  .scroll-steps__stage {
+    display: block;
+  }
+}

@@ -4,7 +4,7 @@
 
 Import: `import { FocusLayout } from "@tundralibs/ui/layouts/focus"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/layouts/focus.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -37,11 +37,15 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ```ts
 FocusLayout({
-  header: html`<a class="navbar__brand" href="/">Acme</a>`,
+  header: html`
+    <a class="navbar__brand" href="/">Acme</a>
+  `,
   content: Wizard({
     id: "checkout",
     steps: [{ label: "Cart", status: "done" }, { label: "Payment", status: "active" }],
-    content: html`<p>…</p>`,
+    content: html`
+      <p>…</p>
+    `,
   }),
 })
 ```

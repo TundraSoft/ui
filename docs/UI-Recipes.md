@@ -1164,6 +1164,6 @@ everything.
 
 - The [example app](./UI-Rapid.md#the-example-app) is all of these recipes running: `deno task app`, then read
   `examples/app/app.ts`.
-- The catalogue (`deno task build:demos`, `demo/index.html`) shows every component in every state, with the exact markup
-  to copy for a plain page.
+- The demo site (`deno task build:demos`, `demo/index.html`) shows every component in every state on its own page, with
+  the TypeScript and the exact markup to copy for a plain page.
 - [Theming](./UI-Theming.md) is how the same pages take your palette.

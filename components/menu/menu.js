@@ -3,7 +3,10 @@
  * the current page, and open the sublist it sits in. The server can only
  * match on the path — a link like `settings.html#tab-billing` is one of
  * several children of the same page, and only the browser knows which
- * one the user followed. Runs on load and on every hash change.
+ * one the user followed. Runs on load and on every hash change. Every
+ * parent above the current link — whichever marked it, the server or this
+ * script — carries `menu__link--current-parent`: in the collapsed rail the
+ * top-level parent is the only thing left to show where you are.
  */
 (() => {
   function sync() {
@@ -14,13 +17,17 @@
       const target = new URL(link.getAttribute("href"), location.href).href;
       if (target === here) matched = link;
     });
-    if (!matched) return;
+    if (!matched) {
+      document.querySelectorAll('.menu__link[aria-current="page"]').forEach(markParents);
+      return;
+    }
 
     matched.closest(".menu__list")?.querySelectorAll(".menu__link").forEach((link) => {
       if (link !== matched && link.getAttribute("href")?.includes("#")) {
         link.classList.remove("menu__link--active");
         link.removeAttribute("aria-current");
       }
+      link.classList.remove("menu__link--current-parent");
     });
     matched.classList.add("menu__link--active");
     matched.setAttribute("aria-current", "page");
@@ -31,6 +38,15 @@
       sublist.classList.add("is-open");
       document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)
         ?.setAttribute("aria-expanded", "true");
+    }
+    markParents(matched);
+  }
+
+  function markParents(link) {
+    let sublist = link?.parentElement?.closest(".menu__sublist");
+    while (sublist) {
+      sublist.previousElementSibling?.classList.add("menu__link--current-parent");
+      sublist = sublist.parentElement?.closest(".menu__sublist");
     }
   }
 

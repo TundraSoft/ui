@@ -1,0 +1,258 @@
+/*
+ * Code block. Each line is a block-level `.code__line`, so line numbers
+ * (CSS counters) and highlights never reach the clipboard — the header's
+ * copy button copies the raw source. Token colours are custom properties
+ * on `.code`, drawn from the theme's own palette (no literal colours), and
+ * the same colours serve the kit's `.tok-*` classes, Prism's `.token.*`
+ * and highlight.js's `.hljs-*`, so a server highlighter's markup colours
+ * itself the moment it lands.
+ */
+.code {
+  /* The `-soft-text` tones: the status colours made for text on a tinted
+     ground, which is what a sunken block with a highlighted line is —
+     the plain fill colours fall under 4.5:1 there. */
+  --code-kw: var(--color-accent-strong, var(--color-primary));
+  --code-str: var(--color-success-soft-text, var(--color-success));
+  --code-num: var(--color-warning-soft-text, var(--color-warning));
+  --code-com: var(--color-text-muted);
+  --code-fn: var(--color-info-soft-text, var(--color-info));
+  --code-type: var(--color-info-soft-text, var(--color-info));
+  --code-attr: var(--color-warning-soft-text, var(--color-warning));
+  --code-tag: var(--color-danger-soft-text, var(--color-danger));
+  --code-punct: var(--color-text-muted);
+  --code-op: var(--color-text);
+  --code-var: var(--color-text);
+  --code-max-height: none;
+  margin: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+}
+
+.code__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.code__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
+  color: var(--color-text);
+}
+
+.code__lang {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.code__copy {
+  margin-inline-start: auto;
+  display: inline-flex;
+}
+
+.code__pre {
+  margin: 0;
+  padding: var(--space-3) 0;
+  max-height: var(--code-max-height);
+  overflow: auto;
+  font-family: var(--font-family-mono);
+  line-height: var(--line-height-base);
+  tab-size: 2;
+}
+
+/* A capped block is focusable (tabindex="0") so the keyboard can scroll it. */
+.code__pre:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: calc(-1 * var(--ring-width));
+}
+
+.code__body {
+  display: block;
+  min-width: max-content;
+  counter-reset: code-line;
+}
+
+.code--wrap .code__body {
+  min-width: 0;
+}
+
+.code__line {
+  display: block;
+  padding-inline: var(--space-4);
+  white-space: pre;
+}
+
+.code--wrap .code__line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* An emphasised line: a sunken wash and an accent rule at the start. */
+.code__line--hl {
+  background: var(--color-surface);
+  background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 8%, var(--color-surface-sunken));
+  box-shadow: inset var(--border-width-thick) 0 0 var(--color-accent, var(--color-primary));
+}
+
+/* Line numbers: a counter in a gutter the clipboard never sees. The
+   number is absolutely placed (a line holds many token spans, so it is
+   not a grid), and a wrapped line's continuation keeps the indent. */
+.code--numbered .code__line {
+  position: relative;
+  padding-inline-start: calc(var(--space-8) + var(--space-2));
+}
+
+.code--numbered .code__line::before {
+  counter-increment: code-line;
+  content: counter(code-line);
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: var(--space-8);
+  padding-inline-end: var(--space-2);
+  box-sizing: border-box;
+  text-align: end;
+  color: var(--color-text-subtle);
+  user-select: none;
+}
+
+.code--sm {
+  --code-max-height: 12rem;
+}
+
+.code--md {
+  --code-max-height: 20rem;
+}
+
+.code--lg {
+  --code-max-height: 32rem;
+}
+
+/* ------------------------------------------------------------ tokens */
+.code .tok-kw,
+.code .token.keyword,
+.code .token.atrule,
+.code .token.important,
+.code .hljs-keyword,
+.code .hljs-selector-tag,
+.code .hljs-doctag {
+  color: var(--code-kw);
+}
+
+.code .tok-str,
+.code .token.string,
+.code .token.char,
+.code .token.attr-value,
+.code .hljs-string,
+.code .hljs-addition,
+.code .hljs-meta-string {
+  color: var(--code-str);
+}
+
+.code .tok-num,
+.code .token.number,
+.code .token.boolean,
+.code .token.constant,
+.code .hljs-number,
+.code .hljs-literal {
+  color: var(--code-num);
+}
+
+.code .tok-com,
+.code .token.comment,
+.code .token.prolog,
+.code .token.doctype,
+.code .token.cdata,
+.code .hljs-comment,
+.code .hljs-quote,
+.code .hljs-meta {
+  color: var(--code-com);
+  font-style: italic;
+}
+
+.code .tok-fn,
+.code .token.function,
+.code .hljs-title,
+.code .hljs-title.function_ {
+  color: var(--code-fn);
+}
+
+.code .tok-type,
+.code .token.class-name,
+.code .token.builtin,
+.code .hljs-type,
+.code .hljs-class,
+.code .hljs-built_in,
+.code .hljs-title.class_ {
+  color: var(--code-type);
+}
+
+.code .tok-attr,
+.code .token.attr-name,
+.code .token.property,
+.code .hljs-attr,
+.code .hljs-attribute,
+.code .hljs-property,
+.code .hljs-symbol {
+  color: var(--code-attr);
+}
+
+.code .tok-tag,
+.code .token.tag,
+.code .token.selector,
+.code .hljs-name,
+.code .hljs-tag,
+.code .hljs-selector-class,
+.code .hljs-selector-id {
+  color: var(--code-tag);
+}
+
+.code .tok-punct,
+.code .token.punctuation,
+.code .hljs-punctuation {
+  color: var(--code-punct);
+}
+
+.code .tok-op,
+.code .token.operator,
+.code .hljs-operator {
+  color: var(--code-op);
+}
+
+.code .tok-var,
+.code .token.variable,
+.code .token.regex,
+.code .hljs-variable,
+.code .hljs-regexp,
+.code .hljs-template-variable {
+  color: var(--code-var);
+}
+
+.code .token.bold,
+.code .hljs-strong {
+  font-weight: var(--font-weight-semibold);
+}
+
+.code .token.italic,
+.code .hljs-emphasis {
+  font-style: italic;
+}

@@ -162,6 +162,22 @@
   position: relative;
   overflow: auto;
   max-height: var(--data-table-max-height, none);
+  /* Scroll-edge fades: a wide table on a phone shows a soft shadow at
+     whichever side has more. Two covers in the surface colour scroll with
+     the content (background-attachment: local) and hide two fixed shadows
+     at the box's edges; as the content moves, the cover at the far side
+     slides away and the shadow shows. Plain cells are transparent below so
+     the fade is visible; the sticky cells keep an opaque ground. */
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(to right, var(--color-surface) 40%, transparent),
+    linear-gradient(to left, var(--color-surface) 40%, transparent),
+    radial-gradient(farthest-side at 0 50%, rgb(var(--shadow-color) / 0.16), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgb(var(--shadow-color) / 0.16), transparent);
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-size: 48px 100%, 48px 100%, 16px 100%, 16px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
 }
 
 /* Height steps — the template picks one instead of emitting an inline
@@ -209,6 +225,13 @@
   padding-inline: var(--space-4);
   white-space: nowrap;
   border-bottom: var(--border-width) solid var(--color-border-subtle);
+  /* Transparent, so the scroll box's edge fades show through; the sticky
+     cells (selection, pinned, actions) paint their own ground below. */
+  background: transparent;
+}
+
+.data-table__table td.data-table__select,
+.data-table__table td.data-table__cell--pinned {
   background: var(--color-surface);
 }
 
@@ -472,4 +495,164 @@ th[aria-sort] .data-table__sort {
   text-transform: none;
   letter-spacing: normal;
   white-space: normal;
+}
+
+/*
+ * DataTable({ responsive: "cards" }): below 768px every row is a card.
+ * Each cell carries its column heading in `data-label` (the template
+ * writes it) and draws it as a small caps label before the value; the
+ * first column is the card's title, numbers stay right-aligned, the
+ * checkbox and the actions sit at the card's corners. The header row
+ * stays in the DOM for assistive technology (visually hidden), the bulk
+ * bar becomes a plain block above the cards and the row-action strip
+ * covers the whole card while open. Nothing here needs a script.
+ */
+@media screen and (max-width: 767px) {
+  .data-table--cards .data-table__scroll {
+    overflow: visible;
+    max-height: none;
+    background-image: none;
+    padding: var(--space-3);
+  }
+
+  .data-table--cards .data-table__table,
+  .data-table--cards .data-table__table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table--cards .data-table__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .data-table--cards .data-table__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--space-3);
+    row-gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .data-table--cards .data-table__row + .data-table__row,
+  .data-table--cards .data-table__group + .data-table__row,
+  .data-table--cards .data-table__row + .data-table__group {
+    margin-top: var(--space-3);
+  }
+
+  .data-table--cards .data-table__row--selected {
+    border-color: var(--color-accent, var(--color-primary));
+  }
+
+  .data-table--cards .data-table__table td {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(6rem, 35%) minmax(0, 1fr);
+    grid-column: 1 / -1;
+    align-items: baseline;
+    column-gap: var(--space-3);
+    height: auto;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    white-space: normal;
+    text-align: start;
+  }
+
+  .data-table--cards .data-table__table td::before {
+    content: attr(data-label);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .data-table--cards .data-table__table td.data-table__num {
+    text-align: end;
+  }
+
+  /* The first column titles the card: no label, bigger, beside the
+     checkbox (column 1) and before the actions (column 3). */
+  .data-table--cards .data-table__row > td:first-child:not(.data-table__select),
+  .data-table--cards .data-table__row > td.data-table__select + td {
+    display: block;
+    grid-area: 1 / 2;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    border-inline-end: none;
+  }
+
+  .data-table--cards .data-table__row > td:first-child:not(.data-table__select)::before,
+  .data-table--cards .data-table__row > td.data-table__select + td::before {
+    content: none;
+  }
+
+  .data-table--cards .data-table__table td.data-table__select {
+    display: block;
+    grid-area: 1 / 1;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .data-table--cards .data-table__table td.data-table__select::before {
+    content: none;
+  }
+
+  .data-table--cards .data-table__table td.data-table__actions {
+    display: block;
+    grid-area: 1 / 3;
+    width: auto;
+  }
+
+  .data-table--cards .data-table__table td.data-table__actions::before {
+    content: none;
+  }
+
+  /* The strip's containing block is now the card (position: relative), so
+     it covers the whole card while open. */
+  .data-table--cards .data-table__row-actions {
+    border-radius: var(--radius-md);
+  }
+
+  .data-table--cards .data-table__table tbody tr:hover td {
+    background: transparent;
+  }
+
+  .data-table--cards .data-table__bulk {
+    position: static;
+    height: auto;
+    min-height: var(--data-table-header-height);
+    margin-block-end: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  .data-table--cards .data-table__group {
+    display: block;
+  }
+
+  .data-table--cards .data-table__table .data-table__group > th {
+    display: block;
+    padding-inline: var(--space-1);
+    background: transparent;
+    border-bottom: none;
+  }
 }

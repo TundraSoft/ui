@@ -4,7 +4,7 @@
 
 Import: `import { DocsLayout } from "@tundralibs/ui/layouts/docs"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/layouts/docs.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -90,7 +90,7 @@ DocsLayout({
       <nav class="layout__toc" aria-label="On this page">
         <button type="button" class="layout__toc-toggle js-only" data-toggle="#main-content-toc" data-toggle-class aria-expanded="false" aria-controls="main-content-toc">On this page</button>
         <p class="layout__toc-title">On this page</p>
-        <div class="layout__toc-body" id="main-content-toc">
+        <div class="layout__toc-body" id="main-content-toc" data-scrollspy>
           <ul class="menu__list">
             <li>
               <a class="menu__link" href="#install">

@@ -19,6 +19,14 @@
 (() => {
   let downOnBackdrop = false;
 
+  /** Close with the exit animation (modal.css `.is-closing`), then for real. */
+  function closeModal(dialog) {
+    if (!(dialog instanceof HTMLDialogElement) || !dialog.open) return;
+    const motion = globalThis.uiMotion;
+    if (motion) motion.exit(dialog, () => dialog.close());
+    else dialog.close();
+  }
+
   document.addEventListener("pointerdown", (event) => {
     downOnBackdrop = event.target instanceof HTMLDialogElement && event.target.open;
   });
@@ -27,21 +35,33 @@
     const opener = event.target.closest?.("[data-modal-open]");
     if (opener) {
       const dialog = document.querySelector(opener.getAttribute("data-modal-open") ?? "");
-      if (dialog instanceof HTMLDialogElement && !dialog.open) dialog.showModal();
+      if (dialog instanceof HTMLDialogElement && !dialog.open) {
+        globalThis.uiMotion?.cancelExit(dialog);
+        dialog.showModal();
+      }
       return;
     }
 
     const closer = event.target.closest?.("[data-modal-close]");
     if (closer) {
-      closer.closest("dialog")?.close();
+      closeModal(closer.closest("dialog"));
       return;
     }
 
     if (downOnBackdrop && event.target instanceof HTMLDialogElement && event.target.open) {
-      event.target.close();
+      closeModal(event.target);
     }
     downOnBackdrop = false;
   });
+
+  // Escape: the browser's own close is immediate; take it over so the
+  // dialog leaves the way it arrived. (`cancel` does not bubble — capture.)
+  document.addEventListener("cancel", (event) => {
+    const dialog = event.target;
+    if (!(dialog instanceof HTMLDialogElement) || !dialog.classList.contains("modal")) return;
+    event.preventDefault();
+    closeModal(dialog);
+  }, true);
 
   /* ------------------------------------------------------ auto-open */
   function autoOpen() {
@@ -78,7 +98,7 @@
       let answer = false;
       const onOk = () => {
         answer = true;
-        dialog.close();
+        closeModal(dialog);
       };
       const onClose = () => {
         ok?.removeEventListener("click", onOk);
@@ -86,7 +106,10 @@
       };
       ok?.addEventListener("click", onOk);
       dialog.addEventListener("close", onClose, { once: true });
-      dialog.showModal();
+      // Asked again while the last answer is still animating out: keep
+      // the dialog (showModal() on an open dialog throws).
+      globalThis.uiMotion?.cancelExit(dialog);
+      if (!dialog.open) dialog.showModal();
       ok?.focus();
     });
   }

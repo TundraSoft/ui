@@ -1,0 +1,224 @@
+/*
+ * Sheet: a native <dialog> pinned to one edge of the viewport. The dialog
+ * itself is the full-viewport box (margin 0, max sizes lifted — reset.css
+ * centres dialogs with `margin: auto` and caps them, both undone here);
+ * `.sheet__panel` is the visible surface, so the slide keyframes move the
+ * panel and the backdrop fades on its own.
+ */
+.sheet {
+  --sheet-size: 28rem;
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  overflow: visible;
+}
+
+.sheet--sm {
+  --sheet-size: 20rem;
+}
+
+.sheet--lg {
+  --sheet-size: 40rem;
+}
+
+.sheet::backdrop {
+  background: var(--color-overlay);
+}
+
+.sheet[open]::backdrop {
+  animation: ui-fade-in var(--duration-enter) var(--ease-out);
+}
+
+.sheet.is-closing::backdrop {
+  animation: ui-fade-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.sheet__panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  box-shadow:
+    var(--shadow-inset-top),
+    var(--shadow-xl);
+  overflow: hidden;
+}
+
+/* A side panel: full height, --sheet-size wide, on the end (or start) edge. */
+.sheet--end .sheet__panel,
+.sheet--start .sheet__panel {
+  inset-block: 0;
+  width: min(var(--sheet-size), 100%);
+}
+
+.sheet--end .sheet__panel {
+  inset-inline-end: 0;
+  border-start-start-radius: var(--radius-lg);
+  border-end-start-radius: var(--radius-lg);
+}
+
+.sheet--start .sheet__panel {
+  inset-inline-start: 0;
+  border-start-end-radius: var(--radius-lg);
+  border-end-end-radius: var(--radius-lg);
+}
+
+.sheet--end[open] .sheet__panel {
+  animation: ui-slide-in-end var(--duration-slow) var(--ease-out);
+}
+
+.sheet--end.is-closing .sheet__panel {
+  animation: ui-slide-out-end var(--duration-base) var(--ease-in) forwards;
+}
+
+.sheet--start[open] .sheet__panel {
+  animation: ui-slide-in-start var(--duration-slow) var(--ease-out);
+}
+
+.sheet--start.is-closing .sheet__panel {
+  animation: ui-slide-out-start var(--duration-base) var(--ease-in) forwards;
+}
+
+[dir="rtl"] .sheet--end[open] .sheet__panel {
+  animation-name: ui-slide-in-start;
+}
+
+[dir="rtl"] .sheet--end.is-closing .sheet__panel {
+  animation-name: ui-slide-out-start;
+}
+
+[dir="rtl"] .sheet--start[open] .sheet__panel {
+  animation-name: ui-slide-in-end;
+}
+
+[dir="rtl"] .sheet--start.is-closing .sheet__panel {
+  animation-name: ui-slide-out-end;
+}
+
+/* The bottom sheet: the whole width, capped at 85vh, rounded top corners,
+   a drag handle. `.sheet--bottom` asks for it at any width; below 768px
+   every sheet gets it (a side panel has no room on a phone). */
+.sheet--bottom .sheet__panel {
+  inset-inline: 0;
+  bottom: 0;
+  max-height: min(var(--sheet-size), 85vh);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+}
+
+.sheet--bottom[open] .sheet__panel {
+  animation: ui-slide-in-bottom var(--duration-slow) var(--ease-out);
+}
+
+.sheet--bottom.is-closing .sheet__panel {
+  animation: ui-slide-out-bottom var(--duration-base) var(--ease-in) forwards;
+}
+
+.sheet__handle {
+  display: none;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 4px;
+  margin: var(--space-2) auto 0;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+
+.sheet--bottom .sheet__handle {
+  display: block;
+}
+
+@media screen and (max-width: 767px) {
+  .sheet__panel {
+    inset: auto 0 0 0;
+    width: auto;
+    height: auto;
+    max-height: 85vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .sheet[open] .sheet__panel {
+    animation: ui-slide-in-bottom var(--duration-slow) var(--ease-out);
+  }
+
+  .sheet.is-closing .sheet__panel {
+    animation: ui-slide-out-bottom var(--duration-base) var(--ease-in) forwards;
+  }
+
+  .sheet__handle {
+    display: block;
+  }
+}
+
+.sheet__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.sheet__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sheet__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: -4px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--ring-width) solid var(--ring-color);
+    outline-offset: var(--ring-offset);
+  }
+}
+
+.sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+}
+
+.sheet__footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* A floating panel inside the sheet (a select's list, a date picker) may
+   spill past the body's scroll box. */
+.sheet__body:has(.combobox--open, .datepicker--open, .timepicker--open) {
+  overflow: visible;
+}

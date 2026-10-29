@@ -50,9 +50,31 @@
   transform: rotate(180deg);
 }
 
+/* The panel is a one-row grid whose row goes 0fr → 1fr: a height
+   animation with no measuring. The inner box carries the padding and
+   the rule, so a closed row is truly zero. collapsible.js drives the
+   `is-collapsed` class; with the script absent `hidden` alone shows and
+   hides the panel. */
 .collapsible__panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-out);
+}
+
+.collapsible__panel.is-collapsed {
+  grid-template-rows: 0fr;
+}
+
+.collapsible__inner {
+  min-height: 0;
+  overflow: hidden;
   padding: var(--space-4);
   border-top: var(--border-width) solid var(--color-border);
+}
+
+/* Fully open, the content may overflow (a dropdown inside it). */
+.collapsible__panel:not(.is-collapsed, .is-animating) > .collapsible__inner {
+  overflow: visible;
 }
 
 .accordion > .collapsible {

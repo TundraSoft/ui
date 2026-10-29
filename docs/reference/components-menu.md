@@ -4,7 +4,7 @@
 
 Import: `import { Menu } from "@tundralibs/ui/menu"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/menu.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -96,7 +96,7 @@ Menu({
 
 Classes defined by `components/menu/menu.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__list`, `.menu__sublist`
+`.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__link--current-parent`, `.menu__list`, `.menu__sublist`
 
 ## Behaviour
 

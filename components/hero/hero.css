@@ -1,0 +1,154 @@
+/*
+ * The opening band. Vertical room is a token so a theme can make it
+ * breathe or tighten it; the title clamps between the display sizes so
+ * it never wraps to four lines on a phone.
+ */
+.hero {
+  --hero-padding-block: clamp(var(--space-10), 12vw, var(--space-16));
+  position: relative;
+  overflow: hidden;
+  padding-block: var(--hero-padding-block);
+  background: var(--color-canvas);
+  color: var(--color-text);
+}
+
+.hero__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.hero__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: 40rem;
+}
+
+.hero__eyebrow {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-accent, var(--color-primary));
+}
+
+.hero__title {
+  margin: 0;
+  font-size: clamp(var(--font-size-3xl), 6vw, calc(var(--font-size-4xl) * 1.5));
+  line-height: 1.02;
+  letter-spacing: var(--letter-spacing-tighter);
+  text-wrap: balance;
+}
+
+.hero--md .hero__title {
+  font-size: clamp(var(--font-size-2xl), 4.5vw, var(--font-size-4xl));
+}
+
+.hero__text {
+  margin: 0;
+  max-width: 34rem;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.hero__media {
+  min-width: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.hero__media > img,
+.hero__media > video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Centred: text and actions on the middle line, media under them. */
+.hero--center .hero__body {
+  align-items: center;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.hero--center .hero__actions {
+  justify-content: center;
+}
+
+/* Tones. The inverse ground re-maps the text tokens locally, so every
+   component inside follows; the accent wash is a soft gradient with a
+   plain fallback for a browser without color-mix(). */
+.hero--inverse {
+  --color-text: var(--color-text-inverse);
+  --color-text-muted: var(--color-text-inverse);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+
+.hero--inverse .hero__text {
+  opacity: 0.8;
+}
+
+.hero--inverse .hero__eyebrow {
+  color: var(--color-accent-inverse, var(--color-accent));
+}
+
+/* An outline button keeps its light surface, which the re-mapped text
+   colour would vanish on: on the inverse ground it is a ghost outline. */
+.hero--inverse .btn--outline {
+  background: transparent;
+  border-color: var(--color-text-inverse);
+  color: var(--color-text-inverse);
+  box-shadow: none;
+}
+
+.hero--inverse .btn--outline:hover {
+  background: var(--color-surface-inverse);
+  background: color-mix(in oklab, var(--color-text-inverse) 12%, var(--color-surface-inverse));
+  border-color: var(--color-text-inverse);
+}
+
+.hero--accent {
+  background: var(--color-surface-sunken);
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--color-accent, var(--color-primary)) 14%, var(--color-canvas)),
+    var(--color-canvas) 60%
+  );
+}
+
+@media screen and (min-width: 992px) {
+  .hero--split .hero__inner {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-10);
+  }
+
+  .hero--split .hero__body,
+  .hero--split .hero__media {
+    flex: 1 1 0;
+  }
+
+  .hero--split.hero--center .hero__body {
+    align-items: flex-start;
+    text-align: start;
+  }
+
+  .hero--split.hero--center .hero__actions {
+    justify-content: flex-start;
+  }
+}

@@ -4,7 +4,7 @@
 
 Import: `import { Tabs, TabLinks } from "@tundralibs/ui/tabs"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/tabs.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -105,8 +105,20 @@ A `#tab-<id>` link deep-links to a tab, so a sidebar can point at `settings#tab-
 Tabs({
   id: "settings",
   items: [
-    { id: "general", label: "General", content: html`<p>Company name, timezone.</p>` },
-    { id: "billing", label: "Billing", content: html`<p>Plan and invoices.</p>` },
+    {
+      id: "general",
+      label: "General",
+      content: html`
+        <p>Company name, timezone.</p>
+      `,
+    },
+    {
+      id: "billing",
+      label: "Billing",
+      content: html`
+        <p>Plan and invoices.</p>
+      `,
+    },
   ],
 })
 ```
@@ -130,10 +142,12 @@ Tabs({
 
 Classes defined by `components/tabs/tabs.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.tabs__count`, `.tabs__icon`, `.tabs__list`, `.tabs__panel`, `.tabs__tab`
+`.js`, `.tabs__count`, `.tabs__icon`, `.tabs__list`, `.tabs__panel`, `.tabs__tab`
 
 ## Behaviour
 
 `components/tabs/tabs.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
+
+Attributes it reads or writes: `data-tabs-ready`.
 
 Events: `rapid:swapped`.

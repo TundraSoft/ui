@@ -2,7 +2,8 @@
  * Admin SaaS sample theme — a full application built from the base
  * partials (v1 + v2), proving the base/theme split end to end. Every
  * page here is a realistic composition, not a component showcase; the
- * catalogue pages exist for that. Built on layouts/sidebar; no inline
+ * demo site's component pages exist for that. Its sidebar is its only
+ * navigation, and its last item leads back to the demo site. Built on layouts/sidebar; no inline
  * styles or scripts (CLAUDE.md §9) — the theme's own partial CSS lives in
  * examples/themes/admin.css, and all behavior comes from dist/ui.js.
  */
@@ -15,8 +16,7 @@ import { Sidebar } from "../../components/sidebar/sidebar.ts";
 import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { AuthLayout } from "../../layouts/auth/auth.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
-import { Stat } from "../../components/stat/stat.ts";
-import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
+import { Stat, type StatTone } from "../../components/stat/stat.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { Badge } from "../../components/badge/badge.ts";
 import { Avatar, AvatarGroup } from "../../components/avatar/avatar.ts";
@@ -50,7 +50,7 @@ import { Timeline } from "../../components/timeline/timeline.ts";
 import { Empty } from "../../components/empty/empty.ts";
 import { SkeletonTable } from "../../components/skeleton/skeleton.ts";
 import { ErrorTemplate } from "../../templates/errors.ts";
-import { Icon } from "../../shared/icons.ts";
+import { Icon, type IconName } from "../../shared/icons.ts";
 
 /* ------------------------------------------------------------ helpers */
 
@@ -62,14 +62,14 @@ const searchInput = (placeholder: string, extra: Record<string, string> = {}) =>
 
 /** Inline empty state that filter.js reveals when a search matches nothing. */
 const filterEmpty = (what: string) =>
-  html`<div data-filter-empty hidden>${
-    Empty({
+  html`
+    <div data-filter-empty hidden>${Empty({
       variant: "inline",
       icon: "search",
       title: `No ${what} match`,
       text: "Try a different search or clear the filter.",
-    })
-  }</div>`;
+    })}</div>
+  `;
 
 function statusBadge(status: string): Html {
   const variant = status === "Paid" || status === "Active" || status === "Done"
@@ -110,6 +110,7 @@ const NAV_ITEMS: MenuItem[] = [
   { label: "Dashboard", href: "dashboard.html", icon: Icon("dashboard", { size: 18 }) },
   { label: "Projects", href: "projects.html", icon: Icon("folder", { size: 18 }) },
   { label: "Team", href: "team.html", icon: Icon("users", { size: 18 }) },
+  { label: "Profile", href: "profile.html", icon: Icon("user", { size: 18 }) },
   { label: "Invoice", href: "invoice.html", icon: Icon("invoice", { size: 18 }) },
   { label: "Tables", href: "tables.html", icon: Icon("table", { size: 18 }) },
   { label: "Forms", href: "forms.html", icon: Icon("edit", { size: 18 }) },
@@ -122,6 +123,8 @@ const NAV_ITEMS: MenuItem[] = [
       { label: "Integrations", href: "settings.html#tab-integrations" },
     ],
   },
+  // The sample sits inside the demo site: its own sidebar is also the way back.
+  { label: "Component library", href: "../index.html", icon: Icon("arrowLeft", { size: 18 }) },
 ];
 
 /** Exact href → active; a parent whose children live on the current page
@@ -167,42 +170,45 @@ const notifications = [
 function adminNavbar() {
   return Navbar({
     id: "admin-navbar",
-    brand: html`<span class="sidebar__brand-mark">A</span> Acme Admin`,
-    actions: html`${
-      Button({
+    brand: html`
+      <span class="sidebar__brand-mark">A</span> <span class="hide-sm">Acme Admin</span>
+    `,
+    actions: html`
+      ${Button({
         variant: "outline",
         size: "sm",
         iconStart: Icon("search", { size: 15 }),
         // Icon-only below sm: the label and shortcut hint hide, the
         // aria-label keeps the accessible name.
-        label: html`<span class="hide-sm">Search…</span><span class="command__kbd hide-sm">⌘K</span>`,
+        label: html`
+          <span class="hide-sm">Search…</span><span class="command__kbd hide-sm">⌘K</span>
+        `,
         attrs: { "data-command-open": "#global-command", "aria-label": "Search (⌘K)", class: "command__trigger" },
-      })
-    }${
-      Dropdown({
+      })}${Dropdown({
         id: "admin-notifications",
         align: "end",
         // A feed, not a list of choices: nothing to search.
         searchable: false,
         trigger: Icon("bell", { size: 18 }),
-        content: html`<div class="notif-list"><p class="text-sm text-semibold">Notifications</p>${
-          Timeline({ items: notifications })
-        }${Button({ label: "View all", variant: "subtle", size: "sm", block: true })}</div>`,
-      })
-    }${
-      Button({
+        content: html`
+          <div class="notif-list"><p class="text-sm text-semibold">Notifications</p>${Timeline({
+            items: notifications,
+          })}${Button({ label: "View all", variant: "subtle", size: "sm", block: true })}</div>
+        `,
+      })}${Button({
         iconOnly: true,
         variant: "ghost",
         label: Icon("moon", { size: 18 }),
         attrs: { "data-theme-toggle": "", "aria-label": "Toggle dark mode" },
-      })
-    }${
-      Dropdown({
+      })}${Dropdown({
         id: "admin-user-menu",
         align: "end",
-        trigger: html`${
-          Avatar({ initials: "JS", size: "sm" })
-        }<span class="hide-sm">Jamie Sun</span><span class="sr-only">Account menu</span>`,
+        trigger: html`
+          ${Avatar({
+            initials: "JS",
+            size: "sm",
+          })}<span class="hide-sm">Jamie Sun</span><span class="sr-only">Account menu</span>
+        `,
         content: Menu({
           items: [
             { label: "Profile", href: "profile.html" },
@@ -210,8 +216,8 @@ function adminNavbar() {
             { label: "Sign out", href: "lock-screen.html" },
           ],
         }),
-      })
-    }`,
+      })}
+    `,
   });
 }
 
@@ -228,7 +234,6 @@ function adminSidebar(activeHref: string) {
 type PageOpts = {
   title: string;
   activeHref: string;
-  breadcrumb: string;
   content: unknown;
   /** Page-level actions rendered top-right of the header. */
   actions?: Html;
@@ -241,42 +246,39 @@ type PageOpts = {
 function adminPage(opts: PageOpts) {
   const toasts = opts.toasts ?? [Toast({ variant: "success", body: "Saved successfully!", autoDismissMs: 4000 })];
   return html`
-    <!doctype html>
+    <!DOCTYPE html>
     <html lang="en">
       <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Acme Admin — ${opts.title}</title>
-    <link rel="stylesheet" href="../../dist/ui.css">
-    <link rel="stylesheet" href="../../examples/themes/admin.css">
-    ${opts.scripts ?? []}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Acme Admin — ${opts.title}</title>
+        <link rel="stylesheet" href="../../dist/ui.css">
+        <link rel="stylesheet" href="../../examples/themes/admin.css">
+        ${opts.scripts ?? []}
       </head>
       <body>
-    ${SidebarLayout({
-      header: adminNavbar(),
-      sidebar: adminSidebar(opts.activeHref),
-      sidebarId,
-      width: "boxed",
-      content: html`${
-        PageHeader({
-          breadcrumb: Breadcrumb({ items: [{ label: "Home", href: "dashboard.html" }, { label: opts.breadcrumb }] }),
-          title: opts.title,
-          actions: html`${opts.actions ?? ""}${
-            Button({
-              label: "Show toast",
-              variant: "outline",
-              size: "sm",
-              attrs: { "data-toast-open": "#page-toasts" },
-            })
-          }`,
-        })
-      }${opts.content}`,
-      contentId: "main-content",
-    })}
-    ${globalCommand}
-    ${ToastRegion()}
-    <template id="page-toasts">${toasts}</template>
-    <script src="../../dist/ui.js"></script>
+        ${SidebarLayout({
+          header: adminNavbar(),
+          sidebar: adminSidebar(opts.activeHref),
+          sidebarId,
+          width: "boxed",
+          content: html`
+            ${PageHeader({
+              title: opts.title,
+              actions: html`
+                ${opts.actions ?? ""}${Button({
+                  label: "Show toast",
+                  variant: "outline",
+                  size: "sm",
+                  attrs: { "data-toast-open": "#page-toasts" },
+                })}
+              `,
+            })}${opts.content}
+          `,
+          contentId: "main-content",
+        })} ${globalCommand} ${ToastRegion()}
+        <template id="page-toasts">${toasts}</template>
+        <script src="../../dist/ui.js"></script>
       </body>
     </html>
   `;
@@ -285,6 +287,7 @@ function adminPage(opts: PageOpts) {
 /* ------------------------------------------------------------ Dashboard */
 
 const statCards = Grid({
+  phoneColumns: "2",
   items: [
     {
       label: "Monthly revenue",
@@ -293,6 +296,9 @@ const statCards = Grid({
       up: true,
       icon: "coin" as const,
       tone: "primary" as const,
+      sparkline: [31, 33, 36, 38, 37, 35, 36, 39, 42, 44, 43, 48],
+      sparklineLabel: "Monthly revenue over the last twelve months, rising",
+      sparklineLabels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
     },
     {
       label: "Active users",
@@ -301,6 +307,8 @@ const statCards = Grid({
       up: true,
       icon: "users" as const,
       tone: "success" as const,
+      sparkline: [6200, 6400, 6350, 6800, 7100, 7000, 7400, 7900, 8100, 8412],
+      sparklineLabel: "Active users over the last ten weeks, rising",
     },
     {
       label: "Conversion rate",
@@ -310,8 +318,25 @@ const statCards = Grid({
       icon: "trendUp" as const,
       tone: "warning" as const,
     },
-    { label: "Churn", value: "1.2%", trend: "+0.2%", up: false, icon: "trendDown" as const, tone: "danger" as const },
-  ].map((stat) =>
+    {
+      label: "Churn",
+      value: "1.2%",
+      trend: "+0.2%",
+      up: false,
+      icon: "trendDown" as const,
+      tone: "danger" as const,
+    },
+  ].map((stat: {
+    label: string;
+    value: string;
+    trend: string;
+    up: boolean;
+    icon: IconName;
+    tone: StatTone;
+    sparkline?: number[];
+    sparklineLabel?: string;
+    sparklineLabels?: string[];
+  }) =>
     GridCol({
       span: 3,
       content: Card({
@@ -322,6 +347,9 @@ const statCards = Grid({
           icon: Icon(stat.icon, { size: 20 }),
           tone: stat.tone,
           trend: { label: stat.trend, up: stat.up },
+          sparkline: stat.sparkline,
+          sparklineLabel: stat.sparklineLabel,
+          sparklineLabels: stat.sparklineLabels,
         }),
       }),
     })
@@ -350,23 +378,24 @@ const revenueChart = Card({
 
 const quickActions = Card({
   title: "Quick actions",
-  body: html`<div class="stack stack--sm">${
-    Button({
+  body: html`
+    <div class="stack stack--sm">${Button({
       label: "New project",
       block: true,
       iconStart: Icon("plus", { size: 15 }),
       attrs: { "data-modal-open": "#create-project-modal" },
-    })
-  }${
-    Button({ label: "Invite teammate", variant: "outline", block: true, attrs: { "data-modal-open": "#invite-modal" } })
-  }${
-    Button({
+    })}${Button({
+      label: "Invite teammate",
+      variant: "outline",
+      block: true,
+      attrs: { "data-modal-open": "#invite-modal" },
+    })}${Button({
       label: "Open command palette",
       variant: "subtle",
       block: true,
       attrs: { "data-command-open": "#global-command" },
-    })
-  }</div>`,
+    })}</div>
+  `,
 });
 
 const activity = Card({
@@ -391,12 +420,24 @@ const tasks = Card({
   ].map((task) =>
     html`
       <div
-        class="task-item"><div class="task-item__row"><span>${task
-          .label}</span><span class="text-muted text-sm text-nums">${task.value}%</span></div>${Progress({
-            value: task.value,
-          })}</div>
+        class="task-item"
+      >
+        <div class="task-item__row">
+          <span>${task
+            .label}</span><span class="text-muted text-sm text-nums">${task.value}%</span>
+        </div>${Progress({
+          value: task.value,
+        })}
+      </div>
     `
-  ).reduce((a, b) => html`${a}${b}`, html``),
+  ).reduce(
+    (a, b) =>
+      html`
+        ${a}${b}
+      `,
+    html`
+    `,
+  ),
 });
 
 /** Lazy region: rAPId's `data-load` swaps the real rows in on mount; the
@@ -404,7 +445,9 @@ const tasks = Card({
 const deployQueue = Card({
   title: "Deploy queue",
   subtitle: "Lazy region — data-load swaps the real rows in",
-  body: html`<div id="deploy-queue" data-action="/deploys" data-load>${SkeletonTable({ rows: 3 })}</div>`,
+  body: html`
+    <div id="deploy-queue" data-action="/deploys" data-load>${SkeletonTable({ rows: 3 })}</div>
+  `,
 });
 
 type Order = { id: string; customer: string; amount: string; status: string; date: string };
@@ -422,6 +465,7 @@ function ordersTable(opts: { id: string; filterable: boolean; selectable: boolea
   return DataTable<Order>({
     id: opts.id,
     title: opts.filterable ? undefined : "Recent orders",
+    responsive: "cards",
     selectable: opts.selectable,
     sort: { key: "date", dir: "desc" },
     buildSortHref: (key, dir) => `?sort=${key}&dir=${dir}`,
@@ -437,17 +481,15 @@ function ordersTable(opts: { id: string; filterable: boolean; selectable: boolea
     rowKey: (row) => row.id,
     rowActions: (row) => rowKebab(`${opts.id}-${row.id}`),
     toolbar: opts.filterable
-      ? html`${searchInput("Search orders…")}<div class="toolbar__end">${
-        Select({
+      ? html`
+        ${searchInput("Search orders…")}<div class="toolbar__end">${Select({
           placeholder: "All statuses",
           attrs: { "data-table-filter": "", "aria-label": "Filter by status" },
           options: [{ value: "paid", label: "Paid" }, { value: "pending", label: "Pending" }, {
             value: "refunded",
             label: "Refunded",
           }, { value: "overdue", label: "Overdue" }],
-        })
-      }${
-        DatePicker({
+        })}${DatePicker({
           id: `${opts.id}-period`,
           name: "period",
           align: "end",
@@ -461,18 +503,26 @@ function ordersTable(opts: { id: string; filterable: boolean; selectable: boolea
             label: "This quarter",
             href: "?preset=q",
           }],
-        })
-      }</div>`
+        })}</div>
+      `
       : undefined,
     bulkAction: opts.selectable ? "?bulk" : undefined,
     bulkActions: opts.selectable
-      ? html`${bulkButton("Mark paid", "paid")}${bulkButton("Export", "export")}${
-        bulkButton("Refund", "refund", "danger")
-      }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`
+      ? html`
+        ${bulkButton("Mark paid", "paid")}${bulkButton("Export", "export")}${bulkButton(
+          "Refund",
+          "refund",
+          "danger",
+        )}${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}
+      `
       : undefined,
-    footer: html`${opts.filterable ? filterEmpty("orders") : ""}<span>Showing ${orderRows.length} of 1,093</span>${
-      Pagination({ page: 1, totalPages: 4, buildHref: (p) => `?page=${p}` })
-    }`,
+    footer: html`
+      ${opts.filterable ? filterEmpty("orders") : ""}<span>Showing ${orderRows.length} of 1,093</span>${Pagination({
+        page: 1,
+        totalPages: 4,
+        buildHref: (p) => `?page=${p}`,
+      })}
+    `,
     attrs: opts.filterable ? { "data-filter-scope": "" } : undefined,
   });
 }
@@ -513,26 +563,26 @@ const createProjectModal = Modal({
       ],
     }),
   }),
-  footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${
-    Button({ label: "Create project" })
-  }`,
+  footer: html`
+    ${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${Button({
+      label: "Create project",
+    })}
+  `,
 });
 
 const inviteModal = Modal({
   id: "invite-modal",
   title: "Invite teammate",
   body: Form({
-    content: html`${
-      FormField({
+    content: html`
+      ${FormField({
         id: "invite-email",
         label: "Email address",
         control: InputIcon({
           icon: Icon("mail", { size: 16 }),
           control: Input({ id: "invite-email", type: "email", placeholder: "teammate@company.com" }),
         }),
-      })
-    }<br>${
-      FormField({
+      })}<br>${FormField({
         id: "invite-role",
         label: "Role",
         control: Segmented({
@@ -545,34 +595,46 @@ const inviteModal = Modal({
             label: "Viewer",
           }],
         }),
-      })
-    }`,
+      })}
+    `,
   }),
-  footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${
-    Button({ label: "Send invite" })
-  }`,
+  footer: html`
+    ${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${Button({
+      label: "Send invite",
+    })}
+  `,
 });
 
-const dashboardContent = html`${statCards}<br>${
-  Grid({ items: [GridCol({ span: 8, content: revenueChart }), GridCol({ span: 4, content: quickActions })] })
-}<br>${
-  Grid({
+const dashboardContent = html`
+  ${statCards}<br>${Grid({
+    items: [GridCol({ span: 8, content: revenueChart }), GridCol({ span: 4, content: quickActions })],
+  })}<br>${Grid({
     items: [
       GridCol({ span: 4, content: activity }),
       GridCol({ span: 4, content: tasks }),
       GridCol({ span: 4, content: deployQueue }),
     ],
-  })
-}<br>${ordersTable({ id: "recent-orders", filterable: false, selectable: false })}${createProjectModal}${inviteModal}`;
+  })}<br>${ordersTable({
+    id: "recent-orders",
+    filterable: false,
+    selectable: false,
+  })}${createProjectModal}${inviteModal}
+`;
 
 /* -------------------------------------------------------------- Profile */
 
 const profileHeader = html`
   <div
-    class="profile-header">${Avatar({
+    class="profile-header"
+  >
+    ${Avatar({
       initials: "JS",
       size: "lg",
-    })}<div><h2>Jamie Sun</h2><p class="text-muted">Product Designer &middot; Acme Inc.</p></div></div>
+    })}<div>
+      <h2>Jamie Sun</h2>
+      <p class="text-muted">Product Designer &middot; Acme Inc.</p>
+    </div>
+  </div>
 `;
 
 type Session = { id: string; device: string; location: string; lastActive: string; current: boolean };
@@ -583,34 +645,35 @@ const sessions: Session[] = [
 ];
 
 const profileContent = Card({
-  body: html`${profileHeader}${
-    Tabs({
+  body: html`
+    ${profileHeader}${Tabs({
       id: "profile-tabs",
       items: [
         {
           id: "overview",
           label: "Overview",
-          content:
-            html`<p>Jamie has been with Acme since 2022, leading design for the billing and onboarding surfaces.</p><br>${
-              Badge({ label: "Design", variant: "primary" })
-            } ${Badge({ label: "Figma" })} ${Badge({ label: "Design systems" })} ${
-              Badge({ label: "v2.1 maintainer", variant: "code" })
-            }<br><br>${
-              Timeline({
-                items: [
-                  { title: "Joined Acme", meta: "Mar 2022", status: "done" },
-                  { title: "Promoted to Senior Designer", meta: "Jan 2024", status: "done" },
-                  { title: "Leading billing redesign", meta: "Since Jun 2026", status: "current" },
-                ],
-              })
-            }`,
+          content: html`
+            <p>Jamie has been with Acme since 2022, leading design for the billing and onboarding surfaces.</p><br>${Badge(
+              { label: "Design", variant: "primary" },
+            )}
+            ${Badge({ label: "Figma" })} ${Badge({ label: "Design systems" })} ${Badge({
+              label: "v2.1 maintainer",
+              variant: "code",
+            })}<br><br>${Timeline({
+              items: [
+                { title: "Joined Acme", meta: "Mar 2022", status: "done" },
+                { title: "Promoted to Senior Designer", meta: "Jan 2024", status: "done" },
+                { title: "Leading billing redesign", meta: "Since Jun 2026", status: "current" },
+              ],
+            })}
+          `,
         },
         {
           id: "edit",
           label: "Edit profile",
           content: Form({
-            content: html`${
-              FormGrid({
+            content: html`
+              ${FormGrid({
                 fields: [
                   FormField({
                     id: "profile-name",
@@ -676,30 +739,28 @@ const profileContent = Card({
                     }),
                   }),
                 ],
-              })
-            }<br>${
-              FormActions({
-                content: html`${Button({ label: "Cancel", variant: "ghost" })}${
-                  Button({ label: "Save changes", type: "submit" })
-                }`,
-              })
-            }`,
+              })}<br>${FormActions({
+                content: html`
+                  ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save changes", type: "submit" })}
+                `,
+              })}
+            `,
           }),
         },
         {
           id: "security",
           label: "Security",
-          content: html`${
-            FormField({
+          content: html`
+            ${FormField({
               id: "current-password",
               label: "Current password",
               span: 6,
               control: Input({ id: "current-password", type: "password" }),
-            })
-          }<br>${
-            Switch({ label: "Two-factor authentication", hint: "Required for admins from Oct 1.", checked: true })
-          }<br><br>${
-            DataTable<Session>({
+            })}<br>${Switch({
+              label: "Two-factor authentication",
+              hint: "Required for admins from Oct 1.",
+              checked: true,
+            })}<br><br>${DataTable<Session>({
               id: "sessions",
               title: "Active sessions",
               selectable: true,
@@ -709,13 +770,13 @@ const profileContent = Card({
                   label: "Device",
                   pinned: true,
                   render: (r) =>
-                    html`${r.device}${
-                      r.current
+                    html`
+                      ${r.device}${r.current
                         ? html`
                           ${Badge({ label: "This device", variant: "accent" })}
                         `
-                        : ""
-                    }`,
+                        : ""}
+                    `,
                 },
                 { key: "location", label: "Location" },
                 { key: "lastActive", label: "Last active" },
@@ -723,16 +784,22 @@ const profileContent = Card({
               rows: sessions,
               rowKey: (r) => r.id,
               bulkAction: "?bulk",
-              bulkActions: html`${bulkButton("Sign out", "signout", "danger")}${
-                Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })
-              }`,
-              footer: html`<span>Sign out of everything else from here.</span>`,
-            })
-          }<br>${FormActions({ content: Button({ label: "Save changes" }) })}`,
+              bulkActions: html`
+                ${bulkButton("Sign out", "signout", "danger")}${Button({
+                  label: "Clear",
+                  size: "sm",
+                  attrs: { "data-bulk-clear": "" },
+                })}
+              `,
+              footer: html`
+                <span>Sign out of everything else from here.</span>
+              `,
+            })}<br>${FormActions({ content: Button({ label: "Save changes" }) })}
+          `,
         },
       ],
-    })
-  }`,
+    })}
+  `,
 });
 
 /* -------------------------------------------------------------- Invoice */
@@ -754,69 +821,86 @@ const invoiceContent = Grid({
       content: Card({
         body: html`
           <div
-            class="invoice-header"><div><h2>Invoice #1042</h2><p class="text-muted">Issued Sep 1, 2026 &middot; Due Sep 15, 2026</p></div>${statusBadge(
+            class="invoice-header"
+          >
+            <div>
+              <h2>Invoice #1042</h2>
+              <p class="text-muted">Issued Sep 1, 2026 &middot; Due Sep 15, 2026</p>
+            </div>${statusBadge(
               "Paid",
-            )}</div><br>${Grid({
-              items: [
-                GridCol({
-                  span: 6,
-                  content: html`
-                    <p class="text-caps">Billed from</p>
-                    <p>Acme Inc.<br>500 Market St<br>San Francisco, CA</p>
-                  `,
-                }),
-                GridCol({
-                  span: 6,
-                  content: html`
-                    <p class="text-caps">Billed to</p>
-                    <p>${Popover({
-                      id: "client-card",
-                      align: "start",
-                      trigger: PopoverTrigger({
-                        controls: "client-card",
-                        label: "Blue Bottle Co.",
-                        className: "btn btn--subtle btn--sm",
-                      }),
-                      content: html`
-                        <div
-                          class="popover__header"><span><span class="popover__title">Blue Bottle Co.</span><br><span class="popover__subtitle">billing@bluebottle.example</span></span></div>
-                        <div
-                          class="popover__stats"><span class="popover__stat"><span class="popover__stat-value">14</span><span class="popover__stat-label">Invoices</span></span><span class="popover__stat"><span class="popover__stat-value">$21k</span><span class="popover__stat-label">Lifetime</span></span></div>
-                        <div class="popover__footer">${Button({ label: "Open account", size: "sm" })}</div>
-                      `,
-                    })}<br>12 Ferry Building<br>San Francisco, CA</p>
-                  `,
-                }),
-              ],
-            })}<br>${DataTable<InvoiceItem>({
-              id: "invoice-items",
-              columns: [
-                { key: "desc", label: "Description" },
-                { key: "qty", label: "Qty", numeric: true },
-                { key: "price", label: "Unit price", numeric: true, render: (r) => money(r.price) },
-                { key: "total", label: "Total", numeric: true, render: (r) => money(r.qty * r.price) },
-              ],
-              rows: invoiceItems,
-              rowKey: (r) => r.desc,
-            })}<br><div
-            class="invoice-totals">
+            )}
+          </div><br>${Grid({
+            items: [
+              GridCol({
+                span: 6,
+                content: html`
+                  <p class="text-caps">Billed from</p>
+                  <p>Acme Inc.<br>500 Market St<br>San Francisco, CA</p>
+                `,
+              }),
+              GridCol({
+                span: 6,
+                content: html`
+                  <p class="text-caps">Billed to</p>
+                  <p>${Popover({
+                    id: "client-card",
+                    align: "start",
+                    trigger: PopoverTrigger({
+                      controls: "client-card",
+                      label: "Blue Bottle Co.",
+                      className: "btn btn--subtle btn--sm",
+                    }),
+                    content: html`
+                      <div
+                        class="popover__header"
+                      >
+                        <span><span class="popover__title">Blue Bottle Co.</span><br><span class="popover__subtitle"
+                          >billing@bluebottle.example</span></span>
+                      </div>
+                      <div
+                        class="popover__stats"
+                      >
+                          <span class="popover__stat"><span class="popover__stat-value">14</span><span class="popover__stat-label"
+                            >Invoices</span></span><span class="popover__stat"><span class="popover__stat-value">$21k</span><span
+                              class="popover__stat-label"
+                            >Lifetime</span></span>
+                          </div>
+                      <div class="popover__footer">${Button({ label: "Open account", size: "sm" })}</div>
+                    `,
+                  })}<br>12 Ferry Building<br>San Francisco, CA</p>
+                `,
+              }),
+            ],
+          })}<br>${DataTable<InvoiceItem>({
+            id: "invoice-items",
+            columns: [
+              { key: "desc", label: "Description" },
+              { key: "qty", label: "Qty", numeric: true },
+              { key: "price", label: "Unit price", numeric: true, render: (r) => money(r.price) },
+              { key: "total", label: "Total", numeric: true, render: (r) => money(r.qty * r.price) },
+            ],
+            rows: invoiceItems,
+            rowKey: (r) => r.desc,
+          })}<br><div
+            class="invoice-totals"
+          >
             <div class="invoice-totals__row"><span>Subtotal</span><span>${money(invoiceSubtotal)}</span></div>
             <div class="invoice-totals__row"><span>Tax (8%)</span><span>${money(invoiceTax)}</span></div>
             <div class="invoice-totals__row invoice-totals__row--grand"><span>Total</span><span>${money(
               invoiceSubtotal + invoiceTax,
             )}</span></div>
           </div><br>${FormActions({
-            content: html`${
-              ButtonGroup({
+            content: html`
+              ${ButtonGroup({
                 buttons: [
                   Button({ label: "Download PDF", variant: "outline" }),
                   Dropdown({
                     id: "download-options",
                     align: "end",
                     triggerClass: "btn btn--outline btn--icon",
-                    trigger: html`${
-                      Icon("chevronDown", { size: 15 })
-                    }<span class="sr-only">More download options</span>`,
+                    trigger: html`
+                      ${Icon("chevronDown", { size: 15 })}<span class="sr-only">More download options</span>
+                    `,
                     content: Menu({
                       items: [
                         { label: "Download PDF", href: "#" },
@@ -826,8 +910,8 @@ const invoiceContent = Grid({
                     }),
                   }),
                 ],
-              })
-            }${Button({ label: "Send reminder", variant: "accent" })}`,
+              })}${Button({ label: "Send reminder", variant: "accent" })}
+            `,
           })}
         `,
       }),
@@ -900,6 +984,7 @@ const teamMembers: Member[] = [
 const teamTable = DataTable<Member>({
   id: "team-table",
   title: "Team members",
+  responsive: "cards",
   selectable: true,
   maxHeight: "md",
   sort: { key: "name", dir: "asc" },
@@ -910,7 +995,10 @@ const teamTable = DataTable<Member>({
       label: "Name",
       pinned: true,
       sortable: true,
-      render: (r) => html`${Avatar({ initials: initials(r.name), size: "sm" })} ${r.name}`,
+      render: (r) =>
+        html`
+          ${Avatar({ initials: initials(r.name), size: "sm" })} ${r.name}
+        `,
     },
     { key: "role", label: "Role", sortable: true },
     { key: "email", label: "Email", mono: true },
@@ -920,27 +1008,40 @@ const teamTable = DataTable<Member>({
   rows: teamMembers,
   rowKey: (r) => r.id,
   rowActions: (r) => rowKebab(`team-${r.id}`),
-  toolbar: html`${searchInput("Search team…")}<div class="toolbar__end">${
-    Segmented({
+  toolbar: html`
+    ${searchInput("Search team…")}<div class="toolbar__end">${Segmented({
       id: "team-status",
       name: "status",
       size: "sm",
       legend: "Status",
       value: "",
       inputAttrs: { "data-table-filter": "" },
-      options: [{ value: "", label: "All" }, { value: "active", label: "Active" }, { value: "away", label: "Away" }, {
-        value: "inactive",
-        label: "Inactive",
-      }],
-    })
-  }${Button({ label: "Add member", size: "sm", iconStart: Icon("plus", { size: 14 }) })}</div>`,
+      options: [
+        { value: "", label: "All" },
+        { value: "active", label: "Active" },
+        { value: "away", label: "Away" },
+        {
+          value: "inactive",
+          label: "Inactive",
+        },
+      ],
+    })}${Button({ label: "Add member", size: "sm", iconStart: Icon("plus", { size: 14 }) })}</div>
+  `,
   bulkAction: "?bulk",
-  bulkActions: html`${bulkButton("Change role", "role")}${bulkButton("Export CSV", "export")}${
-    bulkButton("Deactivate", "deactivate", "danger")
-  }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
-  footer: html`${filterEmpty("team members")}<span>${teamMembers.length} members</span>${
-    Pagination({ page: 1, totalPages: 1, buildHref: (p) => `?page=${p}` })
-  }`,
+  bulkActions: html`
+    ${bulkButton("Change role", "role")}${bulkButton("Export CSV", "export")}${bulkButton(
+      "Deactivate",
+      "deactivate",
+      "danger",
+    )}${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}
+  `,
+  footer: html`
+    ${filterEmpty("team members")}<span>${teamMembers.length} members</span>${Pagination({
+      page: 1,
+      totalPages: 1,
+      buildHref: (p) => `?page=${p}`,
+    })}
+  `,
   attrs: { "data-filter-scope": "" },
 });
 
@@ -950,21 +1051,29 @@ const importsEmpty = Card({
     icon: "upload",
     title: "No imports yet",
     text: "Bring in customers from a CSV or connect your CRM — rows land here for review before they go live.",
-    actions: html`${Button({ label: "Import CSV", size: "sm" })}${
-      Button({ label: "Connect CRM", size: "sm", variant: "outline" })
-    }`,
+    actions: html`
+      ${Button({ label: "Import CSV", size: "sm" })}${Button({
+        label: "Connect CRM",
+        size: "sm",
+        variant: "outline",
+      })}
+    `,
   }),
 });
 
 const auditLog = Card({
   title: "Audit log",
   subtitle: "Lazy region — data-load",
-  body: html`<div id="audit-log" data-action="/audit" data-load>${SkeletonTable({ rows: 4 })}</div>`,
+  body: html`
+    <div id="audit-log" data-action="/audit" data-load>${SkeletonTable({ rows: 4 })}</div>
+  `,
 });
 
-const tablesContent = html`${teamTable}<br>${
-  ordersTable({ id: "orders-table", filterable: true, selectable: true })
-}<br>${Grid({ items: [GridCol({ span: 6, content: importsEmpty }), GridCol({ span: 6, content: auditLog })] })}`;
+const tablesContent = html`
+  ${teamTable}<br>${ordersTable({ id: "orders-table", filterable: true, selectable: true })}<br>${Grid({
+    items: [GridCol({ span: 6, content: importsEmpty }), GridCol({ span: 6, content: auditLog })],
+  })}
+`;
 
 /* ---------------------------------------------------------------- Forms */
 
@@ -980,11 +1089,21 @@ const memberForm = Card({
   title: "New member",
   subtitle: "Every field type, including a server-side validation failure",
   body: Form({
-    content: html`${FormErrorAlert(mockFormError)}<br>${
-      FormGrid({
+    content: html`
+      ${FormErrorAlert(mockFormError)}<br>${FormGrid({
         fields: [
-          FormField({ id: "f-first", label: "First name", span: 6, control: Input({ id: "f-first", value: "Ada" }) }),
-          FormField({ id: "f-last", label: "Last name", span: 6, control: Input({ id: "f-last", value: "Lovelace" }) }),
+          FormField({
+            id: "f-first",
+            label: "First name",
+            span: 6,
+            control: Input({ id: "f-first", value: "Ada" }),
+          }),
+          FormField({
+            id: "f-last",
+            label: "Last name",
+            span: 6,
+            control: Input({ id: "f-last", value: "Lovelace" }),
+          }),
           FormField({
             id: "f-email",
             label: "Work email",
@@ -1030,7 +1149,12 @@ const memberForm = Card({
                   meta: "Manager",
                   lead: Avatar({ initials: "AR", size: "sm" }),
                 },
-                { value: "mt", label: "Marcus T.", group: "Engineering", lead: Avatar({ initials: "MT", size: "sm" }) },
+                {
+                  value: "mt",
+                  label: "Marcus T.",
+                  group: "Engineering",
+                  lead: Avatar({ initials: "MT", size: "sm" }),
+                },
                 { value: "js", label: "Jamie Sun", group: "Design", lead: Avatar({ initials: "JS", size: "sm" }) },
               ],
             }),
@@ -1135,25 +1259,30 @@ const memberForm = Card({
             }),
           }),
         ],
-      })
-    }<br>${
-      FormActions({
-        content: html`${Button({ label: "Cancel", variant: "ghost" })}${
-          Button({ label: "Save draft", variant: "outline" })
-        }${Button({ label: "Create member", type: "submit" })}`,
-      })
-    }`,
+      })}<br>${FormActions({
+        content: html`
+          ${Button({ label: "Cancel", variant: "ghost" })}${Button({
+            label: "Save draft",
+            variant: "outline",
+          })}${Button({ label: "Create member", type: "submit" })}
+        `,
+      })}
+    `,
   }),
 });
 
 const preferences = Card({
   title: "Preferences",
-  body: html`<div class="stack">${
-    Switch({ label: "Email notifications", hint: "Mentions, assignments and weekly summary.", checked: true })
-  }${Switch({ label: "SMS alerts", hint: "Only for billing failures and security events." })}${
-    Switch({ label: "Beta features", hint: "Try new UI before it ships to everyone.", disabled: true })
-  }${
-    Slider({
+  body: html`
+    <div class="stack">${Switch({
+      label: "Email notifications",
+      hint: "Mentions, assignments and weekly summary.",
+      checked: true,
+    })}${Switch({ label: "SMS alerts", hint: "Only for billing failures and security events." })}${Switch({
+      label: "Beta features",
+      hint: "Try new UI before it ships to everyone.",
+      disabled: true,
+    })}${Slider({
       id: "digest-freq",
       name: "digest",
       label: "Digest frequency",
@@ -1162,24 +1291,18 @@ const preferences = Card({
       value: 2,
       scale: ["Off", "Monthly", "Weekly", "Daily"],
       format: (v) => ["Off", "Monthly", "Weekly", "Daily"][v],
-    })
-  }${
-    ChoiceGroup({
+    })}${ChoiceGroup({
       items: [
         Checkbox({ label: "Weekly digest", checked: true }),
         Checkbox({ label: "Product updates" }),
       ],
-    })
-  }${
-    ChoiceGroup({
+    })}${ChoiceGroup({
       inline: true,
       items: [
         Radio({ name: "plan", label: "Monthly", checked: true }),
         Radio({ name: "plan", label: "Annual" }),
       ],
-    })
-  }${
-    FormField({
+    })}${FormField({
       id: "density",
       label: "Density",
       control: Segmented({
@@ -1187,9 +1310,12 @@ const preferences = Card({
         name: "density",
         value: "comfortable",
         options: [{ value: "compact", label: "Compact" }, { value: "comfortable", label: "Comfortable" }],
+        // view-switch.js writes the picked value into data-view on the
+        // forms page's wrapper; admin.css maps it onto --density.
+        inputAttrs: { "data-view-target": "#forms-density" },
       }),
-    })
-  }</div>`,
+    })}</div>
+  `,
 });
 
 const onboardingWizard = Card({
@@ -1199,8 +1325,8 @@ const onboardingWizard = Card({
     steps: [{ label: "Account", status: "done" }, { label: "Company", status: "active" }, { label: "Billing" }, {
       label: "Review",
     }],
-    content: html`${
-      FormGrid({
+    content: html`
+      ${FormGrid({
         fields: [
           FormField({ id: "w-company", label: "Company name", span: 6, control: Input({ id: "w-company" }) }),
           FormField({
@@ -1244,20 +1370,24 @@ const onboardingWizard = Card({
             }),
           }),
         ],
-      })
-    }<br>${
-      FormActions({ content: html`${Button({ label: "Back", variant: "ghost" })}${Button({ label: "Continue" })}` })
-    }`,
+      })}<br>${FormActions({
+        content: html`
+          ${Button({ label: "Back", variant: "ghost" })}${Button({ label: "Continue" })}
+        `,
+      })}
+    `,
   }),
 });
 
-const formsContent = Grid({
-  items: [
-    GridCol({ span: 8, content: memberForm }),
-    GridCol({ span: 4, content: preferences }),
-    GridCol({ span: 12, content: onboardingWizard }),
-  ],
-});
+const formsContent = html`
+  <div id="forms-density" data-view="comfortable">${Grid({
+    items: [
+      GridCol({ span: 8, content: memberForm }),
+      GridCol({ span: 4, content: preferences }),
+      GridCol({ span: 12, content: onboardingWizard }),
+    ],
+  })}</div>
+`;
 
 /* ------------------------------------------------------------- Projects */
 
@@ -1314,7 +1444,9 @@ const projects = [
 
 const projectsContent = html`
   <div
-    data-filter-scope><div class="toolbar">${searchInput("Search projects…")}${Segmented({
+    data-filter-scope
+  >
+    <div class="toolbar">${searchInput("Search projects…")}${Segmented({
       id: "project-status",
       name: "status",
       size: "sm",
@@ -1351,10 +1483,16 @@ const projectsContent = html`
               <div class="project-card__header">${Icon("folder", { size: 20 })}${statusBadge(
                 project.status,
               )}</div><h3 class="mt-2">${project.name}</h3><p
-                class="text-muted text-sm">${project.desc}</p>${Progress({ value: project.progress })}<div
-                class="project-card__footer">${AvatarGroup({
+                class="text-muted text-sm"
+              >
+                ${project.desc}
+              </p>${Progress({ value: project.progress })}<div
+                class="project-card__footer"
+              >
+                ${AvatarGroup({
                   avatars: project.team.map((i) => Avatar({ initials: i, size: "sm" })),
-                })}<span class="text-subtle text-xs">Due ${project.due} · ${project.progress}%</span></div>
+                })}<span class="text-subtle text-xs">Due ${project.due} · ${project.progress}%</span>
+              </div>
             `,
           }),
         })
@@ -1367,13 +1505,14 @@ const projectsContent = html`
         title: "No archived projects",
         text: "Finished projects you archive will show up here.",
       }),
-    })}</div>${createProjectModal}
+    })}
+  </div>${createProjectModal}
 `;
 
 /* ----------------------------------------------------------------- Team */
 
-const teamContent = html`<div data-filter-scope><div class="toolbar">${searchInput("Search team…")}${
-  Segmented({
+const teamContent = html`
+  <div data-filter-scope><div class="toolbar">${searchInput("Search team…")}${Segmented({
     id: "team-page-status",
     name: "status",
     size: "sm",
@@ -1381,9 +1520,7 @@ const teamContent = html`<div data-filter-scope><div class="toolbar">${searchInp
     value: "",
     inputAttrs: { "data-table-filter": "" },
     options: [{ value: "", label: "All" }, { value: "active", label: "Active" }, { value: "away", label: "Away" }],
-  })
-}</div>${
-  Grid({
+  })}</div>${Grid({
     items: teamMembers.map((member) =>
       GridCol({
         span: 3,
@@ -1392,41 +1529,56 @@ const teamContent = html`<div data-filter-scope><div class="toolbar">${searchInp
           variant: "outlined",
           body: html`
             <div
-              class="team-card">${Avatar({ initials: initials(member.name), size: "lg" })}<h3 class="mt-3">${member
-                .name}</h3><p class="text-muted text-sm">${member.role}</p><div class="team-card__meta">${Icon("mail", {
-                  size: 14,
-                })}<span class="text-muted text-xs">${member.email}</span></div><div class="mt-3">${statusBadge(
-                  member.status,
-                )}</div>${Popover({
-                  id: `member-${member.id}`,
-                  trigger: PopoverTrigger({ controls: `member-${member.id}`, label: "Contact" }),
-                  content: html`
-                    <div
-                      class="popover__header"><span><span class="popover__title">${member
-                        .name}</span><br><span class="popover__subtitle">${member.email}</span></span></div>
-                    <div
-                      class="popover__stats"><span class="popover__stat"><span class="popover__stat-value">${member
-                        .joined.slice(
-                          0,
-                          4,
-                        )}</span><span class="popover__stat-label">Joined</span></span><span class="popover__stat"><span class="popover__stat-value">${member
+              class="team-card"
+            >
+              ${Avatar({ initials: initials(member.name), size: "lg" })}<h3 class="mt-3">${member
+                .name}</h3>
+              <p class="text-muted text-sm">${member.role}</p>
+              <div class="team-card__meta">${Icon("mail", {
+                size: 14,
+              })}<span class="text-muted text-xs">${member.email}</span></div>
+              <div class="mt-3">${statusBadge(
+                member.status,
+              )}</div>${Popover({
+                id: `member-${member.id}`,
+                trigger: PopoverTrigger({ controls: `member-${member.id}`, label: "Contact" }),
+                content: html`
+                  <div
+                    class="popover__header"
+                  >
+                    <span><span class="popover__title">${member
+                      .name}</span><br><span class="popover__subtitle">${member.email}</span></span>
+                  </div>
+                  <div
+                    class="popover__stats"
+                  >
+                    <span class="popover__stat"><span class="popover__stat-value">${member
+                      .joined.slice(
+                        0,
+                        4,
+                      )}</span><span class="popover__stat-label"
+                      >Joined</span></span><span class="popover__stat"><span class="popover__stat-value">${member
                           .status === "Active"
                         ? "Now"
-                        : "2d"}</span><span class="popover__stat-label">Last seen</span></span></div>
-                    <div class="popover__footer">${Button({ label: "Message", size: "sm" })}${Button({
-                      label: "Profile",
-                      size: "sm",
-                      variant: "outline",
-                      href: "profile.html",
-                    })}</div>
-                  `,
-                })}</div>
+                        : "2d"}</span><span
+                        class="popover__stat-label"
+                      >Last seen</span></span>
+                    </div>
+                  <div class="popover__footer">${Button({ label: "Message", size: "sm" })}${Button({
+                    label: "Profile",
+                    size: "sm",
+                    variant: "outline",
+                    href: "profile.html",
+                  })}</div>
+                `,
+              })}
+              </div>
           `,
         }),
       })
     ),
-  })
-}${filterEmpty("team members")}</div>${inviteModal}`;
+  })}${filterEmpty("team members")}</div>${inviteModal}
+`;
 
 /* ------------------------------------------------------------- Settings */
 
@@ -1447,25 +1599,29 @@ const billingRows: BillingRow[] = [
 const deleteWorkspaceModal = Modal({
   id: "delete-workspace-modal",
   title: "Delete workspace?",
-  body:
-    html`<p>This permanently deletes <strong>Acme Inc.</strong>, its 6 members and all data. Type the workspace name to confirm.</p><br>${
-      Input({ placeholder: "Acme Inc." })
-    }`,
-  footer: html`${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${
-    Button({ label: "Delete workspace", variant: "danger" })
-  }`,
+  body: html`
+    <p>
+      This permanently deletes <strong>Acme Inc.</strong>, its 6 members and all data. Type the workspace name to confirm.
+    </p><br>${Input({ placeholder: "Acme Inc." })}
+  `,
+  footer: html`
+    ${Button({ label: "Cancel", variant: "ghost", attrs: { "data-modal-close": "" } })}${Button({
+      label: "Delete workspace",
+      variant: "danger",
+    })}
+  `,
 });
 
-const settingsContent = html`${
-  Card({
+const settingsContent = html`
+  ${Card({
     body: Tabs({
       id: "settings-tabs",
       items: [
         {
           id: "general",
           label: "General",
-          content: html`${
-            FormGrid({
+          content: html`
+            ${FormGrid({
               fields: [
                 FormField({
                   id: "workspace-name",
@@ -1527,14 +1683,14 @@ const settingsContent = html`${
                   }),
                 }),
               ],
-            })
-          }<br>${FormActions({ content: Button({ label: "Save changes" }) })}`,
+            })}<br>${FormActions({ content: Button({ label: "Save changes" }) })}
+          `,
         },
         {
           id: "billing",
           label: "Billing",
-          content: html`${
-            Grid({
+          content: html`
+            ${Grid({
               items: [
                 GridCol({
                   span: 6,
@@ -1542,7 +1698,10 @@ const settingsContent = html`${
                     variant: "flat",
                     body: html`
                       <p class="text-caps">Current plan</p><h3>Team &middot; $49/mo</h3><p
-                        class="text-muted text-sm">Renews Oct 1, 2026 · 6 of 10 seats</p>${Progress({ value: 60 })}
+                        class="text-muted text-sm"
+                      >
+                        Renews Oct 1, 2026 · 6 of 10 seats
+                      </p>${Progress({ value: 60 })}
                     `,
                   }),
                 }),
@@ -1561,9 +1720,7 @@ const settingsContent = html`${
                   }),
                 }),
               ],
-            })
-          }<br>${
-            DataTable<BillingRow>({
+            })}<br>${DataTable<BillingRow>({
               id: "billing-history",
               title: "Billing history",
               columns: [
@@ -1575,61 +1732,74 @@ const settingsContent = html`${
               rows: billingRows,
               rowKey: (r) => r.id,
               rowActions: () => Button({ label: "PDF", size: "sm", variant: "ghost", href: "invoice.html" }),
-            })
-          }<br>${
-            FormActions({
-              content: html`${Button({ label: "Change plan", variant: "outline" })}${
-                Button({ label: "Update payment method" })
-              }`,
-            })
-          }`,
+            })}<br>${FormActions({
+              content: html`
+                ${Button({ label: "Change plan", variant: "outline" })}${Button({
+                  label: "Update payment method",
+                })}
+              `,
+            })}
+          `,
         },
         {
           id: "integrations",
           label: "Integrations",
-          content: html`${
-            integrations.map((integ) =>
+          content: html`
+            ${integrations.map((integ) =>
               html`
                 <div
-                  class="integration-row"><div class="integration-row__icon">${Icon("plug", {
+                  class="integration-row"
+                >
+                  <div class="integration-row__icon">${Icon("plug", {
                     size: 18,
-                  })}</div><div class="integration-row__body"><p class="text-medium">${integ
-                    .name}</p><p class="text-muted text-sm">${integ.desc}</p></div>${Switch({
-                      checked: integ.connected,
-                      attrs: { "aria-label": `Connect ${integ.name}` },
-                    })}</div>
+                  })}</div>
+                  <div class="integration-row__body">
+                    <p class="text-medium">${integ
+                      .name}</p>
+                    <p class="text-muted text-sm">${integ.desc}</p>
+                  </div>${Switch({
+                    checked: integ.connected,
+                    attrs: { "aria-label": `Connect ${integ.name}` },
+                  })}
+                </div>
               `
-            )
-          }<br><h3>Webhooks</h3><br>${
-            Empty({
+            )}<br><h3>Webhooks</h3><br>${Empty({
               variant: "inline",
               icon: "terminal",
               title: "No webhooks configured",
               text: "Send events to your own endpoints when records change.",
               actions: Button({ label: "Add webhook", size: "sm" }),
-            })
-          }`,
+            })}
+          `,
         },
       ],
     }),
-  })
-}<br>${
-  Card({
+  })}<br>${Card({
     title: "Danger zone",
     variant: "danger",
     body: html`
       <div
-        class="danger-zone__row"><div><p class="text-medium">Delete this workspace</p><p class="text-muted text-sm">All projects, members and billing history are removed. This cannot be undone.</p></div>${Button(
-          { label: "Delete workspace", variant: "danger", attrs: { "data-modal-open": "#delete-workspace-modal" } },
-        )}</div>
+        class="danger-zone__row"
+      >
+        <div>
+          <p class="text-medium">Delete this workspace</p>
+          <p class="text-muted text-sm">All projects, members and billing history are removed. This cannot be undone.</p>
+        </div>${Button(
+          {
+            label: "Delete workspace",
+            variant: "danger",
+            attrs: { "data-modal-open": "#delete-workspace-modal" },
+          },
+        )}
+      </div>
     `,
-  })
-}${deleteWorkspaceModal}`;
+  })}${deleteWorkspaceModal}
+`;
 
 /* ------------------------------------------------ Lock screen / 404 */
 
 const lockScreenPage = html`
-  <!doctype html>
+  <!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="utf-8">
@@ -1639,35 +1809,41 @@ const lockScreenPage = html`
       <link rel="stylesheet" href="../../examples/themes/admin.css">
     </head>
     <body>
-  ${AuthLayout({
-    brand: html`<span class="sidebar__brand-mark">A</span> Acme`,
-    content: Card({
-      body: html`
-        <div
-          class="profile-header">${Avatar({
-            initials: "JS",
-            size: "lg",
-          })}<div><h3>Jamie Sun</h3><p class="text-muted text-sm">Session locked</p></div></div>${Form({
-            content: html`${
-              FormField({
-                id: "unlock-password",
-                label: "Password",
-                control: Input({ id: "unlock-password", type: "password" }),
-              })
-            }<br>${
-              Otp({
-                id: "unlock-otp",
-                name: "otp",
-                label: "Authenticator code",
-                hint: "The 6-digit code from your authenticator app.",
-                groups: 3,
-              })
-            }<br>${FormActions({ content: Button({ label: "Unlock", type: "submit", block: true }) })}`,
-          })}
-      `,
-    }),
-  })}
-  <script src="../../dist/ui.js"></script>
+      ${AuthLayout({
+        brand: html`
+          <span class="sidebar__brand-mark">A</span> Acme
+        `,
+        content: Card({
+          body: html`
+            <div
+              class="profile-header"
+            >
+              ${Avatar({
+                initials: "JS",
+                size: "lg",
+              })}<div>
+                <h3>Jamie Sun</h3>
+                <p class="text-muted text-sm">Session locked</p>
+              </div>
+            </div>${Form({
+              content: html`
+                ${FormField({
+                  id: "unlock-password",
+                  label: "Password",
+                  control: Input({ id: "unlock-password", type: "password" }),
+                })}<br>${Otp({
+                  id: "unlock-otp",
+                  name: "otp",
+                  label: "Authenticator code",
+                  hint: "The 6-digit code from your authenticator app.",
+                  groups: 3,
+                })}<br>${FormActions({ content: Button({ label: "Unlock", type: "submit", block: true }) })}
+              `,
+            })}
+          `,
+        }),
+      })}
+      <script src="../../dist/ui.js"></script>
     </body>
   </html>
 `;
@@ -1686,7 +1862,7 @@ const notFoundBody = ErrorTemplate.render(
 );
 
 const notFoundPage = html`
-  <!doctype html>
+  <!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="utf-8">
@@ -1696,10 +1872,8 @@ const notFoundPage = html`
       <link rel="stylesheet" href="../../examples/themes/admin.css">
     </head>
     <body>
-  ${adminNavbar()}
-  ${notFoundBody}
-  ${globalCommand}
-  <script src="../../dist/ui.js"></script>
+      ${adminNavbar()} ${notFoundBody} ${globalCommand}
+      <script src="../../dist/ui.js"></script>
     </body>
   </html>
 `;
@@ -1715,7 +1889,7 @@ await write(
   adminPage({
     title: "Dashboard",
     activeHref: "dashboard.html",
-    breadcrumb: "Dashboard",
+
     content: dashboardContent,
     scripts: [ChartScript()],
     actions: Segmented({
@@ -1736,7 +1910,7 @@ await write(
   adminPage({
     title: "Projects",
     activeHref: "projects.html",
-    breadcrumb: "Projects",
+
     content: projectsContent,
     actions: Button({
       label: "New project",
@@ -1751,7 +1925,7 @@ await write(
   adminPage({
     title: "Team",
     activeHref: "team.html",
-    breadcrumb: "Team",
+
     content: teamContent,
     actions: Button({
       label: "Invite",
@@ -1763,14 +1937,14 @@ await write(
 );
 await write(
   "profile",
-  adminPage({ title: "Profile", activeHref: "profile.html", breadcrumb: "Profile", content: profileContent }),
+  adminPage({ title: "Profile", activeHref: "profile.html", content: profileContent }),
 );
 await write(
   "invoice",
   adminPage({
     title: "Invoice",
     activeHref: "invoice.html",
-    breadcrumb: "Invoice",
+
     content: invoiceContent,
     toasts: [Toast({ variant: "ink", body: "Reminder sent to Blue Bottle Co.", action: { label: "Undo" } })],
   }),
@@ -1780,7 +1954,7 @@ await write(
   adminPage({
     title: "Tables",
     activeHref: "tables.html",
-    breadcrumb: "Tables",
+
     content: tablesContent,
     toasts: [
       Toast({ variant: "success", body: "Export ready", meta: "orders-2026-09.csv · 1,093 rows" }),
@@ -1790,11 +1964,11 @@ await write(
 );
 await write(
   "forms",
-  adminPage({ title: "Forms", activeHref: "forms.html", breadcrumb: "Forms", content: formsContent }),
+  adminPage({ title: "Forms", activeHref: "forms.html", content: formsContent }),
 );
 await write(
   "settings",
-  adminPage({ title: "Settings", activeHref: "settings.html", breadcrumb: "Settings", content: settingsContent }),
+  adminPage({ title: "Settings", activeHref: "settings.html", content: settingsContent }),
 );
 await write("lock-screen", lockScreenPage);
 await write("404", notFoundPage);

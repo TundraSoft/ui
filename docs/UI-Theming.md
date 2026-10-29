@@ -81,9 +81,20 @@ does not bundle the fonts — add a font link if you want them.
 `--shadow-sm|md|lg|xl`, `--shadow-inset-top`; `--control-height-sm|md|lg` (30/36/44 — inputs and buttons align because
 heights are fixed, not padding-derived); `--container-max-width`.
 
+**Density**: the three control heights are `calc(var(--control-height-<size>-base) * var(--density))` — bases of
+30/36/44px and a factor of `1` on `:root`. Put `data-density="compact"` (0.85 — a 36px control becomes 30.6px) or
+`data-density="comfortable"` (1.15) on `<html>`, `<body>` or any region to retune every button, input, select and
+segmented control inside it; `data-density="default"` resets a nested region. A theme retunes the `-base` sizes (density
+keeps working) or sets a height outright (that height opts out of the factor). Setting `--density` on a region of your
+own is not enough on its own: a custom property resolves its `var()`s where it is declared, so re-derive the three
+heights in that rule the way `[data-density]` does in `styles/base.css`. Nothing else reads the factor — spacing and
+type stay put, so a compact table is still readable.
+
 **Focus**: `--ring-color`, `--ring-width`, `--ring-offset` (`--focus-ring-*` are aliases).
 
-**Motion and stacking**: `--transition-fast|base|slow`; `--z-dropdown|sticky|popover|overlay|modal|toast`.
+**Motion and stacking**: `--duration-fast|base|slow|enter|exit` and `--ease-out|in|in-out|spring` (the
+`--transition-fast|base|slow` shorthands are built from them); `--z-dropdown|sticky|popover|overlay|modal|toast`. See
+[Motion](#motion) below.
 
 **Layout**: `--layout-max-width`, `--layout-measure`, `--layout-focus-width`, `--layout-sidebar-width`,
 `--layout-rail-width`, `--layout-aside-width`, `--layout-pane-width`, `--layout-gutter`, `--scroll-padding-top`.
@@ -171,6 +182,36 @@ light preference and its first click is a no-op.
 
 ---
 
+## Motion
+
+Every panel in the kit enters and leaves the same way, and every move is built from five durations and four curves, so a
+theme retunes the whole feel from the tokens alone — `--duration-enter: 160ms` makes everything snappier,
+`--ease-spring: linear` takes the bounce out of the segmented thumb and the tab indicator.
+
+- **Floating panels** (dropdown, popover, select and combobox lists, date and time pickers, the rail flyout) fade and
+  rise from their trigger (`ui-float-in`, 220ms, `--ease-out`) and leave the same way, quicker (`ui-float-out`, 150ms,
+  `--ease-in`). Modal, command palette, sheet and lightbox scale from 96% with a backdrop fade (`ui-scale-in`); toasts
+  and banners rise in (`ui-rise-in`); a side sheet slides in from its edge.
+- **Leaving is a convention, not a special case.** A component hides a panel with `uiMotion.exit(el, done)`
+  (`shared/js/motion.js`): the element gets `.is-closing`, its stylesheet's `.is-closing` rule plays the `*-out`
+  keyframes, and `done` runs after `animationend`. Give any custom partial an `.is-closing` rule and the same helper
+  animates it out; leave the rule out and it is hidden at once. The generic `[data-toggle]` and `[data-dismiss]`
+  behaviours already go through it.
+- **Height** (collapsible, accordion) animates the panel's grid row from `0fr` to `1fr`, so nothing is measured.
+- **Indicators** (segmented thumb, tabs underline) are one surface that glides to the selected option; the selected
+  tab's own border is the fallback until the script has measured.
+- **The theme toggle** cross-fades the palette with one beat of colour transitions on every element
+  (`html.theme-changing`) — not a View Transition, which would swallow clicks while it runs.
+- **Pressed** buttons and clickable cards scale to 97%; table rows carry a `view-transition-name` from their key, so a
+  sorted table re-orders under rAPId's swap transition instead of cross-fading.
+- **Reduced motion** is one switch: `styles/reset.css` zeroes every animation and transition under
+  `prefers-reduced-motion`, the scripts check the same query, and spinners alone keep turning (slowly).
+
+The keyframes live in `styles/motion.css` (`ui-fade-in|out`, `ui-float-in|out`, `ui-float-up-in|out`, `ui-scale-in|out`,
+`ui-rise-in`, `ui-sink-out`, `ui-slide-in|out-start|end|bottom`, `ui-reveal`). They animate `transform`; a panel's
+static offset (centring, the shift `shared/js/float.js` writes when a panel would leave the viewport) goes on
+`translate`, so the two never fight.
+
 ## Charts, images, media
 
 Charts follow tokens automatically. Images sit on `--color-surface-alt` until they paint. Text over media uses
@@ -178,8 +219,36 @@ Charts follow tokens automatically. Images sit on `--color-surface-alt` until th
 
 ---
 
+## Theme builder
+
+`demo/foundations/theme-builder.html` (part of `build:demos`; Foundations › Theme builder in the demo sidebar) is the
+quick way to a first theme file. Colour pickers for primary, accent, canvas, surface, text, border and the four status
+colours, sliders for the radius (`--radius-md`, small and large derived at 0.55× / 1.55×), the control height
+(`--control-height-md`, small and large derived), the base type size and the motion duration (fast/slow/enter/exit
+derived), and two font selects — every move is written onto the page through the CSSOM, so a preview made of real
+components (buttons, fields, a select, switches, an alert, stats, tabs, a data table) follows it live. "Light palette" /
+"Dark palette" picks which palette the colour pickers edit; shape, type and motion are shared. **Export theme.css**
+writes only the tokens you changed, as a `:root` block plus the two dark blocks with the exact selectors
+`tokens/default.css` uses, ready to load after the bundle; **Copy CSS** puts it on the clipboard. The state lives in
+`localStorage` and in the URL hash, so a half-finished theme survives a reload and a link to it can be shared. The page
+is a demo, not part of the bundle: its harness script and stylesheet are generated beside it.
+
+---
+
 ## Checking a theme
 
-Run the catalogue with your stylesheet in the switcher (add it to `themes` in `examples/pages/build-catalogue.ts`) and
-`deno task test:catalogue` — it asserts each theme's computed body background changes, light and dark.
-`deno task test:all` sweeps every page under `demo/` in both modes for console errors and the same computed-style check.
+Run the demo site with your stylesheet in the header's theme switch (add it to `THEMES` in
+`examples/pages/site/chrome.ts`, and the file to `examples/themes/`) and `deno task test:catalogue` — it asserts each
+theme's computed body background changes, light and dark, and runs **axe-core** (WCAG 2.0/2.1 A + AA, colour contrast
+included) over every component page: a serious or critical violation fails the suite unless
+`examples/tests/axe-allowlist.json` names its rule and a selector pattern with a reason. The full report, allowlisted
+and minor findings included, is written to `.test-output/catalogue/axe.json`. `deno task test:all` sweeps every page
+under `demo/` in both modes for console errors and the same computed-style check.
+
+`deno task test:visual` compares every demo page at 1440 and 375, light and dark, with the perceptual hashes in
+`examples/tests/visual-baseline.json` (stored per browser platform — fonts and line wraps differ between macOS and
+Linux). A page that drifts past 5% of its cells (`VISUAL_TOLERANCE=0.08` to loosen) is rendered once more on a fresh
+page, and fails only when the drift repeats, naming the page and the screenshot in `.test-output/visual/`. When the
+change is the point, look at the screenshot, then `deno task test:visual:update` and commit the JSON.
+`VISUAL_PAGES=navigation,admin/forms` limits a run (and an update, which then merges) to the pages whose path contains
+one of the names; `VISUAL_SAVE=1` keeps every screenshot. A platform with no baseline passes with a note.

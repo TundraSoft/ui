@@ -1,18 +1,27 @@
-/* Stat: a KPI tile — icon chip, label, big number, trend. Usually inside
-   a Card; renders as a bare fragment for lazy/live regions. */
+/* Stat: a KPI tile — label on top, the value large with its trend badge
+   inline beside it, an icon chip at the top end spanning both rows, an
+   optional sparkline under. Usually inside a Card; renders as a bare
+   fragment for lazy/live regions. Half the height of a stacked tile: a
+   row of four reads as one line of numbers. */
 .stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label icon"
+    "value icon"
+    "spark spark";
+  align-items: start;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
 }
 
 .stat__icon {
+  grid-area: icon;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-bottom: var(--space-2);
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-md);
   background: var(--color-surface-sunken);
   color: var(--color-text-muted);
@@ -44,8 +53,20 @@
 }
 
 .stat__label {
+  grid-area: label;
+  align-self: end;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+}
+
+/* The value and its trend share a baseline. */
+.stat__row {
+  grid-area: value;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .stat__value {
@@ -57,5 +78,83 @@
 }
 
 .stat__trend {
+  display: inline-flex;
+}
+
+/* The sparkline: a 100×32 box stretched to the tile's width, the line in
+   the tile's tone (accent for the default), the area a soft wash of it. */
+.stat__spark {
+  grid-area: spark;
+  display: block;
+  width: 100%;
+  height: 2rem;
   margin-top: var(--space-1);
+  color: var(--color-accent, var(--color-primary));
+  overflow: visible;
+}
+
+.stat--success .stat__spark {
+  color: var(--color-success);
+}
+
+.stat--warning .stat__spark {
+  color: var(--color-warning);
+}
+
+.stat--danger .stat__spark {
+  color: var(--color-danger);
+}
+
+.stat--info .stat__spark {
+  color: var(--color-info);
+}
+
+.stat__spark-area {
+  fill: currentColor;
+  fill-opacity: 0.12;
+}
+
+.stat__spark-line {
+  stroke: currentColor;
+}
+
+/* Hit columns: invisible until hovered, when the column tints and the
+   browser shows the point's <title>. */
+.stat__spark-hit {
+  fill: currentColor;
+  fill-opacity: 0;
+  transition: fill-opacity var(--transition-fast);
+}
+
+.stat__spark-hit:hover {
+  fill-opacity: 0.14;
+}
+
+/* The tip stat.js places above the hovered column (one per page). */
+.stat__spark-tip {
+  position: absolute;
+  z-index: var(--z-popover);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+  animation: ui-fade-in var(--duration-fast) var(--ease-out);
+}
+
+/* A narrow tile (two-up on a phone) drops the value a size so four
+   digits and a badge still fit on one line. */
+@media screen and (max-width: 575px) {
+  .stat__value {
+    font-size: var(--font-size-2xl);
+  }
+
+  .stat__icon {
+    width: 2rem;
+    height: 2rem;
+  }
 }

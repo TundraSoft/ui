@@ -102,21 +102,28 @@ export function TimePicker(props: TimePickerProps): Html {
     const t = timeToMinutes(slot)!;
     const selected = slot === value;
     return html`
-      <div class="timepicker__slot" role="option" id="${id}-slot-${slot.replace(":", "")}" data-value="${slot}"
+      <div
+        class="timepicker__slot"
+        role="option"
+        id="${id}-slot-${slot.replace(":", "")}"
+        data-value="${slot}"
         aria-selected="${selected ? "true" : "false"}"
         ${t < lo || t > hi
           ? html`
             hidden
           `
-          : ""}><span>${slot}</span><span class="timepicker__check" aria-hidden="true">${Icon("check", {
-            size: 14,
-          })}</span></div>
+          : ""}
+      >
+        <span>${slot}</span><span class="timepicker__check" aria-hidden="true">${Icon("check", {
+          size: 14,
+        })}</span>
+      </div>
     `;
   });
 
   const segment = (part: "hour" | "minute", segValue: string) =>
-    html`<input ${
-      renderAttrs({
+    html`
+      <input ${renderAttrs({
         id: part === "hour" ? id : `${id}-minute`,
         class: "timepicker__segment",
         type: "text",
@@ -140,8 +147,8 @@ export function TimePicker(props: TimePickerProps): Html {
         "data-msg-incomplete": part === "hour" ? msg.incomplete : undefined,
         "data-msg-min": part === "hour" ? msg.min : undefined,
         "data-msg-max": part === "hour" ? msg.max : undefined,
-      })
-    }>`;
+      })}>
+    `;
 
   const rootAttrs: Attrs = mergeAttrs(props.attrs, {
     "data-timepicker": "",
@@ -161,7 +168,9 @@ export function TimePicker(props: TimePickerProps): Html {
           props.disabled && "timepicker--disabled",
         ),
         rootAttrs,
-      )}><input ${renderAttrs({
+      )}
+    >
+      <input ${renderAttrs({
         id: `${id}-value`,
         class: cx("input", "timepicker__native", props.invalid && "input--invalid"),
         type: "time",
@@ -175,25 +184,52 @@ export function TimePicker(props: TimePickerProps): Html {
         "aria-invalid": props.invalid ? "true" : undefined,
         "aria-label": props.label,
         "data-timepicker-value": "",
-      })}><div class="timepicker__field" role="group"${renderAttrs({
+      })}><div class="timepicker__field" role="group" ${renderAttrs({
         "aria-label": props.label,
-      })}><span class="timepicker__icon" aria-hidden="true">${Icon("clock", {
-        size: 15,
-      })}</span>${segment("hour", hh)}<span class="timepicker__sep" aria-hidden="true">:</span>${segment(
-        "minute",
-        mm,
-      )}${props.zone
-        ? html`<span class="timepicker__zone">${props.zone}</span>`
-        : ""}<button type="button" class="timepicker__toggle" aria-label="Choose a time" aria-haspopup="listbox"
-      aria-expanded="false" aria-controls="${listId}" data-timepicker-toggle${props.disabled
-        ? html`
-          disabled
-        `
-        : ""}>${Icon("chevronDown", {
+      })}>
+        <span class="timepicker__icon" aria-hidden="true">${Icon("clock", {
           size: 15,
-        })}</button></div><div class="timepicker__list" id="${listId}" role="listbox" tabindex="-1"
-      aria-label="${props.label ? `${props.label}: times` : "Times"}" data-step="${String(
-        step,
-      )}" hidden>${slots}</div></div>
+        })}</span>${segment("hour", hh)}<span
+          class="timepicker__sep"
+          aria-hidden="true"
+        >:</span>${segment(
+          "minute",
+          mm,
+        )}${props.zone
+          ? html`
+            <span class="timepicker__zone">${props.zone}</span>
+          `
+          : ""}<button
+          type="button"
+          class="timepicker__toggle"
+          aria-label="Choose a time"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          aria-controls="${listId}"
+          data-timepicker-toggle${props.disabled
+            ? html`
+              disabled
+            `
+            : ""}
+        >
+          ${Icon("chevronDown", {
+            size: 15,
+          })}
+        </button>
+      </div>
+      <div
+        class="timepicker__list"
+        id="${listId}"
+        role="listbox"
+        tabindex="-1"
+        aria-label="${props.label ? `${props.label}: times` : "Times"}"
+        data-step="${String(
+          step,
+        )}"
+        hidden
+      >
+        ${slots}
+      </div>
+    </div>
   `;
 }

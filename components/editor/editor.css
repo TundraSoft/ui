@@ -5,11 +5,13 @@
  * hidden and the textarea stands alone, which is exactly what submits.
  */
 .editor {
+  position: relative;
   display: flex;
   flex-direction: column;
   border: var(--border-width) solid var(--color-border-control, var(--color-border-strong));
   border-radius: var(--radius-md);
   background: var(--color-surface);
+  /* Clipped so the frame's corners hold; the popover form sits inside. */
   overflow: hidden;
 }
 
@@ -35,6 +37,13 @@
   padding: var(--space-1) var(--space-2);
   border-bottom: var(--border-width) solid var(--color-border-subtle);
   background: var(--color-surface-sunken, var(--color-surface-alt));
+}
+
+.editor__sep {
+  width: var(--border-width);
+  height: 18px;
+  margin-inline: var(--space-1);
+  background: var(--color-border);
 }
 
 .editor__tool,
@@ -78,6 +87,52 @@
   cursor: not-allowed;
 }
 
+.editor__glyph {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+}
+
+.editor__tool--text {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+/* The block-style picker: a native select dressed as a toolbar control. */
+.editor__select {
+  height: 28px;
+  padding-inline: var(--space-2) var(--space-5);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.editor__select:hover,
+.editor__select:focus-visible {
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+}
+
+.editor__select:focus-visible {
+  border-color: var(--ring-color);
+}
+
+/* The fullscreen toggle shows one of its two icons. */
+.editor__icon-off,
+.editor--fullscreen .editor__icon-on {
+  display: none;
+}
+
+.editor--fullscreen .editor__icon-off {
+  display: inline-flex;
+}
+
 .editor__spacer {
   flex: 1 1 auto;
 }
@@ -109,6 +164,65 @@
   pointer-events: none;
 }
 
+/* What the surface draws for the blocks the toolbar inserts. */
+.editor__surface table {
+  border-collapse: collapse;
+  margin-block: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.editor__surface th,
+.editor__surface td {
+  min-width: 4rem;
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  text-align: start;
+}
+
+.editor__surface th {
+  background: var(--color-surface-sunken);
+  font-weight: var(--font-weight-semibold);
+}
+
+.editor__surface pre {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+}
+
+.editor__surface blockquote {
+  margin: var(--space-2) 0;
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width-thick) solid var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+
+.editor__surface ul.task-list {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.editor__surface ul.task-list > li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.editor__surface img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.editor__surface img[data-editor-uploading] {
+  min-width: 6rem;
+  min-height: 2rem;
+  background: var(--color-surface-sunken);
+  opacity: 0.6;
+}
+
 .editor__preview {
   min-height: 8rem;
   padding: var(--space-3);
@@ -118,10 +232,145 @@
   display: none;
 }
 
+/* Contextual table tools (html mode), shown while the caret is in a cell. */
+.editor__table-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-alt);
+}
+
+.editor__table-tools[hidden] {
+  display: none;
+}
+
+/* The link / image / code-block form: a small panel under the toolbar.
+   editor.js sets its inline-start offset from the tool that opened it
+   (CSSOM) and plays the shared float-in / float-out keyframes. */
+.editor__popover {
+  position: absolute;
+  top: var(--editor-popover-top, 40px);
+  inset-inline-start: var(--editor-popover-x, var(--space-2));
+  z-index: var(--z-popover);
+  width: min(22rem, calc(100% - 2 * var(--space-2)));
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-inset-top), var(--shadow-lg);
+  transform-origin: top left;
+  animation: ui-float-in var(--duration-enter) var(--ease-out);
+}
+
+.editor__popover[hidden] {
+  display: none;
+}
+
+.editor__popover.is-closing {
+  animation: ui-float-out var(--duration-exit) var(--ease-in) forwards;
+}
+
+.editor__dialog {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.editor__dialog-field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.editor__dialog-field[hidden] {
+  display: none;
+}
+
+.editor__dialog-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.editor__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Footer: the count on the start, messages (an upload error) on the end. */
+.editor__status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  border-top: var(--border-width) solid var(--color-border-subtle);
+  background: var(--color-surface-sunken, var(--color-surface-alt));
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted); /* on the sunken ground, subtle is under 4.5:1 */
+  font-variant-numeric: tabular-nums;
+}
+
+.editor__count--over {
+  color: var(--color-danger);
+}
+
+.editor__message {
+  color: var(--color-danger);
+}
+
+.editor__message:empty {
+  display: none;
+}
+
+/* Full screen: the frame takes the viewport, the control fills it. */
+.editor--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  border-radius: 0;
+  border: none;
+}
+
+.editor--fullscreen:focus-within {
+  outline: none;
+}
+
+.editor--fullscreen .editor__source,
+.editor--fullscreen .editor__surface,
+.editor--fullscreen .editor__preview {
+  flex: 1 1 auto;
+  min-height: 0;
+  resize: none;
+}
+
+.editor--fullscreen .editor__source {
+  height: auto;
+  max-width: var(--layout-measure, 70ch);
+  width: 100%;
+  margin-inline: auto;
+  padding-block: var(--space-6);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.editor--fullscreen .editor__surface,
+.editor--fullscreen .editor__preview {
+  max-width: var(--layout-measure, 70ch);
+  width: 100%;
+  margin-inline: auto;
+  padding-block: var(--space-6);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
 /* Which control shows: without JS only the textarea; with JS the HTML
    mode swaps the textarea for the surface (the textarea still submits). */
 html:not(.js) .editor__toolbar,
-html:not(.js) .editor__surface {
+html:not(.js) .editor__surface,
+html:not(.js) .editor__status,
+html:not(.js) .editor__table-tools {
   display: none;
 }
 

@@ -4,7 +4,7 @@
 
 Import: `import { RowActions, DataTable } from "@tundralibs/ui/data-table"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/data-table.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -62,11 +62,23 @@ button again ("Clear selection"), goes back to the ticked rows.
 | `selectedLabel` | `string` |  | The bar's count once taken. @default "All <total> selected" |
 | `clearLabel` | `string` |  | The button once taken. @default "Clear selection" |
 
+### `DataTableResponsive`
+
+How the table behaves on a phone: `scroll` (default) keeps the grid and
+scrolls it sideways, edge fades showing there is more; `cards` re-lays
+every row out as a card below 768px — each cell labelled with its column
+heading (`data-label`, CSS only), the first column as the card's title,
+numbers right-aligned, the checkbox and the actions at the corners.
+
+- `"scroll"`
+- `"cards"`
+
 ### `DataTableProps`
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | yes | Required: history push refuses a region with no id. |
+| `responsive` | `DataTableResponsive` |  | Phone layout — see {@link DataTableResponsive}. @default "scroll" |
 | `title` | `string` |  |  |
 | `columns` | `DataTableColumn[]` | yes |  |
 | `rows` | `T[]` | yes |  |
@@ -120,11 +132,12 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### Members: per-row selection, select all, POST row actions, cells a phone layout can read
 
-`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `cellAttrs` marks cells for a CSS-only card layout below 768px.
+`rowSelectable` leaves the owner without a checkbox; `selectAll` offers every match the server found (it posts `all=1` with the filter); a `post` item is its own CSRF-carrying form, `confirm` asks first; `responsive: "cards"` lays every row out as a labelled card below 768px.
 
 ```ts
 DataTable<Invoice>({
   id: "members",
+  responsive: "cards",
   selectable: true,
   rowSelectable: (r) => r.client !== "Northwind",
   selectAll: { total: 312, fields: { q: "north" } },
@@ -151,7 +164,7 @@ DataTable<Invoice>({
 ```
 
 ```html
-<div class="data-table" id="members">
+<div class="data-table data-table--cards" id="members">
   <form class="data-table__form" method="post" action="/members/bulk" data-action="/members/bulk" data-target="#members" data-swap="outer">
     <div class="data-table__scroll">
       <div class="data-table__bulk" hidden data-bulk-bar>
@@ -182,8 +195,8 @@ DataTable<Invoice>({
             <td class="data-table__select">
               <input type="checkbox" name="selected" aria-label="Select row INV-2048" data-select-row value="INV-2048">
             </td>
-            <td class="" data-card="primary">Northwind Traders</td>
-            <td class="data-table__num" data-card="meta">$12,400.00</td>
+            <td class="" data-label="Name" data-card="primary">Northwind Traders</td>
+            <td class="data-table__num" data-label="Seats" data-card="meta">$12,400.00</td>
             <td class="data-table__actions">
               <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#members-INV-2048-strip" aria-expanded="false" aria-controls="members-INV-2048-strip">
                 <svg width="16" height="16" width="2" …>…</svg>
@@ -210,8 +223,8 @@ DataTable<Invoice>({
             <td class="data-table__select">
               <input type="checkbox" name="selected" aria-label="Select row INV-2047" data-select-row value="INV-2047">
             </td>
-            <td class="" data-card="primary">Contoso Ltd</td>
-            <td class="data-table__num" data-card="meta">$3,120.00</td>
+            <td class="" data-label="Name" data-card="primary">Contoso Ltd</td>
+            <td class="data-table__num" data-label="Seats" data-card="meta">$3,120.00</td>
             <td class="data-table__actions">
               <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#members-INV-2047-strip" aria-expanded="false" aria-controls="members-INV-2047-strip">
                 <svg width="16" height="16" width="2" …>…</svg>
@@ -260,9 +273,14 @@ DataTable<Invoice>({
   ],
   rows: invoices,
   rowKey: (r) => r.id,
-  bulkActions: html`${
-    Button({ label: "Archive", size: "sm", type: "submit", attrs: { name: "op", value: "archive" } })
-  }${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}`,
+  bulkActions: html`
+    ${Button({
+      label: "Archive",
+      size: "sm",
+      type: "submit",
+      attrs: { name: "op", value: "archive" },
+    })}${Button({ label: "Clear", size: "sm", attrs: { "data-bulk-clear": "" } })}
+  `,
   rowActions: (r) =>
     RowActions({
       id: `inv-${r.id}`,
@@ -370,22 +388,23 @@ DataTable<Invoice>({
   <div class="data-table__footer">
     <nav aria-label="Pagination">
       <ul class="pagination">
-        <li>
+        <li class="pagination__item pagination__item--nav">
           <span class="pagination__link pagination__link--disabled" aria-disabled="true" aria-label="Previous page">&#8249;</span>
         </li>
-        <li>
+        <li class="pagination__item pagination__item--page pagination__item--current">
           <a href="/invoices?page=1" class="pagination__link" aria-current="page" aria-label="Page 1" data-action="/invoices?page=1" data-target="#invoices" data-swap="outer" data-push="">1</a>
         </li>
-        <li>
+        <li class="pagination__item pagination__item--page">
           <a href="/invoices?page=2" class="pagination__link" aria-label="Page 2" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">2</a>
         </li>
-        <li>
+        <li class="pagination__item pagination__item--ellipsis">
           <span class="pagination__ellipsis" aria-hidden="true">&hellip;</span>
         </li>
-        <li>
+        <li class="pagination__item pagination__item--page">
           <a href="/invoices?page=4" class="pagination__link" aria-label="Page 4" data-action="/invoices?page=4" data-target="#invoices" data-swap="outer" data-push="">4</a>
         </li>
-        <li>
+        <li class="pagination__status" aria-hidden="true">Page 1 of 4</li>
+        <li class="pagination__item pagination__item--nav">
           <a href="/invoices?page=2" class="pagination__link" aria-label="Next page" data-action="/invoices?page=2" data-target="#invoices" data-swap="outer" data-push="">&#8250;</a>
         </li>
       </ul>
@@ -436,12 +455,12 @@ DataTable<Invoice>({
 
 Classes defined by `components/data-table/data-table.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
+`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table--cards`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
 
 ## Behaviour
 
 `components/data-table/data-table.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-total`.
+Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-total`.
 
 Events: `rapid:swapped`.

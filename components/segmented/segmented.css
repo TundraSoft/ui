@@ -57,6 +57,7 @@
 
 .segmented__item {
   position: relative;
+  z-index: 1; /* above the sliding thumb (::before) */
   display: inline-flex;
   flex: 0 0 auto;
 }
@@ -96,10 +97,6 @@
 .js .segmented[data-segmented-ready] .segmented__input:checked + .segmented__label {
   background: transparent;
   box-shadow: none;
-}
-
-.segmented__item {
-  z-index: 1;
 }
 
 .segmented__input:focus-visible + .segmented__label {

@@ -58,6 +58,40 @@ import { Tooltip } from "../../components/tooltip/tooltip.ts";
 import { Wizard } from "../../components/wizard/wizard.ts";
 import { Icon } from "../../shared/icons.ts";
 import { chartSamples } from "./charts.ts";
+import { entry as sheetEntry } from "./catalogue/sheet.ts";
+import { entry as bannerEntry } from "./catalogue/banner.ts";
+import { entry as descriptionListEntry } from "./catalogue/description-list.ts";
+import { entry as calendarEntry } from "./catalogue/calendar.ts";
+import { entry as numberInputEntry } from "./catalogue/number-input.ts";
+import { entry as proseEntry } from "./catalogue/prose.ts";
+import { entry as treeEntry } from "./catalogue/tree.ts";
+import { entry as carouselEntry } from "./catalogue/carousel.ts";
+import { entry as lightboxEntry } from "./catalogue/lightbox.ts";
+import { entry as heroEntry } from "./catalogue/hero.ts";
+import { entry as featureGridEntry } from "./catalogue/feature-grid.ts";
+import { entry as pricingEntry } from "./catalogue/pricing.ts";
+import { entry as testimonialEntry } from "./catalogue/testimonial.ts";
+import { entry as siteFooterEntry } from "./catalogue/site-footer.ts";
+import { entry as revealEntry } from "./catalogue/reveal.ts";
+import { entry as listGroupEntry } from "./catalogue/list-group.ts";
+import { entry as toggleEntry } from "./catalogue/toggle.ts";
+import { entry as kbdEntry } from "./catalogue/kbd.ts";
+import { entry as ratingEntry } from "./catalogue/rating.ts";
+import { entry as separatorEntry } from "./catalogue/separator.ts";
+import { entry as ratioEntry } from "./catalogue/ratio.ts";
+import { entry as figureEntry } from "./catalogue/figure.ts";
+import { entry as scrollspyEntry } from "./catalogue/scrollspy.ts";
+import { entry as backToTopEntry } from "./catalogue/back-to-top.ts";
+import { entry as contextMenuEntry } from "./catalogue/context-menu.ts";
+import { entry as menubarEntry } from "./catalogue/menubar.ts";
+import { entry as splitPaneEntry } from "./catalogue/split-pane.ts";
+import { entry as scrollAreaEntry } from "./catalogue/scroll-area.ts";
+import { entry as transferEntry } from "./catalogue/transfer.ts";
+import { entry as colorPickerEntry } from "./catalogue/color-picker.ts";
+import { entry as tourEntry } from "./catalogue/tour.ts";
+import { entry as fabEntry } from "./catalogue/fab.ts";
+import { entry as codeEntry } from "./catalogue/code.ts";
+import { entry as diffEntry } from "./catalogue/diff.ts";
 import {
   commandItems,
   type DemoRoutes,
@@ -84,7 +118,15 @@ export type CatalogueState = {
 };
 
 export type CatalogueCase = { label: string; html: Html };
-export type CatalogueGroup = "forms" | "data" | "charts" | "cards" | "navigation" | "actions" | "feedback";
+export type CatalogueGroup =
+  | "forms"
+  | "data"
+  | "charts"
+  | "cards"
+  | "navigation"
+  | "actions"
+  | "feedback"
+  | "marketing";
 export type CatalogueEntry = {
   /** Component directory name under components/. */
   name: string;
@@ -92,6 +134,26 @@ export type CatalogueEntry = {
   group: CatalogueGroup;
   cases: CatalogueCase[];
 };
+/** An entry before its group is looked up — what a split entry file (`./catalogue/<name>.ts`) returns. */
+export type CatalogueEntryInput = Omit<CatalogueEntry, "group">;
+/** One case. */
+export const caseOf = (label: string, html: Html): CatalogueCase => ({ label, html });
+/** Several cases side by side (wraps). */
+export const caseRow = (...items: Html[]): Html =>
+  html`
+    <div class="cat-row">${items}</div>
+  `;
+/**
+ * A visually hidden `<label for>` — an accessible name for a control shown
+ * bare, where the component has no prop that reaches the control itself
+ * (an Editor's markdown textarea, a NumberInput's field).
+ */
+export const srLabel = (forId: string, text: string): Html =>
+  html`<label class="sr-only" for="${forId}">${text}</label>`;
+/** A paragraph of body copy for a case. */
+export const caseCopy: Html = html`
+  <p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>
+`;
 
 /** One page per group — the "basis types" a user browses. */
 export const catalogueGroups: readonly { id: CatalogueGroup; title: string; blurb: string }[] = [
@@ -114,7 +176,16 @@ export const catalogueGroups: readonly { id: CatalogueGroup; title: string; blur
   },
   { id: "navigation", title: "Navigation", blurb: "Navbar, sidebar, menus, breadcrumbs, the command palette." },
   { id: "actions", title: "Actions", blurb: "Buttons, dropdowns, popovers, tooltips." },
-  { id: "feedback", title: "Feedback", blurb: "Alerts, toasts (including one from the server), modals." },
+  {
+    id: "feedback",
+    title: "Feedback",
+    blurb: "Alerts, toasts (including one from the server), modals, sheets, banners.",
+  },
+  {
+    id: "marketing",
+    title: "Marketing & media",
+    blurb: "Hero, feature grid, pricing, testimonials, site footer, carousel, lightbox, scroll effects.",
+  },
 ];
 
 const GROUP_OF: Record<string, CatalogueGroup> = {
@@ -165,10 +236,90 @@ const GROUP_OF: Record<string, CatalogueGroup> = {
   toast: "feedback",
   modal: "feedback",
   consent: "feedback",
+  sheet: "feedback",
+  banner: "feedback",
+  "description-list": "data",
+  calendar: "data",
+  "number-input": "forms",
+  prose: "cards",
+  tree: "navigation",
+  carousel: "marketing",
+  lightbox: "marketing",
+  hero: "marketing",
+  "feature-grid": "marketing",
+  pricing: "marketing",
+  testimonial: "marketing",
+  "site-footer": "marketing",
+  reveal: "marketing",
+  "list-group": "navigation",
+  "toggle": "actions",
+  "kbd": "actions",
+  "rating": "forms",
+  "separator": "cards",
+  "ratio": "cards",
+  "figure": "cards",
+  "scrollspy": "navigation",
+  "back-to-top": "navigation",
+  "context-menu": "actions",
+  "menubar": "navigation",
+  "split-pane": "cards",
+  "scroll-area": "cards",
+  "transfer": "forms",
+  "color-picker": "forms",
+  "tour": "feedback",
+  "fab": "actions",
+  "code": "cards",
+  "diff": "cards",
 };
 
+/**
+ * Entries kept in files of their own (`./catalogue/<name>.ts`, one per
+ * component, each exporting `entry(routes, state)`): a new component adds
+ * a file here instead of growing this one. `test-catalogue.ts` reads them
+ * for its coverage check alongside this file.
+ */
+const splitEntries: ((routes: DemoRoutes, state: CatalogueState) => CatalogueEntryInput)[] = [
+  sheetEntry,
+  bannerEntry,
+  descriptionListEntry,
+  calendarEntry,
+  numberInputEntry,
+  proseEntry,
+  treeEntry,
+  carouselEntry,
+  lightboxEntry,
+  heroEntry,
+  featureGridEntry,
+  pricingEntry,
+  testimonialEntry,
+  siteFooterEntry,
+  revealEntry,
+  listGroupEntry,
+  toggleEntry,
+  kbdEntry,
+  ratingEntry,
+  separatorEntry,
+  ratioEntry,
+  figureEntry,
+  scrollspyEntry,
+  backToTopEntry,
+  contextMenuEntry,
+  menubarEntry,
+  splitPaneEntry,
+  scrollAreaEntry,
+  transferEntry,
+  colorPickerEntry,
+  tourEntry,
+  fabEntry,
+  codeEntry,
+  diffEntry,
+];
+
 const c = (label: string, html: Html): CatalogueCase => ({ label, html });
-const row = (...items: Html[]) => html`<div class="cat-row">${items}</div>`;
+const row = (...items: Html[]) =>
+  html`
+    <div class="cat-row">${items}</div>
+  `;
 
 /** A list long enough to need the search box and the height cap. */
 const cities = [
@@ -256,9 +407,13 @@ const requiredForm = (id: string, validate: boolean, fields: Html) =>
     id,
     action: "?required",
     validate,
-    content: html`${fields}${Button({ label: "Save", type: "submit", attrs: { id: `${id}-go` } })}`,
+    content: html`
+      ${fields}${Button({ label: "Save", type: "submit", attrs: { id: `${id}-go` } })}
+    `,
   });
-const lorem = html`<p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>`;
+const lorem = html`
+  <p>Body copy for the case, long enough to wrap onto a second line inside a card-sized box.</p>
+`;
 const img = (seed: number, w = 600, h = 338) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
 const alertVariants = ["neutral", "success", "warning", "danger", "info"] as const;
@@ -282,6 +437,7 @@ const timelineStatuses = ["done", "current", "pending"] as const;
 const timelineTones = ["neutral", "success", "warning", "danger", "info", "accent"] as const;
 const wizardStatuses = ["pending", "active", "done"] as const;
 const popoverAligns = ["center", "start", "end"] as const;
+const tooltipSides = ["top", "bottom", "start", "end"] as const;
 const dropdownAligns = ["start", "end"] as const;
 const segmentedSizes = ["sm", "md"] as const;
 const otpModes = ["numeric", "alphanumeric"] as const;
@@ -334,41 +490,51 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("FormErrorAlert (RapidFormError)", FormErrorAlert(formError)),
         c(
           "role — status by default for neutral/success/info, alert for warning/danger; override or none (#cat-alert-roles)",
-          html`<div class="stack stack--sm" id="cat-alert-roles">${Alert({ variant: "success", body: "Saved." })}${
-            Alert({ variant: "danger", body: "Could not save." })
-          }${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${
-            Alert({ variant: "neutral", role: "none", body: "A static note." })
-          }${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>`,
+          html`
+            <div class="stack stack--sm" id="cat-alert-roles">${Alert({ variant: "success", body: "Saved." })}${Alert({
+              variant: "danger",
+              body: "Could not save.",
+            })}${Alert({ variant: "info", role: "alert", body: "Your session ends in 1 minute." })}${Alert({
+              variant: "neutral",
+              role: "none",
+              body: "A static note.",
+            })}${Alert({ variant: "info", role: "note", body: "A callout beside the form." })}</div>
+          `,
         ),
         c(
           "aside, bodyAttrs, textTag — a badge or link beside the body, a class on the body, prose text (#cat-alert-slots)",
-          html`<div class="stack stack--sm" id="cat-alert-slots">${
-            Alert({
+          html`
+            <div class="stack stack--sm" id="cat-alert-slots">${Alert({
               variant: "warning",
               title: "Choose which domains stay",
               body: "Your plan includes 3 domains; you have 5.",
               aside: Badge({ label: "3 days left", variant: "warning" }),
-            })
-          }${
-            Alert({
+            })}${Alert({
               variant: "info",
               role: "note",
               body:
                 "Payments are not set up yet. Until they are, moving to a paid plan, changing it or cancelling goes through support; extras are paid in credits and work as usual.",
-              aside: html`<a href="#">Write to support</a>`,
+              aside: html`
+                <a href="#">Write to support</a>
+              `,
               bodyAttrs: { class: "cat-alert-body", "data-kind": "billing" },
-            })
-          }${Alert({ variant: "neutral", role: "note", textTag: "p", body: "Every request carries a key." })}${
-            Alert({
+            })}${Alert({
+              variant: "neutral",
+              role: "note",
+              textTag: "p",
+              body: "Every request carries a key.",
+            })}${Alert({
               variant: "info",
               icon: false,
               role: "note",
               body:
                 "A theme that draws the icon as a ::before sets --alert-aside-indent on its variants; the action then lines up with the text on a phone.",
-              aside: html`<a href="#">Open settings</a>`,
+              aside: html`
+                <a href="#">Open settings</a>
+              `,
               attrs: { class: "cat-alert-before-icon" },
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
         c(
           "actions",
@@ -376,9 +542,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             variant: "warning",
             title: "This link is flagged",
             body: "Visitors see a warning instead of the destination.",
-            actions: html`${Button({ label: "Change destination", size: "sm" })}${
-              Button({ label: "Ask for a review", size: "sm", variant: "outline" })
-            }`,
+            actions: html`
+              ${Button({ label: "Change destination", size: "sm" })}${Button({
+                label: "Ask for a review",
+                size: "sm",
+                variant: "outline",
+              })}
+            `,
           }),
         ),
       ],
@@ -401,12 +571,27 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           c(`size ${size}`, row(Avatar({ initials: "AB", size }), Avatar({ src: img(7, 96, 96), alt: "Photo", size })))
         ),
         c(
+          "status online / away / busy / offline — a presence dot with sr-only text, at every size (#cat-avatar-online)",
+          row(
+            ...(["online", "away", "busy", "offline"] as const).map((status) =>
+              Avatar({
+                initials: status.slice(0, 2).toUpperCase(),
+                status,
+                attrs: status === "online" ? { id: "cat-avatar-online" } : {},
+              })
+            ),
+            ...avatarSizes.map((size) =>
+              Avatar({ src: img(7, 96, 96), alt: "Photo", size, status: "online", statusLabel: "Active now" })
+            ),
+          ),
+        ),
+        c(
           "AvatarGroup",
           AvatarGroup({
             avatars: [
-              Avatar({ initials: "AB" }),
+              Avatar({ initials: "AB", status: "online" }),
               Avatar({ initials: "CD" }),
-              Avatar({ initials: "EF" }),
+              Avatar({ initials: "EF", status: "busy" }),
               Avatar({ initials: "+3" }),
             ],
           }),
@@ -438,8 +623,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("single", Breadcrumb({ items: [{ label: "Home" }] })),
         c(
           "collapse — the middle folds into … when the trail does not fit (#cat-bc-fold)",
-          html`<div class="cat-narrow" id="cat-bc-fold">${
-            Breadcrumb({
+          html`
+            <div class="cat-narrow" id="cat-bc-fold">${Breadcrumb({
               collapse: true,
               items: [
                 { label: "Northwind Traders", href: "#" },
@@ -447,8 +632,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 { label: "Groups & permissions", href: "#" },
                 { label: "Billing administrators" },
               ],
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -539,24 +724,31 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           )
         ),
         c(
-          "selected + footerSplit + avatar + actions",
+          "selected + footerSplit + avatar + actions (not interactive: a card holding its own controls is never one control)",
           Card({
             selected: true,
-            interactive: true,
             avatar: Avatar({ initials: "GH", size: "sm" }),
             title: "Grace Hopper",
             subtitle: "Admin",
             actions: Button({ label: "Edit", size: "sm", variant: "ghost" }),
             body: lorem,
-            footer: html`<span>Left</span><span>Right</span>`,
+            footer: html`
+              <span>Left</span><span>Right</span>
+            `,
             footerSplit: true,
           }),
         ),
         c(
           "parts: CardHeader / CardBody / CardFooter / CardMedia",
-          html`<div class="card">${CardMedia({ src: img(30), alt: "" })}${
-            CardHeader({ title: "Assembled", subtitle: "from parts" }, { titleHref: "#" })
-          }${CardBody(lorem)}${CardFooter({ content: Button({ label: "Done", size: "sm" }), split: true })}</div>`,
+          html`
+            <div class="card">${CardMedia({ src: img(30), alt: "" })}${CardHeader({
+              title: "Assembled",
+              subtitle: "from parts",
+            }, { titleHref: "#" })}${CardBody(lorem)}${CardFooter({
+              content: Button({ label: "Done", size: "sm" }),
+              split: true,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -582,17 +774,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "format / xFormat — number formats as data (functions cannot cross JSON); a long category axis thins (#cat-chart-format, #cat-chart-hformat, #cat-chart-xformat, #cat-chart-pformat)",
-          html`<div class="stack">${
-            Chart({
+          html`
+            <div class="stack">${Chart({
               id: "cat-chart-format",
               type: "line",
               height: 200,
               format: "currency:USD",
               series: [{ name: "Equity", data: Array.from({ length: 30 }, (_, i) => 12000 + i * 137.000001) }],
               categories: Array.from({ length: 30 }, (_, i) => `Oct ${String(i + 1).padStart(2, "0")}`),
-            })
-          }${
-            row(
+            })}${row(
               Chart({
                 id: "cat-chart-hformat",
                 type: "bar",
@@ -635,8 +825,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 series: [{ name: "Revenue", data: [1250000, 2300000, 1800000] }],
                 categories: ["Q1", "Q2", "Q3"],
               }),
-            )
-          }</div>`,
+            )}</div>
+          `,
         ),
       ]),
     },
@@ -668,9 +858,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "Collapsible closed / defaultOpen",
-          html`<div class="stack stack--sm">${Collapsible({ id: "cat-col-1", title: "Closed", content: lorem })}${
-            Collapsible({ id: "cat-col-2", title: "Open", content: lorem, defaultOpen: true })
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${Collapsible({
+              id: "cat-col-1",
+              title: "Closed",
+              content: lorem,
+            })}${Collapsible({ id: "cat-col-2", title: "Open", content: lorem, defaultOpen: true })}</div>
+          `,
         ),
         c(
           "Accordion",
@@ -693,16 +887,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             requiredForm(
               "cat-req-cb",
               true,
-              html`${
-                Combobox({
+              html`
+                ${Combobox({
                   id: "cat-req-cb-one",
                   name: "owner",
                   label: "Owner",
                   required: true,
                   options: cityOptions.slice(0, 6),
-                })
-              }${
-                Combobox({
+                })}${Combobox({
                   id: "cat-req-cb-many",
                   name: "regions",
                   label: "Regions",
@@ -710,8 +902,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   required: true,
                   requiredMessage: "Add at least one region.",
                   options: cityOptions.slice(0, 6),
-                })
-              }`,
+                })}
+              `,
             ),
             requiredForm(
               "cat-req-cb-plain",
@@ -775,14 +967,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "total — one page of a larger result set ends with a note (#cat-cb-total)",
-          Combobox({
-            id: "cat-cb-total",
-            name: "office",
-            label: "Office",
-            open: true,
-            total: 9812,
-            options: cityOptions.slice(0, 5),
-          }),
+          html`
+            <div class="cat-room cat-room--lg">${Combobox({
+              id: "cat-cb-total",
+              name: "office",
+              label: "Office",
+              open: true,
+              total: 9812,
+              options: cityOptions.slice(0, 5),
+            })}</div>
+          `,
         ),
         c(
           "selectedOptions — a pick the page of options does not hold keeps its label (#cat-cb-selopts)",
@@ -859,23 +1053,29 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "empty state",
-          Combobox({
-            id: "cat-cb-4",
-            name: "four",
-            label: "Empty",
-            open: true,
-            query: "zzz",
-            options: [],
-            emptyText: "Nobody matches.",
-          }),
+          html`
+            <div class="cat-room">${Combobox({
+              id: "cat-cb-4",
+              name: "four",
+              label: "Empty",
+              open: true,
+              query: "zzz",
+              options: [],
+              emptyText: "Nobody matches.",
+            })}</div>
+          `,
         ),
         c(
-          "ComboboxList fragment",
-          ComboboxList({
-            id: "cat-cb-5",
-            query: "gr",
-            options: [{ value: "g", label: "Grace" }, { value: "gb", label: "Graham" }],
-          }),
+          "ComboboxList fragment — what a route returns for a swap of the listbox (shown inside a bare listbox here)",
+          html`
+            <div class="cat-listbox" role="listbox" aria-label="Fragment sample">${ComboboxList(
+              {
+                id: "cat-cb-5",
+                query: "gr",
+                options: [{ value: "g", label: "Grace" }, { value: "gb", label: "Graham" }],
+              },
+            )}</div>
+          `,
         ),
       ],
     },
@@ -919,8 +1119,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c("floating (closed; ⌘K opens)", Command({ id: "cat-cmd-3", items: [{ label: "Only in the palette" }] })),
         c(
-          "CommandList fragment",
-          CommandList({ id: "cat-cmd-4", query: "in", items: [{ label: "Invite", icon: "users" }] }),
+          "CommandList fragment — what a route returns for a swap of the list (shown inside a bare listbox here)",
+          html`
+            <div class="cat-listbox" role="listbox" aria-label="Fragment sample">${CommandList({
+              id: "cat-cmd-4",
+              query: "in",
+              items: [{ label: "Invite", icon: "users" }],
+            })}</div>
+          `,
         ),
       ],
     },
@@ -976,7 +1182,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               size: "sm",
               attrs: { "data-table-search": "", "aria-label": "Filter accounts" },
             }),
-            footer: html`<span>3 rows</span>`,
+            footer: html`
+              <span>3 rows</span>
+            `,
             attrs: { "data-filter-scope": "" },
           }),
         ),
@@ -991,6 +1199,29 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               rowKey: (r) => r.id,
             }),
           )
+        ),
+        c(
+          "responsive: cards — card per row below 768 (#cat-dt-cards)",
+          DataTable<Row>({
+            id: "cat-dt-cards",
+            responsive: "cards",
+            selectable: true,
+            selected: ["2"],
+            columns: [
+              { key: "name", label: "Name", pinned: true },
+              { key: "status", label: "Status", render: (r) => Badge({ label: r.status }) },
+              { key: "amount", label: "Amount", numeric: true },
+            ],
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-cards-${r.id}`,
+                label: `Actions for ${r.name}`,
+                items: [{ label: "Edit", href: "#" }, { label: "Archive", danger: true, attrs: { type: "button" } }],
+              }),
+            footer: Pagination({ page: 2, totalPages: 8, buildHref: (p) => `?p=${p}` }),
+          }),
         ),
         c(
           "sortable + toolbar + pagination footer (no selection)",
@@ -1092,8 +1323,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           DataTable<Row>({
             id: "cat-dt-tools",
             maxHeight: "sm",
-            toolbar: html`${
-              Select({
+            toolbar: html`
+              ${Select({
                 id: "cat-dt-tools-status",
                 name: "status",
                 options: [
@@ -1107,16 +1338,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   { value: "draft", label: "Draft" },
                 ],
                 attrs: { "aria-label": "Status" },
-              })
-            }${
-              Combobox({
+              })}${Combobox({
                 id: "cat-dt-tools-owner",
                 name: "owner",
                 placeholder: "Owner",
                 hints: false,
                 options: rows.map((r) => ({ value: r.id, label: r.name })),
-              })
-            }`,
+              })}
+            `,
             columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }, {
               key: "amount",
               label: "Amount",
@@ -1215,8 +1444,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "tp-form",
             action: "?time",
             validate: true,
-            content: html`${
-              FormField({
+            content: html`
+              ${FormField({
                 id: "tp-req",
                 label: "Pickup",
                 required: true,
@@ -1230,8 +1459,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                     max: "18:00",
                     messages: { required: "Pick a pickup time." },
                   }),
-              })
-            }${FormActions({ content: Button({ label: "Book", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Book", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -1263,15 +1492,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "dtp-form",
             action: "?expiry",
             validate: true,
-            content: html`${
-              FormField({
+            content: html`
+              ${FormField({
                 id: "dtp-req-time",
                 label: "Expires",
                 required: true,
                 control: () =>
                   DateTimePicker({ id: "dtp-req", name: "expires", required: true, today: "2026-09-14", step: 60 }),
-              })
-            }${FormActions({ content: Button({ label: "Save", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Save", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -1335,7 +1564,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               Button({ label: "Download" }),
               Dropdown({
                 id: "cat-dd-split",
-                trigger: Icon("chevronDown", { size: 15 }),
+                trigger: html`${Icon("chevronDown", { size: 15 })}<span class="sr-only">More download formats</span>`,
                 triggerClass: "btn btn--primary",
                 content: Menu({ items: [{ label: "PDF", href: "#" }, { label: "CSV", href: "#" }] }),
               }),
@@ -1384,9 +1613,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-dz-form",
             action: routes.upload,
             attrs: { "data-action": routes.upload, "data-target": "#cat-dz-1", "data-swap": "outer" },
-            content: html`${Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB" })}${
-              FormActions({ content: Button({ label: "Upload", type: "submit" }) })
-            }`,
+            content: html`
+              ${Dropzone({ id: "cat-dz-1", name: "files", multiple: true, hint: "Anything up to 10 MB" })}${FormActions(
+                { content: Button({ label: "Upload", type: "submit" }) },
+              )}
+            `,
           }),
         ),
         c(
@@ -1430,10 +1661,83 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c(
+          "html mode with a table, a task list and a code block — the contextual table tools show while the caret is in a cell (#cat-ed-rich)",
+          Editor({
+            id: "cat-ed-rich",
+            name: "rich",
+            mode: "html",
+            value: "<h2>Launch checklist</h2>" +
+              '<ul class="task-list"><li><input type="checkbox" checked> Freeze the schema</li>' +
+              '<li><input type="checkbox"> Rotate the keys</li></ul>' +
+              "<table><thead><tr><th>Region</th><th>Status</th></tr></thead>" +
+              "<tbody><tr><td>eu-west</td><td>ready</td></tr><tr><td>us-east</td><td>pending</td></tr></tbody></table>" +
+              '<pre><code class="language-bash">deno task deploy --region eu-west</code></pre>',
+          }),
+        ),
+        c(
+          "toolbar basic (a comment box, no status bar) / minimal (a caption)",
+          row(
+            Editor({
+              id: "cat-ed-basic",
+              name: "comment",
+              toolbar: "basic",
+              statusBar: false,
+              rows: 4,
+              placeholder: "Leave a comment…",
+            }),
+            Editor({
+              id: "cat-ed-min",
+              name: "caption",
+              mode: "html",
+              toolbar: "minimal",
+              statusBar: false,
+              rows: 3,
+              value: "<p>A <em>short</em> caption.</p>",
+            }),
+          ),
+        ),
+        c(
+          "maxLength — the status bar counts down; uploadAction — a dropped or pasted image is stored by the server (#cat-ed-max, #cat-ed-up)",
+          row(
+            html`
+              ${srLabel("cat-ed-max", "Summary")}${Editor({
+                id: "cat-ed-max",
+                name: "summary",
+                maxLength: 120,
+                rows: 4,
+                value: "A summary that may not run past one hundred and twenty characters.",
+              })}
+            `,
+            Editor({
+              id: "cat-ed-up",
+              name: "post",
+              rows: 4,
+              uploadAction: routes.upload,
+              placeholder: "Drop an image here, or paste one…",
+            }),
+          ),
+        ),
+        c(
           "disabled / invalid",
           row(
-            Editor({ id: "cat-ed-dis", name: "d", value: "Read-only", disabled: true, rows: 3 }),
-            Editor({ id: "cat-ed-inv", name: "i", value: "Too short", invalid: true, rows: 3 }),
+            html`
+              ${srLabel("cat-ed-dis", "Disabled editor")}${Editor({
+                id: "cat-ed-dis",
+                name: "d",
+                value: "Read-only",
+                disabled: true,
+                rows: 3,
+              })}
+            `,
+            html`
+              ${srLabel("cat-ed-inv", "Invalid editor")}${Editor({
+                id: "cat-ed-inv",
+                name: "i",
+                value: "Too short",
+                invalid: true,
+                rows: 3,
+              })}
+            `,
           ),
         ),
       ],
@@ -1459,16 +1763,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "icon as Html (another icon set), text as Html, details (#cat-empty-details)",
-          html`<div id="cat-empty-details">${
-            Empty({
+          html`
+            <div id="cat-empty-details">${Empty({
               variant: "inline",
-              icon: html`<span class="cat-own-icon">#</span>`,
+              icon: html`
+                <span class="cat-own-icon">#</span>
+              `,
               title: "No tags yet",
-              text: html`Tags group links by <strong>campaign</strong>.`,
-              details: html`<span>Included in ${Badge({ label: "Pro", variant: "accent" })}</span>`,
+              text: html`
+                Tags group links by <strong>campaign</strong>.
+              `,
+              details: html`
+                <span>Included in ${Badge({ label: "Pro", variant: "accent" })}</span>
+              `,
               actions: Button({ label: "Compare plans", size: "sm", variant: "outline" }),
-            })
-          }</div>`,
+            })}</div>
+          `,
         ),
       ],
     },
@@ -1503,26 +1813,44 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "FormActions",
-          FormActions({ content: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}` }),
+          FormActions({
+            content: html`
+              ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}
+            `,
+          }),
         ),
       ],
     },
     {
       name: "form",
       cases: [
-        c("plain", Form({ id: "cat-form-1", action: "#", content: FormField({ label: "Name", control: Input({}) }) })),
+        c(
+          "plain",
+          Form({
+            id: "cat-form-1",
+            action: "#",
+            content: FormField({ id: "cat-form-1-name", label: "Name", control: Input({ id: "cat-form-1-name" }) }),
+          }),
+        ),
         c(
           "csrfToken — the hidden field a no-JS POST carries; CsrfField for a hand-built form",
-          html`${
-            Form({
+          html`
+            ${Form({
               id: "cat-form-csrf",
               action: "?save",
               csrfToken: "demo-token",
-              content: FormField({ label: "Name", control: Input({ name: "name" }) }),
-            })
-          }<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${
-            Button({ label: "Revoke", size: "sm", variant: "danger", type: "submit" })
-          }</form>`,
+              content: FormField({
+                id: "cat-form-csrf-name",
+                label: "Name",
+                control: Input({ id: "cat-form-csrf-name", name: "name" }),
+              }),
+            })}<form method="post" action="?revoke">${CsrfField({ token: "demo-token" })}${Button({
+              label: "Revoke",
+              size: "sm",
+              variant: "danger",
+              type: "submit",
+            })}</form>
+          `,
         ),
         c(
           "autosubmit — a filter bar: a choice submits, typing does not (#cat-autosubmit)",
@@ -1532,10 +1860,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             method: "get",
             autosubmit: true,
             attrs: { "data-cat-autosubmit": "" },
-            content: html`<div class="cat-row">${
-              Input({ type: "search", name: "q", placeholder: "Search", size: "sm", attrs: { "aria-label": "Search" } })
-            }${
-              Select({
+            content: html`
+              <div class="cat-row">${Input({
+                type: "search",
+                name: "q",
+                placeholder: "Search",
+                size: "sm",
+                attrs: { "aria-label": "Search" },
+              })}${Select({
                 id: "cat-autosubmit-status",
                 name: "status",
                 options: [{ value: "", label: "All" }, { value: "active", label: "Active" }, {
@@ -1543,17 +1875,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   label: "Paused",
                 }],
                 attrs: { "aria-label": "Status" },
-              })
-            }${
-              Segmented({
+              })}${Segmented({
                 id: "cat-autosubmit-range",
                 name: "range",
                 size: "sm",
                 value: "7d",
                 legend: "Range",
                 options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
-              })
-            }</div>`,
+              })}</div>
+            `,
           }),
         ),
         c(
@@ -1563,7 +1893,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             action: "#",
             method: "get",
             error: formError,
-            content: FormField({ label: "Email", control: Input({ type: "email", invalid: true }) }),
+            content: FormField({
+              id: "cat-form-2-email",
+              label: "Email",
+              control: Input({ id: "cat-form-2-email", type: "email", invalid: true }),
+            }),
           }),
         ),
         c(
@@ -1572,8 +1906,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-validate",
             action: "?validate",
             validate: true,
-            content: html`${
-              FormGrid({
+            content: html`
+              ${FormGrid({
                 fields: [
                   FormField({
                     id: "cv-email",
@@ -1664,8 +1998,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                       }),
                   }),
                 ],
-              })
-            }${FormActions({ content: Button({ label: "Create account", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Create account", type: "submit" }) })}
+            `,
           }),
         ),
       ],
@@ -1677,11 +2011,122 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "every GridColSpan",
           Grid({
             items: gridSpans.map((span) =>
-              GridCol({ span, content: html`<div class="cat-swatch">${String(span)}</div>` })
+              GridCol({
+                span,
+                content: html`
+                  <div class="cat-swatch">${String(span)}</div>
+                `,
+              })
             ),
           }),
         ),
-        c("default span", Grid({ items: [GridCol({ content: html`<div class="cat-swatch">default</div>` })] })),
+        c(
+          'phoneColumns: "2" — two-up below 768 (every GridPhoneColumns)',
+          Grid({
+            phoneColumns: "2",
+            attrs: { id: "cat-grid-phone-2" },
+            items: ["1", "2", "3", "4"].map((n) =>
+              GridCol({
+                span: 3,
+                content: html`
+                  <div class="cat-swatch">${n}</div>
+                `,
+              })
+            ),
+          }),
+        ),
+        c(
+          'phoneColumns: "1" (the default)',
+          Grid({
+            phoneColumns: "1",
+            items: [GridCol({
+              span: 6,
+              content: html`
+                <div class="cat-swatch">one</div>
+              `,
+            })],
+          }),
+        ),
+        c(
+          "default span",
+          Grid({
+            items: [GridCol({
+              content: html`
+                <div class="cat-swatch">default</div>
+              `,
+            })],
+          }),
+        ),
+        c(
+          "span per breakpoint (GridColSpans, mobile first): { xs: 6, md: 4, xl: 3 } — two-up on a phone, three from 768, four from 1400",
+          Grid({
+            attrs: { id: "cat-grid-breakpoints" },
+            items: ["1", "2", "3", "4"].map((n) =>
+              GridCol({
+                span: { xs: 6, md: 4, xl: 3 },
+                content: html`
+                  <div class="cat-swatch">${n}</div>
+                `,
+              })
+            ),
+          }),
+        ),
+        c(
+          "{ sm: 6, lg: 8 } beside { sm: 6, lg: 4 } — a main + aside that stacks only below 576 (every GridBreakpoint)",
+          Grid({
+            attrs: { id: "cat-grid-aside" },
+            items: [
+              GridCol({
+                span: { xs: 12, sm: 6, lg: 8 },
+                content: html`
+                  <div class="cat-swatch">main</div>
+                `,
+              }),
+              GridCol({
+                span: { sm: 6, md: 6, lg: 4, xl: 4 },
+                content: html`
+                  <div class="cat-swatch">aside</div>
+                `,
+              }),
+            ],
+          }),
+        ),
+        c(
+          'gap: "sm" | "md" | "lg" (every GridGap)',
+          html`
+            <div class="stack stack--sm">
+              ${(["sm", "md", "lg"] as const).map((gap) =>
+                Grid({
+                  gap,
+                  attrs: { id: `cat-grid-gap-${gap}` },
+                  items: ["1", "2", "3"].map((n) =>
+                    GridCol({
+                      span: 4,
+                      content: html`
+                        <div class="cat-swatch">${gap} ${n}</div>
+                      `,
+                    })
+                  ),
+                })
+              )}
+            </div>
+          `,
+        ),
+        c(
+          "utilities layer (styles/utilities.css): d-flex / align-items-center / justify-content-between / gap-3 / p-3 / rounded / border / text-truncate / hide-sm / d-md-none",
+          html`
+            <div id="cat-utilities" class="d-flex align-items-center justify-content-between gap-3 p-3 border rounded">
+              <span class="text-truncate min-w-0">A row laid out with utilities alone — this label truncates when the row is narrow.</span>
+              <span class="hide-sm text-muted text-nowrap">hidden &lt; 576</span>
+              <span class="d-md-none text-muted text-nowrap">phone only</span>
+              ${Button({ label: "Action", size: "sm" })}
+            </div>
+            <div class="cluster mt-3">
+              ${Badge({ label: "cluster" })} ${Badge({ label: "wraps" })} ${Badge({ label: "chips" })}
+              <span class="ms-auto text-sm text-muted">ms-auto</span>
+            </div>
+          `,
+        ),
       ],
     },
     {
@@ -1689,15 +2134,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "type email + domains — local part, fixed @, the domain (one domain: fixed text)",
-          html`<div class="stack stack--sm">${
-            Input({
+          html`
+            <div class="stack stack--sm">${Input({
               id: "cat-em-1",
               name: "email",
               type: "email",
               domains: ["acme.com", "acme.io"],
               value: "ada@acme.io",
-            })
-          }${Input({ id: "cat-em-2", name: "email", type: "email", domains: ["acme.com"] })}</div>`,
+              attrs: { "aria-label": "Email (two domains)" },
+            })}${Input({
+              id: "cat-em-2",
+              name: "email",
+              type: "email",
+              domains: ["acme.com"],
+              attrs: { "aria-label": "Email (one domain)" },
+            })}</div>
+          `,
         ),
         c(
           "type tel + countries — country code, then the number",
@@ -1707,20 +2159,35 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             type: "tel",
             countries: [{ code: "+1", label: "US" }, { code: "+44", label: "UK" }, { code: "+91", label: "IN" }],
             value: "+44 20 7946 0958",
+            attrs: { "aria-label": "Phone number" },
           }),
         ),
         c(
           "type tel + countries with flags — the library ships none; the demo draws five (examples/shared/flags.ts)",
-          Input({ id: "cat-tel-2", name: "phone", type: "tel", countries: sampleCountries, value: "+49 30 901820" }),
+          Input({
+            id: "cat-tel-2",
+            name: "phone",
+            type: "tel",
+            countries: sampleCountries,
+            value: "+49 30 901820",
+            attrs: { "aria-label": "Phone number (with flags)" },
+          }),
         ),
         c(
           "type url + scheme — https:// fixed, the rest typed",
-          Input({ id: "cat-url-1", name: "website", type: "url", scheme: "https://", value: "https://acme.com/team" }),
+          Input({
+            id: "cat-url-1",
+            name: "website",
+            type: "url",
+            scheme: "https://",
+            value: "https://acme.com/team",
+            attrs: { "aria-label": "Website" },
+          }),
         ),
         c(
           "prefix / suffix",
-          html`<div class="stack stack--sm">${
-            Input({
+          html`
+            <div class="stack stack--sm">${Input({
               id: "cat-px-1",
               name: "amount",
               type: "number",
@@ -1728,26 +2195,58 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               suffix: "per seat",
               min: 0,
               step: "any",
-            })
-          }${Input({ id: "cat-px-2", name: "weight", type: "number", suffix: "kg" })}</div>`,
+              attrs: { "aria-label": "Amount per seat" },
+            })}${Input({
+              id: "cat-px-2",
+              name: "weight",
+              type: "number",
+              suffix: "kg",
+              attrs: { "aria-label": "Weight" },
+            })}</div>
+          `,
         ),
         c(
           "Counter() alone — for a custom control that sets data-counter itself",
-          html`${Input({ id: "cat-cnt-2", name: "tag", maxLength: 10, attrs: { "data-counter": "" } })}${
-            Counter("cat-cnt-2", 10)
-          }`,
+          html`
+            ${Input({
+              id: "cat-cnt-2",
+              name: "tag",
+              maxLength: 10,
+              attrs: { "data-counter": "", "aria-label": "Tag" },
+            })}${Counter(
+              "cat-cnt-2",
+              10,
+            )}
+          `,
         ),
         c(
           "counter (maxLength 40)",
-          Input({ id: "cat-cnt-1", name: "title", maxLength: 40, counter: true, value: "Quarterly invoice run" }),
+          Input({
+            id: "cat-cnt-1",
+            name: "title",
+            maxLength: 40,
+            counter: true,
+            value: "Quarterly invoice run",
+            attrs: { "aria-label": "Title" },
+          }),
         ),
         c(
           "type search — clear button (clearable: false to drop it)",
-          html`<div class="stack stack--sm">${
-            Input({ id: "cat-srch-1", name: "q", type: "search", placeholder: "Search", value: "invoices" })
-          }${
-            Input({ id: "cat-srch-2", name: "q", type: "search", placeholder: "No clear button", clearable: false })
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-srch-1",
+              name: "q",
+              type: "search",
+              placeholder: "Search",
+              value: "invoices",
+            })}${Input({
+              id: "cat-srch-2",
+              name: "q",
+              type: "search",
+              placeholder: "No clear button",
+              clearable: false,
+            })}</div>
+          `,
         ),
         c(
           "the invite form — email domains + tel countries + url scheme, validate + guard (#cat-invite; the app joins the parts)",
@@ -1757,18 +2256,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "states",
           row(
-            Input({ value: "Disabled", disabled: true }),
-            Input({ value: "Readonly", readonly: true }),
+            Input({ value: "Disabled", disabled: true, attrs: { "aria-label": "Disabled input" } }),
+            Input({ value: "Readonly", readonly: true, attrs: { "aria-label": "Read-only input" } }),
             Input({ placeholder: "Required", required: true }),
-            Input({ value: "bad", invalid: true }),
+            Input({ value: "bad", invalid: true, attrs: { "aria-label": "Invalid input" } }),
           ),
         ),
         c(
           "types",
           row(
             Input({ type: "email", placeholder: "email" }),
-            Input({ type: "password", value: "secret" }),
-            Input({ type: "number", value: "3" }),
+            Input({ type: "password", value: "secret", attrs: { "aria-label": "Password" } }),
+            Input({ type: "number", value: "3", attrs: { "aria-label": "Quantity" } }),
             Input({ type: "search", placeholder: "search" }),
             Input({ type: "date" }),
           ),
@@ -1804,22 +2303,49 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "InputGroup start / end / both / select",
           row(
-            InputGroup({ start: "$", control: Input({ extraClass: "input-group__control" }) }),
-            InputGroup({ end: "USD", control: Input({ extraClass: "input-group__control" }) }),
-            InputGroup({ start: "https://", end: ".com", control: Input({ extraClass: "input-group__control" }) }),
             InputGroup({
-              start: Select({ options: [{ value: "1", label: "+1" }], extraClass: "input-group__control" }),
-              control: Input({ extraClass: "input-group__control" }),
+              start: "$",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Amount" } }),
+            }),
+            InputGroup({
+              end: "USD",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Price in USD" } }),
+            }),
+            InputGroup({
+              start: "https://",
+              end: ".com",
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Domain name" } }),
+            }),
+            InputGroup({
+              start: Select({
+                id: "cat-ig-country",
+                options: [{ value: "1", label: "+1" }],
+                extraClass: "input-group__control",
+                attrs: { "aria-label": "Country code" },
+              }),
+              control: Input({ extraClass: "input-group__control", attrs: { "aria-label": "Phone number" } }),
             }),
           ),
         ),
         c(
           'Input({ type: "password" }) — the password field with its Show/Hide toggle',
-          Input({ id: "cat-pw-1", name: "password", type: "password", required: true }),
+          Input({
+            id: "cat-pw-1",
+            name: "password",
+            type: "password",
+            required: true,
+            attrs: { "aria-label": "Password" },
+          }),
         ),
         c(
           "reveal: false — the bare native control",
-          Input({ id: "cat-pw-0", name: "password", type: "password", reveal: false }),
+          Input({
+            id: "cat-pw-0",
+            name: "password",
+            type: "password",
+            reveal: false,
+            attrs: { "aria-label": "Password (no toggle)" },
+          }),
         ),
         c(
           "new password — strength bar (type to see it), strengthMin 3",
@@ -1831,6 +2357,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             autocomplete: "new-password",
             strength: true,
             strengthMin: 3,
+            attrs: { "aria-label": "New password" },
           }),
         ),
         c(
@@ -1841,6 +2368,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             name: "password",
             value: "correct horse battery",
             strength: true,
+            attrs: { "aria-label": "Password (prefilled)" },
           }),
         ),
         c(
@@ -1850,6 +2378,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-pw-4",
             name: "confirm",
             match: "#cat-pw-2",
+            attrs: { "aria-label": "Confirm password" },
           }),
         ),
         c(
@@ -1860,6 +2389,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             name: "password",
             reveal: false,
             disabled: true,
+            attrs: { "aria-label": "Password (disabled)" },
           }),
         ),
         c(
@@ -1878,6 +2408,77 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               }),
           }),
         ),
+        c(
+          "mask: 'phone' / 'card' / 'postcode' — formatted as you type, the caret stays put; paste works",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-phone",
+              attrs: { "aria-label": "Phone" },
+              name: "phone",
+              mask: "phone",
+              value: "4155550132",
+            })}${Input({ id: "cat-mask-card", name: "card", mask: "card", placeholder: "Card number" })}${Input({
+              id: "cat-mask-postcode",
+              name: "postcode",
+              mask: "postcode",
+              placeholder: "Postcode",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'date' / 'time' — slot order from maskLocale (en-GB here: dd/mm/yyyy); an impossible date or time is a validity error",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-date",
+              attrs: { "aria-label": "Date of birth" },
+              name: "born",
+              mask: "date",
+              maskLocale: "en-GB",
+              messages: { mask: "That date does not exist." },
+            })}${Input({
+              id: "cat-mask-date-us",
+              attrs: { "aria-label": "Due date" },
+              name: "due",
+              mask: "date",
+              value: "12/31/2026",
+            })}${Input({
+              id: "cat-mask-time",
+              attrs: { "aria-label": "Time" },
+              name: "at",
+              mask: "time",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'currency' — grouped as typed, two decimals on blur, the symbol as an addon; the form posts the raw number (maskRaw)",
+          html`
+            <div class="stack stack--sm">${Input({
+              id: "cat-mask-currency",
+              attrs: { "aria-label": "Amount" },
+              name: "amount",
+              mask: "currency",
+              value: "1234.5",
+            })}${Input({
+              id: "cat-mask-currency-eur",
+              attrs: { "aria-label": "Price" },
+              name: "price",
+              mask: "currency",
+              maskCurrency: "EUR",
+              maskLocale: "de-DE",
+            })}</div>
+          `,
+        ),
+        c(
+          "mask: 'custom' — maskPattern '##-AAA-####' (# digit, A letter, * either), maskPlaceholderChar",
+          Input({
+            id: "cat-mask-custom",
+            name: "ref",
+            attrs: { "aria-label": "Reference" },
+            mask: "custom",
+            maskPattern: "##-AAA-####",
+            maskPlaceholderChar: "_",
+          }),
+        ),
       ],
     },
     {
@@ -1889,28 +2490,27 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "open — shown as soon as it is on the page: on load, or when a swap brings it (#cat-modal-open)",
-          html`${
-            Button({
+          html`
+            ${Button({
               label: "Swap it in",
               variant: "outline",
               attrs: { "data-cat-swap-in": "#cat-modal-open-template", id: "cat-modal-open-trigger" },
-            })
-          }<template id="cat-modal-open-template">${
-            Modal({
+            })}<template id="cat-modal-open-template">${Modal({
               id: "cat-modal-open",
               title: "Opened by the server",
               open: true,
-              body:
-                html`<p>Rendered with <code>open: true</code>, the way a form that failed inside a modal comes back.</p>`,
+              body: html`
+                <p>Rendered with <code>open: true</code>, the way a form that failed inside a modal comes back.</p>
+              `,
               footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
-            })
-          }</template>`,
+            })}</template>
+          `,
         ),
         c(
           "ConfirmModal + data-confirm — a link, a button and a submit button ask first (#cat-confirm)",
           html`
-            <div class="cat-row"
-              id="cat-confirm">${Button({
+            <div class="cat-row" id="cat-confirm">
+              ${Button({
                 label: "Leave (link)",
                 href: "#cat-confirmed",
                 variant: "outline",
@@ -1923,9 +2523,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 label: "Send (submit)",
                 type: "submit",
                 attrs: { "data-confirm": "Send the form?" },
-              })}</form></div>
+              })}</form>
+            </div>
             <p
-              class="text-muted text-2xs">One ConfirmModal per page: this page's chrome renders it (the core template does in a rAPId app). Its props, kept out of the page in a template:</p>
+              class="text-muted text-2xs"
+            >
+              One ConfirmModal per page: this page's chrome renders it (the core template does in a rAPId app). Its props, kept out
+              of the page in a template:
+            </p>
             <template id="cat-confirm-sample">${ConfirmModal(
               { id: "cat-confirm-sample-dialog", title: "Sure?", confirmLabel: "OK", cancelLabel: "Back" },
             )}</template>
@@ -1933,31 +2538,39 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "title + footer (button opens)",
-          html`${Button({ label: "Open modal", attrs: { "data-modal-open": "#cat-modal-1" } })}${
-            Modal({
+          html`
+            ${Button({ label: "Open modal", attrs: { "data-modal-open": "#cat-modal-1" } })}${Modal({
               id: "cat-modal-1",
               title: "Confirm",
               body: lorem,
-              footer: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "OK" })}`,
-            })
-          }`,
+              footer: html`
+                ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "OK" })}
+              `,
+            })}
+          `,
         ),
         c(
           "label only (no title)",
-          html`${
-            Button({ label: "Open labelled modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-2" } })
-          }${Modal({ id: "cat-modal-2", label: "Plain dialog", body: lorem })}`,
+          html`
+            ${Button({
+              label: "Open labelled modal",
+              variant: "outline",
+              attrs: { "data-modal-open": "#cat-modal-2" },
+            })}${Modal({ id: "cat-modal-2", label: "Plain dialog", body: lorem })}
+          `,
         ),
         c(
           "a form in a modal — Select, DateTimePicker (#cat-modal-3)",
-          html`${
-            Button({ label: "Open form modal", variant: "outline", attrs: { "data-modal-open": "#cat-modal-3" } })
-          }${
-            Modal({
+          html`
+            ${Button({
+              label: "Open form modal",
+              variant: "outline",
+              attrs: { "data-modal-open": "#cat-modal-3" },
+            })}${Modal({
               id: "cat-modal-3",
               title: "New destination",
-              body: html`${
-                FormField({
+              body: html`
+                ${FormField({
                   id: "cat-modal-sel",
                   label: "Kind",
                   control: (a) =>
@@ -1971,9 +2584,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                         { value: "slack", label: "Slack" },
                       ],
                     }),
-                })
-              }${
-                FormField({
+                })}${FormField({
                   id: "cat-modal-at-time",
                   label: "Starts",
                   control: () =>
@@ -1983,11 +2594,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                       value: "2026-09-15T09:00:00Z",
                       today: "2026-09-14",
                     }),
-                })
-              }`,
-              footer: html`${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}`,
-            })
-          }`,
+                })}
+              `,
+              footer: html`
+                ${Button({ label: "Cancel", variant: "ghost" })}${Button({ label: "Save" })}
+              `,
+            })}
+          `,
         ),
       ],
     },
@@ -2003,16 +2616,29 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             actions: Button({ label: "Sign in", size: "sm" }),
           }),
         ),
-        c("brand only", Navbar({ id: "cat-nav-2", brand: html`<span class="sidebar__brand-mark">A</span> Acme` })),
+        c(
+          "brand only",
+          Navbar({
+            id: "cat-nav-2",
+            brand: html`
+              <span class="sidebar__brand-mark">A</span> Acme
+            `,
+          }),
+        ),
         c(
           "menuActions — a control that moves into the phone menu; its twin in actions is hide-md (#cat-nav-menu)",
           Navbar({
             id: "cat-nav-menu",
             brand: "Acme",
             links: [{ href: "#", label: "How it works", active: true }, { href: "#", label: "Pricing" }],
-            actions: html`${
-              Button({ label: "Status: all systems go", size: "sm", variant: "ghost", attrs: { class: "hide-md" } })
-            }${Button({ label: "Sign in", size: "sm" })}`,
+            actions: html`
+              ${Button({
+                label: "Status: all systems go",
+                size: "sm",
+                variant: "ghost",
+                attrs: { class: "hide-md" },
+              })}${Button({ label: "Sign in", size: "sm" })}
+            `,
             menuActions: Button({ label: "Status: all systems go", size: "sm", variant: "ghost" }),
           }),
         ),
@@ -2027,13 +2653,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-card-form",
             action: "?card",
             validate: true,
-            content: html`${
-              CardFields({
+            content: html`
+              ${CardFields({
                 name: "card",
                 luhn: true,
                 messages: { luhn: "Check the card number.", expired: "This card has expired." },
-              })
-            }${FormActions({ content: Button({ label: "Pay", type: "submit" }) })}`,
+              })}${FormActions({ content: Button({ label: "Pay", type: "submit" }) })}
+            `,
           }),
         ),
         c(
@@ -2168,9 +2794,19 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             trigger: PopoverTrigger({ controls: "gh-card", label: "Grace Hopper" }),
             content: html`
               <div
-                class="popover__header"><span><span class="popover__title">Grace Hopper</span><br><span class="popover__subtitle">grace@tundra.dev</span></span></div>
+                class="popover__header"
+              >
+                <span><span class="popover__title">Grace Hopper</span><br><span class="popover__subtitle"
+                  >grace@tundra.dev</span></span>
+              </div>
               <div
-                class="popover__stats"><span class="popover__stat"><span class="popover__stat-value">148</span><span class="popover__stat-label">Reviews</span></span><span class="popover__stat"><span class="popover__stat-value">2.1h</span><span class="popover__stat-label">Median</span></span></div>
+                class="popover__stats"
+              >
+                  <span class="popover__stat"><span class="popover__stat-value">148</span><span class="popover__stat-label"
+                    >Reviews</span></span><span class="popover__stat"><span class="popover__stat-value">2.1h</span><span
+                      class="popover__stat-label"
+                    >Median</span></span>
+                  </div>
               <div class="popover__footer">${Button({ label: "Message", size: "sm" })}${Button({
                 label: "Profile",
                 size: "sm",
@@ -2186,24 +2822,28 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               id: `cat-pop-${align}`,
               align,
               trigger: PopoverTrigger({ controls: `cat-pop-${align}`, label: align }),
-              content: html`<div class="popover__header"><span class="popover__title">${align}</span></div>`,
+              content: html`
+                <div class="popover__header"><span class="popover__title">${align}</span></div>
+              `,
             }),
           )
         ),
         c(
           "open + label",
-          Popover({
-            id: "cat-pop-open",
-            open: true,
-            label: "Details",
-            trigger: PopoverTrigger({
-              controls: "cat-pop-open",
-              label: "Open",
+          html`
+            <div class="cat-room">${Popover({
+              id: "cat-pop-open",
               open: true,
-              className: "btn btn--outline btn--sm",
-            }),
-            content: lorem,
-          }),
+              label: "Details",
+              trigger: PopoverTrigger({
+                controls: "cat-pop-open",
+                label: "Open",
+                open: true,
+                className: "btn btn--outline btn--sm",
+              }),
+              content: lorem,
+            })}</div>
+          `,
         ),
         c(
           "loadFrom (lazy, data-load)",
@@ -2247,8 +2887,12 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "inside a dialog closed at load — placed when it opens (#cat-seg-dialog)",
-          html`${Button({ label: "Open", variant: "outline", attrs: { "data-modal-open": "#cat-seg-dialog" } })}${
-            Modal({
+          html`
+            ${Button({
+              label: "Open",
+              variant: "outline",
+              attrs: { "data-modal-open": "#cat-seg-dialog" },
+            })}${Modal({
               id: "cat-seg-dialog",
               title: "Range",
               body: Segmented({
@@ -2259,8 +2903,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 options: [{ value: "7d", label: "7 days" }, { value: "30d", label: "30 days" }],
               }),
               footer: Button({ label: "Close", variant: "ghost", attrs: { "data-modal-close": "" } }),
-            })
-          }`,
+            })}
+          `,
         ),
         c(
           "long options in a FormField — as wide as its options, scrolls inside on a phone, never widens the page (#cat-seg-long)",
@@ -2290,9 +2934,23 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             value: "",
             legend: "Status",
             options: [
-              { value: "", label: "All", count: html`<span>48.2k</span>`, countTitle: "48,213" },
+              {
+                value: "",
+                label: "All",
+                count: html`
+                  <span>48.2k</span>
+                `,
+                countTitle: "48,213",
+              },
               { value: "active", label: "Active", count: 120 },
-              { value: "flagged", label: html`${Icon("warning", { size: 13 })}Flagged`, count: 3, alert: true },
+              {
+                value: "flagged",
+                label: html`
+                  ${Icon("warning", { size: 13 })}Flagged
+                `,
+                count: 3,
+                alert: true,
+              },
               { value: "paused", label: "Paused", count: 0, alert: true },
             ],
           }),
@@ -2322,6 +2980,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-sel-lead",
             name: "market",
             value: "de",
+            attrs: { "aria-label": "Market" },
             options: [
               { value: "fr", label: "France", lead: flags.fr },
               { value: "de", label: "Germany", lead: flags.de },
@@ -2336,6 +2995,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-sel-long",
             name: "city",
             value: "tokyo",
+            attrs: { "aria-label": "City" },
             options: cityOptions,
             searchPlaceholder: "Search cities…",
             emptyText: "No city matches.",
@@ -2348,6 +3008,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               "cat-req-plain",
               false,
               FormField({
+                id: "cat-req-plain-sel",
                 label: "City (plain form)",
                 control: Select({
                   id: "cat-req-plain-sel",
@@ -2362,6 +3023,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               "cat-req-val",
               true,
               FormField({
+                id: "cat-req-val-sel",
                 label: "City (validated)",
                 control: Select({
                   id: "cat-req-val-sel",
@@ -2377,23 +3039,61 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "searchable: false — typing on the field jumps to the first option starting with it",
-          Select({ id: "cat-sel-plain", searchable: false, options: cityOptions.slice(0, 8) }),
+          Select({
+            id: "cat-sel-plain",
+            searchable: false,
+            options: cityOptions.slice(0, 8),
+            attrs: { "aria-label": "City (type-ahead)" },
+          }),
         ),
         c(
           "plain / placeholder / value",
           row(
-            Select({ id: "cat-sel", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
-            Select({ placeholder: "Pick one", options: [{ value: "a", label: "Alpha" }] }),
-            Select({ value: "b", options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }] }),
+            Select({
+              id: "cat-sel",
+              options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }],
+              attrs: { "aria-label": "Plain select" },
+            }),
+            Select({
+              id: "cat-sel-placeholder",
+              placeholder: "Pick one",
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Select with a placeholder" },
+            }),
+            Select({
+              id: "cat-sel-value",
+              value: "b",
+              options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }],
+              attrs: { "aria-label": "Select with a value" },
+            }),
           ),
         ),
         c(
           "disabled / required / invalid / disabled option",
           row(
-            Select({ disabled: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ required: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ invalid: true, options: [{ value: "a", label: "Alpha" }] }),
-            Select({ options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta (off)", disabled: true }] }),
+            Select({
+              id: "cat-sel-disabled",
+              disabled: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Disabled select" },
+            }),
+            Select({
+              id: "cat-sel-required",
+              required: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Required select" },
+            }),
+            Select({
+              id: "cat-sel-invalid",
+              invalid: true,
+              options: [{ value: "a", label: "Alpha" }],
+              attrs: { "aria-label": "Invalid select" },
+            }),
+            Select({
+              id: "cat-sel-disabled-option",
+              options: [{ value: "a", label: "Alpha" }, { value: "b", label: "Beta (off)", disabled: true }],
+              attrs: { "aria-label": "Select with a disabled option" },
+            }),
           ),
         ),
       ],
@@ -2403,7 +3103,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "brand + items",
-          Sidebar({ id: "cat-sb-1", brand: html`<span class="sidebar__brand-mark">A</span> Acme`, items: menuItems }),
+          Sidebar({
+            id: "cat-sb-1",
+            brand: html`
+              <span class="sidebar__brand-mark">A</span> Acme
+            `,
+            items: menuItems,
+          }),
         ),
         c("collapsible", Sidebar({ id: "cat-sb-2", items: menuItems, collapsible: true })),
         c("SidebarToggle", SidebarToggle({ targetId: "cat-sb-1", label: "Menu" })),
@@ -2415,11 +3121,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c("Skeleton variants", row(...skeletonVariants.map((variant) => Skeleton({ variant })))),
         c(
           "Skeleton widths",
-          html`<div class="stack stack--sm">${
-            skeletonWidths.map((width) => Skeleton({ variant: "text", width }))
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${skeletonWidths.map((width) => Skeleton({ variant: "text", width }))}</div>
+          `,
         ),
-        c("SkeletonTable rows/columns", SkeletonTable({ rows: 2, columns: [["md", "sm", "xs"], ["lg", "sm", "xs"]] })),
+        c(
+          "SkeletonTable rows/columns",
+          SkeletonTable({ rows: 2, columns: [["md", "sm", "xs"], ["lg", "sm", "xs"]] }),
+        ),
         c("SkeletonCard", SkeletonCard()),
       ],
     },
@@ -2501,7 +3210,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             items: statTones.map((tone) =>
               GridCol({
                 span: 4,
-                content: Card({ body: Stat({ label: tone, value: "1,234", tone, icon: Icon("coin", { size: 20 }) }) }),
+                content: Card({
+                  body: Stat({ label: tone, value: "1,234", tone, icon: Icon("coin", { size: 20 }) }),
+                }),
               })
             ),
           }),
@@ -2513,6 +3224,59 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             Stat({ label: "Down", value: "8%", trend: { label: "-0.4%", up: false } }),
             Stat({ label: "Plain", value: "42" }),
           ),
+        ),
+        c(
+          "sparkline — an inline SVG drawn on the server, no chart engine (#cat-stat-spark)",
+          Grid({
+            phoneColumns: "2",
+            items: [
+              GridCol({
+                span: 4,
+                content: Card({
+                  body: Stat({
+                    label: "Signups (30d)",
+                    value: "1,284",
+                    tone: "primary",
+                    icon: Icon("users", { size: 20 }),
+                    trend: { label: "+8.2%", up: true },
+                    sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40, 38, 44],
+                    sparklineLabel: "Daily signups over the last 30 days, rising",
+                    sparklineLabels: [
+                      "Jan",
+                      "Feb",
+                      "Mar",
+                      "Apr",
+                      "May",
+                      "Jun",
+                      "Jul",
+                      "Aug",
+                      "Sep",
+                      "Oct",
+                      "Nov",
+                      "Dec",
+                    ],
+                    attrs: { id: "cat-stat-spark" },
+                  }),
+                }),
+              }),
+              GridCol({
+                span: 4,
+                content: Card({
+                  body: Stat({
+                    label: "Churn",
+                    value: "1.2%",
+                    tone: "danger",
+                    trend: { label: "+0.2%", up: false },
+                    sparkline: [9, 8, 8, 10, 11, 10, 12, 13, 12, 14],
+                  }),
+                }),
+              }),
+              GridCol({
+                span: 4,
+                content: Card({ body: Stat({ label: "Flat", value: "0", sparkline: [1, 1, 1, 1] }) }),
+              }),
+            ],
+          }),
         ),
       ],
     },
@@ -2570,7 +3334,14 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             listAttrs: { class: "cat-tablinks-list", "data-kind": "links" },
             items: [
               { label: "Clicks", href: "#", current: true, icon: Icon("trendUp", { size: 15 }) },
-              { label: "Conversions", href: "#", count: html`<span>1.2k</span>`, countTitle: "1,204" },
+              {
+                label: "Conversions",
+                href: "#",
+                count: html`
+                  <span>1.2k</span>
+                `,
+                countTitle: "1,204",
+              },
               { label: "Attribution", href: "#", badge: Badge({ label: "Pro", variant: "neutral" }) },
             ],
           }),
@@ -2590,7 +3361,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "counter (maxLength 280)",
-          Textarea({ id: "cat-ta-cnt", name: "note", maxLength: 280, counter: true, rows: 3, value: "Ship it." }),
+          Textarea({
+            id: "cat-ta-cnt",
+            name: "note",
+            maxLength: 280,
+            counter: true,
+            rows: 3,
+            value: "Ship it.",
+            attrs: { "aria-label": "Note" },
+          }),
         ),
         c(
           "autosize — grows with the content",
@@ -2600,11 +3379,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           "plain / rows / states",
           row(
             Textarea({ placeholder: "Plain" }),
-            Textarea({ rows: 6, value: "Six rows" }),
-            Textarea({ value: "Disabled", disabled: true }),
-            Textarea({ value: "Readonly", readonly: true }),
+            Textarea({ rows: 6, value: "Six rows", attrs: { "aria-label": "Six rows" } }),
+            Textarea({ value: "Disabled", disabled: true, attrs: { "aria-label": "Disabled textarea" } }),
+            Textarea({ value: "Readonly", readonly: true, attrs: { "aria-label": "Read-only textarea" } }),
             Textarea({ required: true, placeholder: "Required" }),
-            Textarea({ value: "bad", invalid: true }),
+            Textarea({ value: "bad", invalid: true, attrs: { "aria-label": "Invalid textarea" } }),
           ),
         ),
       ],
@@ -2617,7 +3396,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           Timeline({
             id: "cat-tl",
             items: [
-              ...timelineStatuses.map((status) => ({ title: status as string, meta: `meta for ${status}`, status })),
+              ...timelineStatuses.map((status) => ({
+                title: status as string,
+                meta: `meta for ${status}`,
+                status,
+              })),
               { title: "No status" },
             ],
           }),
@@ -2652,11 +3435,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             ? "Show toast — data-toast-open clones a <template> into #toast-region (no server on this page)"
             : "from the server — data-action appends into #toast-region",
           routes.toast === "#"
-            ? html`${
-              Button({ label: "Show toast", attrs: { "data-toast-open": "#cat-toast-template" } })
-            }<template id="cat-toast-template">${
-              Toast({ variant: "success", body: "Saved.", meta: "just now", dismissible: true, autoDismissMs: 6000 })
-            }</template>`
+            ? html`
+              ${Button({
+                label: "Show toast",
+                attrs: { "data-toast-open": "#cat-toast-template" },
+              })}<template id="cat-toast-template">${Toast({
+                variant: "success",
+                body: "Saved.",
+                meta: "just now",
+                dismissible: true,
+                autoDismissMs: 6000,
+              })}</template>
+            `
             : Button({
               label: "Show toast",
               attrs: { "data-action": routes.toast, "data-target": "#toast-region", "data-swap": "append" },
@@ -2664,21 +3454,68 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "Toast variants",
-          html`<div class="stack stack--sm">${
-            toastVariants.map((variant) => Toast({ variant, body: `${variant} toast`, meta: "just now" }))
-          }</div>`,
+          html`
+            <div class="stack stack--sm">${toastVariants.map((variant) =>
+              Toast({ variant, body: `${variant} toast`, meta: "just now" })
+            )}</div>
+          `,
         ),
         c(
           "icon / no icon / action / dismissible / autoDismiss",
-          html`<div class="stack stack--sm">${Toast({ body: "Custom icon", icon: Icon("bell", { size: 13 }) })}${
-            Toast({ body: "No icon", icon: false })
-          }${Toast({ variant: "ink", body: "With action", action: { label: "Undo", attrs: { "data-undo": "" } } })}${
-            Toast({ body: "Not dismissible", dismissible: false })
-          }${Toast({ body: "Auto-dismiss 60s", autoDismissMs: 60000 })}</div>`,
+          html`
+            <div class="stack stack--sm">${Toast({ body: "Custom icon", icon: Icon("bell", { size: 13 }) })}${Toast(
+              { body: "No icon", icon: false },
+            )}${Toast({
+              variant: "ink",
+              body: "With action",
+              action: { label: "Undo", attrs: { "data-undo": "" } },
+            })}${Toast({ body: "Not dismissible", dismissible: false })}${Toast({
+              body: "Auto-dismiss 60s",
+              autoDismissMs: 60000,
+            })}</div>
+          `,
         ),
         c(
           "ToastRegion with max",
           ToastRegion({ id: "cat-toast-region", max: 3, toasts: [Toast({ body: "In a region" })] }),
+        ),
+        c(
+          "position bottom-end / bottom-start / bottom-center / top-end / top-start / top-center — each button appends into its own region (#cat-toast-pos-top-center); the regions sit in the top layer, above an open modal, where the Popover API exists",
+          html`
+            ${row(
+              ...([
+                "bottom-end",
+                "bottom-start",
+                "bottom-center",
+                "top-end",
+                "top-start",
+                "top-center",
+              ] as const).map((position) =>
+                Button({
+                  label: position,
+                  variant: "outline",
+                  size: "sm",
+                  attrs: {
+                    "data-toast-open": "#cat-toast-pos-template",
+                    "data-toast-region": `#cat-toast-pos-${position}`,
+                    id: `cat-toast-pos-btn-${position}`,
+                  },
+                })
+              ),
+            )}<template id="cat-toast-pos-template">${Toast({
+              variant: "info",
+              body: "Positioned toast",
+              meta: "closes in 4 s",
+              autoDismissMs: 4000,
+            })}</template>${([
+              "bottom-end",
+              "bottom-start",
+              "bottom-center",
+              "top-end",
+              "top-start",
+              "top-center",
+            ] as const).map((position) => ToastRegion({ id: `cat-toast-pos-${position}`, position, max: 2 }))}
+          `,
         ),
       ],
     },
@@ -2687,19 +3524,18 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "ConsentBanner + a Cookie settings link — shown until a choice is stored, loads its loader on Accept (#cat-consent-banner)",
-          html`${
-            Button({
+          html`
+            ${Button({
               label: "Cookie settings",
               variant: "outline",
               attrs: { "data-consent-open": "#cat-consent-banner" },
-            })
-          }${
-            ConsentBanner({
+            })}${ConsentBanner({
               id: "cat-consent-banner",
               title: "Cookies for analytics?",
               body: html`
                 Acme would use a sample analytics script to count visits. Nothing loads unless you accept. <a
-                  href="#">Privacy notice</a>
+                  href="#"
+                >Privacy notice</a>
               `,
               accept: "Accept",
               reject: "Reject",
@@ -2707,8 +3543,8 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               storageKey: "cat-consent",
               loaders: [{ src: routes.consentLoader, attrs: { "data-id": "sample" } }],
               cookies: ["_ga*", "_gid", "cat_*"],
-            })
-          }`,
+            })}
+          `,
         ),
       ],
     },
@@ -2718,12 +3554,16 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "start + end",
           Toolbar({
-            start: html`${Input({ type: "search", placeholder: "Search", size: "sm" })}${
-              Select({ options: [{ value: "all", label: "All" }] })
-            }`,
-            end: html`${Button({ label: "Export", size: "sm", variant: "outline" })}${
-              Button({ label: "New", size: "sm" })
-            }`,
+            start: html`
+              ${Input({ type: "search", placeholder: "Search", size: "sm" })}${Select({
+                id: "cat-toolbar-filter",
+                options: [{ value: "all", label: "All" }],
+                attrs: { "aria-label": "Filter" },
+              })}
+            `,
+            end: html`
+              ${Button({ label: "Export", size: "sm", variant: "outline" })}${Button({ label: "New", size: "sm" })}
+            `,
           }),
         ),
       ],
@@ -2732,12 +3572,60 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "tooltip",
       cases: [
         c(
-          "hover trigger",
+          "hover trigger (#cat-tip)",
           Tooltip({
             id: "cat-tip",
             trigger: Button({ label: "Hover me", variant: "outline", attrs: { "aria-describedby": "cat-tip" } }),
             content: "Helpful context",
           }),
+        ),
+        c(
+          "side top / bottom / start / end — flips when there is no room (#cat-tip-side-top…)",
+          row(
+            ...tooltipSides.map((side) =>
+              Tooltip({
+                id: `cat-tip-side-${side}`,
+                side,
+                trigger: Button({
+                  label: side,
+                  variant: "outline",
+                  size: "sm",
+                  attrs: { "aria-describedby": `cat-tip-side-${side}` },
+                }),
+                content: `Shown on the ${side}`,
+              })
+            ),
+          ),
+        ),
+        c(
+          "long content wraps; delay 0 (#cat-tip-long)",
+          Tooltip({
+            id: "cat-tip-long",
+            delay: 0,
+            trigger: Button({
+              label: "Why is this disabled?",
+              variant: "ghost",
+              attrs: { "aria-describedby": "cat-tip-long" },
+            }),
+            content:
+              "Invoices that have been sent cannot be deleted; void them instead, and the client gets a credit note.",
+          }),
+        ),
+        c(
+          "at the viewport edge — shifted back on screen (#cat-tip-edge)",
+          html`
+            <div class="cat-tip-edge">${Tooltip({
+              id: "cat-tip-edge",
+              trigger: Button({
+                iconOnly: true,
+                variant: "outline",
+                size: "sm",
+                iconStart: Icon("info", { size: 14 }),
+                attrs: { "aria-label": "About this", "aria-describedby": "cat-tip-edge" },
+              }),
+              content: "A bubble that would run off the right edge is pulled back inside the viewport.",
+            })}</div>
+          `,
         ),
       ],
     },
@@ -2746,7 +3634,11 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: [
         c(
           "every step status",
-          Wizard({ id: "cat-wz", steps: wizardStatuses.map((status) => ({ label: status, status })), content: lorem }),
+          Wizard({
+            id: "cat-wz",
+            steps: wizardStatuses.map((status) => ({ label: status, status })),
+            content: lorem,
+          }),
         ),
         c(
           "steps only — no content (a flow whose pages carry their own)",
@@ -2754,7 +3646,9 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             id: "cat-wz-steps",
             label: "Import steps",
             listAttrs: { class: "cat-wz-list" },
-            steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, { label: "Results" }],
+            steps: [{ label: "Upload", status: "done" }, { label: "Columns", status: "active" }, {
+              label: "Results",
+            }],
           }),
         ),
       ],
@@ -2764,7 +3658,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
 
 /** Every entry, grouped — `routes` decides where the server-driven cases point. */
 export function catalogue(routes: DemoRoutes = staticRoutes, state: CatalogueState = {}): CatalogueEntry[] {
-  return entries(routes, state).map((e) => {
+  return [...entries(routes, state), ...splitEntries.map((make) => make(routes, state))].map((e) => {
     const group = GROUP_OF[e.name];
     if (!group) throw new Error(`catalogue: components/${e.name} has no group in GROUP_OF`);
     return { ...e, group };
@@ -2774,24 +3668,29 @@ export function catalogue(routes: DemoRoutes = staticRoutes, state: CatalogueSta
 /** The whole catalogue (or one group of it) as one page body. */
 export function catalogueHtml(list: CatalogueEntry[] = catalogue()): Html {
   const entries = list;
-  return html`<nav class="cat-nav" aria-label="Components">${
-    entries.map((e) => html`<a href="#cat-${e.name}">${e.name}</a>`)
-  }</nav>${
-    entries.map((e) =>
+  return html`
+    <nav class="cat-nav" aria-label="Components">${entries.map((e) =>
       html`
-        <section class="cat-section" id="cat-${e.name}"
-          data-catalogue="${e.name}"><h2 class="cat-section__title">${e
-            .name} <span class="text-mono text-2xs">components/${e.name}</span></h2>${e.cases.map((k) =>
-              html`
-                <div class="cat-case" data-case="${k.label}">
-                  <p class="cat-case__label">${k.label}</p>
-                  <div class="cat-case__body">${k.html}</div>
-                </div>
-              `
-            )}</section>
+        <a href="#cat-${e.name}">${e.name}</a>
       `
-    )
-  }`;
+    )}</nav>${entries.map((e) =>
+      html`
+        <section class="cat-section" id="cat-${e.name}" data-catalogue="${e.name}">
+          <h2 class="cat-section__title">
+            ${e
+              .name} <span class="text-mono text-2xs">components/${e.name}</span>
+          </h2>${e.cases.map((k) =>
+            html`
+              <div class="cat-case" data-case="${k.label}">
+                <p class="cat-case__label">${k.label}</p>
+                <div class="cat-case__body">${k.html}</div>
+              </div>
+            `
+          )}
+        </section>
+      `
+    )}
+  `;
 }
 
 /** Harness-only layout for the catalogue page — not part of the library. */
@@ -2805,9 +3704,16 @@ export const catalogueCss =
 .cat-case__body { padding: var(--space-4); border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
 .cat-narrow { max-width: 320px; }
+.cat-room { padding-bottom: 9rem; }
+.cat-room--lg { padding-bottom: 18rem; } /* an open list of five rows plus its notes */
+.cat-col { flex: 1 1 16rem; min-width: 0; max-width: 420px; }
+.cat-listbox { position: relative; max-width: 24rem; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-row-muted { color: var(--color-text-muted); }
 .cat-alert-before-icon { --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3)); }
 .cat-alert-before-icon::before { content: ""; flex: 0 0 var(--alert-icon-size); height: var(--alert-icon-size); border-radius: var(--radius-full); background: currentColor; opacity: 0.6; }
+.cat-tip-edge { display: flex; justify-content: flex-end; }
+.cat-banner-scroll { max-height: 8rem; overflow-y: auto; border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
+.cat-banner-scroll p { padding: var(--space-3) var(--space-4); margin: 0; }
 .cat-swatch { background: var(--color-surface-alt); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-2); text-align: center; font-size: var(--font-size-xs); }
 `;

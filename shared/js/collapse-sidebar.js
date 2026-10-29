@@ -8,7 +8,11 @@
  * opens one it is shown as a panel floating beside the rail — fixed at
  * the trigger's row, titled with the parent's label, closed by an outside
  * click, Escape, a scroll, a resize, or expanding the sidebar again.
- * Positioned through the CSSOM (CSP-clean), like dropdown.js.
+ * Positioned through the CSSOM (CSP-clean), like dropdown.js. Hovering or
+ * focusing a parent in the rail opens its flyout too (a parent that is a
+ * link navigates on click, so a click alone could never show its
+ * children), and every rail link carries its label as a title while the
+ * labels are hidden.
  */
 (() => {
   const KEY = "ui-sidebar-collapsed";
@@ -17,17 +21,33 @@
   const flyouts = () => document.querySelectorAll(`.${FLYOUT}`);
 
   function closeFlyout(sublist) {
-    sublist.classList.remove(FLYOUT, "is-open");
-    sublist.hidden = true;
+    // A sublist the server rendered open (the current section) goes back
+    // to open, so expanding the sidebar again shows it where it was.
+    const wasOpen = sublist.getAttribute("data-flyout-restore") === "open";
+    sublist.removeAttribute("data-flyout-restore");
+    sublist.classList.remove(FLYOUT);
+    sublist.classList.toggle("is-open", wasOpen);
+    sublist.hidden = !wasOpen;
     sublist.style.removeProperty("left");
     sublist.style.removeProperty("top");
     sublist.querySelector(".menu__flyout-title")?.remove();
-    document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)?.setAttribute("aria-expanded", "false");
+    document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)?.setAttribute(
+      "aria-expanded",
+      String(wasOpen),
+    );
+    // The sidebar only outranks the content while a flyout is open
+    // (sidebar.css), otherwise it would cover a dropdown near its edge.
+    const sidebar = sublist.closest(".sidebar");
+    if (sidebar && !sidebar.querySelector(`.${FLYOUT}`)) sidebar.classList.remove("sidebar--flyout-open");
   }
   const closeFlyouts = () => flyouts().forEach(closeFlyout);
 
   function openFlyout(sublist, trigger, sidebar) {
     flyouts().forEach((other) => other !== sublist && closeFlyout(other));
+    if (!sublist.hasAttribute("data-flyout-restore")) {
+      sublist.setAttribute("data-flyout-restore", sublist.classList.contains("is-open") ? "open" : "closed");
+    }
+    sidebar.classList.add("sidebar--flyout-open");
     if (!sublist.querySelector(".menu__flyout-title")) {
       const title = document.createElement("li");
       title.className = "menu__flyout-title";
@@ -43,6 +63,17 @@
     if (r.top + height > innerHeight - 8) sublist.style.top = `${Math.max(8, innerHeight - 8 - height)}px`;
   }
 
+  // Labels are hidden in the rail: the link's title says what the icon is.
+  function applyTitles(sidebar) {
+    const collapsed = sidebar.classList.contains("sidebar--collapsed");
+    sidebar.querySelectorAll(".menu__link").forEach((link) => {
+      const label = link.querySelector(".menu__link-label")?.textContent?.trim();
+      if (!label) return;
+      if (collapsed && !link.closest(`.${FLYOUT}`)) link.setAttribute("title", label);
+      else link.removeAttribute("title");
+    });
+  }
+
   try {
     if (localStorage.getItem(KEY) === "1") {
       document.querySelectorAll(".sidebar").forEach((el) => {
@@ -52,6 +83,43 @@
   } catch {
     // No persistence available — starts expanded, which is fine.
   }
+  document.querySelectorAll(".sidebar").forEach(applyTitles);
+
+  // Hover or focus on a parent in the rail shows its children; leaving
+  // both the parent and the flyout closes it after a short grace period.
+  let hoverTimer = 0;
+  const parentOf = (target) => {
+    const link = target.closest?.(".sidebar--collapsed .menu__link");
+    if (!link || link.closest(`.${FLYOUT}`)) return null;
+    const sublist = link.nextElementSibling;
+    return sublist?.classList.contains("menu__sublist") ? { link, sublist } : null;
+  };
+  function hoverOpen(target) {
+    const hit = parentOf(target);
+    if (hit) {
+      clearTimeout(hoverTimer);
+      if (!hit.sublist.classList.contains(FLYOUT)) {
+        if (!hit.sublist.hasAttribute("data-flyout-restore")) {
+          hit.sublist.setAttribute(
+            "data-flyout-restore",
+            hit.sublist.classList.contains("is-open") && !hit.sublist.hidden ? "open" : "closed",
+          );
+        }
+        hit.sublist.hidden = false;
+        openFlyout(hit.sublist, hit.link, hit.link.closest(".sidebar"));
+        hit.link.setAttribute("aria-expanded", "true");
+      }
+      return;
+    }
+    if (target.closest?.(`.${FLYOUT}`)) {
+      clearTimeout(hoverTimer);
+      return;
+    }
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(closeFlyouts, 220);
+  }
+  document.addEventListener("mouseover", (event) => hoverOpen(event.target));
+  document.addEventListener("focusin", (event) => hoverOpen(event.target));
 
   // A parent item clicked in the collapsed rail: toggle.js (registered
   // later) flips the sublist on this same click, so look after it ran.
@@ -61,9 +129,27 @@
       const sidebar = trigger.closest(".sidebar");
       const sublist = document.querySelector(trigger.getAttribute("data-toggle"));
       if (!sublist || !sidebar) return;
+      // Hover may already have opened the flyout, in which case toggle.js
+      // has just hidden it again: a click on a rail parent always ends with
+      // its children showing (Escape, an outside click or leaving closes).
+      const wasOpen = sublist.classList.contains(FLYOUT);
+      if (!sublist.hasAttribute("data-flyout-restore")) {
+        sublist.setAttribute(
+          "data-flyout-restore",
+          sublist.classList.contains("is-open") && !sublist.hidden ? "open" : "closed",
+        );
+      }
       setTimeout(() => {
-        if (sublist.hidden) closeFlyout(sublist);
-        else openFlyout(sublist, trigger, sidebar);
+        if (sublist.hidden && !wasOpen) {
+          closeFlyout(sublist);
+          return;
+        }
+        // toggle.js hides through uiMotion.exit, whose `hidden` lands on
+        // animationend — cancel that or it closes the flyout a beat later.
+        globalThis.uiMotion?.cancelExit(sublist);
+        sublist.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        openFlyout(sublist, trigger, sidebar);
       }, 0);
       return;
     }
@@ -79,16 +165,6 @@
   addEventListener("scroll", closeFlyouts, { capture: true, passive: true });
   addEventListener("resize", closeFlyouts, { passive: true });
 
-  try {
-    if (localStorage.getItem(KEY) === "1") {
-      document.querySelectorAll(".sidebar").forEach((el) => {
-        el.classList.add("sidebar--collapsed");
-      });
-    }
-  } catch {
-    // No persistence available — starts expanded, which is fine.
-  }
-
   document.addEventListener("click", (event) => {
     const trigger = event.target.closest?.("[data-collapse]");
     if (!trigger) return;
@@ -100,6 +176,7 @@
     closeFlyouts();
     const collapsed = target.classList.toggle("sidebar--collapsed");
     trigger.setAttribute("aria-expanded", String(!collapsed));
+    applyTitles(target);
     try {
       localStorage.setItem(KEY, collapsed ? "1" : "0");
     } catch {

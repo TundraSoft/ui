@@ -4,7 +4,7 @@
 
 Import: `import { attr, messageAttrs, Counter, Input, FloatingInput, InputIcon, InputGroup } from "@tundralibs/ui/input"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/input.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -80,6 +80,27 @@ artwork (it is multicolour, heavy, and changes), so bring a set:
 | `label` | `string` |  |  |
 | `flag` | `Html` |  |  |
 
+### `InputMask`
+
+Input masks (`Input({ mask })`): the value is formatted as it is typed.
+`phone` is lenient — digits grouped 3-3-4 (then fours), an optional
+leading `+` country code kept in front; it is a readability aid, not a
+validator, and every country's local grouping is not modelled. `date`
+follows the locale's day/month order (`maskLocale`, via `Intl`) and
+refuses an impossible month or day; `time` is `HH:MM`; `currency` groups
+thousands and keeps two decimals, with the symbol as a fixed addon and
+the raw number submitted; `card` groups a card number 4-4-4-4 (Amex
+4-6-5); `postcode` upper-cases letters and digits with one space;
+`custom` follows `maskPattern`.
+
+- `"phone"`
+- `"date"`
+- `"time"`
+- `"currency"`
+- `"card"`
+- `"postcode"`
+- `"custom"`
+
 ### `InputProps`
 
 | Prop | Type | Required | Description |
@@ -115,6 +136,12 @@ artwork (it is multicolour, heavy, and changes), so bring a set:
 | `strengthMin` | `PasswordStrength` |  | `type: "password"` only, with `strength`: the lowest level (1–4) the validator accepts. |
 | `reveal` | `boolean` |  | `type: "password"` only: `false` renders the bare native control (no toggle, no bar) — inside an `InputGroup`, or when the page must not offer to reveal the value. |
 | `passwordLabels` | `Partial` |  | `type: "password"` only: the toggle's, strength levels' and Caps Lock notice's text, for translation. |
+| `mask` | `InputMask` |  | Format the value as it is typed — see {@link InputMask}. The control stays a plain text input: without the script whatever was typed is submitted as is, so the server must parse leniently (it must anyway). |
+| `maskPattern` | `string` |  | `mask: "custom"`: the shape, one character per position — `#` a digit, `A` a letter, `*` either, anything else a literal that is inserted for the person (`"AA-####"`, `"(###) ###-####"`). |
+| `maskLocale` | `string` |  | BCP 47 locale for `date` (day/month order) and `currency` (separators, symbol). @default "en-US" |
+| `maskCurrency` | `string` |  | `mask: "currency"`: the ISO 4217 code the symbol and decimals come from. @default "USD" |
+| `maskRaw` | `boolean` |  | Submit the unformatted value: the script moves `name` to a hidden input it keeps filled with the raw digits (`1234.50`, `5551234567`), the visible field stays unnamed. @default true for `currency`, false otherwise |
+| `maskPlaceholderChar` | `string` |  | With no `placeholder`: show the mask's shape with this character in every slot (`"_"` → `__/__/____`). |
 | `extraClass` | `string` |  | Extra classes, e.g. `input-group__control` when nested in an InputGroup. |
 | `attrs` | `Attrs` |  |  |
 
@@ -134,6 +161,7 @@ Messages the client-side validator shows instead of the browser's, per rule.
 | `step` | `string` |  |  |
 | `match` | `string` |  | For `match`. |
 | `strength` | `string` |  | For a password's `strengthMin`. |
+| `mask` | `string` |  | For a `mask` that refuses an impossible value (a 13th month). |
 
 ### `PasswordStrength`
 
@@ -602,8 +630,8 @@ Input({ id: "current", name: "password", type: "password", required: true, autoc
 `strengthMin` makes anything below Good invalid; `match` on the confirm field checks equality. Both need `Form({ validate: true })` to show inline; the server still validates.
 
 ```ts
-html`${
-  FormField({
+html`
+  ${FormField({
     id: "new-password",
     label: "Password",
     required: true,
@@ -620,9 +648,7 @@ html`${
         strengthMin: 3,
         messages: { minLength: "Use at least 12 characters.", strength: "Choose a stronger password." },
       }),
-  })
-}${
-  FormField({
+  })}${FormField({
     id: "confirm",
     label: "Confirm password",
     required: true,
@@ -636,8 +662,8 @@ html`${
         match: "#new-password",
         messages: { match: "The passwords do not match." },
       }),
-  })
-}`
+  })}
+`
 ```
 
 ```html
@@ -698,6 +724,43 @@ html`${
 </div>
 ```
 
+### Masked fields: a card number and a price
+
+`mask` formats as you type and keeps the caret; `currency` posts the raw number through a hidden input when the script runs, the text as typed without it. `custom` follows `maskPattern` (`#` digit, `A` letter, `*` either).
+
+```ts
+html`
+  <div class="stack stack--sm">${Input({
+    id: "card",
+    name: "card",
+    mask: "card",
+    autocomplete: "cc-number",
+  })}${Input({
+    id: "price",
+    name: "price",
+    mask: "currency",
+    maskCurrency: "EUR",
+    maskLocale: "de-DE",
+  })}${Input({
+    id: "ref",
+    name: "ref",
+    mask: "custom",
+    maskPattern: "AA-####",
+  })}</div>
+`
+```
+
+```html
+<div class="stack stack--sm">
+  <input type="text" class="input" inputmode="numeric" data-mask="card" data-mask-locale="en-US" id="card" name="card" autocomplete="cc-number">
+  <div class="input-group" data-mask-group="">
+    <span class="input-group__addon">€</span>
+    <input type="text" class="input input-group__control" inputmode="decimal" data-mask="currency" data-mask-locale="de-DE" data-mask-currency="EUR" data-mask-raw="" id="price" name="price" autocomplete="off">
+  </div>
+  <input type="text" class="input" data-mask="custom" data-mask-pattern="AA-####" data-mask-locale="en-US" id="ref" name="ref" autocomplete="off">
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/input/input.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
@@ -708,6 +771,6 @@ Classes defined by `components/input/input.css` — structural, token-driven; ov
 
 `components/input/input.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-autosize`, `data-counter`, `data-counter-for`, `data-icon-hide`, `data-icon-show`, `data-input-clear`, `data-input-clear-button`, `data-label-hide`, `data-label-show`, `data-levels`, `data-msg-strength`, `data-password`, `data-password-caps`, `data-password-label`, `data-password-reveal`, `data-password-reveal-label`, `data-password-strength`, `data-strength-level`, `data-strength-min`.
+Attributes it reads or writes: `data-autosize`, `data-counter`, `data-counter-for`, `data-icon-hide`, `data-icon-show`, `data-input-clear`, `data-input-clear-button`, `data-label-hide`, `data-label-show`, `data-levels`, `data-mask`, `data-mask-locale`, `data-mask-order`, `data-mask-pattern`, `data-mask-raw`, `data-mask-ready`, `data-mask-value`, `data-msg-mask`, `data-msg-strength`, `data-password`, `data-password-caps`, `data-password-label`, `data-password-reveal`, `data-password-reveal-label`, `data-password-strength`, `data-strength-level`, `data-strength-min`.
 
 Events: `rapid:swapped`.

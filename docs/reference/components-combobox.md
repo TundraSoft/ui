@@ -4,7 +4,7 @@
 
 Import: `import { ComboboxList, Combobox } from "@tundralibs/ui/combobox"`
 
-Rendered in every variant on the catalogue (`deno task build:demos`, then `demo/index.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
+Shown on its demo page (`deno task build:demos`, then `demo/components/combobox.html`). Guides: [Getting started](../UI-Getting-Started.md) · [rAPId integration](../UI-Rapid.md) · [Theming](../UI-Theming.md).
 
 ## Functions
 
@@ -199,7 +199,7 @@ Combobox({
       <input class="combobox__input" id="watchers" type="text" role="combobox" autocomplete="off" value="" placeholder="" aria-expanded="false" aria-controls="watchers-list" aria-autocomplete="list" data-combobox-action="/fragments/people" data-combobox-open-on="type" data-combobox-min-chars="2" data-combobox-target="#watchers-list">
     </div>
     <div class="combobox__list" id="watchers-list" role="listbox" aria-multiselectable="true" hidden>
-      <div class="combobox__empty">No matches.</div>
+      <div class="combobox__empty" role="option" aria-disabled="true">No matches.</div>
       <div class="combobox__hints">
         <span>&uarr;&darr; navigate</span>
         <span>&crarr; select</span>
