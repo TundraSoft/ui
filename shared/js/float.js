@@ -54,7 +54,10 @@
       const vh = document.documentElement.clientHeight;
       const roomBelow = vh - a.bottom;
       const roomAbove = a.top;
-      if (r.height + gutter > roomBelow && roomAbove > roomBelow) below = false;
+      // An anchor outside the viewport (a panel rendered open far down a
+      // page, fitted on load) has no meaningful room either way: stay below.
+      const onScreen = a.bottom > 0 && a.top < vh;
+      if (onScreen && r.height + gutter > roomBelow && roomAbove > roomBelow) below = false;
     }
     return { shift, below };
   }

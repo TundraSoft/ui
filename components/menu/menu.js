@@ -21,6 +21,7 @@
         link.classList.remove("menu__link--active");
         link.removeAttribute("aria-current");
       }
+      link.classList.remove("menu__link--current-parent");
     });
     matched.classList.add("menu__link--active");
     matched.setAttribute("aria-current", "page");
@@ -31,6 +32,9 @@
       sublist.classList.add("is-open");
       document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)
         ?.setAttribute("aria-expanded", "true");
+      // The parent (a toggle or a link) carries the mark too: in the
+      // collapsed rail it is the only thing left to show where you are.
+      sublist.previousElementSibling?.classList.add("menu__link--current-parent");
     }
   }
 

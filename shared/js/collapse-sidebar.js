@@ -8,7 +8,11 @@
  * opens one it is shown as a panel floating beside the rail — fixed at
  * the trigger's row, titled with the parent's label, closed by an outside
  * click, Escape, a scroll, a resize, or expanding the sidebar again.
- * Positioned through the CSSOM (CSP-clean), like dropdown.js.
+ * Positioned through the CSSOM (CSP-clean), like dropdown.js. Hovering or
+ * focusing a parent in the rail opens its flyout too (a parent that is a
+ * link navigates on click, so a click alone could never show its
+ * children), and every rail link carries its label as a title while the
+ * labels are hidden.
  */
 (() => {
   const KEY = "ui-sidebar-collapsed";
@@ -48,6 +52,17 @@
     if (r.top + height > innerHeight - 8) sublist.style.top = `${Math.max(8, innerHeight - 8 - height)}px`;
   }
 
+  // Labels are hidden in the rail: the link's title says what the icon is.
+  function applyTitles(sidebar) {
+    const collapsed = sidebar.classList.contains("sidebar--collapsed");
+    sidebar.querySelectorAll(".menu__link").forEach((link) => {
+      const label = link.querySelector(".menu__link-label")?.textContent?.trim();
+      if (!label) return;
+      if (collapsed && !link.closest(`.${FLYOUT}`)) link.setAttribute("title", label);
+      else link.removeAttribute("title");
+    });
+  }
+
   try {
     if (localStorage.getItem(KEY) === "1") {
       document.querySelectorAll(".sidebar").forEach((el) => {
@@ -57,6 +72,37 @@
   } catch {
     // No persistence available — starts expanded, which is fine.
   }
+  document.querySelectorAll(".sidebar").forEach(applyTitles);
+
+  // Hover or focus on a parent in the rail shows its children; leaving
+  // both the parent and the flyout closes it after a short grace period.
+  let hoverTimer = 0;
+  const parentOf = (target) => {
+    const link = target.closest?.(".sidebar--collapsed .menu__link");
+    if (!link || link.closest(`.${FLYOUT}`)) return null;
+    const sublist = link.nextElementSibling;
+    return sublist?.classList.contains("menu__sublist") ? { link, sublist } : null;
+  };
+  function hoverOpen(target) {
+    const hit = parentOf(target);
+    if (hit) {
+      clearTimeout(hoverTimer);
+      if (!hit.sublist.classList.contains(FLYOUT)) {
+        hit.sublist.hidden = false;
+        openFlyout(hit.sublist, hit.link, hit.link.closest(".sidebar"));
+        hit.link.setAttribute("aria-expanded", "true");
+      }
+      return;
+    }
+    if (target.closest?.(`.${FLYOUT}`)) {
+      clearTimeout(hoverTimer);
+      return;
+    }
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(closeFlyouts, 220);
+  }
+  document.addEventListener("mouseover", (event) => hoverOpen(event.target));
+  document.addEventListener("focusin", (event) => hoverOpen(event.target));
 
   // A parent item clicked in the collapsed rail: toggle.js (registered
   // later) flips the sublist on this same click, so look after it ran.
@@ -84,16 +130,6 @@
   addEventListener("scroll", closeFlyouts, { capture: true, passive: true });
   addEventListener("resize", closeFlyouts, { passive: true });
 
-  try {
-    if (localStorage.getItem(KEY) === "1") {
-      document.querySelectorAll(".sidebar").forEach((el) => {
-        el.classList.add("sidebar--collapsed");
-      });
-    }
-  } catch {
-    // No persistence available — starts expanded, which is fine.
-  }
-
   document.addEventListener("click", (event) => {
     const trigger = event.target.closest?.("[data-collapse]");
     if (!trigger) return;
@@ -105,6 +141,7 @@
     closeFlyouts();
     const collapsed = target.classList.toggle("sidebar--collapsed");
     trigger.setAttribute("aria-expanded", String(!collapsed));
+    applyTitles(target);
     try {
       localStorage.setItem(KEY, collapsed ? "1" : "0");
     } catch {

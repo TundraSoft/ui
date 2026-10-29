@@ -39,6 +39,7 @@ it, an optional icon chip at the top end, an optional sparkline under.
 | `trend` | `{ label: string; up: boolean }` |  | e.g. `{ label: "+12.4%", up: true }` — rendered as a status badge beside the value. |
 | `sparkline` | `number[]` |  | A small trend line under the value, drawn on the server as an inline SVG (a polyline and a soft fill) from these points — no chart engine, the same bytes on every render. Two or more numbers; the line fills the tile's width. Say what it shows in `sparklineLabel`. |
 | `sparklineLabel` | `string` |  | Accessible name of the sparkline, e.g. "Daily signups, rising". Without it the drawing is decorative. |
+| `sparklineLabels` | `string[]` |  | One label per point ("Mar", "Week 12"), shown with the value in the tooltip of that point's column (a native `<title>`, so no script). Without labels the tooltip reads "3 of 12: 48". |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -75,6 +76,18 @@ Stat({
   trend: { label: "+8.2%", up: true },
   sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40],
   sparklineLabel: "Daily signups over the last 30 days, rising",
+  sparklineLabels: [
+    "1 Sep",
+    "4 Sep",
+    "7 Sep",
+    "10 Sep",
+    "13 Sep",
+    "16 Sep",
+    "19 Sep",
+    "22 Sep",
+    "25 Sep",
+    "28 Sep",
+  ],
 })
 ```
 
@@ -87,7 +100,7 @@ Stat({
       <span class="badge badge--success">+8.2%</span>
     </span>
   </span>
-  <svg width="2" …>…</svg>
+  <svg width="2" height="32" height="32" height="32" height="32" height="32" height="32" height="32" height="32" height="32" height="32" …>…</svg>
 </div>
 ```
 
@@ -95,4 +108,4 @@ Stat({
 
 Classes defined by `components/stat/stat.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-line`, `.stat__trend`, `.stat__value`
+`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-hit`, `.stat__spark-line`, `.stat__trend`, `.stat__value`

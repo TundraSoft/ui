@@ -41,6 +41,12 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* menu.js marks the parent of the current child: expanded it is a quiet
+   hint, in the collapsed rail (sidebar.css) it is the only mark left. */
+.menu__link--current-parent {
+  color: var(--color-primary);
+}
+
 .menu__icon {
   flex: 0 0 auto;
   width: 1.1em;

@@ -80,6 +80,11 @@
     justify-content: center;
   }
 
+  .sidebar--collapsed .menu__link--current-parent {
+    background: var(--color-surface-alt);
+    font-weight: var(--font-weight-medium);
+  }
+
   .sidebar--collapsed .sidebar__collapse-icon {
     transform: rotate(180deg);
   }

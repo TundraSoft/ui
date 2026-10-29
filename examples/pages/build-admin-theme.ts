@@ -299,6 +299,7 @@ const statCards = Grid({
       tone: "primary" as const,
       sparkline: [31, 33, 36, 38, 37, 35, 36, 39, 42, 44, 43, 48],
       sparklineLabel: "Monthly revenue over the last twelve months, rising",
+      sparklineLabels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
     },
     {
       label: "Active users",
@@ -335,6 +336,7 @@ const statCards = Grid({
     tone: StatTone;
     sparkline?: number[];
     sparklineLabel?: string;
+    sparklineLabels?: string[];
   }) =>
     GridCol({
       span: 3,
@@ -348,6 +350,7 @@ const statCards = Grid({
           trend: { label: stat.trend, up: stat.up },
           sparkline: stat.sparkline,
           sparklineLabel: stat.sparklineLabel,
+          sparklineLabels: stat.sparklineLabels,
         }),
       }),
     })

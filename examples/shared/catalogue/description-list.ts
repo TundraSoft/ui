@@ -28,7 +28,7 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         caseRow(
           ...sizes.map((size) =>
             html`
-              <div class="cat-narrow">${DescriptionList({
+              <div class="cat-col">${DescriptionList({
                 size,
                 divided: true,
                 layout: "inline",

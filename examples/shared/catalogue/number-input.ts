@@ -59,20 +59,23 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
             })}</div>
           `,
           html`
-            <div class="cat-narrow">${srLabel("cat-ni-invalid", "Invalid number")}${NumberInput({
+            <div class="cat-narrow">${FormField({
               id: "cat-ni-invalid",
-              name: "bad",
-              value: 0,
-              min: 1,
-              invalid: true,
+              label: "Quantity",
+              error: "At least 1.",
+              control: NumberInput({ id: "cat-ni-invalid", name: "bad", value: 0, min: 1, invalid: true }),
             })}</div>
           `,
           html`
-            <div class="cat-narrow">${srLabel("cat-ni-disabled", "Disabled number")}${NumberInput({
+            <div class="cat-narrow">${FormField({
               id: "cat-ni-disabled",
-              name: "off",
-              value: 3,
-              disabled: true,
+              label: "Locked",
+              control: NumberInput({
+                id: "cat-ni-disabled",
+                name: "off",
+                value: 3,
+                disabled: true,
+              }),
             })}</div>
           `,
         ),

@@ -96,7 +96,7 @@ Menu({
 
 Classes defined by `components/menu/menu.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__list`, `.menu__sublist`
+`.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__link--current-parent`, `.menu__list`, `.menu__sublist`
 
 ## Behaviour
 

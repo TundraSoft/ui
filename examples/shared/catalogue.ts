@@ -1053,20 +1053,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c(
           "empty state",
-          Combobox({
-            id: "cat-cb-4",
-            name: "four",
-            label: "Empty",
-            open: true,
-            query: "zzz",
-            options: [],
-            emptyText: "Nobody matches.",
-          }),
+          html`
+            <div class="cat-room">${Combobox({
+              id: "cat-cb-4",
+              name: "four",
+              label: "Empty",
+              open: true,
+              query: "zzz",
+              options: [],
+              emptyText: "Nobody matches.",
+            })}</div>
+          `,
         ),
         c(
           "ComboboxList fragment — what a route returns for a swap of the listbox (shown inside a bare listbox here)",
           html`
-            <div class="combobox__list combobox__list--static" role="listbox" aria-label="Fragment sample">${ComboboxList(
+            <div class="cat-listbox" role="listbox" aria-label="Fragment sample">${ComboboxList(
               {
                 id: "cat-cb-5",
                 query: "gr",
@@ -1119,7 +1121,7 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         c(
           "CommandList fragment — what a route returns for a swap of the list (shown inside a bare listbox here)",
           html`
-            <div class="command__list" role="listbox" aria-label="Fragment sample">${CommandList({
+            <div class="cat-listbox" role="listbox" aria-label="Fragment sample">${CommandList({
               id: "cat-cmd-4",
               query: "in",
               items: [{ label: "Invite", icon: "users" }],
@@ -3239,6 +3241,20 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                     trend: { label: "+8.2%", up: true },
                     sparkline: [12, 18, 14, 22, 26, 24, 31, 29, 36, 40, 38, 44],
                     sparklineLabel: "Daily signups over the last 30 days, rising",
+                    sparklineLabels: [
+                      "Jan",
+                      "Feb",
+                      "Mar",
+                      "Apr",
+                      "May",
+                      "Jun",
+                      "Jul",
+                      "Aug",
+                      "Sep",
+                      "Oct",
+                      "Nov",
+                      "Dec",
+                    ],
                     attrs: { id: "cat-stat-spark" },
                   }),
                 }),
@@ -3690,6 +3706,8 @@ export const catalogueCss =
 .cat-narrow { max-width: 320px; }
 .cat-room { padding-bottom: 9rem; }
 .cat-room--lg { padding-bottom: 18rem; } /* an open list of five rows plus its notes */
+.cat-col { flex: 1 1 16rem; min-width: 0; max-width: 420px; }
+.cat-listbox { position: relative; max-width: 24rem; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
 .cat-own-icon { font-weight: var(--font-weight-semibold); }
 .cat-row-muted { color: var(--color-text-muted); }
 .cat-alert-before-icon { --alert-aside-indent: calc(var(--alert-icon-size) + var(--space-3)); }

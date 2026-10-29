@@ -1373,6 +1373,19 @@ agents built the batch in parallel against the same hard rules; what changed and
   `CATALOGUE_GROUPS=forms,data deno task test:catalogue` runs one or two pages (a debugging aid).
 - Harness lesson: an always-open panel in one catalogue case overlaps the next case's control, and a Puppeteer click at
   those coordinates lands on the panel's hints bar — wrap such cases in `.cat-room--lg`.
+- **The user's walk of the demos (2026-10-29)** found what no suite had: a bare `ComboboxList` fragment wrapped in
+  `.combobox__list` is an absolutely positioned open list floating over the page (fragment samples now sit in a static
+  `.cat-listbox`); a read-only half star rendered as a small star because the overlay was a 50%-wide box and the reset's
+  `svg { max-width: 100% }` shrank the icon inside it (it is full size with `clip-path: inset(0 50% 0 0)` now); an
+  inline `DescriptionList` in a flex row wrapped its values letter by letter because `overflow-wrap:
+  anywhere` makes
+  the min-content one character (the value column has `min-width: 6rem`); a popover rendered `open` far down a page was
+  flipped above its trigger on load because `uiFloat.fit` measured room against the viewport the anchor was not in
+  (off-screen anchors never flip); and the collapsed sidebar rail gave no way to see a parent's children — hovering or
+  focusing a rail parent opens its flyout, every rail link carries its label as a `title`, and menu.js marks the parent
+  of the current child `menu__link--current-parent` (highlighted in the rail). Stat sparklines have per-point hit
+  columns with a native `<title>` tooltip (`sparklineLabels` names the points) — with `preserveAspectRatio="none"` any
+  circle or text inside the box would stretch, so the tooltip is the browser's.
 
 **Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
 

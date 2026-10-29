@@ -118,6 +118,18 @@
   stroke: currentColor;
 }
 
+/* Hit columns: invisible until hovered, when the column tints and the
+   browser shows the point's <title>. */
+.stat__spark-hit {
+  fill: currentColor;
+  fill-opacity: 0;
+  transition: fill-opacity var(--transition-fast);
+}
+
+.stat__spark-hit:hover {
+  fill-opacity: 0.14;
+}
+
 /* A narrow tile (two-up on a phone) drops the value a size so four
    digits and a badge still fit on one line. */
 @media screen and (max-width: 575px) {

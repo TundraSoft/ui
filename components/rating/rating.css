@@ -81,23 +81,22 @@
   fill: currentColor;
 }
 
+/* The overlay is full size and clipped to its start half: a narrower box
+   would shrink the icon instead (the reset gives every svg max-width: 100%). */
 .rating__star--half .rating__half {
   position: absolute;
   inset: 0;
-  width: 50%;
-  overflow: hidden;
-  color: var(--color-warning);
   display: inline-flex;
+  color: var(--color-warning);
+  clip-path: inset(0 50% 0 0);
 }
 
 .rating__star--half .rating__half svg {
   fill: currentColor;
-  flex: 0 0 auto;
 }
 
 [dir="rtl"] .rating__star--half .rating__half {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
+  clip-path: inset(0 0 0 50%);
 }
 
 .rating--sm {

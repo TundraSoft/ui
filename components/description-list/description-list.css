@@ -48,7 +48,9 @@
 
 .description-list--inline .description-list__description {
   flex: 1 1 auto;
-  min-width: 0;
+  /* `overflow-wrap: anywhere` makes the min-content one character: in a
+     flex row of lists the value column would wrap letter by letter. */
+  min-width: 6rem;
 }
 
 /* Columns: pairs in a responsive grid. */

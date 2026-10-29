@@ -20,6 +20,12 @@ export type StatProps = {
   sparkline?: number[];
   /** Accessible name of the sparkline, e.g. "Daily signups, rising". Without it the drawing is decorative. */
   sparklineLabel?: string;
+  /**
+   * One label per point ("Mar", "Week 12"), shown with the value in the
+   * tooltip of that point's column (a native `<title>`, so no script).
+   * Without labels the tooltip reads "3 of 12: 48".
+   */
+  sparklineLabels?: string[];
   attrs?: Attrs;
 };
 
@@ -38,12 +44,28 @@ function sparkPoints(data: number[]): string {
   return data.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
 }
 
-/** The sparkline SVG: a line plus a filled area under it (currentColor). */
-function sparkline(data: number[], label?: string): Html {
+/**
+ * The sparkline SVG: a line plus a filled area under it (currentColor),
+ * and one hit column per point carrying a `<title>` — the browser's own
+ * tooltip names the point on hover, and the column tints while it does.
+ */
+function sparkline(data: number[], label?: string, labels?: string[]): Html {
   const points = sparkPoints(data);
   const first = points.split(" ")[0]!.split(",")[0];
   const last = points.split(" ").pop()!.split(",")[0];
   const area = `${first},${SPARK_H} ${points} ${last},${SPARK_H}`;
+  const n = data.length;
+  const step = n > 1 ? SPARK_W / (n - 1) : SPARK_W;
+  const hits = data.map((v, i) => {
+    const x = n > 1 ? Math.max(0, i * step - step / 2) : 0;
+    const w = n > 1 ? (i === 0 || i === n - 1 ? step / 2 : step) : SPARK_W;
+    const tip = `${labels?.[i] ?? `${i + 1} of ${n}`}: ${String(v)}`;
+    return html`
+      <rect class="stat__spark-hit" x="${x.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="${String(SPARK_H)}">
+        <title>${tip}</title>
+      </rect>
+    `;
+  });
   return html`
     <svg class="stat__spark" viewBox="0 0 ${String(SPARK_W)} ${String(
       SPARK_H,
@@ -63,6 +85,7 @@ function sparkline(data: number[], label?: string): Html {
         stroke-linecap="round"
         vector-effect="non-scaling-stroke"
       ></polyline>
+      ${hits}
     </svg>
   `;
 }
@@ -86,7 +109,7 @@ export function Stat(props: StatProps): Html {
               variant: props.trend.up ? "success" : "danger",
             })}</span>
           `}</span>${props.sparkline && props.sparkline.length > 1
-          ? sparkline(props.sparkline, props.sparklineLabel)
+          ? sparkline(props.sparkline, props.sparklineLabel, props.sparklineLabels)
           : ""}
       </div>
   `;

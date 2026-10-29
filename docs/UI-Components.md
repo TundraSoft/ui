@@ -539,6 +539,12 @@ Avatar({ src, alt: "Grace" });
 Avatar({ initials: "JS", status: "online" }); // presence dot: online | away | busy | offline
 AvatarGroup({ avatars: [a, b, c] });
 Stat({ label: "Revenue", value: "$48.2k", icon: Icon("coin"), tone: "success", trend: { label: "+12.4%", up: true } });
+Stat({
+  label: "Signups",
+  value: "1,284",
+  sparkline: [12, 18, 14, 22, 26],
+  sparklineLabels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+}); // hover a column for its value
 ```
 
 ### [Timeline](./reference/components-timeline.md), [Empty](./reference/components-empty.md), [Skeleton](./reference/components-skeleton.md), [Progress](./reference/components-progress.md)
