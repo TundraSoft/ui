@@ -1,21 +1,21 @@
 /// <reference lib="dom" />
 /**
- * The catalogue pages (demo/{forms,data,charts,cards,navigation,actions,
- * feedback}.html), three ways:
+ * The catalogue — one demo page per component (demo/components/<name>.html,
+ * built by examples/pages/build-demo.ts) — three ways:
  *
  * 1. Coverage, statically: every `export function` in components/ and
  *    every literal of every declared variant/size/tone/status union is
  *    referenced by examples/shared/catalogue.ts (+ charts.ts / data.ts).
  *    Add a component or a variant without cataloguing it and this fails.
- * 2. Every page renders: every catalogued section and case is present and
+ * 2. Every component page renders: its catalogued cases are all present and
  *    non-empty, every chart drew, no console/page errors, no inline
  *    styles, no horizontal overflow, and the dark toggle changes the
  *    canvas.
- * 3. Behaviour, per page: slider sync, combobox keyboard, inline date
+ * 3. Behaviour, per group (each step moves to the page it drives): slider sync, combobox keyboard, inline date
  *    picker, OTP, dropzone (forms); data-table selection + bulk bar +
  *    sticky header (data); command palette (navigation); popover
  *    (actions); and the theme switcher — each theme's computed body
- *    background, light and dark (forms).
+ *    background, light and dark, through the site header's theme switch.
  */
 import { ensureDir, readDir, readTextFile, realPath, writeTextFile } from "@tundralibs/compat/file";
 import { exit, getEnv } from "@tundralibs/compat/runtime";
@@ -190,25 +190,46 @@ async function axePass(page: Page, file: string): Promise<void> {
 // in .test-output/catalogue/axe.json for anyone working the allowlist down.
 const axeReport: Record<string, AxeViolation[]> = {};
 
-async function openPage(file: string): Promise<Page> {
+/** A component's page, from the demo root: every component has one (demo/components/<name>.html). */
+const fileOf = (name: string) => `components/${name}.html`;
+
+/** The one tab the suite drives; listeners report against whichever page it is on. */
+async function openPage(): Promise<Page> {
   const page = await browser.newPage();
+  const here = () => page.url().replace(`file://${root}/`, "");
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
   await page.setViewport({ width: 1280, height: 900 });
   page.on("console", (m) => {
     if ((m.type() === "error" || m.type() === "warn") && !isNetworkNoise(m)) {
-      fail(`${file}: console.${m.type()}: ${m.text()}`);
+      fail(`${here()}: console.${m.type()}: ${m.text()}`);
     }
   });
-  page.on("pageerror", (e) => fail(`${file}: pageerror: ${e}`));
+  page.on("pageerror", (e) => fail(`${here()}: pageerror: ${e}`));
   page.on(
     "requestfailed",
-    (r) => !isBlockedRequest(r) && fail(`${file}: requestfailed: ${r.url()} — ${r.failure()?.errorText}`),
+    (r) => !isBlockedRequest(r) && fail(`${here()}: requestfailed: ${r.url()} — ${r.failure()?.errorText}`),
   );
-  // file:// pages share one origin, so a persisted theme toggle from the
-  // previous page would leak into this one — clear before the page runs.
-  await page.evaluateOnNewDocument(() => localStorage.clear());
-  await page.goto(`file://${root}/${file}`, { waitUntil: "networkidle0", timeout: 30000 });
+  // A guarded form left dirty asks before the tab moves on (beforeunload).
+  page.on("dialog", (d) => d.accept());
+  // file:// pages share one origin, so a persisted theme toggle (or the
+  // collapsed sidebar) from the previous page would leak into the next —
+  // clear before every page runs (about:blank between groups has no storage).
+  await page.evaluateOnNewDocument(() => {
+    try {
+      localStorage.clear();
+    } catch { /* about:blank */ }
+  });
   return page;
+}
+
+/**
+ * Moves the tab to a component's page, unless it is already there — then
+ * nothing reloads, so a step can build on the state the previous one left.
+ */
+async function go(page: Page, name: string): Promise<void> {
+  const url = `file://${root}/${fileOf(name)}`;
+  if (page.url() === url) return;
+  await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
 }
 
 /**
@@ -219,8 +240,10 @@ async function openPage(file: string): Promise<Page> {
  * showValue, Navbar menuActions, Switch state words and the consent
  * banner. One block per page.
  */
-async function outsmartFixes(page: Page, group: string, file: string): Promise<void> {
-  const fresh = async (seed?: Record<string, string>, width = 1280) => {
+async function outsmartFixes(page: Page, group: string): Promise<void> {
+  /** A new tab on a component's page, its storage holding exactly `seed`. */
+  const fresh = async (name: string, seed?: Record<string, string>, width = 1280) => {
+    const file = fileOf(name);
     const p = await browser.newPage();
     await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
     await p.setViewport({ width, height: 800 });
@@ -234,6 +257,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
   };
 
   if (group === "forms") {
+    await go(page, "input");
     // #66: the glyph paints above the search control's .input-clear wrapper.
     // Hit-testing follows paint order, so let the glyph take the hit for a
     // moment and ask what is on top at its centre.
@@ -255,6 +279,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
     check(glyph.fill > 0.99, `forms: the search InputIcon's control does not fill the row (${glyph.fill.toFixed(2)})`);
     check(glyph.cls === "input-icon cat-own-class", `forms: InputIcon does not merge attrs.class (${glyph.cls})`);
 
+    await go(page, "segmented");
     // #67: as wide as its options inside a FormField, not the field.
     const segWide = await page.$eval("#cat-seg-long", (el) => {
       const seg = el.closest(".segmented")!;
@@ -265,6 +290,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
     });
     check(segWide.seg < segWide.field - 1, `forms: Segmented stretches to its FormField (${JSON.stringify(segWide)})`);
 
+    await go(page, "slider");
     // #72: Slider showValue — a value without a label of its own.
     const slider = await page.$eval("#cat-sl-field", (input) => {
       const root = input.closest(".slider")!;
@@ -288,6 +314,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
     );
     check(Math.abs(slider.end) < 1, `forms: Slider showValue output is not at the row's end (${slider.end}px)`);
 
+    await go(page, "switch");
     // #64: the state word follows the checkbox, with no script.
     const word = (id: string) => page.$eval(`#${id}`, (el) => (el.closest("label") as HTMLElement).innerText.trim());
     const wordBefore = await word("cat-sw-state");
@@ -312,7 +339,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
 
     // #67 on a phone: scrolls inside, never widens the page; the thumb
     // stays on the checked option however far the control is scrolled.
-    const phone = await fresh(undefined, 375);
+    const phone = await fresh("segmented", undefined, 375);
     const thumb = () =>
       phone.$eval("#cat-seg-long", (el) => {
         const seg = el.closest(".segmented") as HTMLElement;
@@ -347,6 +374,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
   }
 
   if (group === "cards") {
+    await go(page, "collapsible");
     // #70: an accordion row reads at body size, not h3 size.
     const acc = await page.$eval("#cat-acc .collapsible__trigger", (t) => {
       const cs = getComputedStyle(t);
@@ -360,7 +388,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
 
     // #65: a host's unlayered page defaults (an embedding frame's) placed
     // ahead of the bundle must not beat the library's page rules.
-    const host = await fresh();
+    const host = await fresh("card");
     const page65 = await host.evaluate(() => {
       const style = document.createElement("style");
       style.textContent =
@@ -394,7 +422,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
 
     // #72: data-theme-default — the site's default replaces the system's,
     // in CSS (no script needed) and for the toggle's first click.
-    const def = await fresh();
+    const def = await fresh("card");
     const bgs = await def.evaluate(() => {
       const root = document.documentElement;
       const bg = () => getComputedStyle(document.body).backgroundColor;
@@ -423,6 +451,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
   }
 
   if (group === "charts") {
+    await go(page, "chart");
     // #71: number formats as data. Labels carry a <title> twin, so read the
     // first text node's tspan.
     const labels = (sel: string) =>
@@ -463,6 +492,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
   }
 
   if (group === "navigation") {
+    await go(page, "navbar");
     // #72: Navbar menuActions — the phone menu carries what the bar drops.
     const bar = await page.$eval("#cat-nav-menu", (n) => ({
       menu: getComputedStyle(n.querySelector(".navbar__menu-actions")!).display,
@@ -473,7 +503,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
       bar.menu === "none" && bar.twin !== "none" && bar.wrap === "nowrap",
       `navigation@1280: menuActions / hide-md / nowrap links (${JSON.stringify(bar)})`,
     );
-    const phone = await fresh(undefined, 375);
+    const phone = await fresh("navbar", undefined, 375);
     const state = () =>
       phone.$eval("#cat-nav-menu", (n) => ({
         menu: (n.querySelector(".navbar__menu-actions") as HTMLElement).offsetParent !== null,
@@ -515,7 +545,7 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
         w.clarity = (...a: unknown[]) => w.__consent.push(`clarity:${JSON.stringify(a)}`);
       });
 
-    const first = await fresh();
+    const first = await fresh("consent");
     await listen(first);
     const asked = await consent(first);
     check(
@@ -549,14 +579,14 @@ async function outsmartFixes(page: Page, group: string, file: string): Promise<v
     );
     await first.close();
 
-    const granted = await fresh({ "cat-consent": "granted" });
+    const granted = await fresh("consent", { "cat-consent": "granted" });
     const later = await consent(granted);
     check(
       later.hidden && later.sample === 1,
       `feedback: a later visit after Accept loads without asking (${JSON.stringify(later)})`,
     );
     await granted.close();
-    const denied = await fresh({ "cat-consent": "denied" });
+    const denied = await fresh("consent", { "cat-consent": "denied" });
     const no = await consent(denied);
     check(
       no.hidden && no.sample === 0,
@@ -618,6 +648,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
           message: (ctl as HTMLInputElement).validationMessage ?? "",
         };
       }, id);
+    await go(page, "select");
     await trapSubmits("#cat-req-plain");
     await page.$eval("#cat-req-plain", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     await clickIn("#cat-req-plain-go");
@@ -659,6 +690,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: required Select in Form({ validate }) (${JSON.stringify({ valBlocked, valFixed, valSent })})`,
     );
 
+    await go(page, "combobox");
     // Required Combobox, single and multi: typed text is not a pick; removing
     // the last token makes the multi invalid again.
     await trapSubmits("#cat-req-cb");
@@ -836,6 +868,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: Combobox caret / total / selectedOptions (${JSON.stringify(cbExtras)})`,
     );
 
+    await go(page, "form");
     // A Select's control is a button: Enter in the search box beside it submits.
     await trapSubmits("#cat-autosubmit");
     await page.$eval("#cat-autosubmit input[type=search]", (el) => el.scrollIntoView({ block: "center" }));
@@ -863,6 +896,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: autosubmit on a Select pick / Segmented change (${JSON.stringify(subs)})`,
     );
 
+    await go(page, "select");
     // The Select button: Space opens, arrows move, Enter picks and keeps focus.
     await page.$eval("#cat-sel", (el) => el.scrollIntoView({ block: "center" }));
     await page.focus("#cat-sel");
@@ -885,6 +919,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: select button keyboard (opened ${opened}, ${JSON.stringify(keyed)})`,
     );
 
+    await go(page, "combobox");
     // Combobox({ hints: false })
     await page.$eval("#cat-cb-nohints", (el) => el.scrollIntoView({ block: "center" }));
     await page.click("#cat-cb-nohints");
@@ -902,6 +937,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     );
     await page.keyboard.press("Escape");
 
+    await go(page, "datetimepicker");
     // DateTimePicker({ clearable })
     const clearBefore = await page.$eval(
       "#dtp-clear [data-datetime-clear]",
@@ -919,6 +955,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `forms: datetimepicker Clear (${clearBefore}, ${JSON.stringify(cleared)})`,
     );
 
+    await go(page, "segmented");
     // A Segmented in a dialog that was closed at load is placed when it opens.
     await page.$eval('[data-modal-open="#cat-seg-dialog"]', (el) => (el as HTMLElement).click());
     await pause(400);
@@ -930,6 +967,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     await page.$eval("#cat-seg-dialog [data-modal-close]", (el) => (el as HTMLElement).click());
     await pause();
 
+    await go(page, "combobox");
     // Combobox({ loadOnFocus }): the first focus fetches once.
     await page.$eval("#cat-cb-focus", (el) => el.scrollIntoView({ block: "center" }));
     await page.focus("#cat-cb-focus");
@@ -945,6 +983,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     );
     await page.keyboard.press("Escape");
 
+    await go(page, "segmented");
     // Segmented counts
     const counts = await page.$$eval(
       "#cat-seg-count .segmented__count",
@@ -957,6 +996,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "data") {
+    await go(page, "data-table");
     // A phone: responsive "cards" lays each row out as a labelled card, the
     // eight-page pagination folds to prev · "Page 2 of 8" · next, and the
     // page never scrolls sideways.
@@ -1100,22 +1140,30 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
         grouped.rows === 3,
       `data: rowGroup / rowAttrs (${JSON.stringify(grouped)})`,
     );
+    await go(page, "avatar");
     const avatar = await page.evaluate(() => ({
       icon: !!document.querySelector("#cat-avatar-icon.avatar.avatar--sm.cat-av > svg"),
       group: !!document.querySelector(".avatar-group.cat-avg"),
     }));
     check(avatar.icon && avatar.group, `data: avatar markup initials / class merge (${JSON.stringify(avatar)})`);
 
-    const misc = await page.evaluate(() => ({
+    await go(page, "timeline");
+    const tl = await page.evaluate(() => ({
       tones: document.querySelectorAll("#cat-tl-tones .timeline__item--danger .timeline__marker svg").length,
       text: !!document.querySelector("#cat-tl-tones .timeline__text"),
-      ownIcon: !!document.querySelector(".empty__icon > .cat-own-icon"),
       tlAttrs: !!document.querySelector(
         "ol#cat-tl-tones.timeline.cat-tl[data-kind=tones] > li.timeline__item.cat-tl-danger",
       ),
-      emptyHtml: !!document.querySelector("#cat-empty-details .empty__text strong"),
-      details: !!document.querySelector("#cat-empty-details .empty__text + .empty__details .badge"),
     }));
+    await go(page, "empty");
+    const misc = {
+      ...tl,
+      ...(await page.evaluate(() => ({
+        ownIcon: !!document.querySelector(".empty__icon > .cat-own-icon"),
+        emptyHtml: !!document.querySelector("#cat-empty-details .empty__text strong"),
+        details: !!document.querySelector("#cat-empty-details .empty__text + .empty__details .badge"),
+      }))),
+    };
     check(
       misc.tones === 1 && misc.text && misc.ownIcon && misc.tlAttrs && misc.emptyHtml && misc.details,
       `data: timeline tones+attrs / empty Html icon, text, details (${JSON.stringify(misc)})`,
@@ -1123,6 +1171,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "feedback") {
+    await go(page, "alert");
     const roles = await page.$$eval(
       "#cat-alert-roles > .alert",
       (els) => els.map((e) => e.getAttribute("role")).join(),
@@ -1186,6 +1235,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
       `feedback: alert aside on a phone (${JSON.stringify(phone)})`,
     );
 
+    await go(page, "modal");
     // A modal rendered with `open` opens when a swap brings it in.
     await clickIn("#cat-modal-open-trigger");
     await pause();
@@ -1230,6 +1280,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "actions") {
+    await go(page, "dropdown");
     // A long Dropdown: capped and scrolling, search focused on open, a parent
     // kept (and its sublist opened) for a matching child, restored on close.
     await page.$eval("#cat-dd-long", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
@@ -1289,6 +1340,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
     const noSearch = await page.$eval("#cat-dd-plain", (el) => !el.querySelector("[data-dropdown-search]"));
     check(noSearch, "actions: Dropdown({ searchable: false }) still renders a search box");
 
+    await go(page, "button");
     await page.evaluate(() => {
       const w = globalThis as unknown as { __copied?: string };
       Object.defineProperty(navigator, "clipboard", {
@@ -1327,24 +1379,33 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "cards") {
+    await go(page, "tabs");
     await clickIn("#cat-tablinks a:nth-child(2)");
     await pause();
-    const cards = await page.evaluate(() => ({
+    const tabs = await page.evaluate(() => ({
       current: document.querySelector("#cat-tablinks [aria-current=page]")?.textContent?.trim(),
       selected: document.querySelectorAll("#cat-tablinks [aria-selected]").length,
-      stepsOnly: !document.querySelector("#cat-wz-steps .wizard__content") &&
-        document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
-      sub: !!document.querySelector(".page-header--sub h2.page-header__title"),
       tabTitle: document.querySelector("#cat-tablinks .tabs__count")?.getAttribute("title"),
       tabList: !!document.querySelector("#cat-tablinks > .tabs__list.cat-tablinks-list[data-kind=links]"),
+    }));
+    await go(page, "wizard");
+    const wizard = await page.evaluate(() => ({
+      stepsOnly: !document.querySelector("#cat-wz-steps .wizard__content") &&
+        document.querySelector("#cat-wz-steps")!.classList.contains("wizard--steps-only"),
       wizard: (() => {
         const ol = document.querySelector("#cat-wz-steps ol")!;
         return `${ol.getAttribute("aria-label")}|${ol.classList.contains("cat-wz-list")}|${
           ol.querySelector("[aria-current=step] .wizard__step-label")?.textContent?.trim()
         }|${ol.querySelector(".wizard__step--done .sr-only")?.textContent}`;
       })(),
-      badge: !!document.querySelector(".page-header--sub .page-header__title-row .badge"),
     }));
+    // The page's own header is level 1; the catalogued level-2 one sits in a case.
+    await go(page, "page-header");
+    const header = await page.evaluate(() => ({
+      sub: !!document.querySelector(".cat-case .page-header--sub h2.page-header__title"),
+      badge: !!document.querySelector(".cat-case .page-header--sub .page-header__title-row .badge"),
+    }));
+    const cards = { ...tabs, ...wizard, ...header };
     check(
       cards.current === "Clicks" && cards.selected === 0 && cards.stepsOnly && cards.sub && cards.badge &&
         cards.tabTitle === "1,204" && cards.tabList && cards.wizard === "Import steps|true|Columns|Done: ",
@@ -1353,6 +1414,7 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 
   if (group === "navigation") {
+    await go(page, "breadcrumb");
     const folded = await page.$eval("#cat-bc-fold", (box) => ({
       more: getComputedStyle(box.querySelector(".breadcrumb__more")!).display,
       mids: [...box.querySelectorAll(".breadcrumb__item--mid")].map((e) => getComputedStyle(e).display).join(),
@@ -1373,13 +1435,16 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
   }
 }
 
-// CATALOGUE_GROUPS=forms,data runs only those pages (a debugging aid; CI runs all).
+// CATALOGUE_GROUPS=forms,data runs only those groups (a debugging aid; CI runs all).
 const onlyGroups = (getEnv().CATALOGUE_GROUPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-for (const group of catalogueGroups) {
-  if (onlyGroups.length && !onlyGroups.includes(group.id)) continue;
-  const file = `${group.id}.html`;
-  const page = await openPage(file);
-  const expected = entries.filter((e) => e.group === group.id);
+const wanted = (group: string) => !onlyGroups.length || onlyGroups.includes(group);
+const page = await openPage();
+
+/* ------------------------------------------- every component's own page */
+for (const entry of entries) {
+  if (!wanted(entry.group)) continue;
+  const file = fileOf(entry.name);
+  await go(page, entry.name);
   const html = await readTextFile(`demo/${file}`);
   if (/ style="/.test(html)) fail(`${file}: markup contains an inline style attribute (CSP §9)`);
   // A second class attribute is silently dropped by the parser: a caller's
@@ -1398,16 +1463,43 @@ for (const group of catalogueGroups) {
     overflow: document.documentElement.scrollWidth - innerWidth,
     bg: getComputedStyle(document.body).backgroundColor,
   }));
-  for (const e of expected) if (!onPage.sections.includes(e.name)) fail(`${file}: section ${e.name} missing`);
-  const expectedCases = expected.reduce((n, e) => n + e.cases.length, 0);
-  check(onPage.cases === expectedCases, `${file}: ${onPage.cases} cases on the page, ${expectedCases} catalogued`);
+  check(
+    onPage.sections.join() === entry.name,
+    `${file}: catalogue sections ${onPage.sections.join() || "none"}, expected ${entry.name}`,
+  );
+  check(
+    onPage.cases === entry.cases.length,
+    `${file}: ${onPage.cases} cases on the page, ${entry.cases.length} catalogued`,
+  );
   check(onPage.emptyCases.length === 0, `${file}: empty cases: ${onPage.emptyCases.join(", ")}`);
   check(onPage.charts === onPage.chartEls, `${file}: ${onPage.chartEls - onPage.charts} chart(s) did not draw`);
   check(onPage.overflow <= 0, `${file}: page overflows horizontally by ${onPage.overflow}px`);
   await axePass(page, file);
 
-  /* ------------------------------------------------ behaviour, per page */
+  await page.screenshot({ path: `${outDir}/${entry.name}-light.png` });
+  await page.click("[data-theme-toggle]");
+  await pause(400);
+  const dark = await page.evaluate(() => ({
+    theme: document.documentElement.dataset.theme,
+    bg: getComputedStyle(document.body).backgroundColor,
+    charts: document.querySelectorAll("[data-chart] .apexcharts-canvas").length,
+  }));
+  check(
+    dark.theme === "dark" && dark.bg !== onPage.bg,
+    `${file}: dark toggle did not change the canvas colour (${onPage.bg} → ${dark.bg})`,
+  );
+  check(dark.charts === onPage.chartEls, `${file}: ${onPage.chartEls - dark.charts} chart(s) lost on the theme switch`);
+  await page.screenshot({ path: `${outDir}/${entry.name}-dark.png` });
+}
+
+/* --------------------------------------------- behaviour, per group */
+// Each block moves the one tab to the page that holds what it drives
+// (`go`); consecutive steps on the same page keep its state.
+for (const group of catalogueGroups) {
+  if (!wanted(group.id)) continue;
+  await page.goto("about:blank");
   if (group.id === "forms") {
+    await go(page, "slider");
     // slider: --slider-pct set by script from the input's value
     const pct = await page.$eval(
       "#concurrency",
@@ -1424,6 +1516,7 @@ for (const group of catalogueGroups) {
     );
     check(out === "1 worker", `forms: slider output pluralises via data-slider-unit (${out})`);
 
+    await go(page, "combobox");
     // combobox keyboard (server-driven case, filtered client-side without the runtime)
     await page.$eval("#reviewer-list", (el) => el.setAttribute("hidden", ""));
     await page.focus("#reviewer");
@@ -1442,6 +1535,7 @@ for (const group of catalogueGroups) {
       "forms: combobox closes after picking",
     );
 
+    await go(page, "datepicker");
     // inline date picker: trigger toggles, outside click leaves it open, 7 in-between days
     const dpHidden = () => page.$eval("#period-panel", (el) => el.hasAttribute("hidden"));
     check(!(await dpHidden()), "forms: inline datepicker starts open");
@@ -1457,6 +1551,7 @@ for (const group of catalogueGroups) {
     const inRange = await page.$$eval("#period .datepicker__day--in-range", (els) => els.length);
     check(inRange === 7, `forms: range renders 7 in-between days (${inRange})`);
 
+    await go(page, "segmented");
     // segmented: the thumb follows the checked option
     const thumb = await page.$eval("#cat-seg-md", (el) => ({
       ready: el.hasAttribute("data-segmented-ready"),
@@ -1474,6 +1569,7 @@ for (const group of catalogueGroups) {
     const thumb2 = await page.$eval("#cat-seg-md", (el) => (el as HTMLElement).style.getPropertyValue("--segmented-x"));
     check(thumb2 !== thumb.x, `forms: segmented thumb did not move on change (${thumb.x} → ${thumb2})`);
 
+    await go(page, "select");
     // select: combobox-style UI, native <select> is the value
     const nativeHidden = await page.$eval("#cat-sel-native", (el) => getComputedStyle(el).display === "none");
     check(nativeHidden, "forms: enhanced select still shows the native control");
@@ -1497,6 +1593,7 @@ for (const group of catalogueGroups) {
     const back = await page.$eval("#cat-sel", (el) => el.textContent!.trim());
     check(back === "Alpha", `forms: native change did not repaint the select UI (${back})`);
 
+    await go(page, "input");
     // a Select inside an InputGroup: its list must escape the group (no overflow clip)
     await page.$eval(".input-group .select [role=combobox]", (el) => el.scrollIntoView({ block: "center" }));
     await page.click(".input-group .select [role=combobox]");
@@ -1521,6 +1618,7 @@ for (const group of catalogueGroups) {
     await pause();
     const closedAgain = await page.$eval(".input-group .select .combobox__list", (el) => el.hasAttribute("hidden"));
     check(closedAgain, "forms: clicking the caret again did not close the list");
+    await go(page, "select");
     // The field itself toggles too, like a native select (it was open-only,
     // so the caret was the one way to close it), and Tab away closes it.
     const selOpen = () => page.$eval("#cat-sel-list", (el) => !el.hasAttribute("hidden"));
@@ -1657,6 +1755,7 @@ for (const group of catalogueGroups) {
       `forms: Select({ searchable: false }) (${JSON.stringify(plainSel)})`,
     );
 
+    await go(page, "combobox");
     // A searchable combobox keeps its list open on a click into its input.
     await page.$eval("#reviewer", (el) => el.scrollIntoView({ block: "center" }));
     await page.click("#reviewer");
@@ -1667,6 +1766,7 @@ for (const group of catalogueGroups) {
     await page.keyboard.press("Escape");
     check(stays, "forms: a second click in a searchable combobox's input closed its list");
 
+    await go(page, "editor");
     // editor: markdown toolbar wraps the selection; html surface mirrors into the textarea.
     // Scroll first so Puppeteer's click needs no scroll of its own (a scroll between
     // selecting and clicking dropped the selection under Bun once), and wait for the
@@ -1732,6 +1832,7 @@ for (const group of catalogueGroups) {
     first = await page.$eval("#note", (el) => (el as HTMLTextAreaElement).value.split("\n")[0]);
     check(!first.startsWith("## "), `forms: markdown heading did not toggle off (${first})`);
 
+    await go(page, "dropzone");
     // dropzone progress is a native <progress>
     const progressVal = await page.$eval("progress.dropzone__bar", (el) => (el as HTMLProgressElement).value);
     check(progressVal === 40, `forms: dropzone bar is a native <progress> (${progressVal})`);
@@ -1779,6 +1880,7 @@ for (const group of catalogueGroups) {
       `forms: rapid:error marks the row (${JSON.stringify(failed)})`,
     );
 
+    await go(page, "form");
     // Client-side validation (Form({ validate: true }) + form.js): the
     // browser bubble is replaced by inline messages, an invalid submit is
     // stopped before it can leave the page, the first invalid field gets
@@ -1926,6 +2028,7 @@ for (const group of catalogueGroups) {
       drifted === "The passwords do not match.",
       `forms: changing the password re-checks the confirm field (${drifted})`,
     );
+    await go(page, "input");
     check(
       await page.$eval("#cat-pw-3", (el) => el.closest("[data-password]")!.getAttribute("data-strength-level")) !== "0",
       "forms: a prefilled password is scored on load",
@@ -2001,11 +2104,13 @@ for (const group of catalogueGroups) {
       !clearBefore && cleared.value === "" && cleared.hidden && cleared.focused === "cat-srch-1" && cleared.none,
       `forms: search clear button (${JSON.stringify(cleared)})`,
     );
+    await go(page, "textarea");
     const h0 = await page.$eval("#cat-ta-auto", (el) => el.getBoundingClientRect().height);
     await page.type("#cat-ta-auto", "one\ntwo\nthree\nfour\nfive\nsix");
     await pause();
     const h1 = await page.$eval("#cat-ta-auto", (el) => el.getBoundingClientRect().height);
     check(h1 > h0 + 30, `forms: autosize textarea grows (${h0} → ${h1})`);
+    await go(page, "form");
     await page.focus("#cv-password");
     const caps = await page.evaluate(() => {
       const input = document.querySelector("#cv-password")!;
@@ -2016,11 +2121,13 @@ for (const group of catalogueGroups) {
       return { on, off };
     });
     check(caps.on && caps.off, `forms: Caps Lock notice follows the modifier (${JSON.stringify(caps)})`);
+    await go(page, "input");
     await page.type("#inv-email", "grace");
     await pause();
     const dirty = await page.$eval("#cat-invite", (f) => f.hasAttribute("data-dirty") && f.hasAttribute("data-guard"));
     check(dirty, "forms: a guarded form marks itself dirty on input");
 
+    await go(page, "card-fields");
     // Card fields: grouping, brand → CVC length, expiry, luhn.
     await page.type("#card-number", "378282246310005");
     await pause();
@@ -2075,6 +2182,7 @@ for (const group of catalogueGroups) {
       "forms: CardFields renders only the parts asked for",
     );
 
+    await go(page, "otp");
     // one-time code
     const carrierHidden = await page.$eval(
       "#otp-sms-value",
@@ -2122,6 +2230,7 @@ for (const group of catalogueGroups) {
     );
     check(described, "forms: error state wires aria-invalid + aria-describedby on the cells");
 
+    await go(page, "select");
     // select: the tick follows a pick (it stayed on the server-rendered option)
     await page.click("#cat-sel");
     await page.click("#cat-sel-list [data-value=b]");
@@ -2137,6 +2246,7 @@ for (const group of catalogueGroups) {
     check(ticks === "a:hidden,b:visible", `forms: select tick moves with the pick (${ticks})`);
     await page.keyboard.press("Escape");
 
+    await go(page, "timepicker");
     // time picker
     const value = (sel: string) => page.$eval(sel, (el) => (el as HTMLInputElement).value);
     const focused = () => page.evaluate(() => document.activeElement?.id);
@@ -2217,6 +2327,7 @@ for (const group of catalogueGroups) {
     await pause();
     check((await tpError()) === null, `forms: fixing the hour clears the error (${await tpError()})`);
 
+    await go(page, "datetimepicker");
     // date-time picker
     const dateField = await page.$eval("#dtp-basic [data-datepicker-start]", (el) => (el as HTMLInputElement).type);
     check(dateField === "hidden", `forms: client-mode date field enhanced to hidden (${dateField})`);
@@ -2250,7 +2361,7 @@ for (const group of catalogueGroups) {
     {
       const local = await browser.newPage();
       await local.emulateTimezone("Asia/Kolkata");
-      await local.goto(`file://${root}/forms.html`, { waitUntil: "load" });
+      await local.goto(`file://${root}/${fileOf("datetimepicker")}`, { waitUntil: "load" });
       await pause();
       const read = () =>
         local.evaluate(() => ({
@@ -2276,7 +2387,7 @@ for (const group of catalogueGroups) {
     {
       const plain = await browser.newPage();
       await plain.setJavaScriptEnabled(false);
-      await plain.goto(`file://${root}/forms.html`, { waitUntil: "load" });
+      await plain.goto(`file://${root}/${fileOf("timepicker")}`, { waitUntil: "load" });
       const native = await plain.$eval("#tp-basic-value", (el) => {
         const i = el as HTMLInputElement;
         return `${i.type}|${i.name}|${i.value}|${i.offsetParent !== null}|${
@@ -2287,6 +2398,7 @@ for (const group of catalogueGroups) {
         native === "time|at|09:30|true|true",
         `forms: without JS the native time input shows and posts (${native})`,
       );
+      await plain.goto(`file://${root}/${fileOf("datetimepicker")}`, { waitUntil: "load" });
       const nativeDate = await plain.$eval("#dtp-basic-date", (root) => {
         const i = root.querySelector("[data-datepicker-start]") as HTMLInputElement;
         const trigger = root.querySelector("[data-datepicker-trigger]") as HTMLElement;
@@ -2303,7 +2415,8 @@ for (const group of catalogueGroups) {
     const bodyBg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     const baseBg = await bodyBg();
     for (const label of ["console", "ledger", "portal", "sunset"]) {
-      await page.click(`[data-theme-file$="${label}.css"]`);
+      // The site header's theme switch: one stylesheet after the bundle.
+      await page.select("#site-theme-native", label);
       await page.waitForFunction(
         (base) => getComputedStyle(document.body).backgroundColor !== base,
         { timeout: 5000 },
@@ -2329,11 +2442,12 @@ for (const group of catalogueGroups) {
         delete document.documentElement.dataset.theme;
       });
     }
-    await page.click('[data-theme-file=""]');
+    await page.select("#site-theme-native", "base");
     await pause(300);
   }
 
   if (group.id === "feedback") {
+    await go(page, "toast");
     // The static page has no runtime: "Show toast" clones a <template> into #toast-region.
     await page.evaluate(() =>
       document.querySelector('[data-toast-open="#cat-toast-template"]')?.scrollIntoView({ block: "center" })
@@ -2353,6 +2467,7 @@ for (const group of catalogueGroups) {
       `feedback: Show toast shows a toast (${JSON.stringify(toast)})`,
     );
 
+    await go(page, "modal");
     // A form in a modal: the select's tick follows a pick, and a floating
     // panel spills out of the dialog instead of being clipped by it.
     await page.click("[data-modal-open='#cat-modal-3']");
@@ -2387,6 +2502,7 @@ for (const group of catalogueGroups) {
   }
 
   if (group.id === "data") {
+    await go(page, "data-table");
     const bulkHidden = () => page.$eval("#invoices [data-bulk-bar]", (el) => el.hasAttribute("hidden"));
     check(await bulkHidden(), "data: bulk bar hidden with nothing selected");
     await page.click("#invoices [data-select-row]");
@@ -2567,6 +2683,7 @@ for (const group of catalogueGroups) {
   }
 
   if (group.id === "navigation") {
+    await go(page, "command");
     await page.focus("#palette .command__input");
     await page.keyboard.press("ArrowDown");
     const cmdActive = await page.$eval("#palette [role=option][data-active]", (el) => el.id).catch(() => null);
@@ -2577,6 +2694,7 @@ for (const group of catalogueGroups) {
   }
 
   if (group.id === "actions") {
+    await go(page, "popover");
     await page.click('[data-popover-trigger][aria-controls="gh-card"]');
     await pause();
     check(
@@ -2589,31 +2707,14 @@ for (const group of catalogueGroups) {
   }
 
   await consoleGaps(page, group.id);
-  await outsmartFixes(page, group.id, file);
-
-  /* ---------------------------------------------------------- dark */
-  await page.screenshot({ path: `${outDir}/${group.id}-light.png`, fullPage: true });
-  await page.click("[data-theme-toggle]");
-  await pause(600);
-  const dark = await page.evaluate(() => ({
-    theme: document.documentElement.dataset.theme,
-    bg: getComputedStyle(document.body).backgroundColor,
-    charts: document.querySelectorAll("[data-chart] .apexcharts-canvas").length,
-  }));
-  check(
-    dark.theme === "dark" && dark.bg !== onPage.bg,
-    `${file}: dark toggle did not change the canvas colour (${onPage.bg} → ${dark.bg})`,
-  );
-  check(dark.charts === onPage.chartEls, `${file}: ${onPage.chartEls - dark.charts} chart(s) lost on the theme switch`);
-  await page.screenshot({ path: `${outDir}/${group.id}-dark.png`, fullPage: true });
-  await page.close();
+  await outsmartFixes(page, group.id);
 }
 
 await browser.close();
 await writeTextFile(`${outDir}/axe.json`, JSON.stringify(axeReport, null, 2));
 const total = entries.reduce((n, e) => n + e.cases.length, 0);
 console.log(
-  `\n${issues.length} issue(s). ${entries.length} components, ${total} cases across ${catalogueGroups.length} pages. Screenshots in ${outDir}/`,
+  `\n${issues.length} issue(s). ${entries.length} components, ${total} cases, one page each. Screenshots in ${outDir}/`,
 );
 if (issues.length) {
   console.log(issues.map((i) => `  - ${i}`).join("\n"));

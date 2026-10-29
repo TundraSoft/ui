@@ -284,10 +284,13 @@ deno task build && deno task build:demos
 open demo/index.html
 ```
 
-`demo/{forms,data,charts,cards,navigation,actions,feedback}.html` is the catalogue — every component in every declared
-variant, size, tone and state (the test suite fails if a component or variant is missing from it) — with a theme
-switcher and the dark toggle. `demo/layouts/` shows the eight frames, `demo/admin/` a complete admin sample on a theme.
-`deno task app` serves the same components from a real rAPId application with the server-driven pieces wired to routes.
+`demo/` is a site built from the library, navigated by its collapsible sidebar alone. `demo/components/<name>.html` is
+one page per component — every declared variant, size, tone and state (the test suite fails if a component or variant is
+missing), the usage code, and the CSS and JS hooks. `demo/foundations/` covers tokens, typography, icons, the grid and
+utilities, motion, themes and dark mode, and the theme builder. `demo/layouts/` previews the eight frames at three
+widths, `demo/rapid/` the integration and the error pages, and `demo/admin/` is a complete admin example on a theme. The
+header switches the theme, the density and light/dark for the whole site. `deno task app` serves the same components
+from a real rAPId application with the server-driven pieces wired to routes.
 
 The same tooling runs on Node (`npm run …`) and Bun (`bun run bun:…`).
 

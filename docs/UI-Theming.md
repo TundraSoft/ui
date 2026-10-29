@@ -221,9 +221,9 @@ Charts follow tokens automatically. Images sit on `--color-surface-alt` until th
 
 ## Theme builder
 
-`demo/theme-builder.html` (`deno task build:theme-builder`, part of `build:demos`; linked from the catalogue sidebar) is
-the quick way to a first theme file. Colour pickers for primary, accent, canvas, surface, text, border and the four
-status colours, sliders for the radius (`--radius-md`, small and large derived at 0.55× / 1.55×), the control height
+`demo/foundations/theme-builder.html` (part of `build:demos`; Foundations › Theme builder in the demo sidebar) is the
+quick way to a first theme file. Colour pickers for primary, accent, canvas, surface, text, border and the four status
+colours, sliders for the radius (`--radius-md`, small and large derived at 0.55× / 1.55×), the control height
 (`--control-height-md`, small and large derived), the base type size and the motion duration (fast/slow/enter/exit
 derived), and two font selects — every move is written onto the page through the CSSOM, so a preview made of real
 components (buttons, fields, a select, switches, an alert, stats, tabs, a data table) follows it live. "Light palette" /
@@ -237,12 +237,13 @@ is a demo, not part of the bundle: its harness script and stylesheet are generat
 
 ## Checking a theme
 
-Run the catalogue with your stylesheet in the switcher (add it to `themes` in `examples/pages/build-catalogue.ts`) and
-`deno task test:catalogue` — it asserts each theme's computed body background changes, light and dark, and runs
-**axe-core** (WCAG 2.0/2.1 A + AA, colour contrast included) over every catalogue page: a serious or critical violation
-fails the suite unless `examples/tests/axe-allowlist.json` names its rule and a selector pattern with a reason. The full
-report, allowlisted and minor findings included, is written to `.test-output/catalogue/axe.json`. `deno task test:all`
-sweeps every page under `demo/` in both modes for console errors and the same computed-style check.
+Run the demo site with your stylesheet in the header's theme switch (add it to `THEMES` in
+`examples/pages/site/chrome.ts`, and the file to `examples/themes/`) and `deno task test:catalogue` — it asserts each
+theme's computed body background changes, light and dark, and runs **axe-core** (WCAG 2.0/2.1 A + AA, colour contrast
+included) over every component page: a serious or critical violation fails the suite unless
+`examples/tests/axe-allowlist.json` names its rule and a selector pattern with a reason. The full report, allowlisted
+and minor findings included, is written to `.test-output/catalogue/axe.json`. `deno task test:all` sweeps every page
+under `demo/` in both modes for console errors and the same computed-style check.
 
 `deno task test:visual` compares every demo page at 1440 and 375, light and dark, with the perceptual hashes in
 `examples/tests/visual-baseline.json` (stored per browser platform — fonts and line wraps differ between macOS and

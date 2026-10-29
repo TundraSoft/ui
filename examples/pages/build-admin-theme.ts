@@ -2,7 +2,8 @@
  * Admin SaaS sample theme — a full application built from the base
  * partials (v1 + v2), proving the base/theme split end to end. Every
  * page here is a realistic composition, not a component showcase; the
- * catalogue pages exist for that. Built on layouts/sidebar; no inline
+ * demo site's component pages exist for that. Its sidebar is its only
+ * navigation, and its last item leads back to the demo site. Built on layouts/sidebar; no inline
  * styles or scripts (CLAUDE.md §9) — the theme's own partial CSS lives in
  * examples/themes/admin.css, and all behavior comes from dist/ui.js.
  */
@@ -16,7 +17,6 @@ import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { AuthLayout } from "../../layouts/auth/auth.ts";
 import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Stat, type StatTone } from "../../components/stat/stat.ts";
-import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
 import { Grid, GridCol } from "../../components/grid/grid.ts";
 import { Badge } from "../../components/badge/badge.ts";
 import { Avatar, AvatarGroup } from "../../components/avatar/avatar.ts";
@@ -110,6 +110,7 @@ const NAV_ITEMS: MenuItem[] = [
   { label: "Dashboard", href: "dashboard.html", icon: Icon("dashboard", { size: 18 }) },
   { label: "Projects", href: "projects.html", icon: Icon("folder", { size: 18 }) },
   { label: "Team", href: "team.html", icon: Icon("users", { size: 18 }) },
+  { label: "Profile", href: "profile.html", icon: Icon("user", { size: 18 }) },
   { label: "Invoice", href: "invoice.html", icon: Icon("invoice", { size: 18 }) },
   { label: "Tables", href: "tables.html", icon: Icon("table", { size: 18 }) },
   { label: "Forms", href: "forms.html", icon: Icon("edit", { size: 18 }) },
@@ -122,6 +123,8 @@ const NAV_ITEMS: MenuItem[] = [
       { label: "Integrations", href: "settings.html#tab-integrations" },
     ],
   },
+  // The sample sits inside the demo site: its own sidebar is also the way back.
+  { label: "Component library", href: "../index.html", icon: Icon("arrowLeft", { size: 18 }) },
 ];
 
 /** Exact href → active; a parent whose children live on the current page
@@ -231,7 +234,6 @@ function adminSidebar(activeHref: string) {
 type PageOpts = {
   title: string;
   activeHref: string;
-  breadcrumb: string;
   content: unknown;
   /** Page-level actions rendered top-right of the header. */
   actions?: Html;
@@ -262,9 +264,6 @@ function adminPage(opts: PageOpts) {
           width: "boxed",
           content: html`
             ${PageHeader({
-              breadcrumb: Breadcrumb({
-                items: [{ label: "Home", href: "dashboard.html" }, { label: opts.breadcrumb }],
-              }),
               title: opts.title,
               actions: html`
                 ${opts.actions ?? ""}${Button({
@@ -1890,7 +1889,7 @@ await write(
   adminPage({
     title: "Dashboard",
     activeHref: "dashboard.html",
-    breadcrumb: "Dashboard",
+
     content: dashboardContent,
     scripts: [ChartScript()],
     actions: Segmented({
@@ -1911,7 +1910,7 @@ await write(
   adminPage({
     title: "Projects",
     activeHref: "projects.html",
-    breadcrumb: "Projects",
+
     content: projectsContent,
     actions: Button({
       label: "New project",
@@ -1926,7 +1925,7 @@ await write(
   adminPage({
     title: "Team",
     activeHref: "team.html",
-    breadcrumb: "Team",
+
     content: teamContent,
     actions: Button({
       label: "Invite",
@@ -1938,14 +1937,14 @@ await write(
 );
 await write(
   "profile",
-  adminPage({ title: "Profile", activeHref: "profile.html", breadcrumb: "Profile", content: profileContent }),
+  adminPage({ title: "Profile", activeHref: "profile.html", content: profileContent }),
 );
 await write(
   "invoice",
   adminPage({
     title: "Invoice",
     activeHref: "invoice.html",
-    breadcrumb: "Invoice",
+
     content: invoiceContent,
     toasts: [Toast({ variant: "ink", body: "Reminder sent to Blue Bottle Co.", action: { label: "Undo" } })],
   }),
@@ -1955,7 +1954,7 @@ await write(
   adminPage({
     title: "Tables",
     activeHref: "tables.html",
-    breadcrumb: "Tables",
+
     content: tablesContent,
     toasts: [
       Toast({ variant: "success", body: "Export ready", meta: "orders-2026-09.csv · 1,093 rows" }),
@@ -1965,11 +1964,11 @@ await write(
 );
 await write(
   "forms",
-  adminPage({ title: "Forms", activeHref: "forms.html", breadcrumb: "Forms", content: formsContent }),
+  adminPage({ title: "Forms", activeHref: "forms.html", content: formsContent }),
 );
 await write(
   "settings",
-  adminPage({ title: "Settings", activeHref: "settings.html", breadcrumb: "Settings", content: settingsContent }),
+  adminPage({ title: "Settings", activeHref: "settings.html", content: settingsContent }),
 );
 await write("lock-screen", lockScreenPage);
 await write("404", notFoundPage);
