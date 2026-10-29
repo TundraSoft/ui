@@ -21,12 +21,20 @@
   const flyouts = () => document.querySelectorAll(`.${FLYOUT}`);
 
   function closeFlyout(sublist) {
-    sublist.classList.remove(FLYOUT, "is-open");
-    sublist.hidden = true;
+    // A sublist the server rendered open (the current section) goes back
+    // to open, so expanding the sidebar again shows it where it was.
+    const wasOpen = sublist.getAttribute("data-flyout-restore") === "open";
+    sublist.removeAttribute("data-flyout-restore");
+    sublist.classList.remove(FLYOUT);
+    sublist.classList.toggle("is-open", wasOpen);
+    sublist.hidden = !wasOpen;
     sublist.style.removeProperty("left");
     sublist.style.removeProperty("top");
     sublist.querySelector(".menu__flyout-title")?.remove();
-    document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)?.setAttribute("aria-expanded", "false");
+    document.querySelector(`[data-toggle="#${CSS.escape(sublist.id)}"]`)?.setAttribute(
+      "aria-expanded",
+      String(wasOpen),
+    );
     // The sidebar only outranks the content while a flyout is open
     // (sidebar.css), otherwise it would cover a dropdown near its edge.
     const sidebar = sublist.closest(".sidebar");
@@ -36,6 +44,9 @@
 
   function openFlyout(sublist, trigger, sidebar) {
     flyouts().forEach((other) => other !== sublist && closeFlyout(other));
+    if (!sublist.hasAttribute("data-flyout-restore")) {
+      sublist.setAttribute("data-flyout-restore", sublist.classList.contains("is-open") ? "open" : "closed");
+    }
     sidebar.classList.add("sidebar--flyout-open");
     if (!sublist.querySelector(".menu__flyout-title")) {
       const title = document.createElement("li");
@@ -88,6 +99,12 @@
     if (hit) {
       clearTimeout(hoverTimer);
       if (!hit.sublist.classList.contains(FLYOUT)) {
+        if (!hit.sublist.hasAttribute("data-flyout-restore")) {
+          hit.sublist.setAttribute(
+            "data-flyout-restore",
+            hit.sublist.classList.contains("is-open") && !hit.sublist.hidden ? "open" : "closed",
+          );
+        }
         hit.sublist.hidden = false;
         openFlyout(hit.sublist, hit.link, hit.link.closest(".sidebar"));
         hit.link.setAttribute("aria-expanded", "true");
@@ -116,6 +133,12 @@
       // has just hidden it again: a click on a rail parent always ends with
       // its children showing (Escape, an outside click or leaving closes).
       const wasOpen = sublist.classList.contains(FLYOUT);
+      if (!sublist.hasAttribute("data-flyout-restore")) {
+        sublist.setAttribute(
+          "data-flyout-restore",
+          sublist.classList.contains("is-open") && !sublist.hidden ? "open" : "closed",
+        );
+      }
       setTimeout(() => {
         if (sublist.hidden && !wasOpen) {
           closeFlyout(sublist);

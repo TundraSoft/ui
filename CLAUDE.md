@@ -1383,11 +1383,15 @@ agents built the batch in parallel against the same hard rules; what changed and
   flipped above its trigger on load because `uiFloat.fit` measured room against the viewport the anchor was not in
   (off-screen anchors never flip); and the collapsed sidebar rail gave no way to see a parent's children — hovering or
   focusing a rail parent opens its flyout, every rail link carries its label as a `title`, and menu.js marks the parent
-  of the current child `menu__link--current-parent` (highlighted in the rail). Stat sparklines have per-point hit
-  columns (`sparklineLabels` names the points): `stat.js` shows the label in a `.stat__spark-tip` the moment the pointer
-  is over a column (a native `<title>`, the no-script fallback, needs a second of stillness and never shows on touch —
-  the user hovered and saw only the column tint); with `preserveAspectRatio="none"` any circle or text inside the box
-  would stretch, so the tip is an HTML element placed through the CSSOM.
+  of the current child `menu__link--current-parent` (highlighted in the rail). A flyout closing restores the sublist's
+  own state (`data-flyout-restore`): the current section's sublist, rendered open, used to come back collapsed after a
+  hover; a flyout taller than the viewport scrolls. The catalogue's own sidebar carries `data-scrollspy` and renders the
+  current page's components as plain hash links, so the component being read lights up while scrolling
+  (`.menu__link.is-active` shares the active look). Stat sparklines have per-point hit columns (`sparklineLabels` names
+  the points): `stat.js` shows the label in a `.stat__spark-tip` the moment the pointer is over a column (a native
+  `<title>`, the no-script fallback, needs a second of stillness and never shows on touch — the user hovered and saw
+  only the column tint); with `preserveAspectRatio="none"` any circle or text inside the box would stretch, so the tip
+  is an HTML element placed through the CSSOM.
 
 **Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
 

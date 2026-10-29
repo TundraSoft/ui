@@ -107,6 +107,8 @@
     animation: ui-float-in var(--duration-enter) var(--ease-out);
     min-width: 12rem;
     max-width: calc(100vw - 2 * var(--space-4));
+    max-height: calc(100vh - 2 * var(--space-4));
+    overflow-y: auto;
     margin: 0;
     padding: var(--space-2);
     background: var(--color-surface);

@@ -35,7 +35,8 @@
   outline-offset: -2px;
 }
 
-.menu__link--active {
+.menu__link--active,
+.menu__link.is-active {
   background: var(--color-surface-alt);
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);

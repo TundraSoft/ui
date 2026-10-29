@@ -122,9 +122,11 @@ function sidebar(active?: CatalogueGroup): Html {
       icon: Icon(GROUP_ICON[g.id], { size: 18 }),
       active: g.id === active,
       expanded: g.id === active,
+      // On its own page a group's components are plain hash links, so the
+      // scroll spy on the sidebar lights the section being read.
       children: all.filter((e) => e.group === g.id).map((e) => ({
         label: e.name,
-        href: `${g.id}.html#cat-${e.name}`,
+        href: g.id === active ? `#cat-${e.name}` : `${g.id}.html#cat-${e.name}`,
         icon: iconOf(e.name),
       })),
     })),
@@ -137,6 +139,7 @@ function sidebar(active?: CatalogueGroup): Html {
     brand: html`<span class="sidebar__brand-mark">U</span> @tundralibs/ui`,
     items,
     collapsible: true,
+    attrs: { "data-scrollspy": "" },
   });
 }
 
