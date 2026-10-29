@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.1](https://github.com/TundraSoft/ui/compare/v0.25.0...v0.25.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* axis-x ScrollArea passes the vertical wheel on, ScrollSpy reads a calc() offset, side sheets are bottom sheets on phones ([#87](https://github.com/TundraSoft/ui/issues/87)) ([4e6a1bd](https://github.com/TundraSoft/ui/commit/4e6a1bdc5af9b83c0df412e38b73f04927c68a9f))
+
 ## [0.25.0](https://github.com/TundraSoft/ui/compare/v0.24.0...v0.25.0) (2026-10-29)
 
 
