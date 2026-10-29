@@ -1,4 +1,5 @@
 .sidebar {
+  --sidebar-edge-toggle-size: 24px;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -32,6 +33,41 @@
   color: var(--color-primary-contrast);
 }
 
+/* Below the brand: an action, a switcher. Controls stretch to the column. */
+.sidebar__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* A labelled group of links; the label reads like the rail flyout's title. */
+.sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sidebar__section-label {
+  margin: 0;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+/* Pinned to the bottom: a usage card, a help link. */
+.sidebar__foot {
+  margin-top: auto;
+}
+
 .sidebar__collapse-toggle {
   margin-top: auto;
   display: flex;
@@ -55,6 +91,10 @@
   outline-offset: -2px;
 }
 
+.sidebar__foot ~ .sidebar__collapse-toggle {
+  margin-top: 0;
+}
+
 .sidebar__collapse-icon {
   transition: transform var(--transition-base);
 }
@@ -72,7 +112,64 @@
   .sidebar--collapsed .menu__link-label,
   .sidebar--collapsed .menu__caret,
   .sidebar--collapsed .menu__sublist,
-  .sidebar--collapsed .sidebar__collapse-label {
+  .sidebar--collapsed .sidebar__collapse-label,
+  .sidebar--collapsed .sidebar__label,
+  .sidebar--collapsed .sidebar__section-label,
+  .sidebar--collapsed .sidebar__foot {
+    display: none;
+  }
+
+  /* A head control folds to its icon, centred in the rail. */
+  .sidebar--collapsed .sidebar__head {
+    align-items: center;
+  }
+
+  .sidebar--collapsed .sidebar__head :is(.btn, a, button) {
+    justify-content: center;
+  }
+
+  /* Groups part with a rule once their labels are gone. */
+  .sidebar--collapsed .sidebar__section + .sidebar__section,
+  .sidebar--collapsed .sidebar__nav > .menu__list + .sidebar__section {
+    padding-top: var(--space-3);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  /* The edge toggle: a small round button straddling the sidebar's end
+     border beside the brand. The sidebar stops being the scroll box (it
+     would clip the button); the nav scrolls between head and foot. */
+  .sidebar--toggle-edge {
+    overflow: visible;
+  }
+
+  /* Positioned only where nothing else positions the sidebar — a layout
+     makes it sticky, and that already anchors the button. */
+  .sidebar--toggle-edge:not(.layout__body > .sidebar) {
+    position: relative;
+  }
+
+  .sidebar--toggle-edge .sidebar__nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar__collapse-toggle--edge {
+    position: absolute;
+    z-index: 1;
+    top: calc(var(--space-4) + 1rem - var(--sidebar-edge-toggle-size) / 2);
+    inset-inline-end: calc(var(--sidebar-edge-toggle-size) / -2);
+    width: var(--sidebar-edge-toggle-size);
+    height: var(--sidebar-edge-toggle-size);
+    margin: 0;
+    padding: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    line-height: 1;
+  }
+
+  .sidebar__collapse-toggle--edge .sidebar__collapse-label {
     display: none;
   }
 

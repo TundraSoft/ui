@@ -3132,6 +3132,58 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("collapsible", Sidebar({ id: "cat-sb-2", items: menuItems, collapsible: true })),
+        c(
+          'head, sections, foot, navLabel and the edge collapse toggle (collapsible: { position: "edge" }; "foot" is the default) (#cat-sb-full)',
+          html`<div class="cat-sidebar-frame">${
+            Sidebar({
+              id: "cat-sb-full",
+              brand: html`
+                <span class="sidebar__brand-mark">B</span><span class="sidebar__brand-label">Brevily</span>
+              `,
+              head: html`${
+                Button({
+                  label: html`<span class="sidebar__label">Create link</span>`,
+                  iconStart: Icon("plus", { size: 16 }),
+                  attrs: { id: "cat-sb-full-create" },
+                })
+              }${
+                Dropdown({
+                  id: "cat-sb-full-org",
+                  trigger: html`${Icon("home", { size: 16 })}<span class="sidebar__label">Acme Inc.</span>`,
+                  triggerClass: "btn btn--outline btn--block",
+                  searchable: false,
+                  content: html`
+                    <ul class="menu__list">
+                      <li><a class="menu__link" href="#">Acme Inc.</a></li>
+                      <li><a
+                                    class="menu__link" href="#">Globex</a></li>
+                    </ul>
+                  `,
+                })
+              }`,
+              items: menuItems,
+              sections: [
+                {
+                  label: "Workspace",
+                  items: [
+                    { label: "Domains", href: "#", icon: Icon("globe", { size: 16 }) },
+                    { label: "Team", href: "#", icon: Icon("users", { size: 16 }) },
+                  ],
+                },
+                { label: "Help", items: [{ label: "Docs", href: "#", icon: Icon("help", { size: 16 }) }] },
+              ],
+              navLabel: "Console",
+              foot: html`
+                <div class="card p-3 stack stack--sm"
+                  id="cat-sb-full-usage"><p class="text-sm">1,240 of 2,000 links</p>${Progress({
+                    value: 62,
+                    attrs: { "aria-label": "Links used" },
+                  })}<a class="text-sm" href="#">Upgrade</a></div>
+              `,
+              collapsible: { position: "edge" },
+            })
+          }</div>`,
+        ),
         c("SidebarToggle", SidebarToggle({ targetId: "cat-sb-1", label: "Menu" })),
       ],
     },
@@ -3724,6 +3776,7 @@ export const catalogueCss =
 .cat-case__body { padding: var(--space-4); border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
 .cat-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; }
 .cat-narrow { max-width: 320px; }
+.cat-sidebar-frame { display: flex; height: 34rem; padding-inline-end: var(--space-6); }
 .cat-room { padding-bottom: 9rem; }
 .cat-room--lg { padding-bottom: 18rem; } /* an open list of five rows plus its notes */
 .cat-col { flex: 1 1 16rem; min-width: 0; max-width: 420px; }

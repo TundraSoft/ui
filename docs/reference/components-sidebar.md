@@ -28,14 +28,34 @@ desktop.
 
 ## Types
 
+### `SidebarSection`
+
+A labelled, non-collapsing group of links (`Sidebar({ sections })`).
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `label` | `string | Html` |  | The group's heading; on the collapsed rail it gives way to a rule. |
+| `items` | `MenuItem[]` | yes |  |
+
+### `SidebarTogglePosition`
+
+Where the desktop collapse toggle sits.
+
+- `"foot"`
+- `"edge"`
+
 ### `SidebarProps`
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `id` | `string` |  |  |
 | `brand` | `string | Html` |  |  |
-| `items` | `MenuItem[]` | yes |  |
-| `collapsible` | `boolean` |  | Adds a desktop-only "collapse to icons" toggle at the bottom (§ mini sidebar). Needs `id` set — the toggle targets it by selector. |
+| `head` | `Html` |  | Below the brand: an action button, an organisation switcher. Wrap a control's text in `<span class="sidebar__label">` and it folds to its icon on the collapsed rail (the text becomes its `title`), as menu labels do. A dropdown in it floats free of the sidebar's scroll box. |
+| `items` | `MenuItem[]` |  | The main links. |
+| `sections` | `SidebarSection[]` |  | Labelled groups after `items`, in the same nav. |
+| `foot` | `Html` |  | Above the collapse toggle, pinned to the bottom: a usage card, a help link. Hidden on the collapsed rail — a theme's unlayered `.sidebar--collapsed .sidebar__foot` rule restyles it there instead. |
+| `navLabel` | `string` |  | The nav's accessible name (default "Main") — distinct per nav when a page has several. |
+| `collapsible` | `boolean | { position?: SidebarTogglePosition }` |  | Adds a desktop-only "collapse to icons" toggle (§ mini sidebar). Needs `id` set — the toggle targets it by selector. `true` puts it at the foot; `{ position: "edge" }` makes it a small round button straddling the sidebar's end border at the top (Linear/Notion style), and the nav scrolls between a fixed head and foot. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -79,10 +99,116 @@ Sidebar({
       </li>
     </ul>
   </nav>
-  <button type="button" class="sidebar__collapse-toggle js-only" data-collapse="#nav" aria-expanded="true" aria-label="Collapse sidebar">
-    <span class="sidebar__collapse-icon">&#8249;</span>
+  <button type="button" class="sidebar__collapse-toggle js-only" data-collapse="#nav" aria-expanded="true" aria-controls="nav" aria-label="Collapse sidebar">
+    <span class="sidebar__collapse-icon" aria-hidden="true">&#8249;</span>
     <span class="sidebar__collapse-label">Collapse</span>
   </button>
+</aside>
+```
+
+### An app console: an action and a switcher on top, groups, a usage card, the toggle on the edge
+
+Text in `.sidebar__label` folds to its icon on the collapsed rail; `foot` hides there; `navLabel` names the nav.
+
+```ts
+Sidebar({
+  id: "console-nav",
+  brand: "Brevily",
+  head: html`${
+    Button({
+      label: html`<span class="sidebar__label">Create link</span>`,
+      iconStart: Icon("plus", { size: 16 }),
+    })
+  }${
+    Dropdown({
+      id: "org",
+      trigger: html`${Icon("home", { size: 16 })}<span class="sidebar__label">Acme Inc.</span>`,
+      triggerClass: "btn btn--outline btn--block",
+      searchable: false,
+      content: html`
+        <ul class="menu__list">
+          <li><a class="menu__link" href="/orgs/globex">Globex</a></li>
+        </ul>
+      `,
+    })
+  }`,
+  items: [{ label: "Links", href: "/links", icon: Icon("link", { size: 18 }), active: true }],
+  sections: [{
+    label: "Workspace",
+    items: [{ label: "Domains", href: "/domains", icon: Icon("globe", { size: 18 }) }],
+  }],
+  foot: html`
+    <div
+      class="card p-3 stack stack--sm"><p class="text-sm">1,240 of 2,000 links</p>${Progress({
+        value: 62,
+        attrs: { "aria-label": "Links used" },
+      })}<a class="text-sm" href="/billing">Upgrade</a></div>
+  `,
+  navLabel: "Console",
+  collapsible: { position: "edge" },
+})
+```
+
+```html
+<aside class="sidebar sidebar--toggle-edge" id="console-nav">
+  <div class="sidebar__brand">Brevily</div>
+  <button type="button" class="sidebar__collapse-toggle js-only sidebar__collapse-toggle--edge" data-collapse="#console-nav" aria-expanded="true" aria-controls="console-nav" aria-label="Collapse sidebar">
+    <span class="sidebar__collapse-icon" aria-hidden="true">&#8249;</span>
+    <span class="sidebar__collapse-label">Collapse</span>
+  </button>
+  <div class="sidebar__head" data-dropdown-clip>
+    <button type="button" class="btn">
+      <svg width="16" height="16" width="2" …>…</svg>
+      <span class="sidebar__label">Create link</span>
+    </button>
+    <div class="dropdown" id="org">
+      <button type="button" class="dropdown__trigger btn btn--outline btn--block" data-toggle="#org-panel" aria-expanded="false" aria-controls="org-panel">
+        <svg width="16" height="16" width="2" …>…</svg>
+        <span class="sidebar__label">Acme Inc.</span>
+      </button>
+      <div class="dropdown__panel" id="org-panel" data-toggle-panel hidden>
+        <div class="dropdown__body">
+          <ul class="menu__list">
+            <li>
+              <a class="menu__link" href="/orgs/globex">Globex</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar__nav" aria-label="Console">
+    <ul class="menu__list">
+      <li>
+        <a class="menu__link menu__link--active" href="/links" aria-current="page">
+          <span class="menu__icon">
+            <svg width="18" height="18" width="2" …>…</svg>
+          </span>
+          <span class="menu__link-label">Links</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar__section" role="group" aria-labelledby="console-nav-section-0">
+      <p class="sidebar__section-label" id="console-nav-section-0">Workspace</p>
+      <ul class="menu__list">
+        <li>
+          <a class="menu__link" href="/domains">
+            <span class="menu__icon">
+              <svg width="18" height="18" width="2" …>…</svg>
+            </span>
+            <span class="menu__link-label">Domains</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="sidebar__foot" data-dropdown-clip>
+    <div class="card p-3 stack stack--sm">
+      <p class="text-sm">1,240 of 2,000 links</p>
+      <progress value="62" max="100" class="progress" aria-label="Links used"></progress>
+      <a class="text-sm" href="/billing">Upgrade</a>
+    </div>
+  </div>
 </aside>
 ```
 
@@ -102,4 +228,4 @@ SidebarToggle({ targetId: "nav", label: "Menu" })
 
 Classes defined by `components/sidebar/sidebar.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.js`, `.menu__caret`, `.menu__flyout-title`, `.menu__link`, `.menu__link--current-parent`, `.menu__link-label`, `.menu__sublist`, `.menu__sublist--flyout`, `.sidebar`, `.sidebar--collapsed`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`
+`.btn`, `.js`, `.layout__body`, `.menu__caret`, `.menu__flyout-title`, `.menu__link`, `.menu__link--current-parent`, `.menu__link-label`, `.menu__list`, `.menu__sublist`, `.menu__sublist--flyout`, `.sidebar`, `.sidebar--collapsed`, `.sidebar--toggle-edge`, `.sidebar__brand`, `.sidebar__brand-label`, `.sidebar__brand-mark`, `.sidebar__collapse-icon`, `.sidebar__collapse-label`, `.sidebar__collapse-toggle`, `.sidebar__collapse-toggle--edge`, `.sidebar__foot`, `.sidebar__head`, `.sidebar__label`, `.sidebar__nav`, `.sidebar__section`, `.sidebar__section-label`

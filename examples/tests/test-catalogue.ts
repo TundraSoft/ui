@@ -775,6 +775,85 @@ async function brevilyDesignFixes(group: string): Promise<void> {
     await p.close();
   }
 
+  if (group === "navigation") {
+    // Sidebar head/sections/foot/navLabel and the edge collapse toggle (the
+    // Brevily console's hand-written sidebar, as props).
+    const p = await open("sidebar", 1280);
+    const read = () =>
+      p.evaluate(() => {
+        const sb = document.getElementById("cat-sb-full")!;
+        const shown = (sel: string) => {
+          const el = sb.querySelector(sel) as HTMLElement | null;
+          return !!el && el.getClientRects().length > 0;
+        };
+        const t = sb.querySelector(".sidebar__collapse-toggle")!.getBoundingClientRect();
+        const r = sb.getBoundingClientRect();
+        const groups = [...sb.querySelectorAll(".sidebar__section")].map((g) =>
+          document.getElementById(g.getAttribute("aria-labelledby") ?? "")?.textContent?.trim()
+        );
+        return {
+          nav: sb.querySelector(".sidebar__nav")!.getAttribute("aria-label"),
+          groups,
+          order: [...sb.children].map((c) => c.className.split(" ")[0]),
+          edge: Math.round((t.left + t.width / 2 - r.right) * 10) / 10,
+          top: Math.round(t.top - r.top),
+          foot: shown(".sidebar__foot"),
+          label: shown(".sidebar__label"),
+          sectionLabel: shown(".sidebar__section-label"),
+          title: document.getElementById("cat-sb-full-create")!.getAttribute("title"),
+          width: Math.round(r.width),
+        };
+      });
+    const wide = await read();
+    check(
+      wide.nav === "Console" && JSON.stringify(wide.groups) === JSON.stringify(["Workspace", "Help"]),
+      `navigation: Sidebar navLabel/sections are not named (${JSON.stringify(wide)})`,
+    );
+    check(
+      JSON.stringify(wide.order) ===
+        JSON.stringify([
+          "sidebar__brand",
+          "sidebar__collapse-toggle",
+          "sidebar__head",
+          "sidebar__nav",
+          "sidebar__foot",
+        ]),
+      `navigation: Sidebar parts are out of order (${JSON.stringify(wide.order)})`,
+    );
+    check(
+      Math.abs(wide.edge) <= 1.5 && wide.top < 40 && wide.foot && wide.label && wide.sectionLabel && !wide.title,
+      `navigation: the expanded Sidebar with an edge toggle is wrong (${JSON.stringify(wide)})`,
+    );
+    // The organisation switcher in the head floats free of the sidebar's scroll box.
+    await p.click("#cat-sb-full-org .dropdown__trigger");
+    await pause();
+    const panel = await p.$eval("#cat-sb-full-org .dropdown__panel", (el) => ({
+      open: !(el as HTMLElement).hidden,
+      fixed: getComputedStyle(el).position,
+    }));
+    check(
+      panel.open && panel.fixed === "fixed",
+      `navigation: the Sidebar head's dropdown is clipped (${JSON.stringify(panel)})`,
+    );
+    await p.keyboard.press("Escape");
+    await p.click("#cat-sb-full .sidebar__collapse-toggle");
+    await pause(500);
+    const rail = await read();
+    check(
+      Math.abs(rail.edge) <= 1.5 && !rail.foot && !rail.label && !rail.sectionLabel && rail.title === "Create link" &&
+        rail.width < 90,
+      `navigation: the collapsed rail does not fold head/foot/sections (${JSON.stringify(rail)})`,
+    );
+    await p.click("#cat-sb-full .sidebar__collapse-toggle");
+    await pause(500);
+    const back = await read();
+    check(
+      !back.title && back.foot,
+      `navigation: expanding the Sidebar again left the rail state (${JSON.stringify(back)})`,
+    );
+    await p.close();
+  }
+
   if (group === "feedback") {
     const p = await open("sheet", 375);
     for (const side of ["end", "start"]) {
