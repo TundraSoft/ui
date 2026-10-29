@@ -79,8 +79,11 @@ deno task test         # every browser suite (needs Chrome; CHROME_PATH)
 deno task app          # the rAPId example app on :8010
 ```
 
-`demo/index.html` links the catalogue (every component in every declared variant, size, tone and state, one page per
-group — CI fails if a component or variant is missing from it), the eight layouts, and the admin sample.
+`demo/` is a site built from the library itself. Its collapsible sidebar is the only navigation: groups → sections →
+pages, collapsing to an icon rail with flyouts. It holds the foundations (tokens, typography, icons, grid and utilities,
+motion, themes and dark mode, the theme builder), one page per component (every declared variant, size, tone and state,
+plus usage code and its CSS/JS hooks; CI fails if a component or variant is missing), the eight layouts previewed at
+phone, tablet and desktop widths, the rAPId integration and error pages, and the admin example app.
 
 The same tooling runs on Node (`npm run …` via tsx) and Bun (`bun run bun:…`). See `CLAUDE.md` for the full contract and
 conventions.

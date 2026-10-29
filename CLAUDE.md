@@ -894,6 +894,57 @@ wrapper and `bleed` at every band; each was verified to fail with its fix remove
 The console's regex rewrites and scripts read kit names directly (`data-table__row`, `data-row-key`, `data-select-row`,
 `page-header__title`, `--segmented-x/-w`): grep it before renaming one.
 
+**The demo site (2026-10-29) — rebuilt from scratch; the sidebar is the only navigation.** The user asked for the demo
+pages to be redone: every capability covered, navigation by a collapsible sidebar alone, grouped into sub-menus. The old
+builders (`build-catalogue.ts`, `build-layouts.ts`, `build-theme-builder.ts`, one page per catalogue group with a
+navbar, breadcrumbs, an "On this page" dropdown, an inline link index and a ⌘K jump palette, plus a separate layouts
+index with its own navbar) are gone. `examples/pages/build-demo.ts` (`deno task build:site`, first half of
+`build:demos`) writes one site:
+
+- **Map** — `examples/pages/site/nav.ts` is the whole information architecture: `COMPONENTS` (label, icon, one-line
+  blurb per component) and `COMPONENT_TREE` (eight groups → sections → components: Forms › Fields / Choices / Pickers /
+  Form layout, Data › Tables / Display / Loading & empty, Charts (a one-component group renders as a plain link),
+  Structure, Navigation, Actions, Feedback, Marketing & media), plus `FOUNDATIONS`, `LAYOUT_INFO`, `RAPID_PAGES`,
+  `ADMIN_PAGES`. `siteMenu(path, base)` renders it with the current leaf `aria-current` and every group above it open.
+  The build throws when a catalogued component is missing from the tree, listed twice, or unknown — a new component
+  needs a line here as well as its catalogue entry.
+- **Chrome** — `site/chrome.ts` `sitePage(meta, content)`: a `SidebarLayout` whose collapsible `Sidebar` (rail + flyouts
+  on desktop, drawer on phones) is the navigation; the header holds **no links** — a plain-text context line ("Forms ·
+  Choices"), a theme `Select` (Base / Console / Ledger / Portal / Sunset — swaps `#theme-css`), a density `Select` (sets
+  `data-density` on `<html>`), and the dark toggle. Theme and density persist in `localStorage` (`site-theme`,
+  `site-density`); every page carries `ToastRegion` + `ConfirmModal`; ApexCharts loads only where a page draws a chart.
+- **Pages** — `index.html` (overview: stats, quick start, what the sidebar holds, principles);
+  `foundations/{tokens,typography,icons,utilities,motion,theming,theme-builder}.html` (`site/foundations.ts` — the token
+  pages parse `tokens/default.css`, `styles/typography.css`, `styles/utilities.css` and `styles/motion.css` at build
+  time; swatches paint through generated `.tk-<token>` classes in site.css, values are read back live by site.js so a
+  theme/dark/density switch updates them; the motion page replays every shared keyframe); one `components/<name>.html`
+  per catalogue entry (`site/component-page.ts`: import line, the catalogued cases in
+  `section#cat-<name>[data-catalogue]` — the hooks `test-catalogue.ts` drives —, the usage examples as TypeScript +
+  rendered HTML in `Tabs` of `CodeBlock`s (snippets cut by `examples/docs/snippets.ts`, shared with
+  `scripts/build-docs.ts`), and an API list: exported functions with their JSDoc, CSS hooks, script attributes, events);
+  `layouts/<name>.html` (`site/pages.ts`: an iframe of `frames/<name>.html` at phone/tablet/desktop widths — a
+  `Segmented` writes `data-view` via view-switch.js, site.js scales a frame wider than its column — plus the bands and
+  the `--layout-*` tokens it reads); `rapid/{integration,errors}.html` (the data-* contract and events as `DataTable`s,
+  template snippets, and `ErrorTemplate` rendered as frames for 404/403/500-dev plus the compact part).
+- **Frames** — `demo/frames/*.html` are standalone documents (the eight layout samples, the error pages) loading
+  `frames/frame.js`, which applies the theme/density/mode the parent page posts (`postMessage` — `file://` pages are
+  opaque origins, so `contentDocument` is off limits). `test-layouts.ts` drives them directly.
+- **`demo/pages.json`** lists every page (`site`, `frames`, `admin`); `test-all-pages.ts` and `test-visual.ts` read it
+  instead of hand-kept lists. `test-all-pages.ts` also holds the navigation rule on every site page: one current link,
+  every group above it open, no header links, no breadcrumb or `.cat-nav` in the chrome, sub-groups present, every site
+  page linked from the sidebar exactly once and every link resolving; and drives the chrome once (collapse to the rail
+  and back, persisted; a rail flyout; theme and density switches; the phone drawer and Escape).
+- **`test-catalogue.ts` on per-component pages** — one tab; the render/axe/dark checks loop over every component page;
+  the behaviour blocks stay grouped and call `go(page, "<component>")` before each step (a no-op when already there, so
+  consecutive steps keep the page's state). Two lessons: a guarded form left dirty asks `beforeunload` before the tab
+  moves on — the tab accepts dialogs; and `about:blank` has no `localStorage`, so the new-document clear is guarded.
+- `menu.js` now marks every parent above the current link `menu__link--current-parent` (it did so only for a hash
+  match), so the collapsed rail shows which group the current page is in.
+
+Not rebuilt: the admin example app's content (its sidebar gained Profile and the link back; breadcrumbs went), the
+`examples/shared/` case library, themes and layout samples — they are the content the site presents, and the regression
+suites are written against them.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each
@@ -921,14 +972,15 @@ Rules that make them frames and keep them device-compatible:
   sidebar/aside/TOC sits under.
 - **No page CSS in demos.** The admin demo's `HEAD_EXTRA` `<style>` block is gone: what was generic became components
   (`PageHeader`, `Stat`, `Toolbar`, `.card--danger`, `.command__trigger`, the `.stack` utility); what was theme-specific
-  moved into `examples/themes/admin.css` as custom partials; the catalogue's harness CSS/JS is written to
-  `demo/catalogue.css|js` by its builder. `test-catalogue.ts`/`test-all-pages.ts` would flag any inline `style=`, and
-  the demo build prints nothing if none exist.
+  moved into `examples/themes/admin.css` as custom partials; the demo site's harness CSS/JS is written to
+  `demo/site.css|js` by its builder (`examples/pages/site/assets.ts`). `test-catalogue.ts`/`test-all-pages.ts` would
+  flag any inline `style=`, and the demo build prints nothing if none exist.
 - `examples/tests/test-layouts.ts` (`deno task test:layouts`) loads every layout at 375, 667×375, 768, 1024, 1440 and
   1920 and asserts: no horizontal overflow, `#main-content` present and within the viewport, reading/boxed frames not
   full-bleed on wide screens, navigation reachable (visible nav, or a drawer toggle that actually opens the sidebar
   on-screen and closes on Escape), rail is a full-width bottom bar on phones, split shows exactly one pane on phones,
-  article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to the demo builder and this list.
+  article/docs asides stack vs. sit beside at their thresholds. Add a layout → add it to `LAYOUT_INFO` (site/nav.ts),
+  the bands table in site/pages.ts, and this list.
 - **SidebarLayout 992–1199 is a grid, not a wrapping flex row (fixed 2026-10-05).** The range used `flex-wrap: wrap` so
   the aside could drop below the content, but the content's `auto` basis (its own width; 100% when boxed) wrapped the
   content itself onto a second line under the sticky sidebar, and a wrapped aside started at the row's edge, under the
@@ -958,20 +1010,18 @@ cards, navigation, actions, feedback — `catalogueGroups`), one case per export
 variant/size/tone/status and every meaningful state. Its server-driven cases (the projects and invoices tables, the
 `#reviewer` combobox, the `#palette` command, the `#period` picker, the "Show toast" button) come from
 `examples/shared/data.ts` and take a `DemoRoutes` — inert query strings on the static pages, real routes in the app —
-plus a `CatalogueState` so the app can render a pushed URL's state. `examples/pages/build-catalogue.ts` renders
-`demo/<group>.html` × 7 and `demo/index.html` — whose chrome is itself the library (a `SidebarLayout` with a nested
-`Sidebar` menu of every group and component, a `Navbar` with a ⌘K `Command` palette that jumps to any component, the
-theme switcher hidden below 576px, `PageHeader` + `Breadcrumb` + an "On this page" `Dropdown`, `Stat`s on the index);
-the app serves the same groups at `/components/<group>`. `examples/tests/test-catalogue.ts` (`deno task test:catalogue`,
-first in `test`) enforces it: **statically**, every `export function` under `components/` and every literal of every
+plus a `CatalogueState` so the app can render a pushed URL's state. The demo site renders each entry on its own page
+(`demo/components/<name>.html`, see "The demo site" below); the app serves the same groups at `/components/<group>`.
+`examples/tests/test-catalogue.ts` (`deno task test:catalogue`, first in `test`) enforces it: **statically**, every
+`export function` under `components/` and every literal of every
 `*Variant|*Size|*Tone|*Status|*Type|*Width|*Mode|
 Orientation|Tag|Ratio|Span` union must be referenced by `catalogue.ts`
-(+ `charts.ts`, `data.ts`), so a new component or variant fails CI until it is catalogued; **in Chrome**, every section
-and case is on its page and non-empty, every chart drew, no console/page errors, no inline styles, no horizontal
-overflow, the dark toggle changes the canvas — and the per-page behaviour and theme assertions that used to live in the
-gallery-v2 suite. `demo/` stays at the repo root (gitignored build output) so that a local build is easy to find and
-open. One harness lesson: `file://` pages share one origin, so a persisted theme toggle leaks between pages — clear
-`localStorage` in `evaluateOnNewDocument`, not after load.
+(+ `charts.ts`, `data.ts`), so a new component or variant fails CI until it is catalogued; **in Chrome**, every
+component page carries its section with every case, non-empty, every chart drew, no console/page errors, no inline
+styles, no horizontal overflow, the dark toggle changes the canvas — and the per-page behaviour and theme assertions
+that used to live in the gallery-v2 suite. `demo/` stays at the repo root (gitignored build output) so that a local
+build is easy to find and open. One harness lesson: `file://` pages share one origin, so a persisted theme toggle leaks
+between pages — clear `localStorage` in `evaluateOnNewDocument`, not after load.
 
 **Never delete `examples/` to "clean up"** — it is the regression suite. If a sample theme grows into a product, it
 lifts out into its own repo with no restructuring; that is the intended path.
@@ -979,9 +1029,10 @@ lifts out into its own repo with no restructuring; that is the intended path.
 **`examples/themes/*.css`** are source with no generator. An earlier layout nested them under `demo/themes/` and a
 same-session `rm -rf demo` deleted them **twice** before the fix was to relocate them, not just to remember more
 carefully. Reference them from a demo script with a relative path back to repo root (e.g. `demo/admin/dashboard.html` →
-`../../examples/themes/admin.css`, `demo/forms.html` → `../examples/themes/console.css`, `demo/card-themed.html` (gone)
-→ `../examples/themes/sunset.css`) — get the `../` count wrong and the browser just silently 404s the stylesheet, so
-re-run `deno task test:all` after touching any of these paths (it would have caught this exact class of mistake).
+`../../examples/themes/admin.css`, `demo/components/select.html` → `../../examples/themes/console.css`; the site chrome
+computes it from the page's depth — `data-themes` on `#theme-css`) — get the `../` count wrong and the browser just
+silently 404s the stylesheet, so re-run `deno task test:all` after touching any of these paths (it would have caught
+this exact class of mistake).
 
 `shared/icons.ts` is a small inline-SVG icon set (`Icon(name, opts)`, ~20 icons) — stroke-based, `currentColor`, built
 only from primitive shapes (circle/rect/line/polyline/straight-line paths, no hand-authored bezier curves) specifically
@@ -1001,17 +1052,13 @@ needed; it's a real, working filter, not a decorative input.
 Settings page so its sidebar submenu (General/Billing/Integrations) links to a specific tab rather than a dead `#`
 anchor.
 
-Demos (restructured 2026-09-16 — the galleries, the card deep-dive, the login page and the blog sample were dropped once
-the catalogue covered everything they showed): `demo/index.html` is the landing page;
-`demo/{forms,data,charts,
-cards,navigation,actions,feedback}.html` are the catalogue, one page per group (see "The
-catalogue" below), each with the theme switcher (Base / Console / Ledger / Portal / Sunset) and the dark toggle;
-`demo/layouts/*.html` are the eight frames; `demo/admin/*.html` is the one full sample theme (SidebarLayout +
-collapsible **dark** sidebar nav + icon set + stat cards + ApexCharts + working filtered/paginated tables + card-grid
-Projects/Team + deep-linked Settings tabs + modal + navbar search/notifications/dark-mode toggle, indigo palette — built
-from scratch with this library's own components, not a clone of any commercial template's assets). All generated by
-`examples/pages/build-*.ts` (`deno task build:demos` runs every one) — edit the script, not the generated HTML in
-`demo/`.
+Demos (rebuilt 2026-10-29, see "The demo site" below): one site under `demo/` whose sidebar is its only navigation, plus
+`demo/admin/*.html`, the one full sample theme (SidebarLayout + collapsible **dark** sidebar nav + icon set + stat
+cards + ApexCharts + working filtered/paginated tables + card-grid Projects/Team + deep-linked Settings tabs + modal +
+navbar search/notifications/dark-mode toggle, indigo palette — built from scratch with this library's own components,
+not a clone of any commercial template's assets; its own sidebar is its navigation, ending in a "Component library" link
+back to the site). All generated by `examples/pages/build-demo.ts` and `build-admin-theme.ts` (`deno task build:demos`
+runs both) — edit the scripts, not the generated HTML in `demo/`.
 
 `deno task test:admin` (`examples/tests/test-admin.ts`) drives the admin demo with a real headless Chrome (Puppeteer via
 `npm:puppeteer-core`, pointed at the system Chrome install — no bundled Chromium) and clicks through every interactive
@@ -1370,7 +1417,7 @@ agents built the batch in parallel against the same hard rules; what changed and
 - **Cleanliness pass** (`scratchpad/audit`-style script, rerun on the final bundle): seven selectors declared twice in
   their own stylesheet were merged, four scripts' private `prefers-reduced-motion` checks became `uiMotion.reduced()`,
   and `.combobox__list--static` exists only for the catalogue's bare fragment sample.
-  `CATALOGUE_GROUPS=forms,data deno task test:catalogue` runs one or two pages (a debugging aid).
+  `CATALOGUE_GROUPS=forms,data deno task test:catalogue` runs one or two groups (a debugging aid).
 - Harness lesson: an always-open panel in one catalogue case overlaps the next case's control, and a Puppeteer click at
   those coordinates lands on the panel's hints bar — wrap such cases in `.cat-room--lg`.
 - **The user's walk of the demos (2026-10-29)** found what no suite had: a bare `ComboboxList` fragment wrapped in
@@ -1395,12 +1442,12 @@ agents built the batch in parallel against the same hard rules; what changed and
 
 **Harness additions (round 2, 2026-10-28): theme builder, axe, visual baselines, density.**
 
-- **`demo/theme-builder.html`** (`examples/shared/theme-builder.ts` + `examples/pages/build-theme-builder.ts`,
-  `deno task build:theme-builder`, in `build:demos`, linked from the catalogue sidebar, swept by `test:all` and
-  `test:visual`): colour pickers + hex fields for ten colour tokens, sliders for radius / control height / type size /
-  motion (derived tokens computed from the one slider), two font selects, a Light/Dark palette switch deciding which
-  palette the colours edit, a preview of real components, Export (changed tokens only, `:root` + the two dark blocks
-  with the tokens file's exact selectors) + Copy + Reset, state in localStorage and the URL hash. All through the CSSOM
+- **`demo/foundations/theme-builder.html`** (`examples/shared/theme-builder.ts`'s `themeBuilderContent()` placed in the
+  site chrome by `examples/pages/build-demo.ts`; Foundations › Theme builder; swept by `test:all` and `test:visual`):
+  colour pickers + hex fields for ten colour tokens, sliders for radius / control height / type size / motion (derived
+  tokens computed from the one slider), two font selects, a Light/Dark palette switch deciding which palette the colours
+  edit, a preview of real components, Export (changed tokens only, `:root` + the two dark blocks with the tokens file's
+  exact selectors) + Copy + Reset, state in localStorage and the URL hash. All through the CSSOM
   (`documentElement.style.setProperty`) — no inline style attribute, so the catalogue's CSP check still holds. Two
   lessons: `getComputedStyle(root).getPropertyValue("--color-x")` returns whatever syntax the sheet used (hex, `rgb()`,
   `color-mix()`), so the builder resolves a token to rgb through a hidden probe span's `color`; and reflecting a slider

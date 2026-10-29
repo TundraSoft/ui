@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 /**
- * Every layout at every viewport band: 375 (phone), 667×375 (phone
+ * Every layout frame (demo/frames/<name>.html — the standalone pages the
+ * site's layout pages preview) at every viewport band: 375 (phone), 667×375 (phone
  * landscape), 768 (tablet), 1024 (laptop), 1440 and 1920 (wide). Per
  * band it asserts: no horizontal page overflow; the main content region
  * exists and is within its width cap; the navigation is reachable (a
@@ -13,7 +14,7 @@ import { isNetworkNoise, launch } from "./browser.ts";
 
 const outDir = ".test-output/layouts";
 await ensureDir(outDir);
-const root = await realPath("demo/layouts");
+const root = await realPath("demo/frames");
 
 const layouts = ["stacked", "sidebar", "rail", "split", "article", "docs", "auth", "focus"];
 const bands = [

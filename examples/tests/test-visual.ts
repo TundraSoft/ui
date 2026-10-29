@@ -1,8 +1,9 @@
 /// <reference lib="dom" />
 /**
- * Visual baselines: every demo page (catalogue, theme builder, layouts,
- * admin) at 1440 and 375, light and dark, reduced to a perceptual hash and
- * compared with examples/tests/visual-baseline.json. A page that drifts
+ * Visual baselines: every demo page listed in demo/pages.json (the site,
+ * the layout and error frames, the admin example app) at 1440 and 375,
+ * light and dark, reduced to a perceptual hash and compared with
+ * examples/tests/visual-baseline.json. A page that drifts
  * past the tolerance fails, naming the page, the distance and the
  * screenshot to look at. `--update` (deno task test:visual:update)
  * rewrites the baseline from the current build.
@@ -38,37 +39,13 @@ const outDir = ".test-output/visual";
 await ensureDir(outDir);
 const root = await realPath("demo");
 
-const pages = [
-  "index.html",
-  "forms.html",
-  "data.html",
-  "charts.html",
-  "cards.html",
-  "navigation.html",
-  "actions.html",
-  "feedback.html",
-  "marketing.html",
-  "theme-builder.html",
-  "layouts/index.html",
-  "layouts/stacked.html",
-  "layouts/sidebar.html",
-  "layouts/rail.html",
-  "layouts/split.html",
-  "layouts/article.html",
-  "layouts/docs.html",
-  "layouts/auth.html",
-  "layouts/focus.html",
-  "admin/dashboard.html",
-  "admin/projects.html",
-  "admin/team.html",
-  "admin/profile.html",
-  "admin/invoice.html",
-  "admin/tables.html",
-  "admin/forms.html",
-  "admin/settings.html",
-  "admin/lock-screen.html",
-  "admin/404.html",
-];
+/** Every page the demo build lists (demo/pages.json): the site, the frames, the admin example app. */
+const manifest = JSON.parse(await readTextFile("demo/pages.json")) as {
+  site: string[];
+  frames: string[];
+  admin: string[];
+};
+const pages = [...manifest.site, ...manifest.frames, ...manifest.admin];
 const widths = [1440, 375];
 const themes = ["light", "dark"] as const;
 
@@ -120,7 +97,9 @@ function distance(a: string, b: string): number {
 
 async function settle(path: string): Promise<void> {
   // Charts animate their first draw whatever the motion preference.
-  await new Promise((r) => setTimeout(r, path === "charts.html" || path === "admin/dashboard.html" ? 1500 : 500));
+  await new Promise((r) =>
+    setTimeout(r, path === "components/chart.html" || path === "admin/dashboard.html" ? 1500 : 500)
+  );
 }
 
 /** Renders one page at one width in both themes; returns key → { hash, png }. */

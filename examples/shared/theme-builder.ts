@@ -1,5 +1,5 @@
 /**
- * The theme builder (demo/theme-builder.html): live controls for the main
+ * The theme builder (demo/foundations/theme-builder.html): live controls for the main
  * tokens — colours, radius, control height, type size, motion, fonts —
  * applied to the page through the CSSOM (`documentElement.style.
  * setProperty`, no inline style attribute) so a preview made of real
@@ -7,33 +7,24 @@
  * tokens as a theme file in the shape `tokens/default.css` uses (a `:root`
  * block plus the two dark blocks, with the same selectors). The state
  * lives in localStorage and in the URL hash, so a theme can be shared as a
- * link. Everything here is harness: the page's chrome is the library, the
- * script and stylesheet are written to demo/theme-builder.{js,css}.
+ * link. Everything here is harness: the demo site places it in its own
+ * chrome and writes the script and stylesheet to demo/foundations/theme-builder.{js,css}.
  */
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { Alert } from "../../components/alert/alert.ts";
 import { Badge } from "../../components/badge/badge.ts";
-import { Breadcrumb } from "../../components/breadcrumb/breadcrumb.ts";
 import { Button } from "../../components/button/button.ts";
 import { Card } from "../../components/card/card.ts";
 import { DataTable } from "../../components/data-table/data-table.ts";
 import { FormField } from "../../components/form-field/form-field.ts";
 import { Input } from "../../components/input/input.ts";
-import type { MenuItem } from "../../components/menu/menu.ts";
-import { ConfirmModal } from "../../components/modal/modal.ts";
-import { Navbar } from "../../components/navbar/navbar.ts";
-import { PageHeader } from "../../components/page-header/page-header.ts";
 import { Segmented } from "../../components/segmented/segmented.ts";
 import { Select } from "../../components/select/select.ts";
-import { Sidebar } from "../../components/sidebar/sidebar.ts";
 import { Slider } from "../../components/slider/slider.ts";
 import { Stat } from "../../components/stat/stat.ts";
 import { Switch } from "../../components/switch/switch.ts";
 import { Tabs } from "../../components/tabs/tabs.ts";
-import { ToastRegion } from "../../components/toast/toast.ts";
-import { SidebarLayout } from "../../layouts/sidebar/sidebar.ts";
 import { Icon } from "../../shared/icons.ts";
-import { catalogueGroups } from "./catalogue.ts";
 
 /** A colour token the builder edits. */
 const COLORS: { token: string; label: string; hint?: string }[] = [
@@ -55,45 +46,6 @@ const FONT_OPTIONS = [
   { value: "serif", label: "Serif" },
   { value: "mono", label: "Monospace" },
 ];
-
-const chrome = (
-  { brand, active }: { brand: Html; active: string },
-) => {
-  const items: MenuItem[] = [
-    { label: "Overview", href: "index.html", icon: Icon("dashboard", { size: 18 }) },
-    ...catalogueGroups.map((g): MenuItem => ({
-      label: g.title,
-      href: `${g.id}.html`,
-      icon: Icon("folder", { size: 18 }),
-    })),
-    { label: "Layouts", href: "layouts/index.html", icon: Icon("folder", { size: 18 }) },
-    { label: "Admin sample", href: "admin/dashboard.html", icon: Icon("users", { size: 18 }) },
-    {
-      label: "Theme builder",
-      href: "theme-builder.html",
-      icon: Icon("palette", { size: 18 }),
-      active: active === "theme",
-    },
-  ];
-  return {
-    navbar: Navbar({
-      id: "tb-topbar",
-      brand,
-      links: [{ href: "index.html", label: "Catalogue" }, { href: "layouts/index.html", label: "Layouts" }, {
-        href: "admin/dashboard.html",
-        label: "Admin",
-      }],
-      actions: Button({
-        label: "Dark",
-        variant: "outline",
-        size: "sm",
-        iconStart: Icon("moon", { size: 14 }),
-        attrs: { "data-theme-toggle": "" },
-      }),
-    }),
-    sidebar: Sidebar({ id: "tb-sidebar", brand, items, collapsible: true }),
-  };
-};
 
 function colorRow(c: { token: string; label: string; hint?: string }): Html {
   const id = `tb${c.token.replace(/^--/, "-")}`;
@@ -310,41 +262,17 @@ function preview(): Html {
   `;
 }
 
-/** The whole document. */
-export function themeBuilderPage(): Html {
-  const brand = html`<span class="sidebar__brand-mark">U</span> Catalogue`;
-  const { navbar, sidebar } = chrome({ brand, active: "theme" });
-  const content = html`
-    ${PageHeader({
-      title: "Theme builder",
-      subtitle:
-        "Move a control and every component follows: the tokens are written onto the page as you go. Export writes the ones you changed as a theme file — one stylesheet loaded after the bundle.",
-      breadcrumb: Breadcrumb({ items: [{ label: "Catalogue", href: "index.html" }, { label: "Theme builder" }] }),
-    })}
+/**
+ * The builder itself — token controls beside a live preview — for a page
+ * to place under its own header (the demo site's Foundations › Theme
+ * builder). Needs `themeBuilderCss` and `themeBuilderJs` on the page.
+ */
+export function themeBuilderContent(): Html {
+  return html`
     <div class="grid tb-layout">
       <div class="col-5">${Card({ title: "Tokens", body: controls() })}</div>
       <div class="col-7 tb-preview-col">${Card({ title: "Preview", body: preview() })}</div>
     </div>
-  `;
-  return html`
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Theme builder — @tundralibs/ui</title>
-        <link rel="stylesheet" href="../dist/ui.css">
-        <link rel="stylesheet" href="catalogue.css">
-        <link rel="stylesheet" href="theme-builder.css">
-      </head>
-      <body>
-    <a class="skip-link" href="#main-content">Skip to content</a>
-    ${SidebarLayout({ header: navbar, sidebar, sidebarId: "tb-sidebar", content, stickyHeader: true })}
-    ${ToastRegion()}${ConfirmModal()}
-    <script src="../dist/ui.js"></script>
-    <script src="theme-builder.js"></script>
-      </body>
-    </html>
   `;
 }
 
