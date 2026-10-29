@@ -100,7 +100,9 @@ Sidebar({
     </ul>
   </nav>
   <button type="button" class="sidebar__collapse-toggle js-only" data-collapse="#nav" aria-expanded="true" aria-controls="nav" aria-label="Collapse sidebar">
-    <span class="sidebar__collapse-icon" aria-hidden="true">&#8249;</span>
+    <span class="sidebar__collapse-icon" aria-hidden="true">
+      <svg width="16" height="16" width="2" …>…</svg>
+    </span>
     <span class="sidebar__collapse-label">Collapse</span>
   </button>
 </aside>
@@ -153,7 +155,9 @@ Sidebar({
 <aside class="sidebar sidebar--toggle-edge" id="console-nav">
   <div class="sidebar__brand">Brevily</div>
   <button type="button" class="sidebar__collapse-toggle js-only sidebar__collapse-toggle--edge" data-collapse="#console-nav" aria-expanded="true" aria-controls="console-nav" aria-label="Collapse sidebar">
-    <span class="sidebar__collapse-icon" aria-hidden="true">&#8249;</span>
+    <span class="sidebar__collapse-icon" aria-hidden="true">
+      <svg width="16" height="16" width="2" …>…</svg>
+    </span>
     <span class="sidebar__collapse-label">Collapse</span>
   </button>
   <div class="sidebar__head" data-dropdown-clip>

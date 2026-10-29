@@ -361,6 +361,19 @@ const ownUsage: Record<string, UsageExample[]> = {
         }),
     },
     {
+      title: "A toolbar filter with no visible label",
+      note: "`ariaLabel` names the input and its list; `labelledBy` points at a caption already on the page instead.",
+      render: () =>
+        Combobox({
+          id: "org-scope",
+          name: "org",
+          ariaLabel: "Organisation",
+          placeholder: "All organisations",
+          hints: false,
+          options: [{ value: "acme", label: "Acme" }, { value: "globex", label: "Globex" }],
+        }),
+    },
+    {
       title: "The fragment the route returns",
       render: () =>
         ComboboxList({
@@ -1421,6 +1434,21 @@ const ownUsage: Record<string, UsageExample[]> = {
             "25 Sep",
             "28 Sep",
           ],
+        }),
+    },
+    {
+      title: "A figure that opens the list behind it",
+      note:
+        "`href` makes the label a link stretched over the tile — over the whole card when the stat is a card's body; `note` is the line under the value.",
+      render: () =>
+        Card({
+          body: Stat({
+            label: "Suspended",
+            value: "12",
+            tone: "warning",
+            note: "+3 this month",
+            href: "/organisations?status=suspended",
+          }),
         }),
     },
   ],

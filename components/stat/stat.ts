@@ -1,5 +1,6 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, renderAttrs } from "../../shared/attrs.ts";
+import { Icon } from "../../shared/icons.ts";
 import { Badge } from "../badge/badge.ts";
 
 export type StatTone = "neutral" | "primary" | "success" | "warning" | "danger" | "info";
@@ -26,6 +27,19 @@ export type StatProps = {
    * Without labels the tooltip reads "3 of 12: 48".
    */
   sparklineLabels?: string[];
+  /**
+   * A line under the value — "of 10,000 · renews 1 Nov", "+6 this month".
+   * Muted, smaller than the label.
+   */
+  note?: string | Html;
+  /**
+   * Makes the figure a way into the list behind it ("Suspended" →
+   * `/organisations?status=suspended`). The label becomes the link and
+   * its hit area is stretched over the tile — over the whole `Card` when
+   * the stat is a card's body — so the link's name stays the label, not
+   * the label, value, trend and note read as one.
+   */
+  href?: string;
   attrs?: Attrs;
 };
 
@@ -94,14 +108,29 @@ function sparkline(data: number[], label?: string, labels?: string[]): Html {
 
 /**
  * A KPI tile: label on top, the value large with its trend inline beside
- * it, an optional icon chip at the top end, an optional sparkline under.
+ * it, an optional icon chip at the top end, an optional note and
+ * sparkline under. With `href` the tile (or its card) links to the list
+ * behind the figure.
  */
 export function Stat(props: StatProps): Html {
   const tone = props.tone ?? "neutral";
-  const cls = classAttrs("stat", props.attrs, tone !== "neutral" && `stat--${tone}`, props.icon && "stat--with-icon");
+  const cls = classAttrs(
+    "stat",
+    props.attrs,
+    tone !== "neutral" && `stat--${tone}`,
+    props.icon && "stat--with-icon",
+    props.note !== undefined && "stat--with-note",
+    props.href !== undefined && "stat--link",
+  );
+  const label = props.href === undefined ? html`<span class="stat__label">${props.label}</span>` : html`
+    <a class="stat__label stat__link"
+      href="${props.href}">${props.label}<span class="stat__link-icon" aria-hidden="true">${Icon("chevronRight", {
+        size: 14,
+      })}</span></a>
+  `;
   return html`
     <div ${cls}>
-      <span class="stat__label">${props.label}</span>${props.icon && html`
+      ${label}${props.icon && html`
         <span class="stat__icon" aria-hidden="true">${props.icon}</span>
       `}<span class="stat__row"><span class="stat__value"
         >${props.value}</span>${props.trend &&
@@ -110,7 +139,9 @@ export function Stat(props: StatProps): Html {
               label: props.trend.label,
               variant: props.trend.up ? "success" : "danger",
             })}</span>
-          `}</span>${props.sparkline && props.sparkline.length > 1
+          `}</span>${props.note !== undefined
+          ? html`<span class="stat__note">${props.note}</span>`
+          : ""}${props.sparkline && props.sparkline.length > 1
           ? sparkline(props.sparkline, props.sparklineLabel, props.sparklineLabels)
           : ""}
       </div>

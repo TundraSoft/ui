@@ -151,6 +151,9 @@ the route returns one page as `ComboboxList({ …, total })`, which ends with "S
 narrow." (`moreText`); and `selectedOptions` gives the labels of picks that page does not hold, so a token never shows a
 raw id.
 
+A combobox with no visible `label` — a filter in a toolbar — takes `ariaLabel` ("Organisation"), or `labelledBy` with
+the id of a caption already on the page; either names the input and its list. With a `label`, the label names both.
+
 ### [DatePicker](./reference/components-datepicker.md)
 
 ```ts
@@ -545,7 +548,11 @@ Stat({
   sparkline: [12, 18, 14, 22, 26],
   sparklineLabels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
 }); // hover a column for its value
+Stat({ label: "Suspended", value: "12", note: "+3 this month", href: "/organisations?status=suspended" });
 ```
+
+`note` is a line under the value. `href` turns the label into a link whose hit area covers the tile, or the whole card
+when the stat is a `Card`'s body. The link's accessible name stays the label.
 
 ### [Timeline](./reference/components-timeline.md), [Empty](./reference/components-empty.md), [Skeleton](./reference/components-skeleton.md), [Progress](./reference/components-progress.md)
 

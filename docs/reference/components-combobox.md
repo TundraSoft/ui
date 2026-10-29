@@ -50,6 +50,8 @@ When the list opens: on focus (the whole list at once) or only once something is
 | `id` | `string` | yes | Required: the listbox is a swap target and needs a stable id. |
 | `name` | `string` | yes |  |
 | `label` | `string` |  |  |
+| `ariaLabel` | `string` |  | The input's accessible name when there is no visible `label` — a toolbar filter ("Organisation"). Names the listbox too. Ignored when `label` or `labelledBy` is given. |
+| `labelledBy` | `string` |  | Id(s) of the element(s) that name the input — a heading or a toolbar caption already on the page. Wins over `label` and `ariaLabel`. |
 | `placeholder` | `string` |  |  |
 | `query` | `string` |  | Current text in the input (what the server matched against). |
 | `options` | `ComboboxOption[]` | yes |  |
@@ -103,7 +105,7 @@ Combobox({
 
 ```html
 <div class="combobox" data-combobox>
-  <label class="form-field__label" for="reviewer">Reviewer</label>
+  <label class="form-field__label" id="reviewer-label" for="reviewer">Reviewer</label>
   <div class="combobox__anchor">
     <div class="combobox__field">
       <input type="hidden" name="reviewer" value="" data-combobox-value>
@@ -112,7 +114,7 @@ Combobox({
         <svg width="15" height="15" width="2" …>…</svg>
       </span>
     </div>
-    <div class="combobox__list" id="reviewer-list" role="listbox" hidden>
+    <div class="combobox__list" id="reviewer-list" role="listbox" aria-labelledby="reviewer-label" hidden>
       <div class="combobox__option" role="option" id="reviewer-opt-0" aria-selected="false" data-value="ada">
         <span class="combobox__option-label">Ada Lovelace</span>
         <span class="combobox__option-meta">Finance</span>
@@ -123,6 +125,54 @@ Combobox({
       <div class="combobox__option" role="option" id="reviewer-opt-1" aria-selected="false" data-value="grace">
         <span class="combobox__option-label">Grace Hopper</span>
         <span class="combobox__option-meta">Ops</span>
+        <span class="combobox__check" aria-hidden="true">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </div>
+      <div class="combobox__hints">
+        <span>&uarr;&darr; navigate</span>
+        <span>&crarr; select</span>
+        <span class="combobox__count">2 matches</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### A toolbar filter with no visible label
+
+`ariaLabel` names the input and its list; `labelledBy` points at a caption already on the page instead.
+
+```ts
+Combobox({
+  id: "org-scope",
+  name: "org",
+  ariaLabel: "Organisation",
+  placeholder: "All organisations",
+  hints: false,
+  options: [{ value: "acme", label: "Acme" }, { value: "globex", label: "Globex" }],
+})
+```
+
+```html
+<div class="combobox combobox--no-hints" data-combobox>
+  <div class="combobox__anchor">
+    <div class="combobox__field">
+      <input type="hidden" name="org" value="" data-combobox-value>
+      <input class="combobox__input" id="org-scope" type="text" role="combobox" autocomplete="off" value="" placeholder="All organisations" aria-expanded="false" aria-controls="org-scope-list" aria-autocomplete="list" aria-label="Organisation">
+      <span class="combobox__caret">
+        <svg width="15" height="15" width="2" …>…</svg>
+      </span>
+    </div>
+    <div class="combobox__list" id="org-scope-list" role="listbox" aria-label="Organisation" hidden>
+      <div class="combobox__option" role="option" id="org-scope-opt-0" aria-selected="false" data-value="acme">
+        <span class="combobox__option-label">Acme</span>
+        <span class="combobox__check" aria-hidden="true">
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </div>
+      <div class="combobox__option" role="option" id="org-scope-opt-1" aria-selected="false" data-value="globex">
+        <span class="combobox__option-label">Globex</span>
         <span class="combobox__check" aria-hidden="true">
           <svg width="15" height="15" width="2" …>…</svg>
         </span>
@@ -186,7 +236,7 @@ Combobox({
 
 ```html
 <div class="combobox combobox--multi" data-combobox data-combobox-name="watchers" data-combobox-hide-selected="">
-  <label class="form-field__label" for="watchers">Watchers</label>
+  <label class="form-field__label" id="watchers-label" for="watchers">Watchers</label>
   <div class="combobox__anchor">
     <div class="combobox__field">
       <span class="combobox__token">
@@ -198,7 +248,7 @@ Combobox({
       </span>
       <input class="combobox__input" id="watchers" type="text" role="combobox" autocomplete="off" value="" placeholder="" aria-expanded="false" aria-controls="watchers-list" aria-autocomplete="list" data-combobox-action="/fragments/people" data-combobox-open-on="type" data-combobox-min-chars="2" data-combobox-target="#watchers-list">
     </div>
-    <div class="combobox__list" id="watchers-list" role="listbox" aria-multiselectable="true" hidden>
+    <div class="combobox__list" id="watchers-list" role="listbox" aria-labelledby="watchers-label" aria-multiselectable="true" hidden>
       <div class="combobox__empty" role="option" aria-disabled="true">No matches.</div>
       <div class="combobox__hints">
         <span>&uarr;&darr; navigate</span>

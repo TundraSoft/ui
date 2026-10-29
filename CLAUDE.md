@@ -970,6 +970,15 @@ sidebar is `overflow: visible` and the nav scrolls; the sidebar gets `position: 
 already make it sticky — a components-layer rule beats the layouts layer whatever its specificity, so it is scoped with
 `:not(.layout__body > .sidebar)` and kept inside the ≥992 query (`.js .sidebar` is fixed below it).
 
+**Stat links and nameless comboboxes (2026-10-29, asked by Console FE).** `Stat({ href, note })`: `note` sits in its own
+grid row under the value (`.stat--with-note` adds the row, so a stat without a note keeps its height); `href` makes the
+label an `a.stat__link` whose `::after` is stretched — over the tile (`.stat--link` is positioned), or over the whole
+Card when the stat is `.card__body`'s child (the stat goes static and the card is the containing block). The link is
+named by the label alone; the sparkline sits above the stretch so its point tips still work.
+`Combobox({ ariaLabel,
+labelledBy })` names a combobox with no visible label (a toolbar filter); the same name goes on
+the listbox, and a visible `label` now has an id (`<id>-label`) that names the listbox too.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

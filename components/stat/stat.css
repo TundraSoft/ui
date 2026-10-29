@@ -15,6 +15,14 @@
   row-gap: var(--space-1);
 }
 
+.stat--with-note {
+  grid-template-areas:
+    "label icon"
+    "value icon"
+    "note note"
+    "spark spark";
+}
+
 .stat__icon {
   grid-area: icon;
   display: inline-flex;
@@ -79,6 +87,80 @@
 
 .stat__trend {
   display: inline-flex;
+}
+
+.stat__note {
+  grid-area: note;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle, var(--color-text-muted));
+}
+
+/* A linked stat: the label is the link, and its ::after is stretched over
+   the tile — or over the Card when the stat is the card's body (the card
+   is the positioned ancestor then), so the whole card is the target while
+   the link's name stays the label. The sparkline sits above the stretch
+   so its point tips still answer the pointer. */
+.stat--link {
+  position: relative;
+}
+
+.card__body > .stat--link {
+  position: static;
+}
+
+.stat__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.stat__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.card__body > .stat--link .stat__link::after {
+  border-radius: var(--radius-md);
+}
+
+.stat__link:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.stat__link:focus-visible {
+  outline: none;
+}
+
+.stat__link:focus-visible::after {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: var(--ring-offset);
+}
+
+.stat__link-icon {
+  display: inline-flex;
+  transition: translate var(--transition-fast);
+}
+
+.stat__link:hover .stat__link-icon {
+  translate: var(--space-1) 0;
+}
+
+[dir="rtl"] .stat__link-icon > svg {
+  transform: scaleX(-1);
+}
+
+.stat--link .stat__spark {
+  position: relative;
+  z-index: 1;
 }
 
 /* The sparkline: a 100×32 box stretched to the tile's width, the line in

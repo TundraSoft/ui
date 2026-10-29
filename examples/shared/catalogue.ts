@@ -902,6 +902,30 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "combobox",
       cases: [
         c(
+          "no visible label — ariaLabel names a toolbar filter (#cat-cb-scope), labelledBy points at a caption (#cat-cb-caption)",
+          Toolbar({
+            start: html`${
+              Combobox({
+                id: "cat-cb-scope",
+                name: "org",
+                ariaLabel: "Organisation",
+                placeholder: "All organisations",
+                hints: false,
+                options: cityOptions.slice(0, 5),
+              })
+            }<span class="text-muted" id="cat-cb-caption-text">Region</span>${
+              Combobox({
+                id: "cat-cb-caption",
+                name: "region",
+                labelledBy: "cat-cb-caption-text",
+                placeholder: "Any",
+                hints: false,
+                options: cityOptions.slice(0, 5),
+              })
+            }`,
+          }),
+        ),
+        c(
           "required — single needs a pick (typed text alone does not count), multi at least one token; in Form({ validate }) (#cat-req-cb) and a plain form (#cat-req-cb-plain)",
           row(
             requiredForm(
@@ -3296,6 +3320,48 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
             Stat({ label: "Down", value: "8%", trend: { label: "-0.4%", up: false } }),
             Stat({ label: "Plain", value: "42" }),
           ),
+        ),
+        c(
+          "note + href — the label links to the list behind the figure; in a Card the whole card is the target (#cat-stat-link)",
+          Grid({
+            phoneColumns: "2",
+            items: [
+              GridCol({
+                span: 4,
+                content: Card({
+                  body: Stat({
+                    label: "Suspended",
+                    value: "12",
+                    tone: "warning",
+                    note: "+3 this month",
+                    href: "#cat-stat-suspended",
+                    attrs: { id: "cat-stat-link" },
+                  }),
+                }),
+              }),
+              GridCol({
+                span: 4,
+                content: Card({
+                  body: Stat({
+                    label: "Links",
+                    value: "8,412",
+                    note: html`of 10,000 &middot; renews 1 Nov`,
+                    icon: Icon("link", { size: 20 }),
+                  }),
+                }),
+              }),
+              GridCol({
+                span: 4,
+                content: Stat({
+                  label: "Review asked",
+                  value: "4",
+                  note: "oldest 2 days",
+                  href: "#cat-stat-review",
+                  attrs: { id: "cat-stat-bare" },
+                }),
+              }),
+            ],
+          }),
         ),
         c(
           "sparkline — an inline SVG drawn on the server, no chart engine (#cat-stat-spark)",
