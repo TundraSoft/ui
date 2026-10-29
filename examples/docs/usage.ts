@@ -1307,6 +1307,48 @@ const ownUsage: Record<string, UsageExample[]> = {
         }),
     },
     {
+      title: "An app console: an action and a switcher on top, groups, a usage card, the toggle on the edge",
+      note:
+        "Text in `.sidebar__label` folds to its icon on the collapsed rail; `foot` hides there; `navLabel` names the nav.",
+      render: () =>
+        Sidebar({
+          id: "console-nav",
+          brand: "Brevily",
+          head: html`${
+            Button({
+              label: html`<span class="sidebar__label">Create link</span>`,
+              iconStart: Icon("plus", { size: 16 }),
+            })
+          }${
+            Dropdown({
+              id: "org",
+              trigger: html`${Icon("home", { size: 16 })}<span class="sidebar__label">Acme Inc.</span>`,
+              triggerClass: "btn btn--outline btn--block",
+              searchable: false,
+              content: html`
+                <ul class="menu__list">
+                  <li><a class="menu__link" href="/orgs/globex">Globex</a></li>
+                </ul>
+              `,
+            })
+          }`,
+          items: [{ label: "Links", href: "/links", icon: Icon("link", { size: 18 }), active: true }],
+          sections: [{
+            label: "Workspace",
+            items: [{ label: "Domains", href: "/domains", icon: Icon("globe", { size: 18 }) }],
+          }],
+          foot: html`
+            <div
+              class="card p-3 stack stack--sm"><p class="text-sm">1,240 of 2,000 links</p>${Progress({
+                value: 62,
+                attrs: { "aria-label": "Links used" },
+              })}<a class="text-sm" href="/billing">Upgrade</a></div>
+          `,
+          navLabel: "Console",
+          collapsible: { position: "edge" },
+        }),
+    },
+    {
       title: "The drawer toggle for a header",
       note: "`SidebarLayout` renders one for you; use this when the header carries its own.",
       render: () => SidebarToggle({ targetId: "nav", label: "Menu" }),

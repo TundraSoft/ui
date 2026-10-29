@@ -72,6 +72,20 @@
       if (collapsed && !link.closest(`.${FLYOUT}`)) link.setAttribute("title", label);
       else link.removeAttribute("title");
     });
+    // A head control whose text is a `.sidebar__label` folds to its icon the
+    // same way. A title the control carried itself is left alone.
+    sidebar.querySelectorAll(".sidebar__label").forEach((span) => {
+      const control = span.closest("a, button, summary");
+      const label = span.textContent?.trim();
+      if (!control || !label) return;
+      if (collapsed && !control.hasAttribute("title")) {
+        control.setAttribute("title", label);
+        control.setAttribute("data-sidebar-title", "");
+      } else if (!collapsed && control.hasAttribute("data-sidebar-title")) {
+        control.removeAttribute("title");
+        control.removeAttribute("data-sidebar-title");
+      }
+    });
   }
 
   try {

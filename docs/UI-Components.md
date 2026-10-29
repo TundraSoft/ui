@@ -772,8 +772,15 @@ The navbar collapses to a toggle on phones, and links stay on one line (`white-s
 horizontal. `actions` never wrap or shrink, so a long set overflows a phone: move the extras into `menuActions` (shown
 inside the phone menu, hidden from 768px) and mark their twins in `actions` `hide-md` (hidden below 768px; `hide-sm`
 hides below 576px). The sidebar is the drawer / collapsible rail the `SidebarLayout` manages;
-`SidebarToggle({ targetId })` is the button it renders. Menus nest to any depth; the script marks the link matching the
-full URL (path + hash) current and opens its parents.
+`SidebarToggle({ targetId })` is the button it renders. Beyond `brand` and `items` a sidebar takes `head` (below the
+brand: an action, an organisation switcher — wrap a control's text in `<span class="sidebar__label">` and it folds to
+its icon on the rail, the text becoming its `title`; a dropdown there floats free of the sidebar's scroll box),
+`sections` (labelled groups after `items`, `{ label?, items }`, a rule between them on the rail), `foot` (pinned to the
+bottom above the toggle — a usage card; hidden on the rail) and `navLabel` (the nav's accessible name, default "Main";
+give each nav on a page its own). `collapsible: { position: "edge" }` puts the collapse toggle on the sidebar's end
+border at the top, a small round button, and makes the nav scroll between a fixed head and foot; `true` keeps it at the
+foot. Menus nest to any depth; the script marks the link matching the full URL (path + hash) current and opens its
+parents.
 
 ### [Tree](./reference/components-tree.md)
 

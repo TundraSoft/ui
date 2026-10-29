@@ -957,6 +957,19 @@ a closing row has finished (`.is-closing` on the row, which also un-turns the ic
 capture-phase `toggle` listener keeps the group exclusive when the browser opens a row itself (find-in-page, a
 fragment). `test-catalogue.ts` drives it with JS off as well.
 
+**Sidebar slots (2026-10-29, asked for by the Brevily console).** The console hand-wrote `<aside class="sidebar">`
+because `SidebarProps` held only `brand`, `items`, `collapsible`. Now: `head` (`.sidebar__head`, after the brand),
+`sections` (`{ label?, items }[]` → `.sidebar__section[role=group]` with a `.sidebar__section-label`, each its own
+`Menu` `<id>-menu-<n>`, all inside the one nav), `foot` (`.sidebar__foot`, `margin-top: auto`), `navLabel`, and
+`collapsible: { position: "edge" }` (`.sidebar--toggle-edge` + `.sidebar__collapse-toggle--edge`, rendered right after
+the brand). On the rail `.sidebar__label` (the convention for head control text — `Button` has no label span), section
+labels and the foot hide; collapse-sidebar.js titles a control from its `.sidebar__label` (marked `data-sidebar-title`
+so a title of its own survives). Head and foot carry `data-dropdown-clip` (a switcher dropdown goes `position: fixed`
+instead of being clipped by the sidebar's `overflow-y: auto`). The edge button straddles the border, so in edge mode the
+sidebar is `overflow: visible` and the nav scrolls; the sidebar gets `position: relative` only where a layout does not
+already make it sticky — a components-layer rule beats the layouts layer whatever its specificity, so it is scoped with
+`:not(.layout__body > .sidebar)` and kept inside the ≥992 query (`.js .sidebar` is fixed below it).
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each
