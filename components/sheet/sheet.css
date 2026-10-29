@@ -136,8 +136,10 @@
   display: block;
 }
 
+/* The phone rules match the side rules' specificity (and the RTL ones')
+   and come later, so they win over `.sheet--end .sheet__panel` & co. */
 @media screen and (max-width: 767px) {
-  .sheet__panel {
+  .sheet .sheet__panel {
     inset: auto 0 0 0;
     width: auto;
     height: auto;
@@ -145,11 +147,17 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 
-  .sheet[open] .sheet__panel {
+  .sheet--bottom .sheet__panel {
+    max-height: min(var(--sheet-size), 85vh);
+  }
+
+  .sheet[open] .sheet__panel,
+  [dir="rtl"] .sheet[open] .sheet__panel {
     animation: ui-slide-in-bottom var(--duration-slow) var(--ease-out);
   }
 
-  .sheet.is-closing .sheet__panel {
+  .sheet.is-closing .sheet__panel,
+  [dir="rtl"] .sheet.is-closing .sheet__panel {
     animation: ui-slide-out-bottom var(--duration-base) var(--ease-in) forwards;
   }
 
