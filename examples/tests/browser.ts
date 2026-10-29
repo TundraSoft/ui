@@ -6,9 +6,10 @@
  * that blocks every host except loopback and cdn.jsdelivr.net at the
  * DNS level, so a flaky third-party origin (fonts, placeholder images)
  * can never fail a run. The one CDN stays reachable because the CDN
- * asset path is itself under test.
+ * asset path is itself under test. `pool()` + `isolatedPage()` let a suite
+ * drive several pages at once (`TEST_CONCURRENCY`, default 4).
  */
-import puppeteer, { type Browser, type ConsoleMessage, type HTTPRequest } from "puppeteer-core";
+import puppeteer, { type Browser, type ConsoleMessage, type HTTPRequest, type Page } from "puppeteer-core";
 import { getEnv } from "@tundralibs/compat/runtime";
 
 const env = getEnv();
@@ -50,4 +51,45 @@ export function isNetworkNoise(msg: ConsoleMessage): boolean {
 /** A failed request that is only the hermetic block at work. */
 export function isBlockedRequest(req: HTTPRequest): boolean {
   return HERMETIC && /ERR_NAME_NOT_RESOLVED|ERR_BLOCKED/.test(req.failure()?.errorText ?? "");
+}
+
+/** How many pages a suite drives at once (`TEST_CONCURRENCY`, default 4; 1 runs everything in order). */
+export const CONCURRENCY: number = Math.max(1, Math.floor(Number(env.TEST_CONCURRENCY ?? "4")) || 1);
+
+/**
+ * Runs `fn` over `items`, at most `size` at a time; `worker` (0…size-1) says
+ * which lane runs the item, so a lane can keep one tab for all its items.
+ * Most of a page check is waiting (loads, settle timers, transitions), so a
+ * few lanes cut a suite's wall time without changing what it checks.
+ */
+export async function pool<T>(
+  items: readonly T[],
+  fn: (item: T, index: number, worker: number) => Promise<void>,
+  size: number = CONCURRENCY,
+): Promise<void> {
+  let next = 0;
+  const lane = async (worker: number) => {
+    while (next < items.length) {
+      const i = next++;
+      await fn(items[i]!, i, worker);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(size, items.length) }, (_, w) => lane(w)));
+}
+
+/**
+ * A tab in a browser context of its own. `file://` pages share one origin,
+ * so tabs in the default context share `localStorage`: a dark toggle in
+ * one would leak into another's light render mid-run. Close it with
+ * `closeIsolated(page)`, which drops the context too.
+ */
+export async function isolatedPage(browser: Browser): Promise<Page> {
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  await page.evaluateOnNewDocument(NAME_SHIM);
+  return page;
+}
+
+export async function closeIsolated(page: Page): Promise<void> {
+  await page.browserContext().close();
 }

@@ -1,12 +1,13 @@
 name: CI
 
-# Runs on every pull request (same-repo and fork) and on pushes to main.
-# main is protected: its ruleset requires these five jobs to pass on a PR
-# before it can merge, so the job names below are load-bearing.
+# Runs on every pull request (same-repo and fork): when it opens and on
+# each push to it. main is protected: its ruleset requires these jobs to
+# pass on a PR before it can merge, so the job names below are
+# load-bearing. There is no run after the merge — it repeated the PR's
+# last run. What it alone caught (two PRs green apart, broken together)
+# still surfaces in the release PR's CI before anything publishes, and in
+# health.yml's weekly full run on main.
 on:
-  push:
-    branches:
-      - main
   pull_request:
   workflow_dispatch:
 
@@ -131,21 +132,24 @@ jobs:
         if: matrix.runtime == 'bun'
         run: bun install
 
-      # `deno task test` / `npm test` / `bun run bun:test` each build the
-      # bundle, generate the demo pages, then run every suite: the catalogue,
-      # layouts at six viewport bands, every demo page light+dark, the
-      # admin demo's interactions, and the rAPId example app end to end.
+      # Each runtime builds the bundle, generates the demo pages, then runs
+      # every behaviour suite (`test:suites`): the rAPId contract, the
+      # catalogue, layouts at six viewport bands, every demo page light+dark,
+      # the admin demo's interactions, and the rAPId example app end to end.
+      # The visual baselines are not here: they screenshot the same Chrome
+      # whatever the runtime (the hashes are byte-identical across all three),
+      # so they run once, in the `visual` job beside these.
       - name: Build, demos and every browser suite (deno)
         if: matrix.runtime == 'deno'
-        run: deno task test
+        run: deno task build && deno task build:demos && deno task test:suites
 
       - name: Build, demos and every browser suite (node)
         if: matrix.runtime == 'node'
-        run: npm test
+        run: npm run build && npm run build:demos && npm run test:suites
 
       - name: Build, demos and every browser suite (bun)
         if: matrix.runtime == 'bun'
-        run: bun run bun:test
+        run: bun run bun:build && bun run bun:build:demos && bun run bun:test:suites
 
       - name: Upload screenshots on failure
         if: failure()
@@ -155,6 +159,35 @@ jobs:
           path: .test-output/
           # .test-output is a dot-directory: upload-artifact v4 skips hidden
           # paths unless told otherwise, so failed runs uploaded nothing.
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+
+  visual:
+    name: Visual baselines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.x
+
+      # Every demo page × 1440/375 × light/dark against
+      # examples/tests/visual-baseline.json — the committed hashes are this
+      # runner's Chrome. A wanted change takes its new hashes from the
+      # VISUAL-HASH lines this step prints.
+      - name: Build, demos and visual baselines
+        run: deno task build && deno task build:demos && deno task test:visual
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: screenshots-visual
+          path: .test-output/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

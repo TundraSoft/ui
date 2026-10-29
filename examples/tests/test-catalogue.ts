@@ -22,7 +22,7 @@ import { exit, getEnv } from "@tundralibs/compat/runtime";
 import type { Page } from "puppeteer-core";
 import { catalogue, catalogueGroups } from "../shared/catalogue.ts";
 import { iconNames } from "../../shared/icons.ts";
-import { isBlockedRequest, isNetworkNoise, launch } from "./browser.ts";
+import { closeIsolated, isBlockedRequest, isNetworkNoise, isolatedPage, launch, pool } from "./browser.ts";
 
 const issues: string[] = [];
 const fail = (s: string) => issues.push(s);
@@ -193,9 +193,13 @@ const axeReport: Record<string, AxeViolation[]> = {};
 /** A component's page, from the demo root: every component has one (demo/components/<name>.html). */
 const fileOf = (name: string) => `components/${name}.html`;
 
-/** The one tab the suite drives; listeners report against whichever page it is on. */
-async function openPage(): Promise<Page> {
-  const page = await browser.newPage();
+/**
+ * A tab the suite drives; listeners report against whichever page it is on.
+ * `isolated` gives it a browser context of its own (the render loop runs
+ * several at once, and file:// pages otherwise share one localStorage).
+ */
+async function openPage(isolated = false): Promise<Page> {
+  const page = isolated ? await isolatedPage(browser) : await browser.newPage();
   const here = () => page.url().replace(`file://${root}/`, "");
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
   await page.setViewport({ width: 1280, height: 900 });
@@ -1438,11 +1442,11 @@ async function consoleGaps(page: Page, group: string): Promise<void> {
 // CATALOGUE_GROUPS=forms,data runs only those groups (a debugging aid; CI runs all).
 const onlyGroups = (getEnv().CATALOGUE_GROUPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const wanted = (group: string) => !onlyGroups.length || onlyGroups.includes(group);
-const page = await openPage();
-
 /* ------------------------------------------- every component's own page */
-for (const entry of entries) {
-  if (!wanted(entry.group)) continue;
+// Several component pages at a time, each lane on one isolated tab.
+const lanes: Page[] = [];
+await pool(entries.filter((entry) => wanted(entry.group)), async (entry, _i, worker) => {
+  const page = lanes[worker] ??= await openPage(true);
   const file = fileOf(entry.name);
   await go(page, entry.name);
   const html = await readTextFile(`demo/${file}`);
@@ -1490,9 +1494,12 @@ for (const entry of entries) {
   );
   check(dark.charts === onPage.chartEls, `${file}: ${onPage.chartEls - dark.charts} chart(s) lost on the theme switch`);
   await page.screenshot({ path: `${outDir}/${entry.name}-dark.png` });
-}
+});
+for (const lane of lanes) await closeIsolated(lane);
 
 /* --------------------------------------------- behaviour, per group */
+// One tab, in order: consecutive steps on the same page build on its state.
+const page = await openPage();
 // Each block moves the one tab to the page that holds what it drives
 // (`go`); consecutive steps on the same page keep its state.
 for (const group of catalogueGroups) {
