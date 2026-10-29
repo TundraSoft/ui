@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.3](https://github.com/TundraSoft/ui/compare/v0.25.2...v0.25.3) (2026-10-29)
+
+
+### Bug Fixes
+
+* **collapsible:** rows are native &lt;details&gt;, so a closed row opens without JS ([#91](https://github.com/TundraSoft/ui/issues/91)) ([ccae68f](https://github.com/TundraSoft/ui/commit/ccae68fbb0aba9af771128225c654ebd6f24034b))
+
 ## [0.25.2](https://github.com/TundraSoft/ui/compare/v0.25.1...v0.25.2) (2026-10-29)
 
 
