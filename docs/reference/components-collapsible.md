@@ -26,7 +26,7 @@ Accordion(props: AccordionProps): Html
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `id` | `string` | yes |  |
+| `id` | `string` | yes | The row's own id, on its root: `#<id>` (or the id of anything inside the row) in the address opens the row on arrival and on hashchange. The panel is `<id>-panel`. |
 | `title` | `string | Html` | yes |  |
 | `content` | `Html` | yes |  |
 | `defaultOpen` | `boolean` |  |  |
@@ -37,7 +37,7 @@ Accordion(props: AccordionProps): Html
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | yes |  |
-| `items` | `Array` | yes |  |
+| `items` | `Array` | yes | Each row's `id` (default `<accordion id>-<index>`) is its deep-link target. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -57,7 +57,7 @@ Collapsible({
 ```
 
 ```html
-<div class="collapsible">
+<div class="collapsible" id="terms">
   <h3 class="collapsible__heading">
     <button type="button" class="collapsible__trigger" data-toggle="#terms-panel" aria-expanded="false" aria-controls="terms-panel">
       Terms and conditions
@@ -74,13 +74,14 @@ Collapsible({
 </div>
 ```
 
-### An FAQ accordion
+### An FAQ accordion — /faq#plans opens the second row
 
 ```ts
 Accordion({
   id: "faq",
   items: [
     {
+      id: "refunds",
       title: "How do refunds work?",
       content: html`
         <p>Within 14 days, in full.</p>
@@ -88,6 +89,7 @@ Accordion({
       defaultOpen: true,
     },
     {
+      id: "plans",
       title: "Can I change plans?",
       content: html`
         <p>Any time; the difference is prorated.</p>
@@ -99,31 +101,31 @@ Accordion({
 
 ```html
 <div class="accordion" id="faq" data-accordion-group="">
-  <div class="collapsible">
+  <div class="collapsible" id="refunds">
     <h3 class="collapsible__heading">
-      <button type="button" class="collapsible__trigger" data-toggle="#faq-0-panel" aria-expanded="true" aria-controls="faq-0-panel">
+      <button type="button" class="collapsible__trigger" data-toggle="#refunds-panel" aria-expanded="true" aria-controls="refunds-panel">
         How do refunds work?
         <span class="collapsible__icon" aria-hidden="true">
           <svg width="14" height="14" width="2" …>…</svg>
         </span>
       </button>
     </h3>
-    <div class="collapsible__panel" id="faq-0-panel" data-toggle-panel>
+    <div class="collapsible__panel" id="refunds-panel" data-toggle-panel>
       <div class="collapsible__inner">
         <p>Within 14 days, in full.</p>
       </div>
     </div>
   </div>
-  <div class="collapsible">
+  <div class="collapsible" id="plans">
     <h3 class="collapsible__heading">
-      <button type="button" class="collapsible__trigger" data-toggle="#faq-1-panel" aria-expanded="false" aria-controls="faq-1-panel">
+      <button type="button" class="collapsible__trigger" data-toggle="#plans-panel" aria-expanded="false" aria-controls="plans-panel">
         Can I change plans?
         <span class="collapsible__icon" aria-hidden="true">
           <svg width="14" height="14" width="2" …>…</svg>
         </span>
       </button>
     </h3>
-    <div class="collapsible__panel" id="faq-1-panel" data-toggle-panel hidden>
+    <div class="collapsible__panel" id="plans-panel" data-toggle-panel hidden>
       <div class="collapsible__inner">
         <p>Any time; the difference is prorated.</p>
       </div>

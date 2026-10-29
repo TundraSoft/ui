@@ -3,6 +3,11 @@ import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { Icon } from "../../shared/icons.ts";
 
 export type CollapsibleProps = {
+  /**
+   * The row's own id, on its root: `#<id>` (or the id of anything inside
+   * the row) in the address opens the row on arrival and on hashchange.
+   * The panel is `<id>-panel`.
+   */
   id: string;
   title: string | Html;
   content: Html;
@@ -15,7 +20,7 @@ export function Collapsible(props: CollapsibleProps): Html {
   const open = Boolean(props.defaultOpen);
 
   return html`
-    <div ${classAttrs("collapsible", props.attrs ?? {})}>
+    <div ${classAttrs("collapsible", mergeAttrs(props.attrs, { id: props.id }))}>
       <h3
         class="collapsible__heading"
       >
@@ -43,6 +48,7 @@ export function Collapsible(props: CollapsibleProps): Html {
 
 export type AccordionProps = {
   id: string;
+  /** Each row's `id` (default `<accordion id>-<index>`) is its deep-link target. */
   items: Array<Omit<CollapsibleProps, "id" | "attrs"> & { id?: string }>;
   attrs?: Attrs;
 };

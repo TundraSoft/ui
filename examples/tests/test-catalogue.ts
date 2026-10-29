@@ -644,6 +644,71 @@ async function brevilyDesignFixes(group: string): Promise<void> {
     await p.close();
   }
 
+  if (group === "cards") {
+    // An accordion row is a deep-link target: open on arrival (already at
+    // DOMContentLoaded, no transition), the rest of the accordion closed,
+    // a target inside the row scrolled under scroll-padding-top.
+    const p = await browser.newPage();
+    await p.setViewport({ width: 1280, height: 800 });
+    p.on("pageerror", (e) => fail(`${fileOf("collapsible")} (deep link): pageerror: ${e}`));
+    await p.evaluateOnNewDocument(() => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const panel = document.getElementById("cat-faq-cancel-panel");
+        (globalThis as { atReady?: unknown }).atReady = panel && {
+          hidden: panel.hidden,
+          animating: panel.classList.contains("is-animating"),
+        };
+      });
+    });
+    await p.goto(`file://${root}/${fileOf("collapsible")}#cat-faq-cancel-note`, {
+      waitUntil: "networkidle0",
+      timeout: 30000,
+    });
+    await pause();
+    const rows = () =>
+      p.evaluate(() =>
+        Object.fromEntries(
+          ["refunds", "plans", "cancel"].map((k) => {
+            const row = document.getElementById(`cat-faq-${k}`)!;
+            const t = row.querySelector(".collapsible__trigger")!;
+            return [
+              k,
+              row.classList.contains("collapsible") && t.getAttribute("aria-expanded") === "true" &&
+              !document.getElementById(`cat-faq-${k}-panel`)!.hidden,
+            ];
+          }),
+        )
+      );
+    const land = await p.evaluate(() => ({
+      ready: (globalThis as { atReady?: unknown }).atReady,
+      top: document.getElementById("cat-faq-cancel-note")!.getBoundingClientRect().top,
+      pad: parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0,
+    }));
+    const onLoad = await rows();
+    check(
+      onLoad.cancel && !onLoad.refunds && !onLoad.plans,
+      `cards: a hash inside an accordion row did not open only that row (${JSON.stringify(onLoad)})`,
+    );
+    check(
+      JSON.stringify(land.ready) === JSON.stringify({ hidden: false, animating: false }),
+      `cards: the deep-linked row was not open, without a transition, by DOMContentLoaded (${
+        JSON.stringify(land.ready)
+      })`,
+    );
+    check(
+      Math.abs(land.top - land.pad) < 4,
+      `cards: the deep-linked target is not under scroll-padding-top (${land.top} vs ${land.pad})`,
+    );
+    await p.evaluate(() => (location.hash = "#cat-faq-plans"));
+    await pause();
+    const onChange = await rows();
+    check(
+      onChange.plans && !onChange.cancel && !onChange.refunds,
+      `cards: hashchange to an accordion row did not open it alone (${JSON.stringify(onChange)})`,
+    );
+    await p.close();
+  }
+
   if (group === "navigation") {
     const p = await open("scrollspy", 1280);
     // A theme's calc() token: 80px. The Usage heading sits just under it.

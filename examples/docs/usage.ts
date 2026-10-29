@@ -317,12 +317,13 @@ const ownUsage: Record<string, UsageExample[]> = {
         }),
     },
     {
-      title: "An FAQ accordion",
+      title: "An FAQ accordion — /faq#plans opens the second row",
       render: () =>
         Accordion({
           id: "faq",
           items: [
             {
+              id: "refunds",
               title: "How do refunds work?",
               content: html`
                 <p>Within 14 days, in full.</p>
@@ -330,6 +331,7 @@ const ownUsage: Record<string, UsageExample[]> = {
               defaultOpen: true,
             },
             {
+              id: "plans",
               title: "Can I change plans?",
               content: html`
                 <p>Any time; the difference is prorated.</p>
