@@ -1,12 +1,13 @@
 name: CI
 
-# Runs on every pull request (same-repo and fork) and on pushes to main.
-# main is protected: its ruleset requires these jobs to pass on a PR
-# before it can merge, so the job names below are load-bearing.
+# Runs on every pull request (same-repo and fork): when it opens and on
+# each push to it. main is protected: its ruleset requires these jobs to
+# pass on a PR before it can merge, so the job names below are
+# load-bearing. There is no run after the merge — it repeated the PR's
+# last run. What it alone caught (two PRs green apart, broken together)
+# still surfaces in the release PR's CI before anything publishes, and in
+# health.yml's weekly full run on main.
 on:
-  push:
-    branches:
-      - main
   pull_request:
   workflow_dispatch:
 

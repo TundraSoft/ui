@@ -1284,8 +1284,8 @@ checks the sprite holds every name.
   excluded from `deno fmt` (release-please writes `*` bullets and inserts each release straight under the H1, so the
   file is just `# Changelog` — an intro paragraph gets demoted under a second heading); and release-please only rewrites
   its PR when the release notes change, so a hidden-type commit (`ci:`, `chore:`) that touches a file the PR also edits
-  leaves the PR behind main. Same-repo release PRs run CI through the push on the PR branch (the `RELEASE_PLEASE_TOKEN`
-  PAT); the `pull_request` event is skipped by the jobs' `if:`.
+  leaves the PR behind main. Release PRs are opened with the `RELEASE_PLEASE_TOKEN` PAT so their `pull_request` event
+  runs CI (one opened with the default token triggers nothing).
 - **Wiki** (`wiki-sync.yml` + `scripts/wiki-sync.ts`): `docs/` is the source of truth; every push to `main` touching it
   flattens `docs/*.md` + `docs/reference/*.md` into the `TundraSoft/ui.wiki` checkout (page name = file name, links
   between docs rewritten to page names, other repo links become GitHub blob URLs, generated `Home.md` + `_Sidebar.md`,
@@ -1296,17 +1296,19 @@ checks the sprite holds every name.
 
 ### CI and weekly health (`.github/workflows/`, 2026-09-16)
 
-- **`ci.yml`** on every pull request and on pushes to `main` (**`main` is protected by a ruleset**, 2026-09-17: PR
-  required, the five CI job names below are required status checks, no force-push or deletion; there is no review-count
-  requirement since there is one maintainer, so land changes as a branch + PR and `gh pr merge --squash` once green — a
-  direct push to `main` is refused): `quality` (fmt check, lint, build, **version-manifest drift**, `deno task check`,
-  JSR `publish --dry-run`, `npm pack --dry-run` asserting `dist/ui.{css,js}` are in the tarball), `audit` (high+),
-  `browser` × {deno, node, bun} running build + demos + `test:suites` (every suite except the visual baselines) with the
-  runner's Chrome, and `visual` ("Visual baselines", 2026-10-29) running `test:visual` once — the screenshots come from
-  the same Chrome whatever the runtime (CI's hashes were byte-identical across all three), so running it per runtime
-  only tripled its cost. Screenshots upload on failure (`include-hidden-files: true`: `.test-output` is a dot-directory
-  and upload-artifact v4 skipped it, so no failed run had ever uploaded any). `deno task test` locally is still
-  everything: build → demos → `test:suites` → `test:visual`.
+- **`ci.yml`** on every pull request — when it opens and on each push to it; not after the merge (2026-10-29: the
+  post-merge run repeated the PR's last one, and the merge-skew it alone caught still shows in the release PR's CI and
+  the weekly health run) (**`main` is protected by a ruleset**, 2026-09-17: PR required, the five CI job names below are
+  required status checks, no force-push or deletion; there is no review-count requirement since there is one maintainer,
+  so land changes as a branch + PR and `gh pr merge --squash` once green — a direct push to `main` is refused):
+  `quality` (fmt check, lint, build, **version-manifest drift**, `deno task check`, JSR `publish --dry-run`,
+  `npm pack --dry-run` asserting `dist/ui.{css,js}` are in the tarball), `audit` (high+), `browser` × {deno, node, bun}
+  running build + demos + `test:suites` (every suite except the visual baselines) with the runner's Chrome, and `visual`
+  ("Visual baselines", 2026-10-29) running `test:visual` once — the screenshots come from the same Chrome whatever the
+  runtime (CI's hashes were byte-identical across all three), so running it per runtime only tripled its cost.
+  Screenshots upload on failure (`include-hidden-files: true`: `.test-output` is a dot-directory and upload-artifact v4
+  skipped it, so no failed run had ever uploaded any). `deno task test` locally is still everything: build → demos →
+  `test:suites` → `test:visual`.
 - **Suites run pages side by side** (2026-10-29): `examples/tests/browser.ts` has `pool(items, fn, size)` and
   `isolatedPage(browser)` / `closeIsolated(page)`; `test-visual` (page × width renders), `test-all-pages` (every page),
   `test-layouts` (layout × band) and `test-catalogue`'s per-component render/axe/dark loop run `TEST_CONCURRENCY` lanes
