@@ -130,6 +130,22 @@
   fill-opacity: 0.14;
 }
 
+/* The tip stat.js places above the hovered column (one per page). */
+.stat__spark-tip {
+  position: absolute;
+  z-index: var(--z-popover);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+  animation: ui-fade-in var(--duration-fast) var(--ease-out);
+}
+
 /* A narrow tile (two-up on a phone) drops the value a size so four
    digits and a badge still fit on one line. */
 @media screen and (max-width: 575px) {

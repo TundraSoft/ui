@@ -108,4 +108,12 @@ Stat({
 
 Classes defined by `components/stat/stat.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-hit`, `.stat__spark-line`, `.stat__trend`, `.stat__value`
+`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-hit`, `.stat__spark-line`, `.stat__spark-tip`, `.stat__trend`, `.stat__value`
+
+## Behaviour
+
+`components/stat/stat.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
+
+Attributes it reads or writes: `data-tip`.
+
+Events: `rapid:swapped`.

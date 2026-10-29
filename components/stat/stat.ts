@@ -46,8 +46,9 @@ function sparkPoints(data: number[]): string {
 
 /**
  * The sparkline SVG: a line plus a filled area under it (currentColor),
- * and one hit column per point carrying a `<title>` — the browser's own
- * tooltip names the point on hover, and the column tints while it does.
+ * and one hit column per point carrying its label in `data-tip` and a
+ * `<title>`: stat.js shows the label in a tip above the point the moment
+ * the pointer is over it; the title is the no-script fallback.
  */
 function sparkline(data: number[], label?: string, labels?: string[]): Html {
   const points = sparkPoints(data);
@@ -61,7 +62,8 @@ function sparkline(data: number[], label?: string, labels?: string[]): Html {
     const w = n > 1 ? (i === 0 || i === n - 1 ? step / 2 : step) : SPARK_W;
     const tip = `${labels?.[i] ?? `${i + 1} of ${n}`}: ${String(v)}`;
     return html`
-      <rect class="stat__spark-hit" x="${x.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="${String(SPARK_H)}">
+      <rect class="stat__spark-hit" x="${x.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="${String(SPARK_H)}"
+        data-tip="${tip}">
         <title>${tip}</title>
       </rect>
     `;
