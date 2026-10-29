@@ -17,19 +17,25 @@
   background-color: var(--color-surface);
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-strong) transparent;
-  overscroll-behavior: contain;
 }
 
+/* Overscroll is contained only on the axis that scrolls: the box is a
+   scroll container on both axes (overflow: hidden on the other), so a
+   plain `contain` would stop a vertical wheel over a sideways table from
+   ever reaching the page. */
 .scroll-area--y {
   overflow-y: auto;
+  overscroll-behavior: auto contain;
 }
 
 .scroll-area--x {
   overflow-x: auto;
+  overscroll-behavior: contain auto;
 }
 
 .scroll-area--both {
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .scroll-area--sm {

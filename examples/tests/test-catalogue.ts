@@ -601,6 +601,87 @@ async function outsmartFixes(page: Page, group: string): Promise<void> {
 }
 
 /**
+ * Found designing Brevily's website and console on 0.25.0: a sideways
+ * ScrollArea must not trap a vertical wheel, ScrollSpy must read the
+ * resolved scroll padding (a theme's calc() token parsed to 0), and an
+ * end/start Sheet must be a bottom sheet on a phone.
+ */
+async function brevilyDesignFixes(group: string): Promise<void> {
+  const open = async (name: string, width: number) => {
+    const p = await browser.newPage();
+    await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+    await p.setViewport({ width, height: 800 });
+    p.on("pageerror", (e) => fail(`${fileOf(name)} (brevily): pageerror: ${e}`));
+    await p.goto(`file://${root}/${fileOf(name)}`, { waitUntil: "networkidle0", timeout: 30000 });
+    return p;
+  };
+
+  if (group === "cards") {
+    const p = await open("scroll-area", 1280);
+    const axes = await p.$eval("#cat-scroll-wide", (el) => {
+      const cs = getComputedStyle(el);
+      return { x: cs.overscrollBehaviorX, y: cs.overscrollBehaviorY };
+    });
+    check(
+      axes.x === "contain" && axes.y === "auto",
+      `cards: ScrollArea axis x contains the wrong axes (${JSON.stringify(axes)})`,
+    );
+    // A real wheel over the table, scrolled to its end so no other box
+    // could take the wheel: the page itself must move.
+    const at = await p.$eval("#cat-scroll-wide", (el) => {
+      el.scrollIntoView({ block: "center", behavior: "instant" });
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, before: scrollY };
+    });
+    await p.mouse.move(at.x, at.y);
+    await p.mouse.wheel({ deltaY: 400 });
+    await pause(400);
+    const after = await p.evaluate(() => scrollY);
+    check(
+      after > at.before + 50,
+      `cards: a vertical wheel over an axis-x ScrollArea did not scroll the page (${at.before} → ${after})`,
+    );
+    await p.close();
+  }
+
+  if (group === "navigation") {
+    const p = await open("scrollspy", 1280);
+    // A theme's calc() token: 80px. The Usage heading sits just under it.
+    const current = await p.evaluate(async () => {
+      document.documentElement.style.setProperty("--scroll-padding-top", "calc(64px + 1rem)");
+      const h = document.getElementById("cat-spy-usage")!;
+      scrollTo({ top: h.getBoundingClientRect().top + scrollY - 82, behavior: "instant" });
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      dispatchEvent(new Event("scroll"));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return document.querySelector('#cat-spy-1 a[aria-current="true"]')?.getAttribute("href");
+    });
+    check(current === "#cat-spy-usage", `navigation: ScrollSpy ignored a calc() --scroll-padding-top (${current})`);
+    await p.close();
+  }
+
+  if (group === "feedback") {
+    const p = await open("sheet", 375);
+    for (const side of ["end", "start"]) {
+      await p.$eval(`#cat-sheet-${side}-open`, (el) => (el as HTMLElement).click());
+      await pause(600);
+      const r = await p.$eval(`#cat-sheet-${side} .sheet__panel`, (el) => {
+        const b = el.getBoundingClientRect();
+        return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, vw: innerWidth, vh: innerHeight };
+      });
+      check(
+        Math.abs(r.left) < 1 && Math.abs(r.right - r.vw) < 1 && Math.abs(r.bottom - r.vh) < 1 &&
+          r.top > r.vh * 0.15 - 1,
+        `feedback: the ${side} Sheet at 375 is not a bottom sheet (${JSON.stringify(r)})`,
+      );
+      await p.$eval(`#cat-sheet-${side} [data-sheet-close]`, (el) => (el as HTMLElement).click());
+      await pause(400);
+    }
+    await p.close();
+  }
+}
+
+/**
  * The pieces added for the Brevily console (2026-10-04): column and cell
  * attributes, per-row selection, select-all, POST row actions, the
  * confirmation dialog, an open-on-arrival modal, a Select that never
@@ -2715,6 +2796,7 @@ for (const group of catalogueGroups) {
 
   await consoleGaps(page, group.id);
   await outsmartFixes(page, group.id);
+  await brevilyDesignFixes(group.id);
 }
 
 await browser.close();

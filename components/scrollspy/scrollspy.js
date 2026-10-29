@@ -20,7 +20,13 @@
   function offsetOf(root) {
     const own = Number(root.getAttribute("data-scrollspy-offset"));
     if (own > 0) return own;
-    const token = getComputedStyle(document.documentElement).getPropertyValue("--scroll-padding-top").trim();
+    // reset.css sets html's scroll-padding-top from the token, and the
+    // computed value is a resolved px length — the token itself reads back
+    // as its declared text, which a calc() or var() would not parse from.
+    const style = getComputedStyle(document.documentElement);
+    const padding = parseFloat(style.scrollPaddingTop);
+    if (padding > 0) return padding;
+    const token = style.getPropertyValue("--scroll-padding-top").trim();
     return token.endsWith("rem") ? parseFloat(token) * 16 : parseFloat(token) || 0;
   }
 
