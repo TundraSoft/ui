@@ -1,6 +1,7 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, mergeAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
+import { Icon } from "../../shared/icons.ts";
 import { Menu, type MenuItem } from "../menu/menu.ts";
 
 /** A labelled, non-collapsing group of links (`Sidebar({ sections })`). */
@@ -58,7 +59,9 @@ export function Sidebar(props: SidebarProps): Html {
         position === "edge" && "sidebar__collapse-toggle--edge",
       )}" data-collapse="#${props.id}" aria-expanded="true" aria-controls="${props.id}"
         aria-label="Collapse sidebar"
-      ><span class="sidebar__collapse-icon" aria-hidden="true">&#8249;</span><span class="sidebar__collapse-label"
+      ><span class="sidebar__collapse-icon" aria-hidden="true">${Icon("chevronLeft", {
+        size: 16,
+      })}</span><span class="sidebar__collapse-label"
         >Collapse</span></button>
     `;
   const edge = position === "edge" && !!collapseToggle;

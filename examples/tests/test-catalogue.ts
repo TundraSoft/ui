@@ -851,6 +851,28 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       !back.title && back.foot,
       `navigation: expanding the Sidebar again left the rail state (${JSON.stringify(back)})`,
     );
+    // A theme's layout tokens size the sidebar and its rail; the toggle draws an icon.
+    const sized = await p.evaluate(async () => {
+      const root = document.documentElement.style;
+      const sb = document.getElementById("cat-sb-full")!;
+      root.setProperty("--layout-sidebar-width", "20rem");
+      root.setProperty("--layout-rail-width", "5rem");
+      sb.classList.add("sidebar--collapsed");
+      await new Promise((r) => setTimeout(r, 400));
+      const rail = Math.round(sb.getBoundingClientRect().width);
+      sb.classList.remove("sidebar--collapsed");
+      await new Promise((r) => setTimeout(r, 400));
+      const full = Math.round(sb.getBoundingClientRect().width);
+      root.removeProperty("--layout-sidebar-width");
+      root.removeProperty("--layout-rail-width");
+      return { full, rail, svg: !!sb.querySelector(".sidebar__collapse-icon > svg") };
+    });
+    check(
+      sized.full === 320 && sized.rail === 80 && sized.svg,
+      `navigation: Sidebar ignores --layout-sidebar-width/--layout-rail-width or draws no chevron (${
+        JSON.stringify(sized)
+      })`,
+    );
     await p.close();
   }
 
