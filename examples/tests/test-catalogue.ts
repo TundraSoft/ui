@@ -1108,6 +1108,100 @@ async function playbookAsks(group: string): Promise<void> {
   };
 
   if (group === "cards") {
+    {
+      const p = await open("code", 1440);
+      const rows = await p.$$eval("#cat-code-blank .code", (blocks) =>
+        blocks.map((block) => {
+          const lines = [...block.querySelectorAll(".code__line")];
+          return {
+            count: lines.length,
+            heights: lines.map((l) => l.getBoundingClientRect().height),
+            numbers: lines.map((l) => getComputedStyle(l, "::before").content),
+            copied: lines.map((l) => l.textContent).join("\n"),
+          };
+        }));
+      check(rows.length === 4, `cards: expected 4 blank-line code samples, found ${rows.length}`);
+      for (const [i, row] of rows.entries()) {
+        check(
+          row.count === 3 && row.heights[1] > 0 && Math.abs(row.heights[1] - row.heights[0]) < 1,
+          `cards: a blank code line collapsed in sample ${i} (${JSON.stringify(row.heights)})`,
+        );
+        check(!row.copied.includes("\u200b"), `cards: the blank-line filler reached the text of sample ${i}`);
+      }
+      check(
+        rows[1]?.numbers.every((n) => n.startsWith("counter(")),
+        `cards: a numbered code block lost its line numbers (${JSON.stringify(rows[1]?.numbers)})`,
+      );
+
+      const langs = await p.$$eval("#cat-code-langs .code", (blocks) =>
+        blocks.map((block) => {
+          const toks = (cls: string) => [...block.querySelectorAll(`.tok-${cls}`)].map((t) => t.textContent ?? "");
+          const line = (text: string) =>
+            [...block.querySelectorAll(".code__line")].find((l) => l.textContent?.includes(text));
+          return {
+            kw: toks("kw"),
+            str: toks("str"),
+            com: toks("com"),
+            variable: toks("var"),
+            fn: toks("fn"),
+            attr: toks("attr"),
+            tag: toks("tag"),
+            type: toks("type"),
+            comment2: line("never ===")?.firstElementChild?.className,
+            docEnd: line('Never with ==."""')?.firstElementChild?.className,
+            afterDoc: line("expected =")?.querySelector(".tok-fn")?.textContent,
+            textBlock: line("multi-line text")?.firstElementChild?.className,
+          };
+        }));
+      const [py, php, java] = langs;
+      check(
+        py.kw.includes("def") && py.kw.includes("return") && py.fn.includes("@webhook") && py.fn.includes("verify") &&
+          py.com.some((c) => c.startsWith("# hex")) && py.variable.includes("self") && py.docEnd === "tok-str" &&
+          py.afterDoc === "new" && py.str.includes('"sha256"'),
+        `cards: python tokens wrong (${JSON.stringify(py)})`,
+      );
+      check(
+        php.tag.includes("<?php") && php.kw.includes("function") && php.variable.includes("$body") &&
+          php.str.includes("'sha256'") && php.comment2 === "tok-com" && php.com.some((c) => c.startsWith("// true")),
+        `cards: php tokens wrong (${JSON.stringify(php)})`,
+      );
+      check(
+        java.attr.includes("@Override") && java.kw.includes("public") && java.type.includes("MessageDigest") &&
+          java.str.includes('"HmacSHA256"') && java.com.includes("// constant time") && java.textBlock === "tok-str",
+        `cards: java tokens wrong (${JSON.stringify(java)})`,
+      );
+
+      const aside = await p.$eval("#cat-code-aside", (block) => {
+        const header = block.querySelector(".code__header")!;
+        const order = [...header.children].map((c) => c.className.split(" ")[0]);
+        const style = (sel: string) => getComputedStyle(block.querySelector(sel)!);
+        const copy = block.querySelector(".code__copy")!.getBoundingClientRect();
+        const badge = block.querySelector(".code__aside")!.getBoundingClientRect();
+        return {
+          order,
+          rightAligned: Math.abs(copy.right - header.getBoundingClientRect().right) < 12 && badge.right <= copy.left,
+          mark: style(".tok-mark").fontWeight,
+          plainWeight: style(".code__line").fontWeight,
+          quiet: style(".tok-quiet").color,
+          text: style(".code__line").color,
+          copied: block.querySelector("[data-copy]")!.getAttribute("data-copy") ?? "",
+        };
+      });
+      check(
+        aside.order.join() === "code__title,code__aside,code__copy" && aside.rightAligned,
+        `cards: code aside is not between the title and the copy button (${JSON.stringify(aside)})`,
+      );
+      check(
+        Number(aside.mark) > Number(aside.plainWeight) && aside.quiet !== aside.text,
+        `cards: tok-mark / tok-quiet draw nothing (${JSON.stringify(aside)})`,
+      );
+      check(
+        aside.copied.includes('"id": "lnk_8Hq2"') && !aside.copied.includes("tok-"),
+        `cards: marked runs reached the copied source (${aside.copied})`,
+      );
+      await p.close();
+    }
+
     for (const width of [1440, 375]) {
       const p = await open("prose", width);
       const sizes = await p.$eval("#cat-prose-article", (el) => {

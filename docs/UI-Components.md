@@ -618,13 +618,15 @@ DiffView({ title: "deno.json", view: "split", lines: diffLines(before, after) })
 ```
 
 A code block renders every line as a `.code__line`, so line numbers (CSS counters) and highlighted rows never reach the
-clipboard, with a header (title, language chip, copy button) and `wrap` or a `maxHeight` that scrolls. Pass `code`
-(escaped) or `highlighted` (server-tokenised markup wrapped with `codeHtml()`): the stylesheet colours the kit's own
-`.tok-*` classes and maps Prism's `.token.*` and highlight.js's `.hljs-*` names onto the same tokens, so either
-library's server output is themed by the same custom properties. On a plain page `code.js` runs a small regex tokeniser
-(json, bash, css, html, js/ts) over `<code data-highlight>` blocks that carry no token markup. The diff view takes
-`DiffLine` rows (`add`, `remove`, `context`, `meta`) — `diffLines(before, after)` computes them for short texts — as a
-unified or split table with number gutters, markers drawn by CSS and `+N −M` stats.
+clipboard, with a header (title, language chip, an `aside` such as a status badge, copy button) and `wrap` or a
+`maxHeight` that scrolls. Pass `code` (escaped) or `highlighted` (server-tokenised markup wrapped with `codeHtml()`):
+the stylesheet colours the kit's own `.tok-*` classes and maps Prism's `.token.*` and highlight.js's `.hljs-*` names
+onto the same tokens, so either library's server output is themed by the same custom properties. On a plain page
+`code.js` runs a small regex tokeniser (json, bash, css, html, js/ts, python, php, java) over `<code data-highlight>`
+blocks that carry no token markup. To mark a run inside a line, write it into `highlighted`: `<span class="tok-mark">`
+emphasises it, `tok-quiet` quietens it, and `--code-mark` / `--code-quiet` retune both. The diff view takes `DiffLine`
+rows (`add`, `remove`, `context`, `meta`) — `diffLines(before, after)` computes them for short texts — as a unified or
+split table with number gutters, markers drawn by CSS and `+N −M` stats.
 
 ---
 

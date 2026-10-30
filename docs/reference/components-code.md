@@ -48,10 +48,11 @@ How tall the block may grow before it scrolls inside itself: 12 / 20 / 32 rem.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `id` | `string` |  |  |
-| `code` | `string` |  | The source, escaped like any text. Give this *or* `highlighted`. With a `language` that code.js knows (`json`, `bash`, `css`, `html`, `js`, `ts`) the block is coloured on the page by a small best-effort tokenizer; any other language renders plain. |
-| `highlighted` | `Html` |  | Markup a server-side highlighter produced — Prism, highlight.js or Shiki with class themes — wrapped with {@link codeHtml}. The kit colours both libraries' class names (`.token.keyword`, `.hljs-keyword`) and its own `.tok-*` set from the theme's tokens. TRUSTED: only ever markup the server made from code it holds. |
+| `code` | `string` |  | The source, escaped like any text. Give this *or* `highlighted`. With a `language` that code.js knows (`json`, `bash`, `css`, `html`, `js`, `ts`, `python`, `php`, `java`) the block is coloured on the page by a small best-effort tokenizer; any other language renders plain. |
+| `highlighted` | `Html` |  | Markup a server-side highlighter produced — Prism, highlight.js or Shiki with class themes — wrapped with {@link codeHtml}. The kit colours both libraries' class names (`.token.keyword`, `.hljs-keyword`) and its own `.tok-*` set from the theme's tokens. Hand-written markup marks a run inside a line the same way: `<span class="tok-mark">` emphasises it, `tok-quiet` quietens it. TRUSTED: only ever markup the server made from code it holds. |
 | `language` | `string` |  | Shown as a chip in the header and set as `language-<x>` on `<code>`. |
 | `title` | `string` |  | A file name or caption in the header. |
+| `aside` | `Html` |  | Beside the title, before the copy button: a status badge, a link. |
 | `lineNumbers` | `boolean` |  | Number the lines (CSS counters; never part of the copied text). |
 | `highlightLines` | `number[]` |  | 1-based lines to emphasise — a changed line, the one a doc talks about. |
 | `wrap` | `boolean` |  | Wrap long lines instead of scrolling sideways. |
@@ -148,6 +149,51 @@ CodeBlock({
 </figure>
 ```
 
+### An API reply: a status beside the title, runs marked by hand
+
+`aside` takes any `Html`. In `highlighted` markup, `tok-mark` emphasises a run and `tok-quiet` quietens one; escape the text yourself, `codeHtml()` is `raw()`.
+
+```ts
+CodeBlock({
+  title: "POST /v1/links",
+  aside: Badge({ variant: "success", label: "201 Created" }),
+  highlighted: codeHtml(
+    '{ "id": <span class="tok-mark">"lnk_8Hq2"</span> } <span class="tok-quiet">// the new link</span>',
+  ),
+})
+```
+
+```html
+<figure class="code" data-code>
+  <figcaption class="code__header">
+    <span class="code__title">POST /v1/links</span>
+    <span class="code__aside">
+      <span class="badge badge--success">201 Created</span>
+    </span>
+    <span class="code__copy">
+      <button type="button" class="btn btn--ghost btn--sm btn--icon btn--copy" data-copy="{ &quot;id&quot;: &quot;lnk_8Hq2&quot; } // the new link" data-copy-announce="Copied" aria-label="Copy code">
+        <span class="btn__copy-label" data-copy-label>
+          <svg width="15" height="15" width="2" width="12" height="12" …>…</svg>
+        </span>
+        <span class="btn__copy-done" data-copy-done>
+          <svg width="15" height="15" width="2" …>…</svg>
+        </span>
+      </button>
+    </span>
+  </figcaption>
+  <pre class="code__pre" tabindex="0">
+    <code class="code__body">
+      <span class="code__line">
+        { "id":
+        <span class="tok-mark">"lnk_8Hq2"</span>
+        }
+        <span class="tok-quiet">// the new link</span>
+      </span>
+    </code>
+  </pre>
+</figure>
+```
+
 ### A tall log, capped and wrapping
 
 ```ts
@@ -189,7 +235,7 @@ CodeBlock({
 
 Classes defined by `components/code/code.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.code`, `.code--lg`, `.code--md`, `.code--numbered`, `.code--sm`, `.code--wrap`, `.code__body`, `.code__copy`, `.code__header`, `.code__lang`, `.code__line`, `.code__line--hl`, `.code__pre`, `.code__title`, `.hljs-addition`, `.hljs-attr`, `.hljs-attribute`, `.hljs-built_in`, `.hljs-class`, `.hljs-comment`, `.hljs-doctag`, `.hljs-emphasis`, `.hljs-keyword`, `.hljs-literal`, `.hljs-meta`, `.hljs-meta-string`, `.hljs-name`, `.hljs-number`, `.hljs-operator`, `.hljs-property`, `.hljs-punctuation`, `.hljs-quote`, `.hljs-regexp`, `.hljs-selector-class`, `.hljs-selector-id`, `.hljs-selector-tag`, `.hljs-string`, `.hljs-strong`, `.hljs-symbol`, `.hljs-tag`, `.hljs-template-variable`, `.hljs-title`, `.hljs-type`, `.hljs-variable`, `.tok-attr`, `.tok-com`, `.tok-fn`, `.tok-kw`, `.tok-num`, `.tok-op`, `.tok-punct`, `.tok-str`, `.tok-tag`, `.tok-type`, `.tok-var`, `.token`
+`.code`, `.code--lg`, `.code--md`, `.code--numbered`, `.code--sm`, `.code--wrap`, `.code__aside`, `.code__body`, `.code__copy`, `.code__header`, `.code__lang`, `.code__line`, `.code__line--hl`, `.code__pre`, `.code__title`, `.hljs-addition`, `.hljs-attr`, `.hljs-attribute`, `.hljs-built_in`, `.hljs-class`, `.hljs-comment`, `.hljs-doctag`, `.hljs-emphasis`, `.hljs-keyword`, `.hljs-literal`, `.hljs-meta`, `.hljs-meta-string`, `.hljs-name`, `.hljs-number`, `.hljs-operator`, `.hljs-property`, `.hljs-punctuation`, `.hljs-quote`, `.hljs-regexp`, `.hljs-selector-class`, `.hljs-selector-id`, `.hljs-selector-tag`, `.hljs-string`, `.hljs-strong`, `.hljs-symbol`, `.hljs-tag`, `.hljs-template-variable`, `.hljs-title`, `.hljs-type`, `.hljs-variable`, `.tok-attr`, `.tok-com`, `.tok-fn`, `.tok-kw`, `.tok-mark`, `.tok-num`, `.tok-op`, `.tok-punct`, `.tok-quiet`, `.tok-str`, `.tok-tag`, `.tok-type`, `.tok-var`, `.token`
 
 ## Behaviour
 

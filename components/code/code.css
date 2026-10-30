@@ -22,6 +22,8 @@
   --code-punct: var(--color-text-muted);
   --code-op: var(--color-text);
   --code-var: var(--color-text);
+  --code-mark: var(--color-text);
+  --code-quiet: var(--color-text-muted);
   --code-max-height: none;
   margin: 0;
   border: var(--border-width) solid var(--color-border);
@@ -64,9 +66,22 @@
   line-height: 1.6;
 }
 
+/* The title gives way first: a status beside it stays readable. */
+.code__aside {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .code__copy {
   margin-inline-start: auto;
   display: inline-flex;
+}
+
+.code__aside + .code__copy {
+  margin-inline-start: 0;
 }
 
 .code__pre {
@@ -99,6 +114,14 @@
   display: block;
   padding-inline: var(--space-4);
   white-space: pre;
+}
+
+/* A blank line still takes a line's height. Not `:empty`: a highlighter
+   splitting a multi-line comment leaves an empty span on the blank line.
+   Not `::before`, which holds the line number. Generated text stays out of
+   the copied source. */
+.code__line::after {
+  content: "\200b";
 }
 
 .code--wrap .code__line {
@@ -245,6 +268,16 @@
 .code .hljs-regexp,
 .code .hljs-template-variable {
   color: var(--code-var);
+}
+
+/* A run marked by hand inside a line, in `highlighted` markup. */
+.code .tok-mark {
+  color: var(--code-mark);
+  font-weight: var(--font-weight-semibold);
+}
+
+.code .tok-quiet {
+  color: var(--code-quiet);
 }
 
 .code .token.bold,

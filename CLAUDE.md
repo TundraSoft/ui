@@ -1031,6 +1031,15 @@ slide's `opacity` = 1 − t through the move; the IntersectionObserver stands as
 the catalogue's page-scroll case carries such a caption, 3,535px without the fix). `ScrollSteps({ dim: false })` →
 `.scroll-steps--no-dim`. All pinned in `playbookAsks()`.
 
+**CodeBlock for every Brevily sample (2026-10-30, asked by the Brevily playbook and Console v4).** A blank line kept no
+height: `.code__line` is `display: block` with nothing in it. The filler is `.code__line::after { content: "\200b" }` on
+every line — not `::before` (the line number lives there) and not `:empty` (a highlighter splitting a multi-line comment
+leaves an empty span on the blank line). `aside` (`Html`, `.code__aside`) sits between title and copy. code.js colours
+`python`/`py`, `php` and `java`; what stays open across lines is now `BLOCKS` (`[opener, closer, class]`, so a Python
+docstring or a Java text block continues as a string), checked at each position inside the scan so an opener inside a
+string or a line comment never counts. `tok-mark` / `tok-quiet` (`--code-mark`, `--code-quiet`) mark a run inside a line
+in `highlighted` markup; `highlighted` turns the tokenizer off, so that markup carries any other colours itself.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each
