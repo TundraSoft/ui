@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/TundraSoft/ui/compare/v0.29.1...v0.30.0) (2026-10-30)
+
+
+### Features
+
+* DataTable pinEnd pins the row actions or last column while the rest scrolls ([#103](https://github.com/TundraSoft/ui/issues/103)) ([af13392](https://github.com/TundraSoft/ui/commit/af13392927257a767acf7e49e32c3f1d0a40d991))
+
 ## [0.29.1](https://github.com/TundraSoft/ui/compare/v0.29.0...v0.29.1) (2026-10-30)
 
 
