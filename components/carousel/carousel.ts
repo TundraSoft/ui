@@ -13,7 +13,8 @@ export type CarouselControls = "bar" | "sides";
 export type CarouselStack = "sm" | "md" | "lg";
 
 export type CarouselProps = {
-  id: string;
+  /** Only needed to refer to the carousel; carousel.js finds its parts without it. */
+  id?: string;
   /** Accessible name of the region — "Customer stories". */
   label: string;
   items: Html[];

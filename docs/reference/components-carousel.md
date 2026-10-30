@@ -58,7 +58,7 @@ Stack the slides into a plain list below this breakpoint: 576 / 768 / 992px.
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
-| `id` | `string` | yes |  |
+| `id` | `string` |  | Only needed to refer to the carousel; carousel.js finds its parts without it. |
 | `label` | `string` | yes | Accessible name of the region — "Customer stories". |
 | `items` | `Html[]` | yes |  |
 | `perView` | `CarouselPerView` |  |  |

@@ -1040,6 +1040,14 @@ docstring or a Java text block continues as a string), checked at each position 
 string or a line comment never counts. `tok-mark` / `tok-quiet` (`--code-mark`, `--code-quiet`) mark a run inside a line
 in `highlighted` markup; `highlighted` turns the tokenizer off, so that markup carries any other colours itself.
 
+**ScrollSteps' two copies, optional Carousel id (2026-10-30, asked by Console FE and Console v4).** `step.media` renders
+twice (in the step, on the stage) and only one is displayed at any width, because a single copy moved by script would
+shift the first paint. The stage copy gets `<id>-stage-` on every id it declares and on references to them
+(`withIdPrefix` in reveal.ts: ID-reference attributes, and `#id` in any other attribute) — a prefix, because scripts
+derive ids from a root's (`<id>-list`). The stage is no longer `aria-hidden` (it hid focusable controls); a faded
+picture is `visibility: hidden`, flipping after the fade. A field in media would post twice, so forms do not belong
+there. `Carousel.id` is optional; carousel.js never used it. `playbookAsks()` pins it at 375 and 1280, axe included.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

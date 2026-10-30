@@ -1,6 +1,7 @@
 /** Catalogue cases for components/reveal — see examples/shared/catalogue.ts. */
 import { html } from "@tundralibs/rapid/ui";
 import { Card } from "../../../components/card/card.ts";
+import { Carousel } from "../../../components/carousel/carousel.ts";
 import {
   CountUp,
   LazySection,
@@ -148,6 +149,32 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
               media: stepMedia("Collect"),
             },
           ],
+        }),
+      ),
+      caseOf(
+        "ScrollSteps — a Carousel, a labelled field and an SVG gradient as media: one displayed copy, unique ids, only the current picture's controls take focus (#cat-scroll-steps-ids)",
+        ScrollSteps({
+          id: "cat-scroll-steps-ids",
+          height: "sm",
+          steps: ["a", "b"].map((key) => ({
+            content: html`
+              <h3>Step ${key}</h3>
+            `,
+            media: html`
+              <div>
+                ${Carousel({
+                  id: `cat-steps-carousel-${key}`,
+                  label: `Pictures for step ${key}`,
+                  items: [stepMedia(`${key} one`), stepMedia(`${key} two`)],
+                })}
+                <label for="cat-steps-note-${key}">Note ${key}</label>
+                <input class="input" id="cat-steps-note-${key}" aria-describedby="cat-steps-help-${key}">
+                <span id="cat-steps-help-${key}">Help ${key}</span>
+                <a href="#cat-steps-help-${key}">To the help</a>
+                <a href="#elsewhere">Elsewhere</a>
+              </div>
+            `,
+          })),
         }),
       ),
       caseOf(

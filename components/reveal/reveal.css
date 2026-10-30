@@ -178,7 +178,9 @@
   overflow: hidden;
 }
 
-/* The stage and its stacked media: one visible at a time, cross-faded. */
+/* The stage and its stacked media: one visible at a time, cross-faded.
+   `visibility` keeps a faded copy's controls out of the tab order; it
+   flips after the fade going out and at once coming in. */
 .scroll-steps__stage {
   display: none;
   position: sticky;
@@ -197,11 +199,14 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--duration-slow) var(--ease-in-out);
+  visibility: hidden;
+  transition: opacity var(--duration-slow) var(--ease-in-out), visibility 0s linear var(--duration-slow);
 }
 
 .scroll-steps__media.is-active {
   opacity: 1;
+  visibility: visible;
+  transition: opacity var(--duration-slow) var(--ease-in-out), visibility 0s;
 }
 
 .scroll-steps__media > img,
