@@ -617,6 +617,198 @@ async function brevilyDesignFixes(group: string): Promise<void> {
   };
 
   if (group === "data") {
+    // DataTable pinEnd: the last column stays at the box's end, on an opaque
+    // ground in every row state and both themes, and the keyboard gets there.
+    const t = await open("data-table", 1280);
+    const pinnedState = (tableId: string) =>
+      t.$eval(`#${tableId}`, (table) => {
+        const box = table.querySelector<HTMLElement>(".data-table__scroll")!;
+        box.scrollLeft = 300;
+        const boxRight = box.getBoundingClientRect().left + box.clientWidth;
+        const cells = [
+          table.querySelector("thead th:last-child")!,
+          table.querySelector(".data-table__row > td:last-child")!,
+        ];
+        return {
+          overflow: box.scrollWidth > box.clientWidth,
+          scrolled: box.scrollLeft,
+          tabindex: box.getAttribute("tabindex"),
+          name: box.getAttribute("aria-label"),
+          cells: cells.map((cell) => {
+            const rect = cell.getBoundingClientRect();
+            const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            // A selection's bulk bar covers the header row by design.
+            return {
+              right: Math.round(rect.right - boxRight),
+              own: !!hit?.closest(".data-table__bulk") || cell.contains(hit),
+            };
+          }),
+        };
+      });
+    await t.$eval("#cat-dt-pin", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    for (const id of ["cat-dt-pin", "cat-dt-pin-last"]) {
+      await t.$eval(`#${id}`, (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      const state = await pinnedState(id);
+      check(state.overflow && state.scrolled > 0, `data: #${id} does not scroll sideways (${JSON.stringify(state)})`);
+      check(state.tabindex === "0" && !!state.name, `data: #${id}'s scroll box is not a named tab stop`);
+      for (const cell of state.cells) {
+        check(cell.right === 0 && cell.own, `data: #${id}'s last column is not pinned (${JSON.stringify(cell)})`);
+      }
+    }
+    // Row states, both themes: opaque, and the edge differs from the ground.
+    const ground = (selector: string) =>
+      t.$eval(selector, (cell) => {
+        const style = getComputedStyle(cell);
+        return {
+          bg: style.backgroundColor,
+          edge: style.borderInlineStartColor,
+          width: parseFloat(style.borderInlineStartWidth),
+        };
+      });
+    const opaque = (colour: string) => colour !== "transparent" && !/\/ 0|, 0\)$|\/ 0\.\d+\)$/.test(colour);
+    const lastIn = (key: string) => `#cat-dt-pin [data-row-key="${key}"] > td:last-child`;
+    for (const theme of ["light", "dark"]) {
+      await t.evaluate((name) => {
+        document.documentElement.dataset.theme = name;
+      }, theme);
+      await pause(350);
+      await t.mouse.move(0, 0);
+      const states: Record<string, { bg: string; edge: string; width: number }> = {
+        header: await ground("#cat-dt-pin thead th:last-child"),
+        plain: await ground(lastIn("1")),
+        selected: await ground(lastIn("2")),
+      };
+      await t.hover(`#cat-dt-pin [data-row-key="1"] > td:nth-child(3)`);
+      await pause(100);
+      states.hover = await ground(lastIn("1"));
+      for (const [name, value] of Object.entries(states)) {
+        check(opaque(value.bg), `data: pinned ${name} cell is see-through in ${theme}: ${value.bg}`);
+        check(value.width > 0 && value.edge !== value.bg, `data: pinned ${name} cell has no edge in ${theme}`);
+      }
+      check(states.plain.bg !== states.selected.bg, `data: a selected row's pinned cell ignores the tint in ${theme}`);
+      check(states.plain.bg !== states.hover.bg, `data: a hovered row's pinned cell ignores the hover in ${theme}`);
+    }
+    await t.evaluate(() => {
+      delete document.documentElement.dataset.theme;
+    });
+    // Keyboard: Tab into the box, arrows scroll it, a link scrolled under the
+    // pinned cell comes clear on focus, the row's actions are in the order.
+    await t.$eval("#cat-dt-pin .data-table__scroll", (box) => {
+      box.scrollLeft = 0;
+      const before = box.closest(".data-table")!.querySelector<HTMLElement>(".data-table__title");
+      before?.setAttribute("tabindex", "-1");
+      before?.focus();
+    });
+    await t.keyboard.press("Tab");
+    const stop = await t.evaluate(() => document.activeElement?.classList.contains("data-table__scroll"));
+    check(!!stop, "data: Tab does not reach the pinEnd scroll box");
+    const outline = await t.$eval("#cat-dt-pin .data-table__scroll", (el) => getComputedStyle(el).outlineStyle);
+    check(outline === "solid", `data: the focused scroll box has no ring (${outline})`);
+    await t.keyboard.press("ArrowRight");
+    await pause(300);
+    const arrowed = await t.$eval("#cat-dt-pin .data-table__scroll", (el) => el.scrollLeft);
+    check(arrowed > 0, "data: arrow keys do not scroll the pinEnd box");
+    const walk: string[] = [];
+    for (let i = 0; i < 12; i++) {
+      await t.keyboard.press("Tab");
+      await pause(250);
+      const at = await t.evaluate(() => {
+        const el = document.activeElement as HTMLElement;
+        const row = el.closest("[data-row-key]");
+        if (!row) return { kind: "outside", clear: true };
+        const pin = row.querySelector("td:last-child")!;
+        const rect = el.getBoundingClientRect();
+        const pinned = pin.contains(el);
+        return {
+          kind: pinned ? "action" : el.tagName,
+          clear: pinned || rect.right <= pin.getBoundingClientRect().left + 1,
+        };
+      });
+      walk.push(at.kind);
+      check(at.clear, `data: Tab left a ${at.kind} under the pinned cell`);
+      if (at.kind === "action") break;
+    }
+    check(walk.includes("A") && walk.includes("action"), `data: Tab did not walk a row to its actions: ${walk}`);
+    // The strip still opens from a pinned kebab, inside the box.
+    await t.keyboard.press("Enter");
+    await pause(400);
+    const strip = await t.evaluate(() => {
+      const open = document.querySelector<HTMLElement>("#cat-dt-pin .data-table__row-actions:not([hidden])");
+      if (!open) return null;
+      const box = open.closest(".data-table__scroll")!.getBoundingClientRect();
+      const rect = open.getBoundingClientRect();
+      return rect.right <= box.right + 1 && rect.left >= box.left - 1;
+    });
+    check(strip === true, `data: a pinned row's action strip did not open inside the box (${strip})`);
+    await t.keyboard.press("Escape");
+    await pause(400);
+    // Axe on the pinned tables, with the box scrolled.
+    await t.addScriptTag({ content: axeSource });
+    const pinAxe = await t.evaluate(async () => {
+      // deno-lint-ignore no-explicit-any
+      const axe = (globalThis as any).axe;
+      const found: string[] = [];
+      for (const id of ["cat-dt-pin", "cat-dt-pin-last", "cat-dt-pin-fits"]) {
+        const result = await axe.run(`#${id}`, {
+          preload: false,
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
+        });
+        // deno-lint-ignore no-explicit-any
+        found.push(...result.violations.map((v: any) => `${v.id}: ${v.nodes[0].target}`));
+      }
+      return found;
+    });
+    check(pinAxe.length === 0, `data: axe on a pinEnd table: ${pinAxe}`);
+    // A table that fits holds no tab stop; a table without the option has none of this.
+    const others = await t.evaluate(() => {
+      const fits = document.querySelector("#cat-dt-pin-fits .data-table__scroll")!;
+      const plain = document.getElementById("cat-dt-1")!;
+      return {
+        fits: fits.getAttribute("tabindex"),
+        plainTab: plain.querySelector(".data-table__scroll")!.getAttribute("tabindex"),
+        plainHead: getComputedStyle(plain.querySelector("thead th:last-child")!).insetInlineEnd,
+        plainEdge: getComputedStyle(plain.querySelector(".data-table__row > td:last-child")!).borderInlineStartWidth,
+      };
+    });
+    check(others.fits === null, "data: a pinEnd table that fits keeps a dead tab stop");
+    check(
+      others.plainTab === null && others.plainHead === "auto" && others.plainEdge === "0px",
+      `data: a table without pinEnd changed (${JSON.stringify(others)})`,
+    );
+    await t.close();
+    // Below 768 the option does nothing: the same cards, and nothing pinned.
+    const phone = await open("data-table", 375);
+    const cards = await phone.evaluate(() => {
+      const shape = (id: string) => {
+        const table = document.getElementById(id)!;
+        return [...table.querySelectorAll(".data-table__row, .data-table__row > td")].map((el) => {
+          const style = getComputedStyle(el);
+          const rect = el.getBoundingClientRect();
+          return [
+            Math.round(rect.width),
+            Math.round(rect.height),
+            style.position,
+            style.display,
+            style.borderInlineStartWidth,
+            style.backgroundColor,
+          ].join(" ");
+        }).join("|");
+      };
+      const last = document.querySelector("#cat-dt-pin-last .data-table__row > td:last-child")!;
+      return {
+        on: shape("cat-dt-pin-cards-true"),
+        off: shape("cat-dt-pin-cards-false"),
+        tab: document.querySelector("#cat-dt-pin-cards-true .data-table__scroll")!.getAttribute("tabindex"),
+        last: getComputedStyle(last).position,
+        pageWide: document.documentElement.scrollWidth > innerWidth,
+      };
+    });
+    check(cards.on === cards.off, "data: pinEnd changed the card layout below 768");
+    check(cards.tab === null, "data: a card layout keeps a dead tab stop from pinEnd");
+    check(cards.last === "static", `data: pinEnd pinned a column below 768 (${cards.last})`);
+    check(!cards.pageWide, "data: the pinEnd cases widen the page at 375");
+    await phone.close();
+
     // Stat href: the label is the link; inside a Card its hit area is the
     // whole card (a point in the card's padding resolves to the link), a
     // bare stat's is the tile. The note sits under the value.

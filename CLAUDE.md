@@ -1048,6 +1048,15 @@ derive ids from a root's (`<id>-list`). The stage is no longer `aria-hidden` (it
 picture is `visibility: hidden`, flipping after the fade. A field in media would post twice, so forms do not belong
 there. `Carousel.id` is optional; carousel.js never used it. `playbookAsks()` pins it at 375 and 1280, axe included.
 
+**DataTable `pinEnd` (2026-10-30, asked by Console FE for the owner).** From 768px the last column (the row actions, or
+the last of `columns` without them) and its header stay at the scroll box's end; the rules hang off
+`.data-table--pin-end` with `:last-child`, so cells need no class of their own. They sit in a `min-width: 768px` query
+so a phone layout, the kit's cards or an app's own through `cellAttrs`, never meets them. The cell's ground follows
+hover and selected, and the body cell has no z-index, like `td.data-table__actions`. The box renders `tabindex="0"` and
+a name (`scrollLabel`); data-table.js `fitPinned` drops the tab stop while nothing overflows and writes
+`--data-table-pin-end-width` for `scroll-padding-inline-end`, so a link focused by Tab comes clear of the pinned cell.
+`playbookAsks()` pins it, keyboard and axe included.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

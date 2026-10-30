@@ -21,7 +21,7 @@ import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { ConsentBanner } from "../../components/consent/consent.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
-import { DataTable, RowActions } from "../../components/data-table/data-table.ts";
+import { DataTable, type DataTableColumn, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker, DatePickerPanel } from "../../components/datepicker/datepicker.ts";
 import { DateTimePicker, dateTimePresets } from "../../components/datetimepicker/datetimepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
@@ -444,6 +444,23 @@ const otpModes = ["numeric", "alphanumeric"] as const;
 const gridSpans = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
 type Row = Record<string, unknown> & { id: string; name: string; status: string; amount: string };
+/** Enough columns to overflow any catalogue width; the name is a link, for the keyboard checks. */
+const wideColumns: DataTableColumn<Row>[] = [
+  { key: "id", label: "ID", mono: true },
+  {
+    key: "name",
+    label: "Name",
+    render: (r) =>
+      html`
+        <a href="#${r.id}">${r.name}</a>
+      `,
+  },
+  ...["Region", "Plan", "Owner", "Renewal", "Billing contact", "Usage this month", "Notes"].map((label) => ({
+    key: label,
+    label,
+    render: () => `${label}: a value long enough to need room`,
+  })),
+];
 const rows: Row[] = [
   { id: "1", name: "Northwind", status: "Active", amount: "$1,200" },
   { id: "2", name: "Contoso", status: "Paused", amount: "$840" },
@@ -1265,6 +1282,64 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
               id: `cat-dt-${maxHeight}`,
               maxHeight,
               columns: [{ key: "name", label: "Name" }],
+              rows,
+              rowKey: (r) => r.id,
+            }),
+          )
+        ),
+        c(
+          "pinEnd — row actions pinned, the rest scrolls inside the box; selectable, sortable (#cat-dt-pin)",
+          DataTable<Row>({
+            id: "cat-dt-pin",
+            title: "Pinned actions",
+            pinEnd: true,
+            selectable: true,
+            selected: ["2"],
+            bulkActions: Button({ label: "Archive", size: "sm" }),
+            columns: wideColumns,
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-pin-row-${r.id}`,
+                label: `Actions for ${r.name}`,
+                items: [{ label: "Edit", href: "#" }, { label: "Remove", href: "#", danger: true }],
+              }),
+          }),
+        ),
+        c(
+          "pinEnd — no rowActions, so the last column is pinned (#cat-dt-pin-last)",
+          DataTable<Row>({
+            id: "cat-dt-pin-last",
+            scrollLabel: "Accounts, last column pinned",
+            pinEnd: true,
+            columns: [...wideColumns, { key: "status", label: "Status" }],
+            rows,
+            rowKey: (r) => r.id,
+          }),
+        ),
+        c(
+          "pinEnd — a table that fits holds no tab stop (#cat-dt-pin-fits)",
+          DataTable<Row>({
+            id: "cat-dt-pin-fits",
+            pinEnd: true,
+            columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }],
+            rows,
+            rowKey: (r) => r.id,
+          }),
+        ),
+        ...[true, false].map((pinEnd) =>
+          c(
+            `pinEnd ${pinEnd} with responsive: cards — the same cards below 768 (#cat-dt-pin-cards-${pinEnd})`,
+            DataTable<Row>({
+              id: `cat-dt-pin-cards-${pinEnd}`,
+              responsive: "cards",
+              pinEnd,
+              columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }, {
+                key: "amount",
+                label: "Amount",
+                numeric: true,
+              }],
               rows,
               rowKey: (r) => r.id,
             }),

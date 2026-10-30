@@ -99,6 +99,8 @@ numbers right-aligned, the checkbox and the actions at the corners.
 | `footer` | `Html` |  |  |
 | `rowActions` | `(row: T) => Html` |  |  |
 | `maxHeight` | `"sm" | "md" | "lg"` |  | Caps the scroll body (sm 240px / md 400px / lg 600px) so the sticky header has something to stick to. A step, not a length: it maps to `.data-table__scroll--*`, so no inline style is emitted (CSP). A theme can retune the steps via `--data-table-max-height` on that class. |
+| `pinEnd` | `boolean` |  | From 768px, pin the last column (the row actions, or the last of `columns` when there are none) and its header to the box's end while the rest scrolls sideways inside the box. The box is a tab stop while it overflows, so the keyboard can scroll it. Below 768px nothing is pinned, so a phone layout is untouched. |
+| `scrollLabel` | `string` |  | Accessible name of the scroll box with `pinEnd`. @default title, else "Table" |
 | `empty` | `Html` |  | Shown instead of the body when `rows` is empty — an `Empty`, or anything. |
 | `emptyMessage` | `string` |  | Plain-text alternative to `empty`. @default "Nothing to show." |
 | `attrs` | `Attrs` |  |  |
@@ -251,6 +253,91 @@ DataTable<Invoice>({
       </table>
     </div>
   </form>
+</div>
+```
+
+### Row actions pinned while the table scrolls sideways
+
+`pinEnd` pins the actions, or the last column without them, from 768px. The box is a tab stop while it overflows.
+
+```ts
+DataTable<Invoice>({
+  id: "ledger",
+  title: "Ledger",
+  pinEnd: true,
+  columns: [
+    { key: "id", label: "Invoice", mono: true },
+    { key: "client", label: "Client" },
+    { key: "total", label: "Total", numeric: true },
+  ],
+  rows: invoices,
+  rowKey: (r) => r.id,
+  rowActions: (r) =>
+    RowActions({
+      id: `ledger-${r.id}`,
+      label: `Actions for ${r.client}`,
+      items: [{ label: "Open", href: `/invoices/${r.id}` }],
+    }),
+})
+```
+
+```html
+<div class="data-table data-table--pin-end" id="ledger">
+  <div class="data-table__toolbar">
+    <span class="data-table__title">Ledger</span>
+  </div>
+  <div class="data-table__scroll" tabindex="0" role="group" aria-label="Ledger">
+    <table class="data-table__table">
+      <thead>
+        <tr>
+          <th class="">INVOICE</th>
+          <th class="">CLIENT</th>
+          <th class="data-table__num">TOTAL</th>
+          <th class="data-table__actions">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="data-table__row" data-row-key="INV-2048">
+          <td class="data-table__mono">INV-2048</td>
+          <td class="">Northwind Traders</td>
+          <td class="data-table__num">$12,400.00</td>
+          <td class="data-table__actions">
+            <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#ledger-INV-2048-strip" aria-expanded="false" aria-controls="ledger-INV-2048-strip">
+              <svg width="16" height="16" width="2" …>…</svg>
+              <span class="sr-only">Actions for Northwind Traders</span>
+            </button>
+            <div class="data-table__row-actions" id="ledger-INV-2048-strip" role="group" aria-label="Actions for Northwind Traders" hidden>
+              <a class="btn btn--sm" href="/invoices/INV-2048">Open</a>
+              <span class="data-table__row-actions-sep"></span>
+              <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
+                <svg width="14" height="14" width="2" …>…</svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr class="data-table__row" data-row-key="INV-2047">
+          <td class="data-table__mono">INV-2047</td>
+          <td class="">Contoso Ltd</td>
+          <td class="data-table__num">$3,120.00</td>
+          <td class="data-table__actions">
+            <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#ledger-INV-2047-strip" aria-expanded="false" aria-controls="ledger-INV-2047-strip">
+              <svg width="16" height="16" width="2" …>…</svg>
+              <span class="sr-only">Actions for Contoso Ltd</span>
+            </button>
+            <div class="data-table__row-actions" id="ledger-INV-2047-strip" role="group" aria-label="Actions for Contoso Ltd" hidden>
+              <a class="btn btn--sm" href="/invoices/INV-2047">Open</a>
+              <span class="data-table__row-actions-sep"></span>
+              <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
+                <svg width="14" height="14" width="2" …>…</svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 ```
 
@@ -455,12 +542,12 @@ DataTable<Invoice>({
 
 Classes defined by `components/data-table/data-table.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table--cards`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
+`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table--cards`, `.data-table--pin-end`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
 
 ## Behaviour
 
 `components/data-table/data-table.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-total`.
+Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-table--pin-end`, `data-table-pin-end-width`, `data-total`.
 
 Events: `rapid:swapped`.

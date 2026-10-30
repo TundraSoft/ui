@@ -326,6 +326,47 @@ td.data-table__cell--pinned {
   z-index: 2;
 }
 
+/* DataTable({ pinEnd }): the last column stays at the box's end while the
+   rest scrolls under it. Only from 768px, so a phone layout (cards, or an
+   app's own through cellAttrs) never meets these rules. The cell's ground
+   follows the row's state, so nothing shows through it. No z-index on the
+   body cell, for the same reason as td.data-table__actions. data-table.js
+   writes --data-table-pin-end-width, so a control focused by Tab scrolls
+   clear of the pinned cell. */
+@media screen and (min-width: 768px) {
+  .data-table--pin-end .data-table__scroll {
+    scroll-padding-inline-end: var(--data-table-pin-end-width, 0px);
+  }
+
+  .data-table--pin-end thead th:last-child {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 4;
+    border-inline-start: var(--border-width) solid var(--color-border-strong);
+  }
+
+  .data-table--pin-end .data-table__row > td:last-child {
+    position: sticky;
+    inset-inline-end: 0;
+    border-inline-start: var(--border-width) solid var(--color-border-strong);
+    background: var(--color-surface);
+  }
+
+  .data-table--pin-end .data-table__row--selected > td:last-child {
+    background: var(--color-surface-sunken, var(--color-surface-alt));
+    background: color-mix(in oklab, var(--color-accent, var(--color-primary)) 5%, var(--color-surface));
+  }
+
+  .data-table--pin-end .data-table__row:hover > td:last-child {
+    background: var(--color-surface-alt);
+  }
+}
+
+.data-table--pin-end .data-table__scroll:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: calc(-1 * var(--ring-width));
+}
+
 .data-table__row-actions {
   position: absolute;
   inset-block: 0;

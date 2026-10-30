@@ -488,6 +488,30 @@ const ownUsage: Record<string, UsageExample[]> = {
         }),
     },
     {
+      title: "Row actions pinned while the table scrolls sideways",
+      note:
+        "`pinEnd` pins the actions, or the last column without them, from 768px. The box is a tab stop while it overflows.",
+      render: () =>
+        DataTable<Invoice>({
+          id: "ledger",
+          title: "Ledger",
+          pinEnd: true,
+          columns: [
+            { key: "id", label: "Invoice", mono: true },
+            { key: "client", label: "Client" },
+            { key: "total", label: "Total", numeric: true },
+          ],
+          rows: invoices,
+          rowKey: (r) => r.id,
+          rowActions: (r) =>
+            RowActions({
+              id: `ledger-${r.id}`,
+              label: `Actions for ${r.client}`,
+              items: [{ label: "Open", href: `/invoices/${r.id}` }],
+            }),
+        }),
+    },
+    {
       title: "Invoices: sortable, selectable, with bulk and row actions",
       note:
         "Sort links swap the table in place and push history; bulk buttons post `op` plus one `selected` per checked row through the table's own form; the kebab opens a row action strip.",

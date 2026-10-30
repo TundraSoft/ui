@@ -18,6 +18,8 @@
  * the count reads the total. Unticking a row, Clear, or the same button
  * again returns to the ticked rows. The count's wording comes from
  * `data-one` / `data-other` on [data-bulk-count] (`{n}` = the number).
+ *
+ * `DataTable.pinEnd`: see fitPinned.
  */
 (() => {
   /** table id → Set of checked row keys, as of the last change. */
@@ -203,7 +205,30 @@
     });
   }
 
+  /* pinEnd: the scroll box is a tab stop only while there is something to
+     scroll, and focus scrolling keeps clear of the pinned cell's width. */
+  function fitPinned(box) {
+    const scrolls = box.scrollWidth > box.clientWidth + 1 || box.scrollHeight > box.clientHeight + 1;
+    if (scrolls) box.setAttribute("tabindex", "0");
+    else box.removeAttribute("tabindex");
+    const pin = box.querySelector("thead th:last-child");
+    if (pin) box.style.setProperty("--data-table-pin-end-width", `${pin.offsetWidth}px`);
+  }
+  const watched = new WeakSet();
+  const pinObserver = "ResizeObserver" in window
+    ? new ResizeObserver((entries) => entries.forEach((entry) => fitPinned(entry.target)))
+    : null;
+  function watchPinned() {
+    document.querySelectorAll(".data-table--pin-end .data-table__scroll").forEach((box) => {
+      fitPinned(box);
+      if (!pinObserver || watched.has(box)) return;
+      watched.add(box);
+      pinObserver.observe(box);
+    });
+  }
+
   function initAll(keepSelection) {
+    watchPinned();
     document.querySelectorAll(".data-table").forEach(nameRows);
     document.querySelectorAll(".data-table").forEach((table) => {
       if (keepSelection) restore(table);
