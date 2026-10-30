@@ -15,7 +15,9 @@ Stat(props: StatProps): Html
 ```
 
 A KPI tile: label on top, the value large with its trend inline beside
-it, an optional icon chip at the top end, an optional sparkline under.
+it, an optional icon chip at the top end, an optional note and
+sparkline under. With `href` the tile (or its card) links to the list
+behind the figure.
 
 ## Types
 
@@ -40,6 +42,8 @@ it, an optional icon chip at the top end, an optional sparkline under.
 | `sparkline` | `number[]` |  | A small trend line under the value, drawn on the server as an inline SVG (a polyline and a soft fill) from these points — no chart engine, the same bytes on every render. Two or more numbers; the line fills the tile's width. Say what it shows in `sparklineLabel`. |
 | `sparklineLabel` | `string` |  | Accessible name of the sparkline, e.g. "Daily signups, rising". Without it the drawing is decorative. |
 | `sparklineLabels` | `string[]` |  | One label per point ("Mar", "Week 12"), shown with the value in the tooltip of that point's column (a native `<title>`, so no script). Without labels the tooltip reads "3 of 12: 48". |
+| `note` | `string | Html` |  | A line under the value — "of 10,000 · renews 1 Nov", "+6 this month". Muted, smaller than the label. |
+| `href` | `string` |  | Makes the figure a way into the list behind it ("Suspended" → `/organisations?status=suspended`). The label becomes the link and its hit area is stretched over the tile — over the whole `Card` when the stat is a card's body — so the link's name stays the label, not the label, value, trend and note read as one. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -104,11 +108,48 @@ Stat({
 </div>
 ```
 
+### A figure that opens the list behind it
+
+`href` makes the label a link stretched over the tile — over the whole card when the stat is a card's body; `note` is the line under the value.
+
+```ts
+Card({
+  body: Stat({
+    label: "Suspended",
+    value: "12",
+    tone: "warning",
+    note: "+3 this month",
+    href: "/organisations?status=suspended",
+  }),
+})
+```
+
+```html
+<div class="card">
+  <div class="card__content">
+    <div class="card__body">
+      <div class="stat stat--warning stat--with-note stat--link">
+        <a class="stat__label stat__link" href="/organisations?status=suspended">
+          Suspended
+          <span class="stat__link-icon" aria-hidden="true">
+            <svg width="14" height="14" width="2" …>…</svg>
+          </span>
+        </a>
+        <span class="stat__row">
+          <span class="stat__value">12</span>
+        </span>
+        <span class="stat__note">+3 this month</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
 ## CSS hooks
 
 Classes defined by `components/stat/stat.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.stat`, `.stat--danger`, `.stat--info`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat__icon`, `.stat__label`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-hit`, `.stat__spark-line`, `.stat__spark-tip`, `.stat__trend`, `.stat__value`
+`.card__body`, `.stat`, `.stat--danger`, `.stat--info`, `.stat--link`, `.stat--primary`, `.stat--success`, `.stat--warning`, `.stat--with-note`, `.stat__icon`, `.stat__label`, `.stat__link`, `.stat__link-icon`, `.stat__note`, `.stat__row`, `.stat__spark`, `.stat__spark-area`, `.stat__spark-hit`, `.stat__spark-line`, `.stat__spark-tip`, `.stat__trend`, `.stat__value`
 
 ## Behaviour
 

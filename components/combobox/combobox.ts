@@ -22,6 +22,17 @@ export type ComboboxProps = {
   id: string;
   name: string;
   label?: string;
+  /**
+   * The input's accessible name when there is no visible `label` — a
+   * toolbar filter ("Organisation"). Names the listbox too. Ignored when
+   * `label` or `labelledBy` is given.
+   */
+  ariaLabel?: string;
+  /**
+   * Id(s) of the element(s) that name the input — a heading or a toolbar
+   * caption already on the page. Wins over `label` and `ariaLabel`.
+   */
+  labelledBy?: string;
   placeholder?: string;
   /** Current text in the input (what the server matched against). */
   query?: string;
@@ -194,6 +205,11 @@ export function Combobox(props: ComboboxProps): Html {
   const known = [...props.options, ...(props.selectedOptions ?? [])];
   const current = props.multi ? undefined : known.find((o) => selected.has(o.value));
   const typeOnly = props.openOn === "type";
+  // One name for the input and its listbox: an explicit labelledBy, else
+  // the visible label, else ariaLabel.
+  const labelId = props.label ? `${props.id}-label` : undefined;
+  const labelledBy = props.labelledBy ?? labelId;
+  const ariaLabel = labelledBy ? undefined : props.ariaLabel;
 
   const tokens = props.multi
     ? [...selected].map((v) => {
@@ -225,12 +241,16 @@ export function Combobox(props: ComboboxProps): Html {
         "data-combobox-name": props.multi ? props.name : undefined,
         "data-combobox-hide-selected": props.multi && props.hideSelected !== false ? "" : undefined,
       })}>${props.label
-        ? html`<label class="form-field__label" for="${props.id}">${props.label}</label>`
+        ? html`<label class="form-field__label" id="${labelId}" for="${props.id}">${props.label}</label>`
         : ""}<div class="combobox__anchor"><div class="combobox__field">${tokens}${valueInput}<input class="combobox__input" id="${props
         .id}" type="text" role="combobox" autocomplete="off" value="${props.query ?? current?.label ??
         ""}" placeholder="${props.placeholder ?? ""}" aria-expanded="${props.open
         ? "true"
         : "false"}" aria-controls="${listId}" aria-autocomplete="list"${renderAttrs({
+          "aria-label": ariaLabel,
+          // A visible <label for> already names the input; only a caller's
+          // own labelledBy goes on it.
+          "aria-labelledby": props.labelledBy,
           "data-combobox-action": props.action,
           "data-combobox-load-on-focus": props.action && props.loadOnFocus && !typeOnly ? "" : undefined,
           "data-combobox-open-on": typeOnly ? "type" : undefined,
@@ -244,6 +264,8 @@ export function Combobox(props: ComboboxProps): Html {
         })}>${(props.caret ?? !typeOnly)
         ? html`<span class="combobox__caret">${Icon("chevronDown", { size: 15 })}</span>`
         : ""}</div><div class="combobox__list" id="${listId}" role="listbox"${renderAttrs({
+          "aria-label": ariaLabel,
+          "aria-labelledby": labelledBy,
           "aria-multiselectable": props.multi ? "true" : undefined,
           "data-combobox-empty": props.emptyText,
           "data-combobox-selected-text": props.multi ? props.selectedText : undefined,

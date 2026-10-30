@@ -616,6 +616,70 @@ async function brevilyDesignFixes(group: string): Promise<void> {
     return p;
   };
 
+  if (group === "data") {
+    // Stat href: the label is the link; inside a Card its hit area is the
+    // whole card (a point in the card's padding resolves to the link), a
+    // bare stat's is the tile. The note sits under the value.
+    const p = await open("stat", 1280);
+    const stat = await p.evaluate(() => {
+      const hit = (el: Element, dx: number, dy: number) => {
+        el.scrollIntoView({ block: "center", behavior: "instant" });
+        const r = el.getBoundingClientRect();
+        const at = document.elementFromPoint(r.left + dx, r.top + dy);
+        return at?.closest("a")?.getAttribute("href") ?? null;
+      };
+      const linked = document.getElementById("cat-stat-link")!;
+      const card = linked.closest(".card")!;
+      const bare = document.getElementById("cat-stat-bare")!;
+      const note = linked.querySelector(".stat__note")!.getBoundingClientRect();
+      const val = linked.querySelector(".stat__value")!.getBoundingClientRect();
+      return {
+        name: linked.querySelector("a.stat__link")?.textContent?.trim(),
+        cardCorner: hit(card, 4, 4),
+        cardBottom: hit(card, card.getBoundingClientRect().width - 4, card.getBoundingClientRect().height - 4),
+        bareValue: hit(bare.querySelector(".stat__value")!, 4, 4),
+        noteBelow: note.top >= val.bottom - 1,
+        unlinked: document.querySelector("#cat-stat .stat:not(.stat--link) a") === null,
+      };
+    });
+    check(
+      stat.name === "Suspended" && stat.cardCorner === "#cat-stat-suspended" &&
+        stat.cardBottom === "#cat-stat-suspended" && stat.bareValue === "#cat-stat-review" && stat.noteBelow &&
+        stat.unlinked,
+      `data: Stat href / note (${JSON.stringify(stat)})`,
+    );
+    await p.close();
+  }
+
+  if (group === "forms") {
+    // Combobox without a visible label: ariaLabel names the input and the
+    // listbox; labelledBy points both at the caption; a visible label
+    // names the listbox through its id.
+    const p = await open("combobox", 1280);
+    const names = await p.evaluate(() => {
+      const of = (id: string) => {
+        const input = document.getElementById(id)!;
+        const list = document.getElementById(`${id}-list`)!;
+        return {
+          input: [input.getAttribute("aria-label"), input.getAttribute("aria-labelledby")],
+          list: [list.getAttribute("aria-label"), list.getAttribute("aria-labelledby")],
+        };
+      };
+      return { scope: of("cat-cb-scope"), caption: of("cat-cb-caption"), labelled: of("cat-req-cb-one") };
+    });
+    const label = await p.$eval("#cat-req-cb-one-label", (el) => el.getAttribute("for")).catch(() => null);
+    check(
+      JSON.stringify(names.scope) === JSON.stringify({ input: ["Organisation", null], list: ["Organisation", null] }) &&
+        JSON.stringify(names.caption) ===
+          JSON.stringify({ input: [null, "cat-cb-caption-text"], list: [null, "cat-cb-caption-text"] }) &&
+        JSON.stringify(names.labelled) ===
+          JSON.stringify({ input: [null, null], list: [null, "cat-req-cb-one-label"] }) &&
+        label === "cat-req-cb-one",
+      `forms: Combobox ariaLabel / labelledBy (${JSON.stringify({ names, label })})`,
+    );
+    await p.close();
+  }
+
   if (group === "cards") {
     const p = await open("scroll-area", 1280);
     const axes = await p.$eval("#cat-scroll-wide", (el) => {
@@ -850,6 +914,28 @@ async function brevilyDesignFixes(group: string): Promise<void> {
     check(
       !back.title && back.foot,
       `navigation: expanding the Sidebar again left the rail state (${JSON.stringify(back)})`,
+    );
+    // A theme's layout tokens size the sidebar and its rail; the toggle draws an icon.
+    const sized = await p.evaluate(async () => {
+      const root = document.documentElement.style;
+      const sb = document.getElementById("cat-sb-full")!;
+      root.setProperty("--layout-sidebar-width", "20rem");
+      root.setProperty("--layout-rail-width", "5rem");
+      sb.classList.add("sidebar--collapsed");
+      await new Promise((r) => setTimeout(r, 400));
+      const rail = Math.round(sb.getBoundingClientRect().width);
+      sb.classList.remove("sidebar--collapsed");
+      await new Promise((r) => setTimeout(r, 400));
+      const full = Math.round(sb.getBoundingClientRect().width);
+      root.removeProperty("--layout-sidebar-width");
+      root.removeProperty("--layout-rail-width");
+      return { full, rail, svg: !!sb.querySelector(".sidebar__collapse-icon > svg") };
+    });
+    check(
+      sized.full === 320 && sized.rail === 80 && sized.svg,
+      `navigation: Sidebar ignores --layout-sidebar-width/--layout-rail-width or draws no chevron (${
+        JSON.stringify(sized)
+      })`,
     );
     await p.close();
   }

@@ -130,7 +130,11 @@ export const COMPONENTS: Record<string, ComponentInfo> = {
   },
   badge: { label: "Badge & chip", icon: "tag", blurb: "Status labels, dots, counts and removable chips." },
   avatar: { label: "Avatar", icon: "user", blurb: "Pictures or initials, in sizes, stacks and with a presence dot." },
-  stat: { label: "Stat", icon: "coin", blurb: "A metric with a trend, an icon and a sparkline." },
+  stat: {
+    label: "Stat",
+    icon: "coin",
+    blurb: "A metric with a trend, an icon, a note and a sparkline; can link to the list behind it.",
+  },
   "description-list": {
     label: "Description list",
     icon: "list",
