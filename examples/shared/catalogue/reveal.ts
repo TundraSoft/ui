@@ -156,25 +156,32 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         ScrollSteps({
           id: "cat-scroll-steps-ids",
           height: "sm",
-          steps: ["a", "b"].map((key) => ({
-            content: html`
-              <h3>Step ${key}</h3>
-            `,
-            media: html`
-              <div>
-                ${Carousel({
-                  id: `cat-steps-carousel-${key}`,
-                  label: `Pictures for step ${key}`,
-                  items: [stepMedia(`${key} one`), stepMedia(`${key} two`)],
-                })}
-                <label for="cat-steps-note-${key}">Note ${key}</label>
-                <input class="input" id="cat-steps-note-${key}" aria-describedby="cat-steps-help-${key}">
-                <span id="cat-steps-help-${key}">Help ${key}</span>
-                <a href="#cat-steps-help-${key}">To the help</a>
-                <a href="#elsewhere">Elsewhere</a>
-              </div>
-            `,
-          })),
+          steps: [
+            ...["a", "b"].map((key) => ({
+              content: html`
+                <h3>Step ${key}</h3>
+              `,
+              media: html`
+                <div>
+                  ${Carousel({
+                    id: `cat-steps-carousel-${key}`,
+                    label: `Pictures for step ${key}`,
+                    items: [stepMedia(`${key} one`), stepMedia(`${key} two`)],
+                  })}
+                  <label for="cat-steps-note-${key}">Note ${key}</label>
+                  <input class="input" id="cat-steps-note-${key}" aria-describedby="cat-steps-help-${key}">
+                  <span id="cat-steps-help-${key}">Help ${key}</span>
+                  <a href="#cat-steps-help-${key}">To the help</a>
+                  <a href="#elsewhere">Elsewhere</a>
+                </div>
+              `,
+            })),
+            {
+              content: html`
+                <h3>Step c, no media of its own</h3>
+              `,
+            },
+          ],
         }),
       ),
       caseOf(

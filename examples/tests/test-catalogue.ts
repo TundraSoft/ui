@@ -1553,6 +1553,82 @@ async function playbookAsks(group: string): Promise<void> {
       await d.close();
     }
 
+    // SiteFooter tag: a div in a layout's footer, styled the same, no nested footer.
+    const foot = await open("site-footer", 1280);
+    const feet = await foot.evaluate(() => {
+      const div = document.getElementById("cat-footer-div")!;
+      const plain = document.getElementById("cat-footer-tag")!;
+      return {
+        div: div.tagName,
+        plain: plain.tagName,
+        nested: document.querySelectorAll("footer footer").length,
+        sameLook: getComputedStyle(div).borderTopWidth === getComputedStyle(plain).borderTopWidth &&
+          getComputedStyle(div).backgroundColor === getComputedStyle(plain).backgroundColor,
+      };
+    });
+    check(feet.div === "DIV" && feet.plain === "FOOTER", `marketing: SiteFooter tag ignored (${JSON.stringify(feet)})`);
+    check(feet.nested === 0, "marketing: SiteFooter nests a footer in a footer");
+    check(feet.sameLook, "marketing: SiteFooter looks different as a div");
+    await foot.close();
+
+    // Focus inside a fading picture moves with the step, without scrolling,
+    // and comes back to the same control on the way back.
+    const f = await open("reveal", 1280, 800);
+    const toStep = async (step: string) => {
+      await f.evaluate((want) => {
+        const text = document.querySelector(`#cat-scroll-steps-ids [data-scroll-step="${want}"] .scroll-steps__text`)!;
+        const box = text.getBoundingClientRect();
+        scrollTo({ top: scrollY + box.top + box.height / 2 - innerHeight / 2, behavior: "instant" });
+      }, step);
+      await pause(150);
+    };
+    const focusState = () =>
+      f.evaluate(() => {
+        const el = document.activeElement as HTMLElement;
+        const media = el.closest<HTMLElement>("[data-scroll-step-media]");
+        const active = document.querySelector<HTMLElement>("#cat-scroll-steps-ids [data-scroll-step-media].is-active")!;
+        return {
+          tag: el.tagName,
+          class: el.className,
+          media: media?.dataset.scrollStepMedia,
+          step: el.dataset.scrollStep,
+          current: active.dataset.scrollStepMedia,
+          y: Math.round(scrollY),
+        };
+      });
+    await toStep("0");
+    const dot = '#cat-scroll-steps-ids [data-scroll-step-media="0"] .carousel__dot';
+    await f.$eval(dot, (el) => (el as HTMLElement).focus({ preventScroll: true }));
+    const start = await focusState();
+    await toStep("1");
+    const moved1 = await focusState();
+    check(
+      moved1.media === "1" && moved1.current === "1" && moved1.class === start.class,
+      `marketing: focus did not move to the new ScrollSteps picture (${JSON.stringify(moved1)})`,
+    );
+    await pause(200);
+    const settled = await focusState();
+    check(settled.y === moved1.y, `marketing: carrying focus scrolled the page (${moved1.y} → ${settled.y})`);
+    await toStep("2");
+    const onStep = await focusState();
+    check(
+      onStep.step === "2",
+      `marketing: a picture with no controls did not hand focus to its step (${JSON.stringify(onStep)})`,
+    );
+    await toStep("1");
+    await toStep("0");
+    const back = await f.evaluate((selector) => document.activeElement === document.querySelector(selector), dot);
+    check(back, "marketing: scrolling back does not restore the focused ScrollSteps control");
+    // Focus elsewhere stays where it is.
+    await f.$eval("#cat-scroll-steps-ids h3", (el) => {
+      el.setAttribute("tabindex", "-1");
+      (el as HTMLElement).focus({ preventScroll: true });
+    });
+    await toStep("1");
+    const stayed = await f.evaluate(() => document.activeElement?.tagName);
+    check(stayed === "H3", `marketing: a step change moved focus that was not in a picture (${stayed})`);
+    await f.close();
+
     // Carousel, Console v4's asks: side arrows, the stacked fallback, page scroll.
     const c = await open("carousel", 1440, 900);
     const noId = await c.$eval("#cat-carousel-no-id", (el) => {

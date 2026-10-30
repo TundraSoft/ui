@@ -339,7 +339,8 @@ function withIdPrefix(media: Html, prefix: string): Html {
  * heading that opens a step is drawn at `--scroll-steps-title-size`.
  * Below 768 the stage is hidden and each step shows its own media in
  * flow — the story reads top to bottom with nothing sticky. Only the
- * current media on the stage is visible, so only its controls take focus.
+ * current media on the stage is visible, so only its controls take focus;
+ * focus inside a picture moves to the new picture as the step changes.
  */
 export function ScrollSteps(props: ScrollStepsProps): Html {
   const attrs = mergeAttrs(props.attrs, { id: props.id, "data-scroll-steps": "" });

@@ -1057,6 +1057,13 @@ a name (`scrollLabel`); data-table.js `fitPinned` drops the tab stop while nothi
 `--data-table-pin-end-width` for `scroll-padding-inline-end`, so a link focused by Tab comes clear of the pinned cell.
 `playbookAsks()` pins it, keyboard and axe included.
 
+**ScrollSteps focus, SiteFooter `tag` (2026-10-30).** A faded picture cannot hold focus, so `activate()` in reveal.js
+moves focus inside a stage picture to the control at the same place in the new one, or to the step (`tabindex="-1"`)
+when that picture has no controls, always with `preventScroll`. The place is remembered while focus is being carried, so
+a picture with fewer controls does not lose it for the way back. Focus elsewhere is never touched.
+`SiteFooter({ tag: "div" })` is for a layout's `footer` slot, which is already a `<footer>`; a `<footer>` may not hold
+another.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

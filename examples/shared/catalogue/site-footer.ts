@@ -60,6 +60,17 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         }),
       ),
       caseOf("columns only", SiteFooter({ columns: columns.slice(0, 3) })),
+      caseOf(
+        "tag: div inside a layout's <footer> (#cat-footer-div); tag: footer is the default",
+        html`
+          <footer class="layout__footer">${SiteFooter({
+            tag: "div",
+            columns: columns.slice(0, 2),
+            attrs: { id: "cat-footer-div" },
+          })}</footer>
+          ${SiteFooter({ tag: "footer", columns: columns.slice(0, 1), attrs: { id: "cat-footer-tag" } })}
+        `,
+      ),
     ],
   };
 }

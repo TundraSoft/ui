@@ -13,6 +13,9 @@ export type SiteFooterSocial = {
   icon: Html;
 };
 
+/** The root element: `div` when something around it is already the `<footer>`. */
+export type SiteFooterTag = "footer" | "div";
+
 export type SiteFooterProps = {
   /** The mark and name, first column. */
   brand?: Html;
@@ -25,6 +28,11 @@ export type SiteFooterProps = {
   social?: SiteFooterSocial[];
   /** A form slot beside the brand — a newsletter sign-up. */
   newsletter?: Html;
+  /**
+   * Pass `"div"` in a layout's `footer` slot: the layout already wraps it in
+   * a `<footer>`, and one may not hold another. @default "footer"
+   */
+  tag?: SiteFooterTag;
   attrs?: Attrs;
 };
 
@@ -46,9 +54,8 @@ export function SiteFooter(props: SiteFooterProps): Html {
       </nav>
     `;
   const hasBrand = props.brand || props.tagline || props.newsletter;
-  return html`
-    <footer${classAttrs("site-footer", props.attrs)}>
-      <div class="container site-footer__inner">
+  const inner = html`
+    <div class="container site-footer__inner">
         <div class="site-footer__top">${hasBrand &&
           html`<div class="site-footer__brand-column">${
             props.brand &&
@@ -74,6 +81,7 @@ export function SiteFooter(props: SiteFooterProps): Html {
                 }</ul>`
               }</div>`}
       </div>
-      </footer>
   `;
+  const attrs = classAttrs("site-footer", props.attrs);
+  return props.tag === "div" ? html`<div${attrs}>${inner}</div>` : html`<footer${attrs}>${inner}</footer>`;
 }

@@ -36,6 +36,13 @@ quietly.
 | `href` | `string` | yes |  |
 | `icon` | `Html` | yes |  |
 
+### `SiteFooterTag`
+
+The root element: `div` when something around it is already the `<footer>`.
+
+- `"footer"`
+- `"div"`
+
 ### `SiteFooterProps`
 
 | Prop | Type | Required | Description |
@@ -46,11 +53,42 @@ quietly.
 | `bottom` | `Html` |  | The legal line in the bottom bar — "© 2026 Acme". |
 | `social` | `SiteFooterSocial[]` |  | Icon links in the bottom bar. |
 | `newsletter` | `Html` |  | A form slot beside the brand — a newsletter sign-up. |
+| `tag` | `SiteFooterTag` |  | Pass `"div"` in a layout's `footer` slot: the layout already wraps it in a `<footer>`, and one may not hold another. @default "footer" |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### In a layout's footer slot
+
+The layout already wraps the slot in a `<footer>`, so this one renders a `<div>`.
+
+```ts
+SiteFooter({
+  tag: "div",
+  columns: [{ title: "Company", links: [{ label: "About", href: "/about" }] }],
+})
+```
+
+```html
+<div class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__top">
+      <div class="site-footer__columns">
+        <nav class="site-footer__column" aria-label="Company">
+          <h3 class="site-footer__title">Company</h3>
+          <ul class="site-footer__links">
+            <li>
+              <a class="site-footer__link" href="/about">About</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 ### The site's foot
 
