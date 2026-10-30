@@ -7,6 +7,15 @@ import type { UsageExample } from "../usage.ts";
 export const usage: Record<string, UsageExample[]> = {
   "components/site-footer": [
     {
+      title: "In a layout's footer slot",
+      note: "The layout already wraps the slot in a `<footer>`, so this one renders a `<div>`.",
+      render: () =>
+        SiteFooter({
+          tag: "div",
+          columns: [{ title: "Company", links: [{ label: "About", href: "/about" }] }],
+        }),
+    },
+    {
       title: "The site's foot",
       render: () =>
         SiteFooter({

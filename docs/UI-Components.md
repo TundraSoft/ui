@@ -1119,6 +1119,7 @@ SiteFooter({
   columns: [{ title: "Product", links: [{ label: "Pricing", href: "/pricing" }] }, { title: "Company", links }],
   social: [{ label: "GitHub", href: "https://github.com/acme", icon: Icon("externalLink") }],
   bottom: html`© 2026 Acme`,
+  tag: "div", // in a layout's footer slot, which is already a <footer>
 });
 ```
 

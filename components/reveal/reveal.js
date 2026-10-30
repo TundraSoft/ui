@@ -275,7 +275,38 @@
   }
 
   /* ------------------------------------------------------ scroll steps */
+  // A faded picture cannot hold focus, so focus inside it moves with the
+  // step: to the control at the same place in the new picture, or to the
+  // step itself when that picture has no controls. The place is remembered
+  // while focus is being carried, so a picture with fewer controls does not
+  // lose it for the way back. Never scrolls: the reader is mid-scroll.
+  const FOCUSABLE = "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled])," +
+    'textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  const controlsIn = (media) => [...media.querySelectorAll(FOCUSABLE)].filter((el) => el.getClientRects().length > 0);
+  const carried = new WeakMap();
+  function carryFocus(section, index, place) {
+    const media = section.querySelector(`[data-scroll-step-media="${index}"]`);
+    const controls = media ? controlsIn(media) : [];
+    let target = controls[Math.min(place, controls.length - 1)];
+    if (!target) {
+      target = section.querySelector(`[data-scroll-step="${index}"]`);
+      if (!target) return;
+      target.setAttribute("tabindex", "-1");
+    }
+    target.focus({ preventScroll: true });
+    carried.set(section, { el: target, place });
+  }
+
   function activate(section, index) {
+    const active = document.activeElement;
+    const outgoing = active?.closest?.(".scroll-steps__media.is-active");
+    const memory = carried.get(section);
+    const held = memory?.el === active;
+    const place = held
+      ? memory.place
+      : outgoing && section.contains(outgoing)
+      ? controlsIn(outgoing).indexOf(active)
+      : -1;
     section.querySelectorAll("[data-scroll-step]").forEach((step) => {
       const on = step.getAttribute("data-scroll-step") === index;
       step.classList.toggle("is-active", on);
@@ -285,6 +316,7 @@
     section.querySelectorAll("[data-scroll-step-media]").forEach((media) => {
       media.classList.toggle("is-active", media.getAttribute("data-scroll-step-media") === index);
     });
+    if (place >= 0) carryFocus(section, index, place);
   }
 
   // The current step is the one whose text is nearest the middle of the
