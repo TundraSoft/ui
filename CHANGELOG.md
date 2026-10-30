@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.1](https://github.com/TundraSoft/ui/compare/v0.29.0...v0.29.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* ScrollSteps media has unique ids and no focusable hidden controls; Carousel id is optional ([#101](https://github.com/TundraSoft/ui/issues/101)) ([b75b26a](https://github.com/TundraSoft/ui/commit/b75b26aa548e3dbfb665ae666a245af33df11dd6))
+
 ## [0.29.0](https://github.com/TundraSoft/ui/compare/v0.28.0...v0.29.0) (2026-10-30)
 
 
