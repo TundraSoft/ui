@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/TundraSoft/ui/compare/v0.27.0...v0.28.0) (2026-10-30)
+
+
+### Features
+
+* Brevily round — menu badges, chart height reserve, title sizes, Reveal keeps text visible, Hero fill, Carousel sides/stack/page scroll ([#97](https://github.com/TundraSoft/ui/issues/97)) ([78476d0](https://github.com/TundraSoft/ui/commit/78476d09603704bf20b0054a541d672449732bee))
+
 ## [0.27.0](https://github.com/TundraSoft/ui/compare/v0.26.0...v0.27.0) (2026-10-30)
 
 
