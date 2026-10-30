@@ -1,5 +1,6 @@
 /** Catalogue cases for components/code — see examples/shared/catalogue.ts. */
 import { html } from "@tundralibs/rapid/ui";
+import { Badge } from "../../../components/badge/badge.ts";
 import { CodeBlock, codeHtml } from "../../../components/code/code.ts";
 import { caseOf, caseRow, type CatalogueEntryInput, type CatalogueState } from "../catalogue.ts";
 import type { DemoRoutes } from "../data.ts";
@@ -64,6 +65,37 @@ const PRISM = `<span class="token keyword">const</span> total <span class="token
 <span class="token comment">/* a comment that
    spans two lines */</span>`;
 
+const PYTHON = `import hmac
+
+@webhook
+def verify(self, body: bytes, sig: str) -> bool:
+    """Compare in constant time.
+
+    Never with ==."""
+    expected = hmac.new(SECRET, body, "sha256").hexdigest()  # hex
+    return hmac.compare_digest(expected, sig)
+`;
+
+const PHP = `<?php
+function verify(string $body, string $sig): bool {
+    /* constant time,
+       never === */
+    $expected = hash_hmac('sha256', $body, SECRET);
+    return hash_equals($expected, $sig); // true when it matches
+}
+`;
+
+const JAVA = `@Override
+public boolean verify(byte[] body, String sig) throws Exception {
+    // constant time
+    Mac mac = Mac.getInstance("HmacSHA256");
+    String doc = """
+        multi-line text
+        """;
+    return MessageDigest.isEqual(mac.doFinal(body), sig.getBytes());
+}
+`;
+
 export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEntryInput {
   return {
     name: "code",
@@ -120,6 +152,45 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
             language: "bash",
             code:
               "curl -X POST https://api.example.com/v1/projects --header 'authorization: Bearer token' --data '{\"name\":\"A very long command line that would otherwise scroll sideways for quite a while\"}'",
+          })}</div>
+        `,
+      ),
+      caseOf(
+        "the same signature check in Python, PHP and Java, coloured by code.js (#cat-code-langs)",
+        html`
+          <div class="stack" id="cat-code-langs">${CodeBlock({
+            language: "python",
+            code: PYTHON,
+          })}${CodeBlock({ language: "php", code: PHP })}${CodeBlock({ language: "java", code: JAVA })}</div>
+        `,
+      ),
+      caseOf(
+        "aside in the header, a run marked and quietened inside a line (#cat-code-aside)",
+        CodeBlock({
+          id: "cat-code-aside",
+          title: "POST /v1/links",
+          aside: Badge({ variant: "success", label: "201 Created" }),
+          highlighted: codeHtml(
+            `{
+  "id": <span class="tok-mark">"lnk_8Hq2"</span>,
+  "short_url": "https://brv.ly/8Hq2", <span class="tok-quiet">// the one to share</span>
+}`,
+          ),
+        }),
+      ),
+      caseOf(
+        "blank lines keep their height: plain, numbered, tokenised inside a comment, a highlighter's split comment (#cat-code-blank)",
+        html`
+          <div class="stack" id="cat-code-blank">${CodeBlock({
+            code: "first paragraph\n\nsecond paragraph",
+          })}${CodeBlock({
+            code: "first paragraph\n\nsecond paragraph",
+            lineNumbers: true,
+          })}${CodeBlock({
+            language: "js",
+            code: "/* a comment\n\n   with a gap */",
+          })}${CodeBlock({
+            highlighted: codeHtml('<span class="token comment">/* a comment\n\n   with a gap */</span>'),
           })}</div>
         `,
       ),

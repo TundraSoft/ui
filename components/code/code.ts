@@ -11,8 +11,8 @@ export type CodeBlockProps = {
   /**
    * The source, escaped like any text. Give this *or* `highlighted`. With
    * a `language` that code.js knows (`json`, `bash`, `css`, `html`, `js`,
-   * `ts`) the block is coloured on the page by a small best-effort
-   * tokenizer; any other language renders plain.
+   * `ts`, `python`, `php`, `java`) the block is coloured on the page by a
+   * small best-effort tokenizer; any other language renders plain.
    */
   code?: string;
   /**
@@ -20,6 +20,8 @@ export type CodeBlockProps = {
    * Shiki with class themes — wrapped with {@link codeHtml}. The kit
    * colours both libraries' class names (`.token.keyword`,
    * `.hljs-keyword`) and its own `.tok-*` set from the theme's tokens.
+   * Hand-written markup marks a run inside a line the same way:
+   * `<span class="tok-mark">` emphasises it, `tok-quiet` quietens it.
    * TRUSTED: only ever markup the server made from code it holds.
    */
   highlighted?: Html;
@@ -27,6 +29,8 @@ export type CodeBlockProps = {
   language?: string;
   /** A file name or caption in the header. */
   title?: string;
+  /** Beside the title, before the copy button: a status badge, a link. */
+  aside?: Html;
   /** Number the lines (CSS counters; never part of the copied text). */
   lineNumbers?: boolean;
   /** 1-based lines to emphasise — a changed line, the one a doc talks about. */
@@ -111,15 +115,34 @@ export function CodeBlock(props: CodeBlockProps): Html {
   } else {
     lines = plain.replace(/\n$/, "").split("\n").map((l, i) => html`<span class="${lineClass(i)}">${l}</span>`);
   }
-  const known = ["json", "bash", "sh", "shell", "css", "html", "xml", "js", "javascript", "ts", "typescript"];
+  const known = [
+    "json",
+    "bash",
+    "sh",
+    "shell",
+    "css",
+    "html",
+    "xml",
+    "js",
+    "javascript",
+    "ts",
+    "typescript",
+    "python",
+    "py",
+    "python3",
+    "php",
+    "java",
+  ];
   const lang = props.language?.toLowerCase();
   const tokenize = props.highlighted === undefined && lang !== undefined && known.includes(lang);
   const copy = props.copy !== false;
-  const header = props.title || props.language || copy
+  const header = props.title || props.language || props.aside || copy
     ? html`
       <figcaption class="code__header">${props.title
         ? html`<span class="code__title">${props.title}</span>`
-        : ""}${props.language ? html`<span class="code__lang">${props.language}</span>` : ""}${copy
+        : ""}${props.language ? html`<span class="code__lang">${props.language}</span>` : ""}${props.aside
+        ? html`<span class="code__aside">${props.aside}</span>`
+        : ""}${copy
         ? html`<span class="code__copy">${
           CopyButton({
             value: plain,

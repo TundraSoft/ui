@@ -1,5 +1,6 @@
 /** Usage examples for components/code — merged into examples/docs/usage.ts. */
 import { CodeBlock, codeHtml } from "../../../components/code/code.ts";
+import { Badge } from "../../../components/badge/badge.ts";
 import type { UsageExample } from "../usage.ts";
 
 export const usage: Record<string, UsageExample[]> = {
@@ -26,6 +27,19 @@ export const usage: Record<string, UsageExample[]> = {
           language: "js",
           highlighted: codeHtml(
             '<span class="token keyword">const</span> n <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>',
+          ),
+        }),
+    },
+    {
+      title: "An API reply: a status beside the title, runs marked by hand",
+      note:
+        "`aside` takes any `Html`. In `highlighted` markup, `tok-mark` emphasises a run and `tok-quiet` quietens one; escape the text yourself, `codeHtml()` is `raw()`.",
+      render: () =>
+        CodeBlock({
+          title: "POST /v1/links",
+          aside: Badge({ variant: "success", label: "201 Created" }),
+          highlighted: codeHtml(
+            '{ "id": <span class="tok-mark">"lnk_8Hq2"</span> } <span class="tok-quiet">// the new link</span>',
           ),
         }),
     },
