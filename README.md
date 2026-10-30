@@ -20,8 +20,8 @@ that plug straight into `Application.initialize`.
 <!-- x-release-please-start-version -->
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.26.0/dist/ui.css">
-<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.26.0/dist/ui.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.27.0/dist/ui.css">
+<script src="https://cdn.jsdelivr.net/npm/@tundralibs/ui@0.27.0/dist/ui.js" defer></script>
 ```
 
 <!-- x-release-please-end -->
