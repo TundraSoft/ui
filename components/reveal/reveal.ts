@@ -1,4 +1,4 @@
-import { type Html, html } from "@tundralibs/rapid/ui";
+import { type Html, html, raw, render } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
 
@@ -259,7 +259,12 @@ export type ScrollStepsHeight = "sm" | "md" | "lg";
 export type ScrollStep = {
   /** The step's text — a heading and a paragraph. */
   content: Html;
-  /** What the sticky stage shows while this step is current. */
+  /**
+   * What the sticky stage shows while this step is current. It renders
+   * twice, in the step and on the stage, with only one displayed at any
+   * width: ids (and what refers to them) get a prefix on the stage copy.
+   * Fields would post twice, so a form does not belong here.
+   */
   media?: Html;
 };
 
@@ -281,6 +286,50 @@ export type ScrollStepsProps = {
   attrs?: Attrs;
 };
 
+/** Attributes whose whole value is one or more ids; any other value refers to an id as `#id`. */
+const ID_REFS = new Set([
+  "for",
+  "form",
+  "list",
+  "headers",
+  "popovertarget",
+  "commandfor",
+  "aria-activedescendant",
+  "aria-controls",
+  "aria-describedby",
+  "aria-details",
+  "aria-errormessage",
+  "aria-flowto",
+  "aria-labelledby",
+  "aria-owns",
+]);
+
+/**
+ * Already-rendered media with every id it declares prefixed, and every
+ * reference to one of them with it. A prefix, not a suffix: scripts derive
+ * ids from a root's (`<id>-list`), which still line up.
+ */
+function withIdPrefix(media: Html, prefix: string): Html {
+  const markup = render(media);
+  const ids = new Set(Array.from(markup.matchAll(/<[^>]*?\sid="([^"]+)"/g), (m) => m[1]));
+  if (ids.size === 0) return media;
+  const own = (id: string) => (ids.has(id) ? prefix + id : id);
+  return raw(
+    markup.replace(
+      /<[a-z][^>]*>/gi,
+      (tag) =>
+        tag.replace(/\s([\w:-]+)="([^"]*)"/g, (_, name: string, value: string) => {
+          const next = name === "id"
+            ? prefix + value
+            : ID_REFS.has(name)
+            ? value.split(/\s+/).map(own).join(" ")
+            : value.replace(/#([\w-]+)/g, (ref, id: string) => (ids.has(id) ? `#${prefix}${id}` : ref));
+          return ` ${name}="${next}"`;
+        }),
+    ),
+  );
+}
+
 /**
  * Scrollytelling: a column of steps beside a sticky stage whose media
  * cross-fades as each step scrolls through the middle of the viewport.
@@ -289,8 +338,8 @@ export type ScrollStepsProps = {
  * `is-active`), so the stage and the text on screen always agree. A
  * heading that opens a step is drawn at `--scroll-steps-title-size`.
  * Below 768 the stage is hidden and each step shows its own media in
- * flow — the story reads top to bottom with nothing sticky, and a plain
- * page reads the same way at every width.
+ * flow — the story reads top to bottom with nothing sticky. Only the
+ * current media on the stage is visible, so only its controls take focus.
  */
 export function ScrollSteps(props: ScrollStepsProps): Html {
   const attrs = mergeAttrs(props.attrs, { id: props.id, "data-scroll-steps": "" });
@@ -317,9 +366,8 @@ export function ScrollSteps(props: ScrollStepsProps): Html {
       renderAttrs({
         class: cx("scroll-steps__media", i === 0 && "is-active"),
         "data-scroll-step-media": String(i),
-        "aria-hidden": "true",
       })
-    }>${step.media ?? ""}</div>`
+    }>${step.media ? withIdPrefix(step.media, `${props.id}-stage-`) : ""}</div>`
   );
   return html`
     <section${classAttrs(cls, attrs)}>

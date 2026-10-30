@@ -1290,8 +1290,92 @@ async function playbookAsks(group: string): Promise<void> {
     check(dim, "marketing: ScrollSteps dim: false still mutes the steps that are not current");
     await r.close();
 
+    // ScrollSteps renders media twice: unique ids, each copy wired to itself,
+    // nothing focusable that is not on screen — phone and desktop.
+    for (const width of [375, 1280]) {
+      const d = await open("reveal", width, 800);
+      await d.$eval("#cat-scroll-steps-ids", (el) => el.scrollIntoView({ block: "start", behavior: "instant" }));
+      await pause(300);
+      const wiring = await d.evaluate(() => {
+        const section = document.getElementById("cat-scroll-steps-ids")!;
+        const ids = [...document.querySelectorAll("[id]")].map((el) => el.id);
+        const stage = section.querySelector(".scroll-steps__stage")!;
+        const inStage = (el: Element | null) => !!el && stage.contains(el);
+        const visible = (el: Element) => {
+          const box = el.getBoundingClientRect();
+          return box.width > 0 && getComputedStyle(el).visibility === "visible";
+        };
+        const focusable = [...section.querySelectorAll<HTMLElement>("a[href],button,input,[tabindex]")]
+          .filter(visible);
+        return {
+          dupes: [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))],
+          ariaHidden: section.querySelectorAll("[aria-hidden='true'] :is(a[href],button,input,[tabindex])").length,
+          label: inStage(document.getElementById(stage.querySelector("label")!.htmlFor)),
+          help: inStage(document.getElementById(stage.querySelector("input")!.getAttribute("aria-describedby")!)),
+          link: inStage(document.querySelector(stage.querySelector("a")!.getAttribute("href")!)),
+          outside: stage.querySelectorAll("a[href='#elsewhere']").length,
+          focusable: focusable.length,
+          stray: focusable.filter((el) => !el.closest(".scroll-steps__media.is-active, .scroll-steps__inline-media"))
+            .map((el) => el.outerHTML.slice(0, 60)),
+        };
+      });
+      check(wiring.dupes.length === 0, `marketing: duplicate ids on the reveal page at ${width}: ${wiring.dupes}`);
+      check(wiring.ariaHidden === 0, `marketing: ScrollSteps has focusable controls under aria-hidden at ${width}`);
+      check(wiring.label && wiring.help && wiring.link, "marketing: a stage copy's references left the copy");
+      check(wiring.outside === 2, "marketing: a reference outside the media was rewritten");
+      check(wiring.focusable > 0, `marketing: ScrollSteps media has no reachable control at ${width}`);
+      check(wiring.stray.length === 0, `marketing: hidden media takes focus at ${width}: ${wiring.stray}`);
+      // Keyboard: Tab through the section lands only on what is on screen.
+      await d.$eval("#cat-scroll-steps-ids .scroll-steps__list", (el) => {
+        el.setAttribute("tabindex", "-1");
+        (el as HTMLElement).focus();
+      });
+      const visited: boolean[] = [];
+      for (let i = 0; i < 12; i++) {
+        await d.keyboard.press("Tab");
+        const step = await d.evaluate(() => {
+          const el = document.activeElement!;
+          if (!el.closest("#cat-scroll-steps-ids")) return null;
+          const box = el.getBoundingClientRect();
+          return box.width > 0 && box.height > 0 && getComputedStyle(el).visibility === "visible";
+        });
+        if (step === null) break;
+        visited.push(step);
+      }
+      check(
+        visited.length > 0 && visited.every(Boolean),
+        `marketing: Tab reached something off screen in ScrollSteps at ${width}: ${visited}`,
+      );
+      // axe on this section at this width (aria-hidden-focus is a wcag2a rule).
+      await d.addScriptTag({ content: axeSource });
+      const axeIds = await d.evaluate(async () => {
+        // deno-lint-ignore no-explicit-any
+        const result = await (globalThis as any).axe.run("#cat-scroll-steps-ids", {
+          preload: false,
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
+        });
+        // deno-lint-ignore no-explicit-any
+        return result.violations.map((v: any) => `${v.id}: ${v.nodes[0].target}`);
+      });
+      check(axeIds.length === 0, `marketing: axe on ScrollSteps at ${width}: ${axeIds}`);
+      await d.close();
+    }
+
     // Carousel, Console v4's asks: side arrows, the stacked fallback, page scroll.
     const c = await open("carousel", 1440, 900);
+    const noId = await c.$eval("#cat-carousel-no-id", (el) => {
+      const inner = el.querySelector<HTMLElement>("[data-carousel]")!;
+      const before = inner.querySelector("[data-carousel-slide]")!.getBoundingClientRect().left;
+      inner.querySelector<HTMLElement>("[data-carousel-next]")!.click();
+      return { id: inner.id, before, dots: inner.querySelectorAll(".carousel__dot").length };
+    });
+    check(
+      noId.id === "" && noId.dots === 2,
+      `marketing: a Carousel without an id is not wired (${JSON.stringify(noId)})`,
+    );
+    await pause(500);
+    const noIdMoved = await c.$eval("#cat-carousel-no-id [data-carousel-track]", (el) => el.scrollLeft);
+    check(noIdMoved > 0, "marketing: Next does nothing on a Carousel without an id");
     await c.$eval("#cat-carousel-sides", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
     await pause(300);
     const sides = await c.evaluate(() => {

@@ -95,8 +95,8 @@ text is nearest the viewport's middle current (`aria-current="step"`,
 `is-active`), so the stage and the text on screen always agree. A
 heading that opens a step is drawn at `--scroll-steps-title-size`.
 Below 768 the stage is hidden and each step shows its own media in
-flow — the story reads top to bottom with nothing sticky, and a plain
-page reads the same way at every width.
+flow — the story reads top to bottom with nothing sticky. Only the
+current media on the stage is visible, so only its controls take focus.
 
 ## Types
 
@@ -244,7 +244,7 @@ How tall each step's scroll band is: 60 / 80 / 100 vh.
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `content` | `Html` | yes | The step's text — a heading and a paragraph. |
-| `media` | `Html` |  | What the sticky stage shows while this step is current. |
+| `media` | `Html` |  | What the sticky stage shows while this step is current. It renders twice, in the step and on the stage, with only one displayed at any width: ids (and what refers to them) get a prefix on the stage copy. Fields would post twice, so a form does not belong here. |
 
 ### `ScrollStepsProps`
 
@@ -471,10 +471,10 @@ html`
     </li>
   </ol>
   <div class="scroll-steps__stage">
-    <div class="scroll-steps__media is-active" data-scroll-step-media="0" aria-hidden="true">
+    <div class="scroll-steps__media is-active" data-scroll-step-media="0">
       <img src="/img/send.png" width="800" height="600" alt="">
     </div>
-    <div class="scroll-steps__media" data-scroll-step-media="1" aria-hidden="true">
+    <div class="scroll-steps__media" data-scroll-step-media="1">
       <img src="/img/collect.png" width="800" height="600" alt="">
     </div>
   </div>

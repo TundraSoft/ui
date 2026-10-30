@@ -30,6 +30,14 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
     name: "carousel",
     cases: [
       caseOf(
+        "no id: optional, several on one page never collide (#cat-carousel-no-id)",
+        html`
+          <div id="cat-carousel-no-id">
+            ${Carousel({ label: "Two stories", items: cards.slice(0, 2) })}
+          </div>
+        `,
+      ),
+      caseOf(
         "perView 3 · gap md · peek · dots + controls (#cat-carousel-cards)",
         Carousel({
           id: "cat-carousel-cards",
