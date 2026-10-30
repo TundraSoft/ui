@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/TundraSoft/ui/compare/v0.28.0...v0.29.0) (2026-10-30)
+
+
+### Features
+
+* CodeBlock aside, Python/PHP/Java colouring, tok-mark/tok-quiet runs; blank lines keep their height ([#99](https://github.com/TundraSoft/ui/issues/99)) ([8c7e07f](https://github.com/TundraSoft/ui/commit/8c7e07f82c4a456507303792f41d76cc7d1f2f16))
+
 ## [0.28.0](https://github.com/TundraSoft/ui/compare/v0.27.0...v0.28.0) (2026-10-30)
 
 
