@@ -979,6 +979,58 @@ named by the label alone; the sparkline sits above the stretch so its point tips
 labelledBy })` names a combobox with no visible label (a toolbar filter); the same name goes on
 the listbox, and a visible `label` now has an id (`<id>-label`) that names the listbox too.
 
+**Menu badges, chart height, Select size (2026-10-30, asked by brevily-design moving to 0.27.0).** `MenuItem.badge`
+(`string | number` → a `Badge` in `badgeVariant`, or `Html`) renders `.menu__badge` after `.menu__link-label` (before a
+parent's caret) — outside the label, because collapse-sidebar.js titles rail links and flyouts from the label's text and
+a count inside it read "Link setup2". The rail hides badges; `.menu__link--alert` (`alert`, default on for a `danger`
+badge) draws a dot on the icon (`--sidebar-alert-dot-size`); a flyout shows them again. `Chart` renders a zero-width
+floated `<svg class="chart__reserve" height=…>` inside a `display: flow-root` box: an SVG `height` attribute is the one
+CSP-clean way to size an element before script runs (no `style=`, and a custom property needs one). The value is
+`height + parentHeightOffset` (15 by default) because ApexCharts sets exactly that `min-height` on the element when it
+mounts — reserving `height` alone still grew the box 15px. A `%` height reserves nothing. `Select({ size })` (the
+`InputSize` union, `.select--sm|lg`; the email-domain and tel-country selects take the Input's size) and
+`Input({ inputmode })` (wins over a variant's own keyboard, then `attrs.inputmode`). `test-catalogue.ts` `designAsks()`
+pins all four.
+
+**Titles that read as titles, text that is never hidden (2026-10-30, the Brevily playbook's review of the website).**
+Prose headings scale from `--prose-size` (`--prose-h1..h4-size`: 2.25 / 1.75 / 1.35 / 1.15×, a step less below 576),
+because fixed `--font-size-2xl` h2s left an 18px article with 24px section titles; `li` and the table are body-sized.
+`.pricing__name` is a display-family title at `--pricing-name-size` (default `--font-size-2xl`). **Reveal no longer
+hides text by default**: `rise`/`scale` only move; `hide: true` (`data-reveal-hide`) or the `fade`/`blur` effects start
+transparent — a fast scroll passed staggered headings before they appeared. **ScrollSteps picks the step whose
+`.scroll-steps__text` is nearest the viewport's middle** (scroll + rAF while the section is in view), not the step band
+crossing a 40–60% IntersectionObserver band: the band trigger left the previous step's picture beside text that was
+wholly on screen; the test samples every 20px and fails on the old trigger. A step's first heading is
+`--scroll-steps-title-size` (3xl). `Hero({ fill, footer })`: `min-height: 100svh - --hero-fill-offset` (vh fallback,
+offset defaults to `--scroll-padding-top`), auto margins centre the inner block and drop the footer to the bottom. Not
+kit work, said so to the site: the compare table's group eyebrows, the FAQ's 18px triggers and /features' h2 < h3 are
+the site's own `brv-*` CSS; the kit's base scale is already ordered (h2 3xl > h3 2xl > h4 xl). `playbookAsks()` in
+`test-catalogue.ts` pins it.
+
+**Carousel sides / stack / page scroll, ScrollSteps `dim` (2026-10-30, asked by Console v4 for the website's tour).**
+`controls: "sides"` wraps the track in `.carousel__frame` with 44px round `.carousel__side--prev|next` at the middle
+edges; carousel.js measures the room beside the frame on each side (viewport edge, not "the page is centred" — a
+`(100vw - 100%) / 2` outset ran past the viewport beside the catalogue's sidebar) and writes
+`--carousel-side-outset-start|end`: fully outside with room, as far out as fits, at most `--space-2` inside; a disabled
+end fades out. `stack` (sm/md/lg breakpoints), `stackReducedMotion`, `stackNoScript` share one
+`@define-mixin
+carousel-stacked` (grid of slides, bar and arrows gone, no pin) — postcss-mixins expands CSS-defined
+mixins, this is the first one; carousel.js treats a grid track as stacked (no keys, no autoplay, goTo is a no-op), and
+the option rules also set `--carousel-stacked: 1` so the script can tell the page's stack from its own "unfit" one.
+`scroll: "page"` renders a `[data-carousel-pin]` around frame + bar; while it applies (JS, > 1 slide, no reduced motion,
+not stacked, and the tallest slide fits — measured as a plain row under `.carousel--measuring`, never painted; too tall
+→ `data-carousel-unfit`, the stacked mixin) the root gets `data-carousel-pinned` + `--carousel-page-count` (CSSOM) →
+`(100svh − header) + (n − 1) × 100svh` tall (the pin leaves the moment the last slide's place passes — `n × 100svh` left
+a trailing screen), the pin one screen under `--scroll-padding-top` with track and slides filling it, the track
+`overflow-x: hidden` with snap off; scroll + rAF set `scrollLeft`: each segment holds `hold/2` (default 0.8) on the
+outgoing slide, moves, holds `hold/2` on the next (first and last slides get half a hold at the ends), the outgoing
+slide's `opacity` = 1 − t through the move; the IntersectionObserver stands aside, and goTo scrolls the PAGE to
+`start + i/(n-1) × length` — buttons, dots and keys all go through goTo, so nothing needs a capture-phase override.
+`.carousel__slide` is `position: relative`: an absolutely placed child (an `.sr-only` caption) otherwise sat against
+`.carousel`, outside the track's clip, and a slide far along the row widened the page (/trust measured 3,315px at 1440;
+the catalogue's page-scroll case carries such a caption, 3,535px without the fix). `ScrollSteps({ dim: false })` →
+`.scroll-steps--no-dim`. All pinned in `playbookAsks()`.
+
 ## Layouts (`layouts/`, 2026-09-15)
 
 A layout is a **frame**: the page chrome and its slots, never content. Eight ship, each

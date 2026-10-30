@@ -1,6 +1,7 @@
 import { type Html, html } from "@tundralibs/rapid/ui";
 import { type Attrs, classAttrs } from "../../shared/attrs.ts";
 import { cx } from "../../shared/classnames.ts";
+import { Badge, type BadgeVariant } from "../badge/badge.ts";
 
 export type MenuItem = {
   id?: string;
@@ -12,6 +13,22 @@ export type MenuItem = {
   /** Render a parent with its sublist open (e.g. the section the current
    * page lives in). menu.js also opens it when a child matches the URL. */
   expanded?: boolean;
+  /**
+   * A count or short status after the label (`Tickets 6`; a parent can
+   * carry its children's sum). A string or number is drawn as a `Badge`
+   * in `badgeVariant`; `Html` goes in as it is. It sits outside
+   * `.menu__link-label`, so the collapsed rail's flyout title and link
+   * tooltip read the label alone, and the rail hides it.
+   */
+  badge?: string | number | Html;
+  /** Variant of a string/number `badge`. @default "neutral" */
+  badgeVariant?: BadgeVariant;
+  /**
+   * On the collapsed rail, where the badge is hidden, mark the icon with a
+   * dot (`.menu__link--alert`) so the item still asks for attention.
+   * @default true when `badgeVariant` is "danger"
+   */
+  alert?: boolean;
 };
 
 export type MenuProps = {
@@ -26,17 +43,29 @@ export type MenuProps = {
   attrs?: Attrs;
 };
 
+function renderBadge(item: MenuItem): Html | "" {
+  if (item.badge === undefined || item.badge === "") return "";
+  const content = typeof item.badge === "string" || typeof item.badge === "number"
+    ? Badge({ label: String(item.badge), variant: item.badgeVariant ?? "neutral" })
+    : item.badge;
+  return html`<span class="menu__badge">${content}</span>`;
+}
+
+function linkClass(item: MenuItem): string {
+  const alert = item.alert ?? (item.badge !== undefined && item.badgeVariant === "danger");
+  return cx("menu__link", item.active && "menu__link--active", alert && "menu__link--alert");
+}
+
 function renderItem(item: MenuItem, path: string): Html {
   const icon = item.icon && html`<span class="menu__icon">${item.icon}</span>`;
+  const badge = renderBadge(item);
 
   if (item.children && item.children.length > 0) {
     const subId = item.id ?? `${path}`;
     const open = Boolean(item.expanded);
-    return html`<li><button type="button" class="${
-      cx("menu__link", item.active && "menu__link--active")
-    }" data-toggle="#${subId}" aria-expanded="${
+    return html`<li><button type="button" class="${linkClass(item)}" data-toggle="#${subId}" aria-expanded="${
       open ? "true" : "false"
-    }" aria-controls="${subId}">${icon}<span class="menu__link-label">${item.label}</span><span class="menu__caret">&#8250;</span></button><ul class="${
+    }" aria-controls="${subId}">${icon}<span class="menu__link-label">${item.label}</span>${badge}<span class="menu__caret">&#8250;</span></button><ul class="${
       cx("menu__sublist", open && "is-open")
     }" id="${subId}"${
       open ? "" : html`
@@ -45,14 +74,13 @@ function renderItem(item: MenuItem, path: string): Html {
     }>${item.children.map((child, i) => renderItem(child, `${path}-${i}`))}</ul></li>`;
   }
 
-  const className = cx("menu__link", item.active && "menu__link--active");
-  return html`<li><a class="${className}" href="${item.href ?? "#"}"${
+  return html`<li><a class="${linkClass(item)}" href="${item.href ?? "#"}"${
     item.active
       ? html`
         aria-current="page"
       `
       : ""
-  }>${icon}<span class="menu__link-label">${item.label}</span></a></li>`;
+  }>${icon}<span class="menu__link-label">${item.label}</span>${badge}</a></li>`;
 }
 
 export function Menu(props: MenuProps): Html {

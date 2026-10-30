@@ -256,7 +256,7 @@ const ownUsage: Record<string, UsageExample[]> = {
     {
       title: "A revenue area chart",
       note:
-        "Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode.",
+        "Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode. The box is already the chart's height (`height`, default 240) before the engine draws, so nothing below it jumps.",
       render: () =>
         html`
           ${ChartScript()}${Chart({
@@ -917,6 +917,12 @@ const ownUsage: Record<string, UsageExample[]> = {
   ],
   "components/input": [
     {
+      title: "A code typed as text, with the number pad",
+      note:
+        '`inputmode` picks the phone keyboard without making the field `type="number"` (which drops leading zeros and adds a spinner).',
+      render: () => Input({ name: "order", inputmode: "numeric", autocomplete: "off", placeholder: "Order number" }),
+    },
+    {
       title: "A work email: only these domains",
       note:
         "The local part is the field (`name`), the domain a select named `<name>-domain` (fixed text with one domain). Join the two on the server with `emailFrom()` from `@tundralibs/ui/shared/compose`.",
@@ -1106,6 +1112,24 @@ const ownUsage: Record<string, UsageExample[]> = {
           ],
         }),
     },
+    {
+      title: "Counts beside the entries",
+      note:
+        "`badge` sits after the label, outside `.menu__link-label`, so a collapsed sidebar's tooltips and flyout titles read the label alone. A folded parent can carry its children's sum. On the rail the badge hides; a `danger` one (or `alert: true`) leaves a dot on the icon.",
+      render: () =>
+        Menu({
+          id: "console-nav",
+          items: [
+            { label: "Tickets", href: "/tickets", badge: 6 },
+            { label: "Abuse reports", href: "/abuse", badge: 2, badgeVariant: "danger" },
+            {
+              label: "Link setup",
+              badge: 2,
+              children: [{ label: "Domains", href: "/domains", badge: 2 }, { label: "Tags", href: "/tags" }],
+            },
+          ],
+        }),
+    },
   ],
   "components/modal": [
     {
@@ -1259,6 +1283,19 @@ const ownUsage: Record<string, UsageExample[]> = {
     },
   ],
   "components/select": [
+    {
+      title: "A small select beside a small input",
+      note: "`size` takes the same `sm` / `md` / `lg` as `Input`, so a filter row lines up.",
+      render: () =>
+        html`
+          <div class="cluster">${Input({ name: "q", type: "search", size: "sm", placeholder: "Filter" })}${Select({
+            name: "status",
+            size: "sm",
+            attrs: { "aria-label": "Status" },
+            options: [{ value: "", label: "Any status" }, { value: "active", label: "Active" }],
+          })}</div>
+        `,
+    },
     {
       title: "A long list, searchable",
       note:

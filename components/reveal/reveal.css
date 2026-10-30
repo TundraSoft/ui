@@ -5,7 +5,14 @@
  * viewport. The transition is one of the motion tokens; reset.css zeroes
  * it under reduced motion, and reveal.js then reveals everything at once.
  */
-.js .reveal[data-reveal]:not(.is-revealed) {
+/* Text is never invisible: by default a reveal only moves (rise, scale) —
+   a fast scroll that passes a heading before reveal.js fires still reads
+   it. `hide` (data-reveal-hide), and the fade and blur effects that are
+   nothing but hiding, start the block transparent: for media and
+   decoration, where arriving late costs nothing. */
+.js .reveal[data-reveal-hide]:not(.is-revealed),
+.js .reveal[data-reveal="fade"]:not(.is-revealed),
+.js .reveal[data-reveal="blur"]:not(.is-revealed) {
   opacity: 0;
 }
 
@@ -155,8 +162,15 @@
   transition: color var(--duration-slow) var(--ease-out);
 }
 
-.scroll-steps__step.is-active {
+.scroll-steps__step.is-active,
+.scroll-steps--no-dim .scroll-steps__step {
   color: var(--color-text);
+}
+
+/* A step's heading is the story's beat: a step above the page's h3.
+   `--scroll-steps-title-size` retunes it (any length, a clamp() too). */
+.scroll-steps__text > :is(h2, h3, h4):first-child {
+  font-size: var(--scroll-steps-title-size, var(--font-size-3xl));
 }
 
 .scroll-steps__inline-media {

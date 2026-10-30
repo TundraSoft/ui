@@ -27,6 +27,9 @@ Menu(props: MenuProps): Html
 | `active` | `boolean` |  |  |
 | `children` | `MenuItem[]` |  |  |
 | `expanded` | `boolean` |  | Render a parent with its sublist open (e.g. the section the current page lives in). menu.js also opens it when a child matches the URL. |
+| `badge` | `string | number | Html` |  | A count or short status after the label (`Tickets 6`; a parent can carry its children's sum). A string or number is drawn as a `Badge` in `badgeVariant`; `Html` goes in as it is. It sits outside `.menu__link-label`, so the collapsed rail's flyout title and link tooltip read the label alone, and the rail hides it. |
+| `badgeVariant` | `BadgeVariant` |  | Variant of a string/number `badge`. @default "neutral" |
+| `alert` | `boolean` |  | On the collapsed rail, where the badge is hidden, mark the icon with a dot (`.menu__link--alert`) so the item still asks for attention. |
 
 ### `MenuProps`
 
@@ -92,11 +95,75 @@ Menu({
 </ul>
 ```
 
+### Counts beside the entries
+
+`badge` sits after the label, outside `.menu__link-label`, so a collapsed sidebar's tooltips and flyout titles read the label alone. A folded parent can carry its children's sum. On the rail the badge hides; a `danger` one (or `alert: true`) leaves a dot on the icon.
+
+```ts
+Menu({
+  id: "console-nav",
+  items: [
+    { label: "Tickets", href: "/tickets", badge: 6 },
+    { label: "Abuse reports", href: "/abuse", badge: 2, badgeVariant: "danger" },
+    {
+      label: "Link setup",
+      badge: 2,
+      children: [{ label: "Domains", href: "/domains", badge: 2 }, { label: "Tags", href: "/tags" }],
+    },
+  ],
+})
+```
+
+```html
+<ul class="menu__list">
+  <li>
+    <a class="menu__link" href="/tickets">
+      <span class="menu__link-label">Tickets</span>
+      <span class="menu__badge">
+        <span class="badge badge--neutral">6</span>
+      </span>
+    </a>
+  </li>
+  <li>
+    <a class="menu__link menu__link--alert" href="/abuse">
+      <span class="menu__link-label">Abuse reports</span>
+      <span class="menu__badge">
+        <span class="badge badge--danger">2</span>
+      </span>
+    </a>
+  </li>
+  <li>
+    <button type="button" class="menu__link" data-toggle="#console-nav-sub-2" aria-expanded="false" aria-controls="console-nav-sub-2">
+      <span class="menu__link-label">Link setup</span>
+      <span class="menu__badge">
+        <span class="badge badge--neutral">2</span>
+      </span>
+      <span class="menu__caret">&#8250;</span>
+    </button>
+    <ul class="menu__sublist" id="console-nav-sub-2" hidden>
+      <li>
+        <a class="menu__link" href="/domains">
+          <span class="menu__link-label">Domains</span>
+          <span class="menu__badge">
+            <span class="badge badge--neutral">2</span>
+          </span>
+        </a>
+      </li>
+      <li>
+        <a class="menu__link" href="/tags">
+          <span class="menu__link-label">Tags</span>
+        </a>
+      </li>
+    </ul>
+  </li>
+</ul>
+```
+
 ## CSS hooks
 
 Classes defined by `components/menu/menu.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__link--current-parent`, `.menu__list`, `.menu__sublist`
+`.menu__badge`, `.menu__caret`, `.menu__icon`, `.menu__link`, `.menu__link--active`, `.menu__link--current-parent`, `.menu__list`, `.menu__sublist`
 
 ## Behaviour
 

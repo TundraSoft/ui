@@ -78,6 +78,32 @@
   height: auto;
 }
 
+/* A strip at the foot of the band (facts, logos). */
+.hero__footer {
+  margin-block-start: var(--space-10);
+}
+
+/* The first screen: at least the viewport minus the sticky header, the
+   inner block centred in the room left by the footer. `vh` first for a
+   2022 browser without the small-viewport units. */
+.hero--fill {
+  --hero-fill-offset: var(--scroll-padding-top, 0px);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--hero-fill-offset));
+  min-height: calc(100svh - var(--hero-fill-offset));
+}
+
+/* Auto margins centre the inner block vertically and push the footer to
+   the bottom, whatever the layout inside it. */
+.hero--fill > .hero__inner {
+  margin-block: auto;
+}
+
+.hero--fill > .hero__footer {
+  width: 100%;
+}
+
 /* Centred: text and actions on the middle line, media under them. */
 .hero--center .hero__body {
   align-items: center;

@@ -78,6 +78,24 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         }),
       ),
       caseOf("tone default", Hero({ title: "Just the words", tone: "default", align: "center" })),
+      caseOf(
+        "fill + footer — hero and its facts strip are the first screen: 100svh minus --hero-fill-offset (the sticky header) (#cat-hero-fill)",
+        Hero({
+          title: "The first screen, filled",
+          text: "The text centres in the room the footer leaves.",
+          actions,
+          align: "center",
+          fill: true,
+          footer: html`
+            <ul class="cluster text-muted" aria-label="Facts">
+              <li>99.99% uptime</li>
+              <li>2B redirects a month</li>
+              <li>SOC 2 Type II</li>
+            </ul>
+          `,
+          attrs: { id: "cat-hero-fill" },
+        }),
+      ),
     ],
   };
 }

@@ -30,11 +30,17 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
     name: "reveal",
     cases: [
       caseOf(
-        "every effect — fade / rise / scale / blur (revealed as they scroll in)",
+        "every effect — fade / rise / scale / blur (revealed as they scroll in); rise and scale only move, so text is never invisible — fade, blur and hide: true start transparent (#cat-reveal-hide)",
         caseRow(
           Reveal({ content: card("fade"), effect: "fade", attrs: { id: "cat-reveal-fade", class: "cat-narrow" } }),
           Reveal({ content: card("rise"), effect: "rise", attrs: { id: "cat-reveal-rise", class: "cat-narrow" } }),
           Reveal({ content: card("scale"), effect: "scale", attrs: { class: "cat-narrow" } }),
+          Reveal({
+            content: card("rise · hide"),
+            effect: "rise",
+            hide: true,
+            attrs: { id: "cat-reveal-hide", class: "cat-narrow" },
+          }),
           Reveal({ content: card("blur"), effect: "blur", attrs: { class: "cat-narrow" } }),
         ),
       ),
@@ -145,13 +151,14 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
         }),
       ),
       caseOf(
-        "ScrollSteps — height md / lg · stage start · a step without media keeps the last one",
+        "ScrollSteps — height md / lg · stage start · a step without media keeps the last one · dim: false keeps every step at full text colour (#cat-scroll-steps-md)",
         html`
           ${ScrollSteps({
             id: "cat-scroll-steps-md",
             height: "md",
             stage: "start",
             label: "How it works",
+            dim: false,
             steps: [
               {
                 content: html`

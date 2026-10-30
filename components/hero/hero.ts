@@ -30,6 +30,16 @@ export type HeroProps = {
   tone?: HeroTone;
   /** The media drifts against the scroll (see `Parallax`); still under reduced motion and on phones. */
   parallax?: boolean;
+  /**
+   * Fill the first screen: at least the small viewport's height (`svh`,
+   * so a phone's collapsing toolbar never pushes the bottom off) minus
+   * `--hero-fill-offset` (default `--scroll-padding-top`, the sticky
+   * header's height), the text centred in the room. With a `footer`, hero
+   * and footer together are exactly that first screen.
+   */
+  fill?: boolean;
+  /** A strip at the hero's foot — a facts row, logos — inside the band, so `fill` counts it. */
+  footer?: Html;
   attrs?: Attrs;
 };
 
@@ -47,6 +57,7 @@ export function Hero(props: HeroProps): Html {
     props.size === "md" && "hero--md",
     props.tone === "inverse" && "hero--inverse",
     props.tone === "accent" && "hero--accent",
+    props.fill && "hero--fill",
   );
   const media = props.media &&
     (props.parallax
@@ -58,7 +69,7 @@ export function Hero(props: HeroProps): Html {
         <div class="hero__body">${props.eyebrow && html`<p class="hero__eyebrow">${props.eyebrow}</p>`}<h1
             class="hero__title">${props.title}</h1>${props.text && html`<p class="hero__text">${props.text}</p>`}${props
               .actions && html`<div class="hero__actions">${props.actions}</div>`}</div>${media}
-      </div>
+      </div>${props.footer && html`<div class="container hero__footer">${props.footer}</div>`}
       </section>
   `;
 }

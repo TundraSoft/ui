@@ -5,6 +5,13 @@
  */
 .prose {
   --prose-size: var(--font-size-base);
+  /* Headings scale from the body size, so a larger prose (an 18px article)
+     keeps titles that read as titles: 18px body → h2 31.5, h3 24.3. A
+     theme retunes a level by setting its variable. */
+  --prose-h1-size: calc(var(--prose-size) * 2.25);
+  --prose-h2-size: calc(var(--prose-size) * 1.75);
+  --prose-h3-size: calc(var(--prose-size) * 1.35);
+  --prose-h4-size: calc(var(--prose-size) * 1.15);
   font-size: var(--prose-size);
   line-height: var(--line-height-relaxed);
   color: var(--color-text);
@@ -17,6 +24,14 @@
 
 .prose--lg {
   --prose-size: var(--font-size-lg);
+}
+
+@media (max-width: 575.98px) {
+  .prose {
+    --prose-h1-size: calc(var(--prose-size) * 1.9);
+    --prose-h2-size: calc(var(--prose-size) * 1.5);
+    --prose-h3-size: calc(var(--prose-size) * 1.25);
+  }
 }
 
 .prose--measure {
@@ -50,20 +65,20 @@
 }
 
 .prose h1 {
-  font-size: var(--font-size-3xl);
+  font-size: var(--prose-h1-size);
   letter-spacing: var(--letter-spacing-tighter);
 }
 
 .prose h2 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--prose-h2-size);
 }
 
 .prose h3 {
-  font-size: var(--font-size-xl);
+  font-size: var(--prose-h3-size);
 }
 
 .prose h4 {
-  font-size: var(--font-size-lg);
+  font-size: var(--prose-h4-size);
 }
 
 .prose h5,
@@ -109,7 +124,10 @@
   list-style: decimal;
 }
 
+/* List items and table cells read at the body size, never smaller than
+   the paragraphs around them. */
 .prose li {
+  font-size: var(--prose-size);
   margin-block-end: var(--space-1);
   padding-inline-start: var(--space-1);
 }
@@ -197,7 +215,7 @@
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--font-size-sm);
+  font-size: var(--prose-size);
   line-height: var(--line-height-base);
 }
 

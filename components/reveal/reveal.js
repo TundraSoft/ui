@@ -30,7 +30,7 @@
  *    the server rendered. Nothing moves under reduced motion.
  *
  * 6. Scroll steps: inside `[data-scroll-steps]`, the `[data-scroll-step]`
- *    crossing the middle band of the viewport is current — `is-active` +
+ *    whose text is nearest the middle of the viewport is current — `is-active` +
  *    `aria-current="step"` on it, `is-active` on the stage's matching
  *    `[data-scroll-step-media]`.
  */
@@ -287,16 +287,51 @@
     });
   }
 
-  // The step crossing the middle band (40%–60% of the viewport) is current.
+  // The current step is the one whose text is nearest the middle of the
+  // viewport (0 while the text spans it) — measured on the text, not the
+  // step's tall band, so the stage never shows the previous step's media
+  // while the next step's text is the one on screen. Measured on scroll,
+  // one frame at a time, only for sections that are in view.
+  const visibleSteps = new Set();
+  let queued = false;
+  function pickStep(section) {
+    const middle = innerHeight / 2;
+    let best = null;
+    let distance = Infinity;
+    section.querySelectorAll("[data-scroll-step]").forEach((step) => {
+      const r = (step.querySelector(".scroll-steps__text") ?? step).getBoundingClientRect();
+      const d = r.bottom < middle ? middle - r.bottom : r.top > middle ? r.top - middle : 0;
+      if (d < distance) {
+        distance = d;
+        best = step;
+      }
+    });
+    if (best && !best.classList.contains("is-active")) activate(section, best.getAttribute("data-scroll-step"));
+  }
+  function scheduleSteps() {
+    if (queued || visibleSteps.size === 0) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      for (const section of visibleSteps) {
+        if (section.isConnected) pickStep(section);
+        else visibleSteps.delete(section);
+      }
+    });
+  }
   const stepObserver = hasIO
     ? new IntersectionObserver((entries) => {
       for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        const section = e.target.closest("[data-scroll-steps]");
-        if (section) activate(section, e.target.getAttribute("data-scroll-step"));
+        if (e.isIntersecting) visibleSteps.add(e.target);
+        else visibleSteps.delete(e.target);
       }
-    }, { rootMargin: "-40% 0px -40% 0px", threshold: 0 })
+      scheduleSteps();
+    })
     : null;
+  if (stepObserver) {
+    addEventListener("scroll", scheduleSteps, { passive: true });
+    addEventListener("resize", scheduleSteps);
+  }
 
   const stepped = new WeakSet();
   function initSteps(root) {
@@ -304,7 +339,7 @@
     root.querySelectorAll?.("[data-scroll-steps]").forEach((section) => {
       if (stepped.has(section)) return;
       stepped.add(section);
-      section.querySelectorAll("[data-scroll-step]").forEach((step) => stepObserver.observe(step));
+      stepObserver.observe(section);
     });
   }
 

@@ -3,6 +3,7 @@ import { type Attrs, classAttrs, mergeAttrs, renderAttrs } from "../../shared/at
 import { cx } from "../../shared/classnames.ts";
 import { Icon } from "../../shared/icons.ts";
 import { ComboboxList } from "../combobox/combobox.ts";
+import type { InputSize } from "../input/input.ts";
 
 export type SelectOption = {
   value: string;
@@ -33,6 +34,8 @@ export type SelectProps = {
    */
   requiredMessage?: string;
   invalid?: boolean;
+  /** Control height and type size, matching `Input({ size })`. @default "md" */
+  size?: InputSize;
   /**
    * A search box at the top of the open list that filters the options as
    * you type (and typing on the closed field starts a search). It is
@@ -77,6 +80,8 @@ export function Select(props: SelectProps): Html {
     "select",
     props.invalid && "select--invalid",
     props.disabled && "select--disabled",
+    props.size === "sm" && "select--sm",
+    props.size === "lg" && "select--lg",
     props.extraClass,
   );
 

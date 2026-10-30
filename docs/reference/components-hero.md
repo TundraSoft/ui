@@ -64,6 +64,8 @@ The ground: the page's, the inverse surface, or a soft accent wash.
 | `size` | `HeroSize` |  |  |
 | `tone` | `HeroTone` |  |  |
 | `parallax` | `boolean` |  | The media drifts against the scroll (see `Parallax`); still under reduced motion and on phones. |
+| `fill` | `boolean` |  | Fill the first screen: at least the small viewport's height (`svh`, so a phone's collapsing toolbar never pushes the bottom off) minus `--hero-fill-offset` (default `--scroll-padding-top`, the sticky header's height), the text centred in the room. With a `footer`, hero and footer together are exactly that first screen. |
+| `footer` | `Html` |  | A strip at the hero's foot — a facts row, logos — inside the band, so `fill` counts it. |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -137,8 +139,48 @@ Hero({
 </section>
 ```
 
+### The first screen, with a facts strip
+
+`fill` makes the band at least `100svh` minus `--hero-fill-offset` (the sticky header, `--scroll-padding-top` by default); the `footer` sits inside it, so hero and facts are exactly the first screen.
+
+```ts
+Hero({
+  title: "Short links your customers trust",
+  text: "Branded domains, live analytics and a team plan that grows with you.",
+  align: "center",
+  fill: true,
+  actions: Button({ label: "Start free", size: "lg", href: "/signup" }),
+  footer: html`
+    <ul class="cluster" aria-label="Facts">
+      <li>99.99% uptime</li>
+      <li>2B redirects a month</li>
+    </ul>
+  `,
+})
+```
+
+```html
+<section class="hero hero--center hero--fill">
+  <div class="container hero__inner">
+    <div class="hero__body">
+      <h1 class="hero__title">Short links your customers trust</h1>
+      <p class="hero__text">Branded domains, live analytics and a team plan that grows with you.</p>
+      <div class="hero__actions">
+        <a class="btn btn--lg" href="/signup">Start free</a>
+      </div>
+    </div>
+  </div>
+  <div class="container hero__footer">
+    <ul class="cluster" aria-label="Facts">
+      <li>99.99% uptime</li>
+      <li>2B redirects a month</li>
+    </ul>
+  </div>
+</section>
+```
+
 ## CSS hooks
 
 Classes defined by `components/hero/hero.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn--outline`, `.hero`, `.hero--accent`, `.hero--center`, `.hero--inverse`, `.hero--md`, `.hero--split`, `.hero__actions`, `.hero__body`, `.hero__eyebrow`, `.hero__inner`, `.hero__media`, `.hero__text`, `.hero__title`
+`.btn--outline`, `.hero`, `.hero--accent`, `.hero--center`, `.hero--fill`, `.hero--inverse`, `.hero--md`, `.hero--split`, `.hero__actions`, `.hero__body`, `.hero__eyebrow`, `.hero__footer`, `.hero__inner`, `.hero__media`, `.hero__text`, `.hero__title`

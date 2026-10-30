@@ -122,6 +122,7 @@ the raw number submitted; `card` groups a card number 4-4-4-4 (Amex
 | `max` | `number | string` |  |  |
 | `step` | `number | "any"` |  |  |
 | `autocomplete` | `string` |  |  |
+| `inputmode` | `"none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url"` |  | The on-screen keyboard to offer (`inputmode`): `numeric` for a code or an id typed as text, `decimal` for an amount. Wins over the keyboard a variant picks for itself (a masked field, an email local part). |
 | `match` | `string` |  | Selector of the control this value must equal (a confirm field): `match: "#password"`. Checked by the validator; the server must check it too. |
 | `messages` | `ValidationMessages` |  | Per-rule messages for the validator, replacing the browser's wording. |
 | `validateAction` | `string` |  | A route that checks one value on the server ("username taken"): on blur, once the native rules pass, the validator POSTs `<name>=<value>` (urlencoded, with the CSRF header) and shows a non-empty text reply as the field's error; an empty reply means fine. Without JS the server catches it on submit. |
@@ -211,6 +212,18 @@ Extends `InputProps`.
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A code typed as text, with the number pad
+
+`inputmode` picks the phone keyboard without making the field `type="number"` (which drops leading zeros and adds a spinner).
+
+```ts
+Input({ name: "order", inputmode: "numeric", autocomplete: "off", placeholder: "Order number" })
+```
+
+```html
+<input type="text" class="input" name="order" placeholder="Order number" autocomplete="off" inputmode="numeric">
+```
 
 ### A work email: only these domains
 

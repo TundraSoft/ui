@@ -21,9 +21,19 @@
 
 .chart {
   position: relative;
+  display: flow-root;
   width: 100%;
   min-width: 0;
   color: var(--color-text);
+}
+
+/* Chart() renders this zero-width float with the chart's height as an SVG
+   attribute: the box is that tall before the engine draws, and stays at
+   least that tall after (the canvas flows over it). */
+.chart__reserve {
+  /* `left`, not `inline-start` (2023): with no width the side is moot. */
+  float: left;
+  width: 0;
 }
 
 /* The engine's own tooltip/menu chrome, on our tokens. */

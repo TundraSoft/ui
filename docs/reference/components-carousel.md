@@ -39,6 +39,21 @@ Space between slides.
 - `"md"`
 - `"lg"`
 
+### `CarouselControls`
+
+Where the prev/next buttons sit: in the bar under the slides, or at the slides' middle edges.
+
+- `"bar"`
+- `"sides"`
+
+### `CarouselStack`
+
+Stack the slides into a plain list below this breakpoint: 576 / 768 / 992px.
+
+- `"sm"`
+- `"md"`
+- `"lg"`
+
 ### `CarouselProps`
 
 | Prop | Type | Required | Description |
@@ -50,9 +65,14 @@ Space between slides.
 | `gap` | `CarouselGap` |  |  |
 | `loop` | `boolean` |  | Next from the last slide goes back to the first. |
 | `autoplay` | `number` |  | Advance every this many ms; pauses while hovered, focused or off screen. |
-| `controls` | `boolean` |  | Prev/next buttons. @default true |
+| `controls` | `boolean | CarouselControls` |  | Prev/next buttons: `true` / `"bar"` in the bar under the slides, `"sides"` one at each middle edge (44px, outside the slides when the page has room beside them, inside the edge when it does not), or `false` for none. @default "bar" |
 | `dots` | `boolean` |  | One dot per slide. @default true |
 | `peek` | `boolean` |  | The next slide peeks in at the edge, a hint there is more. |
+| `stack` | `CarouselStack` |  | Below this breakpoint the track becomes a plain list (a grid of the slides, no buttons, no dots, no autoplay) — what a narrow screen reads best. |
+| `stackReducedMotion` | `boolean` |  | Stack whenever the reader asks for reduced motion (`prefers-reduced-motion: reduce`). |
+| `stackNoScript` | `boolean` |  | Stack on a page without the script, instead of the hand-scrolled strip. |
+| `scroll` | `"track" | "page"` |  | `"page"`: the slides move sideways as the page scrolls down. The carousel pins (sticky under `--scroll-padding-top`, slides filling the frame) in a band of that screen plus one more per slide, each slide holding for `hold` of its screen; buttons, dots and arrow keys scroll the page to a slide's place, so page and track never disagree. Only with the script, never under reduced motion, never while stacked, and only when the tallest slide fits the frame — otherwise it is a plain carousel (pair it with `stack` to get a list). |
+| `hold` | `number` |  | With `scroll: "page"`, the share of each slide's screen it stays still (0–0.95); the rest is the move to the next, during which the outgoing slide fades. The first and last slides get half of it at the band's ends. @default 0.8 |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -206,16 +226,72 @@ Carousel({
 </section>
 ```
 
+### A product tour that moves as the page scrolls
+
+`scroll: "page"` pins the carousel under the header, slides filling the frame; the page's scroll moves them, each holding for `hold` (80%) of its screen while the outgoing one fades through the brief move, and the side arrows, dots and keys scroll the page to a slide. A slide taller than the frame, a screen below 768px, reduced motion or no script give a plain list of the slides.
+
+```ts
+Carousel({
+  id: "tour",
+  label: "How it works",
+  controls: "sides",
+  scroll: "page",
+  stack: "md",
+  stackReducedMotion: true,
+  stackNoScript: true,
+  items: ["Shorten", "Brand", "Measure"].map((step) =>
+    html`
+      <img src="/img/tour-${step.toLowerCase()}.png" width="1200" height="720" alt="${step}" loading="lazy">
+    `
+  ),
+})
+```
+
+```html
+<section class="carousel carousel--per-1 carousel--sides carousel--stack-md carousel--stack-reduced carousel--stack-noscript carousel--page" id="tour" data-carousel="" data-carousel-scroll="page" aria-roledescription="carousel" aria-label="How it works">
+  <div class="carousel__pin" data-carousel-pin>
+    <div class="carousel__frame">
+      <div class="carousel__track" data-carousel-track tabindex="0">
+        <div class="carousel__slide" role="group" aria-roledescription="slide" aria-label="1 of 3" data-carousel-slide>
+          <img src="/img/tour-shorten.png" width="1200" height="720" alt="Shorten" loading="lazy">
+        </div>
+        <div class="carousel__slide" role="group" aria-roledescription="slide" aria-label="2 of 3" data-carousel-slide>
+          <img src="/img/tour-brand.png" width="1200" height="720" alt="Brand" loading="lazy">
+        </div>
+        <div class="carousel__slide" role="group" aria-roledescription="slide" aria-label="3 of 3" data-carousel-slide>
+          <img src="/img/tour-measure.png" width="1200" height="720" alt="Measure" loading="lazy">
+        </div>
+      </div>
+      <div class="carousel__controls carousel__controls--sides">
+        <button type="button" class="btn btn--outline btn--icon carousel__button carousel__side carousel__side--prev" data-carousel-prev aria-label="Previous slide">
+          <svg width="20" height="20" width="2" …>…</svg>
+        </button>
+        <button type="button" class="btn btn--outline btn--icon carousel__button carousel__side carousel__side--next" data-carousel-next aria-label="Next slide">
+          <svg width="20" height="20" width="2" …>…</svg>
+        </button>
+      </div>
+    </div>
+    <div class="carousel__bar">
+      <div class="carousel__dots" data-carousel-dots>
+        <button type="button" class="carousel__dot" data-carousel-to="0" aria-label="Go to slide 1" aria-current="true"></button>
+        <button type="button" class="carousel__dot" data-carousel-to="1" aria-label="Go to slide 2"></button>
+        <button type="button" class="carousel__dot" data-carousel-to="2" aria-label="Go to slide 3"></button>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
 ## CSS hooks
 
 Classes defined by `components/carousel/carousel.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.carousel`, `.carousel--gap-lg`, `.carousel--gap-sm`, `.carousel--peek`, `.carousel--per-2`, `.carousel--per-3`, `.carousel--per-auto`, `.carousel__bar`, `.carousel__controls`, `.carousel__dot`, `.carousel__dots`, `.carousel__slide`, `.carousel__track`, `.js`
+`.carousel`, `.carousel--gap-lg`, `.carousel--gap-sm`, `.carousel--page`, `.carousel--peek`, `.carousel--per-2`, `.carousel--per-3`, `.carousel--per-auto`, `.carousel--stack-lg`, `.carousel--stack-md`, `.carousel--stack-noscript`, `.carousel--stack-reduced`, `.carousel--stack-sm`, `.carousel__bar`, `.carousel__controls`, `.carousel__controls--sides`, `.carousel__dot`, `.carousel__dots`, `.carousel__frame`, `.carousel__pin`, `.carousel__side`, `.carousel__side--next`, `.carousel__side--prev`, `.carousel__slide`, `.carousel__track`, `.js`, `.sr-only`
 
 ## Behaviour
 
 `components/carousel/carousel.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-carousel`, `data-carousel-autoplay`, `data-carousel-loop`, `data-carousel-next`, `data-carousel-paused`, `data-carousel-prev`, `data-carousel-slide`, `data-carousel-to`, `data-carousel-track`.
+Attributes it reads or writes: `data-carousel`, `data-carousel-autoplay`, `data-carousel-hold`, `data-carousel-loop`, `data-carousel-next`, `data-carousel-paused`, `data-carousel-pin`, `data-carousel-pinned`, `data-carousel-prev`, `data-carousel-scroll`, `data-carousel-slide`, `data-carousel-to`, `data-carousel-track`, `data-carousel-unfit`.
 
 Events: `rapid:swapped`.
