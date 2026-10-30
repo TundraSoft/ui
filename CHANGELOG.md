@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/TundraSoft/ui/compare/v0.26.0...v0.27.0) (2026-10-30)
+
+
+### Features
+
+* Stat href + note, Combobox ariaLabel / labelledBy; sidebar width follows its tokens ([#95](https://github.com/TundraSoft/ui/issues/95)) ([ae3c765](https://github.com/TundraSoft/ui/commit/ae3c76541e0f14d0ca40cf661a5df5e1dc505243))
+
 ## [0.26.0](https://github.com/TundraSoft/ui/compare/v0.25.3...v0.26.0) (2026-10-29)
 
 
