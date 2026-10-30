@@ -125,6 +125,16 @@ export type DataTableProps<T> = {
    * can retune the steps via `--data-table-max-height` on that class.
    */
   maxHeight?: "sm" | "md" | "lg";
+  /**
+   * From 768px, pin the last column (the row actions, or the last of
+   * `columns` when there are none) and its header to the box's end while
+   * the rest scrolls sideways inside the box. The box is a tab stop while
+   * it overflows, so the keyboard can scroll it. Below 768px nothing is
+   * pinned, so a phone layout is untouched.
+   */
+  pinEnd?: boolean;
+  /** Accessible name of the scroll box with `pinEnd`. @default title, else "Table" */
+  scrollLabel?: string;
   /** Shown instead of the body when `rows` is empty — an `Empty`, or anything. */
   empty?: Html;
   /** Plain-text alternative to `empty`. @default "Nothing to show." */
@@ -373,11 +383,14 @@ export function DataTable<T extends Record<string, unknown>>(
   // The bulk bar lives inside the scroll box, sticky over the header row,
   // so it never takes up flow space: rows stay put when a selection starts.
   // A capped box scrolls, so it is focusable: the keyboard can scroll it.
+  // With pinEnd, data-table.js takes the tab stop away while it fits.
   const region = html`
     <div
       class="${scrollCls}"
       ${renderAttrs({
-        tabindex: props.maxHeight ? "0" : undefined,
+        tabindex: props.maxHeight || props.pinEnd ? "0" : undefined,
+        role: props.pinEnd ? "group" : undefined,
+        "aria-label": props.pinEnd ? props.scrollLabel ?? props.title ?? "Table" : undefined,
       })}>${bulk}<table class="data-table__table"><thead>${head}</thead><tbody>${props.rows.length
         ? body
         : ""}</tbody></table>${props.rows.length
@@ -395,7 +408,12 @@ export function DataTable<T extends Record<string, unknown>>(
     `
     : region;
 
-  const rootAttrs = classAttrs("data-table", mergeAttrs(props.attrs, { id: props.id }), cards && "data-table--cards");
+  const rootAttrs = classAttrs(
+    "data-table",
+    mergeAttrs(props.attrs, { id: props.id }),
+    cards && "data-table--cards",
+    props.pinEnd && "data-table--pin-end",
+  );
   return html`<div ${rootAttrs}>${
     props.title || props.toolbar
       ? html`<div class="data-table__toolbar">${
