@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.0](https://github.com/TundraSoft/ui/compare/v0.30.0...v0.31.0) (2026-10-30)
+
+
+### Features
+
+* SiteFooter tag for a layout's footer slot; ScrollSteps focus moves with the step ([#105](https://github.com/TundraSoft/ui/issues/105)) ([6081c6d](https://github.com/TundraSoft/ui/commit/6081c6dcfe5dc8b1b7c9b7824660c4de8f4ceebc))
+
 ## [0.30.0](https://github.com/TundraSoft/ui/compare/v0.29.1...v0.30.0) (2026-10-30)
 
 
