@@ -22,12 +22,21 @@ export type RevealProps = {
   once?: boolean;
   /** @default "div" */
   tag?: RevealTag;
+  /**
+   * Start the block transparent until it is in view. Off by default, so
+   * text wrapped in a reveal is always readable — a fast scroll can pass a
+   * heading before it arrives; `rise` and `scale` only move it. Turn it on
+   * for media and decoration. (`fade` and `blur` always hide: that is all
+   * they do.) @default false
+   */
+  hide?: boolean;
   attrs?: Attrs;
 };
 
 /**
- * Content that reveals itself as it scrolls into view. Hidden only under
- * `html.js` (a page without the script shows everything at once);
+ * Content that arrives as it scrolls into view. Moved only under
+ * `html.js` (a page without the script shows everything at once), and
+ * never transparent unless `hide` (or a `fade` / `blur` effect) says so;
  * reveal.js adds `is-revealed` when the block enters the viewport, so the
  * effect never costs a plain page anything. Blocks already on screen at
  * load reveal immediately.
@@ -36,6 +45,7 @@ export function Reveal(props: RevealProps): Html {
   const attrs = mergeAttrs(props.attrs, {
     "data-reveal": props.effect ?? "rise",
     "data-reveal-repeat": props.once === false ? "" : undefined,
+    "data-reveal-hide": props.hide ? "" : undefined,
   });
   const cls = cx("reveal", props.delay && props.delay !== "0" && `reveal--delay-${props.delay}`);
   switch (props.tag) {
@@ -62,6 +72,8 @@ export type RevealGroupProps = {
    */
   stagger?: boolean;
   once?: boolean;
+  /** Each item starts transparent (see `RevealProps.hide`). @default false */
+  hide?: boolean;
   /** The group element. @default "div" */
   tag?: "div" | "ul";
   attrs?: Attrs;
@@ -74,7 +86,9 @@ export function RevealGroup(props: RevealGroupProps): Html {
     "data-reveal-stagger": props.stagger === false ? undefined : "",
   });
   const tag = props.tag === "ul" ? "li" : "div";
-  const items = props.items.map((content) => Reveal({ content, effect: props.effect, once: props.once, tag }));
+  const items = props.items.map((content) =>
+    Reveal({ content, effect: props.effect, once: props.once, hide: props.hide, tag })
+  );
   return props.tag === "ul"
     ? html`<ul${classAttrs("reveal-group", attrs)}>${items}</ul>`
     : html`<div${classAttrs("reveal-group", attrs)}>${items}</div>`;
@@ -259,14 +273,21 @@ export type ScrollStepsProps = {
   stage?: "start" | "end";
   /** Accessible name of the step list. @default "Steps" */
   label?: string;
+  /**
+   * Mute the text of the steps that are not current. `false` keeps every
+   * step at full text colour — only the stage's picture changes. @default true
+   */
+  dim?: boolean;
   attrs?: Attrs;
 };
 
 /**
  * Scrollytelling: a column of steps beside a sticky stage whose media
  * cross-fades as each step scrolls through the middle of the viewport.
- * The first step is current in the markup; reveal.js moves
- * `aria-current="step"` and `is-active` with an IntersectionObserver.
+ * The first step is current in the markup; reveal.js makes the step whose
+ * text is nearest the viewport's middle current (`aria-current="step"`,
+ * `is-active`), so the stage and the text on screen always agree. A
+ * heading that opens a step is drawn at `--scroll-steps-title-size`.
  * Below 768 the stage is hidden and each step shows its own media in
  * flow — the story reads top to bottom with nothing sticky, and a plain
  * page reads the same way at every width.
@@ -277,6 +298,7 @@ export function ScrollSteps(props: ScrollStepsProps): Html {
     "scroll-steps",
     `scroll-steps--${props.height ?? "md"}`,
     props.stage === "start" && "scroll-steps--stage-start",
+    props.dim === false && "scroll-steps--no-dim",
   );
   const steps = props.steps.map((step, i) =>
     html`<li ${

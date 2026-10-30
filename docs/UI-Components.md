@@ -709,7 +709,9 @@ Prose({ content: proseHtml(renderedMarkdown), size: "md", measure: true });
 ```
 
 Styles for rendered Markdown — headings with rhythm, lists, quotes, code, tables, figures, `kbd` — on the library's
-tokens. `proseHtml()` wraps an HTML string the **server has already sanitised**; never hand it user input.
+tokens. Headings scale from the body size (`--prose-h2-size` is 1.75× `--prose-size`, h3 1.35×, a step less below
+576px), so a `size: "lg"` article keeps titles that read as titles; list items and table cells are body-sized.
+`proseHtml()` wraps an HTML string the **server has already sanitised**; never hand it user input.
 
 ---
 
@@ -772,8 +774,20 @@ Sidebar({
   ],
 });
 Menu({ id: "m", items });
+Menu({
+  items: [{ label: "Tickets", href: "/tickets", badge: 6 }, {
+    label: "Abuse",
+    href: "/abuse",
+    badge: 2,
+    badgeVariant: "danger",
+  }],
+});
 Breadcrumb({ items: [{ label: "Home", href: "/" }, { label: "Settings", href: "/settings" }, { label: "Profile" }] });
 ```
+
+A `MenuItem.badge` (a count, a short status, or any `Html`) sits after the label, outside `.menu__link-label`, so the
+collapsed sidebar's tooltips and flyout titles read the label alone. The rail hides badges; a `danger` one (or
+`alert: true`) leaves a dot on the item's icon.
 
 The navbar collapses to a toggle on phones, and links stay on one line (`white-space: nowrap`) while the bar is
 horizontal. `actions` never wrap or shrink, so a long set overflows a phone: move the extras into `menuActions` (shown
@@ -1084,7 +1098,9 @@ PricingTable({
 });
 ```
 
-The hero's `tone` paints it on the surface, inverse (ink) or an accent wash; `parallax` lets the media drift on scroll.
+The hero's `tone` paints it on the surface, inverse (ink) or an accent wash; `parallax` lets the media drift on scroll;
+`fill` makes it the first screen (`100svh` minus `--hero-fill-offset`, the sticky header by default), with a `footer`
+strip (facts, logos) inside it. A plan's name is the card's title (`--pricing-name-size`, default `--font-size-2xl`).
 The pricing toggle is a real radio group that `pricing.js` mirrors onto `data-billing`; without the script both prices
 show.
 
@@ -1123,9 +1139,14 @@ photos.map((p, i) =>
 ```
 
 The carousel is a scroll-snap track: it scrolls by hand with nothing loaded, and the script adds prev/next, dots, arrow
-keys, the active slide and autoplay that pauses on hover, focus and off-screen. The lightbox is a `<dialog>` opened by
-any `LightboxLink` (a plain link to the full image without the script): keys, swipe, counter, caption, backdrop click,
-and focus back on the thumbnail.
+keys, the active slide and autoplay that pauses on hover, focus and off-screen. `controls: "sides"` puts 44px arrows at
+the slides' middle edges (outside them where the viewport has room). `stack: "sm" | "md" | "lg"`, `stackReducedMotion`
+and `stackNoScript` turn the track into a plain grid of the slides below that breakpoint, under reduced motion, or
+without the script. `scroll: "page"` drives the track from the page: pinned under the header with the slides filling the
+frame, in a band of that screen plus one per later slide; each slide holds for `hold` (default 0.8) of its screen and
+the outgoing one fades through the brief move; buttons, dots and keys scroll the page. A slide taller than the frame
+stacks the carousel instead of being clipped. The lightbox is a `<dialog>` opened by any `LightboxLink` (a plain link to
+the full image without the script): keys, swipe, counter, caption, backdrop click, and focus back on the thumbnail.
 
 ### [Reveal, RevealGroup, Parallax, LazySection](./reference/components-reveal.md)
 
@@ -1136,11 +1157,12 @@ Parallax({ content: html`<img src="/img/texture.png" alt="">`, speed: "slow" });
 LazySection({ id: "customers", action: "/fragments/customers", placeholder: SkeletonCard() });
 ```
 
-Scroll effects that cost nothing when they cannot run: a revealed block is hidden only under `html.js` and shown by an
-IntersectionObserver (already-visible blocks reveal on load; `once: false` replays); the stagger is a `--reveal-index`
-set through the CSSOM; parallax is a rAF-throttled transform, off under reduced motion and on coarse pointers. A lazy
-section calls `window.rapid.swap()` as it nears the viewport when the runtime is present — on a plain page it simply
-shows what it carries.
+Scroll effects that cost nothing when they cannot run: a revealed block moves only under `html.js` and arrives by an
+IntersectionObserver. `rise` and `scale` never make it transparent, so a heading a fast scroll passes is still read;
+`hide: true` (and the `fade` / `blur` effects) start it invisible — for media, not text (already-visible blocks reveal
+on load; `once: false` replays); the stagger is a `--reveal-index` set through the CSSOM; parallax is a rAF-throttled
+transform, off under reduced motion and on coarse pointers. A lazy section calls `window.rapid.swap()` as it nears the
+viewport when the runtime is present — on a plain page it simply shows what it carries.
 
 ### [ScrollProgress, CountUp, ScrollSteps](./reference/components-reveal.md)
 
@@ -1153,8 +1175,10 @@ ScrollSteps({ id: "story", steps: [{ content: step1, media: shot1 }, { content: 
 A reading-progress bar driven by `--scroll-progress` (pure CSS where scroll-driven animations exist, a rAF script
 elsewhere). A count-up renders its final `Intl`-formatted value in the markup and animates from `from` once, when it
 first enters the viewport, ending on the exact server text — never a 0 at rest. Scroll steps pin a stage while the page
-scrolls through the steps' text, cross-fading each step's media and marking the current one `aria-current`; on a phone
-the stage unpins and every step shows its media in order.
+scrolls through the steps' text, cross-fading each step's media and marking the current one `aria-current` — the step
+whose text is nearest the viewport's middle, so picture and text never disagree; a step's opening heading is drawn at
+`--scroll-steps-title-size` (default `--font-size-3xl`, a `clamp()` works), and `dim: false` keeps every step at full
+text colour. On a phone the stage unpins and every step shows its media in order.
 
 ---
 

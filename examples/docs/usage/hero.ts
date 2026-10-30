@@ -40,5 +40,24 @@ export const usage: Record<string, UsageExample[]> = {
           size: "md",
         }),
     },
+    {
+      title: "The first screen, with a facts strip",
+      note:
+        "`fill` makes the band at least `100svh` minus `--hero-fill-offset` (the sticky header, `--scroll-padding-top` by default); the `footer` sits inside it, so hero and facts are exactly the first screen.",
+      render: () =>
+        Hero({
+          title: "Short links your customers trust",
+          text: "Branded domains, live analytics and a team plan that grows with you.",
+          align: "center",
+          fill: true,
+          actions: Button({ label: "Start free", size: "lg", href: "/signup" }),
+          footer: html`
+            <ul class="cluster" aria-label="Facts">
+              <li>99.99% uptime</li>
+              <li>2B redirects a month</li>
+            </ul>
+          `,
+        }),
+    },
   ],
 };

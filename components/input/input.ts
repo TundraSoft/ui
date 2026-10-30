@@ -57,6 +57,12 @@ export type InputProps = {
   step?: number | "any";
   autocomplete?: string;
   /**
+   * The on-screen keyboard to offer (`inputmode`): `numeric` for a code or
+   * an id typed as text, `decimal` for an amount. Wins over the keyboard a
+   * variant picks for itself (a masked field, an email local part).
+   */
+  inputmode?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url";
+  /**
    * Selector of the control this value must equal (a confirm field):
    * `match: "#password"`. Checked by the validator; the server must
    * check it too.
@@ -238,6 +244,7 @@ function nativeInput(props: InputProps, over: Partial<InputProps> = {}, extraAtt
     max: attr(p.max),
     step: attr(p.step),
     autocomplete: p.autocomplete,
+    inputmode: p.inputmode ?? p.attrs?.inputmode ?? extraAttrs.inputmode,
     "data-match": p.match,
     "data-validate-action": p.validateAction,
     "data-counter": p.counter && p.maxLength ? "" : undefined,
@@ -376,6 +383,7 @@ function EmailDomainsField(props: InputProps, domains: string[]): Html {
         value: chosen && domains.includes(chosen) ? chosen : domains[0],
         options: domains.map((d) => ({ value: d, label: d })),
         disabled: props.disabled,
+        size: props.size,
         attrs: { "aria-label": "Email domain" },
       })
     }</span>`;
@@ -412,6 +420,7 @@ function TelCountriesField(props: InputProps, countries: CountryCode[]): Html {
           lead: c.flag,
         })),
         disabled: props.disabled,
+        size: props.size,
         attrs: { "aria-label": "Country code", autocomplete: "tel-country-code" },
       })}</span>${control}</div>
   `;

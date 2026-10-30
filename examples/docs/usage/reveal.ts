@@ -17,7 +17,8 @@ export const usage: Record<string, UsageExample[]> = {
   "components/reveal": [
     {
       title: "A section that rises into view",
-      note: "Hidden only under `html.js`; a page without the script shows it at once.",
+      note:
+        "A rise only moves the block: the heading is readable from the first frame, even when a fast scroll passes it before it arrives. A page without the script shows it in place.",
       render: () =>
         Reveal({
           content: html`
@@ -25,6 +26,18 @@ export const usage: Record<string, UsageExample[]> = {
           `,
           effect: "rise",
           tag: "section",
+        }),
+    },
+    {
+      title: "A picture that fades in",
+      note:
+        "`hide: true` starts the block transparent — for media and decoration, never for the text a reader is scanning.",
+      render: () =>
+        Reveal({
+          content: html`
+            <img src="/img/map.png" width="960" height="540" alt="Clicks by country" loading="lazy">
+          `,
+          hide: true,
         }),
     },
     {

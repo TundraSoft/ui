@@ -40,5 +40,25 @@ export const usage: Record<string, UsageExample[]> = {
           ),
         }),
     },
+    {
+      title: "A product tour that moves as the page scrolls",
+      note:
+        '`scroll: "page"` pins the carousel under the header, slides filling the frame; the page\'s scroll moves them, each holding for `hold` (80%) of its screen while the outgoing one fades through the brief move, and the side arrows, dots and keys scroll the page to a slide. A slide taller than the frame, a screen below 768px, reduced motion or no script give a plain list of the slides.',
+      render: () =>
+        Carousel({
+          id: "tour",
+          label: "How it works",
+          controls: "sides",
+          scroll: "page",
+          stack: "md",
+          stackReducedMotion: true,
+          stackNoScript: true,
+          items: ["Shorten", "Brand", "Measure"].map((step) =>
+            html`
+              <img src="/img/tour-${step.toLowerCase()}.png" width="1200" height="720" alt="${step}" loading="lazy">
+            `
+          ),
+        }),
+    },
   ],
 };

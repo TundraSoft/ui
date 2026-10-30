@@ -462,6 +462,23 @@ const menuItems = [
     }],
   },
 ];
+const badgeItems = [
+  { label: "Inbox", href: "#", icon: Icon("send", { size: 16 }), badge: 6 },
+  {
+    label: "Incidents",
+    href: "#",
+    icon: Icon("shield", { size: 16 }),
+    badge: "2 open",
+    badgeVariant: "danger" as const,
+  },
+  {
+    label: "Link setup",
+    icon: Icon("tag", { size: 16 }),
+    badge: 3,
+    children: [{ label: "Domains", href: "#", badge: 2 }, { label: "Tags", href: "#", badge: 1 }],
+  },
+  { label: "Settings", href: "#", icon: Icon("settings", { size: 16 }) },
+];
 const formError = {
   message: "Please fix the highlighted fields.",
   fields: { email: "Enter a valid email address", name: "Required" },
@@ -757,6 +774,15 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       cases: chartTypes.map((type) =>
         c(`type ${type}`, Chart({ type, id: `cat-chart-${type}`, height: 200, ...chartSamples[type] }))
       ).concat([
+        c(
+          "the box reserves the chart's height before the engine draws — no jump when it mounts (#cat-chart-reserve: 300px + the engine's 15px parentHeightOffset)",
+          Chart({
+            id: "cat-chart-reserve",
+            type: "line",
+            height: 300,
+            series: [{ name: "Clicks", data: [4, 6, 5, 9, 7, 11] }],
+          }),
+        ),
         c(
           "sparkline + title + stacked + toolbar",
           row(
@@ -2298,6 +2324,10 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
         ),
         c("Input sizes", row(...inputSizes.map((size) => Input({ size, placeholder: size })))),
         c(
+          "inputmode — the phone keyboard to offer, here numeric for a code typed as text (#cat-inputmode)",
+          Input({ id: "cat-inputmode", name: "code", inputmode: "numeric", placeholder: "Order number" }),
+        ),
+        c(
           "states",
           row(
             Input({ value: "Disabled", disabled: true, attrs: { "aria-label": "Disabled input" } }),
@@ -2527,7 +2557,13 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
     },
     {
       name: "menu",
-      cases: [c("nested, icons, active, expanded", Menu({ id: "cat-menu", items: menuItems }))],
+      cases: [
+        c("nested, icons, active, expanded", Menu({ id: "cat-menu", items: menuItems })),
+        c(
+          "badge — a count after the label (a parent carries its children's sum), badgeVariant, Html; outside the label, so the rail's tooltip and flyout title read the label alone (#cat-menu-badges)",
+          Menu({ id: "cat-menu-badges", items: badgeItems, attrs: { id: "cat-menu-badges" } }),
+        ),
+      ],
     },
     {
       name: "modal",
@@ -3019,6 +3055,22 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
       name: "select",
       cases: [
         c(
+          "size — sm / md / lg, the same heights as Input({ size }) beside it (#cat-sel-sizes)",
+          html`<div class="stack" id="cat-sel-sizes">${
+            inputSizes.map((size) =>
+              row(
+                Input({ size, placeholder: `Input ${size}`, attrs: { "aria-label": `Input ${size}` } }),
+                Select({
+                  id: `cat-sel-size-${size}`,
+                  size,
+                  attrs: { "aria-label": `Select ${size}` },
+                  options: [{ value: "a", label: `Select ${size}` }, { value: "b", label: "Other" }],
+                }),
+              )
+            )
+          }</div>`,
+        ),
+        c(
           "options with a lead — any Html before the label, here a flag",
           Select({
             id: "cat-sel-lead",
@@ -3156,6 +3208,12 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
           }),
         ),
         c("collapsible", Sidebar({ id: "cat-sb-2", items: menuItems, collapsible: true })),
+        c(
+          "badges on the rail — collapsed, a badge hides and a danger one leaves a dot on the icon (MenuItem.alert) (#cat-sb-badges)",
+          html`<div class="cat-sidebar-frame">${
+            Sidebar({ id: "cat-sb-badges", items: badgeItems, collapsible: true })
+          }</div>`,
+        ),
         c(
           'head, sections, foot, navLabel and the edge collapse toggle (collapsible: { position: "edge" }; "foot" is the default) (#cat-sb-full)',
           html`<div class="cat-sidebar-frame">${

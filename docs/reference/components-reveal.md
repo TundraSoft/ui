@@ -14,8 +14,9 @@ Shown on its demo page (`deno task build:demos`, then `demo/components/reveal.ht
 Reveal(props: RevealProps): Html
 ```
 
-Content that reveals itself as it scrolls into view. Hidden only under
-`html.js` (a page without the script shows everything at once);
+Content that arrives as it scrolls into view. Moved only under
+`html.js` (a page without the script shows everything at once), and
+never transparent unless `hide` (or a `fade` / `blur` effect) says so;
 reveal.js adds `is-revealed` when the block enters the viewport, so the
 effect never costs a plain page anything. Blocks already on screen at
 load reveal immediately.
@@ -89,8 +90,10 @@ ScrollSteps(props: ScrollStepsProps): Html
 
 Scrollytelling: a column of steps beside a sticky stage whose media
 cross-fades as each step scrolls through the middle of the viewport.
-The first step is current in the markup; reveal.js moves
-`aria-current="step"` and `is-active` with an IntersectionObserver.
+The first step is current in the markup; reveal.js makes the step whose
+text is nearest the viewport's middle current (`aria-current="step"`,
+`is-active`), so the stage and the text on screen always agree. A
+heading that opens a step is drawn at `--scroll-steps-title-size`.
 Below 768 the stage is hidden and each step shows its own media in
 flow — the story reads top to bottom with nothing sticky, and a plain
 page reads the same way at every width.
@@ -133,6 +136,7 @@ The element the reveal renders as.
 | `delay` | `RevealDelay` |  |  |
 | `once` | `boolean` |  | Reveal once and stay (default). `false` hides it again when it scrolls out, so it replays on the way back. |
 | `tag` | `RevealTag` |  |  |
+| `hide` | `boolean` |  | Start the block transparent until it is in view. Off by default, so text wrapped in a reveal is always readable — a fast scroll can pass a heading before it arrives; `rise` and `scale` only move it. Turn it on for media and decoration. (`fade` and `blur` always hide: that is all they do.) @default false |
 | `attrs` | `Attrs` |  |  |
 
 ### `RevealGroupProps`
@@ -143,6 +147,7 @@ The element the reveal renders as.
 | `effect` | `RevealEffect` |  |  |
 | `stagger` | `boolean` |  | Stagger the items: reveal.js numbers each child (`--reveal-index`, through the CSSOM) and the stylesheet delays it by that many steps. |
 | `once` | `boolean` |  |  |
+| `hide` | `boolean` |  | Each item starts transparent (see `RevealProps.hide`). @default false |
 | `tag` | `"div" | "ul"` |  | The group element. @default "div" |
 | `attrs` | `Attrs` |  |  |
 
@@ -250,6 +255,7 @@ How tall each step's scroll band is: 60 / 80 / 100 vh.
 | `height` | `ScrollStepsHeight` |  |  |
 | `stage` | `"start" | "end"` |  | Which side the stage sits on at ≥ 768. @default "end" |
 | `label` | `string` |  | Accessible name of the step list. @default "Steps" |
+| `dim` | `boolean` |  | Mute the text of the steps that are not current. `false` keeps every step at full text colour — only the stage's picture changes. @default true |
 | `attrs` | `Attrs` |  |  |
 
 ## Usage
@@ -258,7 +264,7 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### A section that rises into view
 
-Hidden only under `html.js`; a page without the script shows it at once.
+A rise only moves the block: the heading is readable from the first frame, even when a fast scroll passes it before it arrives. A page without the script shows it in place.
 
 ```ts
 Reveal({
@@ -274,6 +280,25 @@ Reveal({
 <section class="reveal" data-reveal="rise">
   <h2>Why teams switch</h2>
 </section>
+```
+
+### A picture that fades in
+
+`hide: true` starts the block transparent — for media and decoration, never for the text a reader is scanning.
+
+```ts
+Reveal({
+  content: html`
+    <img src="/img/map.png" width="960" height="540" alt="Clicks by country" loading="lazy">
+  `,
+  hide: true,
+})
+```
+
+```html
+<div class="reveal" data-reveal="rise" data-reveal-hide="">
+  <img src="/img/map.png" width="960" height="540" alt="Clicks by country" loading="lazy">
+</div>
 ```
 
 ### Three cards, one after another
@@ -460,7 +485,7 @@ html`
 
 Classes defined by `components/reveal/reveal.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.count-up`, `.is-revealed`, `.js`, `.lazy-section`, `.parallax`, `.reveal`, `.reveal--delay-1`, `.reveal--delay-2`, `.reveal--delay-3`, `.reveal-group`, `.scroll-progress`, `.scroll-progress--bottom`, `.scroll-progress__bar`, `.scroll-steps`, `.scroll-steps--lg`, `.scroll-steps--sm`, `.scroll-steps--stage-start`, `.scroll-steps__inline-media`, `.scroll-steps__list`, `.scroll-steps__media`, `.scroll-steps__stage`, `.scroll-steps__step`
+`.count-up`, `.is-revealed`, `.js`, `.lazy-section`, `.parallax`, `.reveal`, `.reveal--delay-1`, `.reveal--delay-2`, `.reveal--delay-3`, `.reveal-group`, `.scroll-progress`, `.scroll-progress--bottom`, `.scroll-progress__bar`, `.scroll-steps`, `.scroll-steps--lg`, `.scroll-steps--no-dim`, `.scroll-steps--sm`, `.scroll-steps--stage-start`, `.scroll-steps__inline-media`, `.scroll-steps__list`, `.scroll-steps__media`, `.scroll-steps__stage`, `.scroll-steps__step`, `.scroll-steps__text`
 
 ## Behaviour
 

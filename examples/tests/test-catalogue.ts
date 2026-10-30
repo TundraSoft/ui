@@ -962,6 +962,412 @@ async function brevilyDesignFixes(group: string): Promise<void> {
 }
 
 /**
+ * brevily-design's asks moving to 0.27.0 (2026-10-30): a MenuItem badge
+ * that stays out of the rail's tooltip and flyout title, a chart box that
+ * is its height before the engine draws, Select sizes, Input inputmode.
+ */
+async function designAsks(group: string): Promise<void> {
+  const open = async (name: string, width: number, js = true) => {
+    const p = await browser.newPage();
+    await p.setJavaScriptEnabled(js);
+    await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+    await p.setViewport({ width, height: 800 });
+    p.on("pageerror", (e) => fail(`${fileOf(name)} (design asks): pageerror: ${e}`));
+    await p.goto(`file://${root}/${fileOf(name)}`, { waitUntil: "networkidle0", timeout: 30000 });
+    return p;
+  };
+
+  if (group === "navigation") {
+    const m = await open("menu", 1280);
+    const menu = await m.evaluate(() => {
+      const list = document.getElementById("cat-menu-badges")!;
+      const links = [...list.querySelectorAll(":scope > li > .menu__link")];
+      const parent = links[2];
+      const badge = parent.querySelector(".menu__badge")!.getBoundingClientRect();
+      const caret = parent.querySelector(".menu__caret")!.getBoundingClientRect();
+      return {
+        labels: links.map((l) => l.querySelector(".menu__link-label")!.textContent!.trim()),
+        badges: links.map((l) => l.querySelector(".menu__badge")?.textContent?.trim() ?? ""),
+        inLabel: list.querySelector(".menu__link-label .badge") !== null,
+        danger: links[1].classList.contains("menu__link--alert") &&
+          !!links[1].querySelector(".badge--danger") && !links[0].classList.contains("menu__link--alert"),
+        beforeCaret: badge.right <= caret.left + 1,
+      };
+    });
+    check(
+      menu.labels.join("|") === "Inbox|Incidents|Link setup|Settings" &&
+        menu.badges.join("|") === "6|2 open|3|" && !menu.inLabel && menu.danger && menu.beforeCaret,
+      `navigation: MenuItem badge (${JSON.stringify(menu)})`,
+    );
+    await m.close();
+
+    const p = await open("sidebar", 1280);
+    await p.$eval("#cat-sb-badges", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await p.click("#cat-sb-badges .sidebar__collapse-toggle");
+    await pause(500);
+    const rail = await p.evaluate(() => {
+      const sb = document.getElementById("cat-sb-badges")!;
+      const links = [...sb.querySelectorAll(".menu__list > li > .menu__link")];
+      const dot = (l: Element) => getComputedStyle(l.querySelector(".menu__icon")!, "::after").content;
+      return {
+        collapsed: sb.classList.contains("sidebar--collapsed"),
+        titles: links.map((l) => l.getAttribute("title")),
+        badgeShown: [...sb.querySelectorAll(".menu__list > li > .menu__link > .menu__badge")].some((b) =>
+          getComputedStyle(b).display !== "none"
+        ),
+        dots: links.map((l) => dot(l) !== "none"),
+      };
+    });
+    await p.click("#cat-sb-badges .menu__list > li:nth-child(3) > .menu__link");
+    await pause(400);
+    const flyout = await p.evaluate(() => {
+      const sub = document.querySelector("#cat-sb-badges .menu__sublist--flyout");
+      return {
+        title: sub?.querySelector(".menu__flyout-title")?.textContent?.trim(),
+        badges: [...(sub?.querySelectorAll(".menu__badge") ?? [])].map((b) =>
+          getComputedStyle(b).display !== "none" ? b.textContent!.trim() : ""
+        ),
+      };
+    });
+    await p.keyboard.press("Escape");
+    await p.click("#cat-sb-badges .sidebar__collapse-toggle");
+    await pause(400);
+    check(
+      rail.collapsed && rail.titles.join("|") === "Inbox|Incidents|Link setup|Settings" && !rail.badgeShown &&
+        rail.dots.join() === "false,true,false,false" && flyout.title === "Link setup" &&
+        flyout.badges.join("|") === "2|1",
+      `navigation: badges on the collapsed rail (${JSON.stringify({ rail, flyout })})`,
+    );
+    await p.close();
+  }
+
+  if (group === "forms") {
+    const p = await open("select", 1280);
+    const sizes = await p.evaluate(() =>
+      ["sm", "md", "lg"].map((size) => {
+        const sel = document.getElementById(`cat-sel-size-${size}`)!.closest(".select")!;
+        const input = sel.parentElement!.querySelector("input.input")!;
+        return {
+          size,
+          input: Math.round(input.getBoundingClientRect().height),
+          select: Math.round(sel.querySelector(".combobox__field")!.getBoundingClientRect().height),
+          font: getComputedStyle(sel.querySelector(".select__button")!).fontSize ===
+            getComputedStyle(input).fontSize,
+        };
+      })
+    );
+    check(
+      sizes.every((s) => s.input === s.select && s.font) && sizes[0].select < sizes[1].select &&
+        sizes[1].select < sizes[2].select,
+      `forms: Select size does not match Input size (${JSON.stringify(sizes)})`,
+    );
+    await p.close();
+    const i = await open("input", 1280);
+    const mode = await i.$eval("#cat-inputmode", (el) => el.getAttribute("inputmode"));
+    check(mode === "numeric", `forms: Input inputmode not rendered (${mode})`);
+    await i.close();
+  }
+
+  if (group === "charts") {
+    // Without script the engine never draws: the box is already the 300px
+    // chart plus ApexCharts' 15px parentHeightOffset, what it ends at.
+    const bare = await open("chart", 1280, false);
+    const before = await bare.$eval("#cat-chart-reserve", (el) => Math.round(el.getBoundingClientRect().height));
+    await bare.close();
+    const p = await open("chart", 1280);
+    await p.waitForFunction(() => !!document.querySelector("#cat-chart-reserve .apexcharts-canvas"), {
+      timeout: 15000,
+    });
+    await pause(300);
+    const after = await p.$eval("#cat-chart-reserve", (el) => ({
+      box: Math.round(el.getBoundingClientRect().height),
+      canvas: Math.round(el.querySelector(".apexcharts-canvas")!.getBoundingClientRect().height),
+    }));
+    check(
+      before === 315 && after.box === before && after.canvas === 300,
+      `charts: the chart box does not reserve its height (${JSON.stringify({ before, after })})`,
+    );
+    await p.close();
+  }
+}
+
+/**
+ * The playbook review of the Brevily website (2026-10-30): titles that
+ * read as titles in prose and on plan cards, Reveal never hiding text by
+ * default, ScrollSteps' stage agreeing with the text on screen, and a
+ * Hero that fills the first screen.
+ */
+async function playbookAsks(group: string): Promise<void> {
+  const open = async (name: string, width: number, height = 800) => {
+    const p = await browser.newPage();
+    await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+    await p.setViewport({ width, height });
+    p.on("pageerror", (e) => fail(`${fileOf(name)} (playbook): pageerror: ${e}`));
+    await p.goto(`file://${root}/${fileOf(name)}`, { waitUntil: "networkidle0", timeout: 30000 });
+    return p;
+  };
+
+  if (group === "cards") {
+    for (const width of [1440, 375]) {
+      const p = await open("prose", width);
+      const sizes = await p.$eval("#cat-prose-article", (el) => {
+        const px = (sel: string) => parseFloat(getComputedStyle(el.querySelector(sel)!).fontSize);
+        return { p: px("p"), h2: px("h2"), h3: px("h3"), li: px("li"), td: px("td") };
+      });
+      const [h2, h3] = width < 576 ? [1.5, 1.25] : [1.75, 1.35];
+      check(
+        Math.abs(sizes.h2 - sizes.p * h2) < 0.5 && Math.abs(sizes.h3 - sizes.p * h3) < 0.5 && sizes.li === sizes.p &&
+          sizes.td === sizes.p,
+        `cards: prose headings do not scale from the body, or lists/tables are smaller at ${width} (${
+          JSON.stringify(sizes)
+        })`,
+      );
+      await p.close();
+    }
+  }
+
+  if (group === "marketing") {
+    const pr = await open("pricing", 1440);
+    const name = await pr.$eval(".pricing__name", (el) => parseFloat(getComputedStyle(el).fontSize));
+    check(name >= 24, `marketing: a plan's name is not a title (${name}px)`);
+    await pr.close();
+
+    const r = await open("reveal", 1440);
+    const reveal = await r.evaluate(() => {
+      const start = (id: string) => {
+        const el = document.getElementById(id)!;
+        el.style.transition = "none";
+        el.classList.remove("is-revealed");
+        const o = getComputedStyle(el).opacity;
+        el.classList.add("is-revealed");
+        el.style.transition = "";
+        return o;
+      };
+      return { rise: start("cat-reveal-rise"), hide: start("cat-reveal-hide"), fade: start("cat-reveal-fade") };
+    });
+    check(
+      reveal.rise === "1" && reveal.hide === "0" && reveal.fade === "0",
+      `marketing: Reveal hides text by default (${JSON.stringify(reveal)})`,
+    );
+    // Walk the steps 20px at a time: the current step — and its media — is
+    // the one whose text is nearest the middle of the viewport (the band
+    // trigger lagged ~40px behind it, a picture of the step before beside
+    // text that was wholly on screen). Near-ties (< 24px apart) are skipped.
+    const disagree = await r.evaluate(async () => {
+      const section = document.getElementById("cat-scroll-steps")!;
+      const frame = () => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+      const top = section.getBoundingClientRect().top + scrollY - innerHeight / 2;
+      const end = top + section.offsetHeight;
+      const bad: string[] = [];
+      let sampled = 0;
+      for (let y = top; y < end; y += 20) {
+        scrollTo({ top: y, behavior: "instant" });
+        await frame();
+        const middle = innerHeight / 2;
+        const ranked = [...section.querySelectorAll<HTMLElement>("[data-scroll-step]")].map((s) => {
+          const b = s.querySelector(".scroll-steps__text")!.getBoundingClientRect();
+          return {
+            id: s.dataset.scrollStep,
+            d: b.bottom < middle ? middle - b.bottom : b.top > middle ? b.top - middle : 0,
+          };
+        }).sort((a, b) => a.d - b.d);
+        if (ranked.length > 1 && ranked[1].d - ranked[0].d < 24) continue;
+        sampled++;
+        const want = ranked[0].id;
+        const step = section.querySelector<HTMLElement>("[data-scroll-step].is-active")?.dataset.scrollStep;
+        const media = section.querySelector<HTMLElement>("[data-scroll-step-media].is-active")?.dataset
+          .scrollStepMedia;
+        if (step !== want || media !== want) bad.push(`${Math.round(y)}: text ${want}, step ${step}, media ${media}`);
+      }
+      if (sampled < 20) bad.push(`only ${sampled} positions sampled`);
+      return bad;
+    });
+    check(disagree.length === 0, `marketing: ScrollSteps' stage disagrees with the text (${disagree.slice(0, 4)})`);
+    const title = await r.$eval(
+      "#cat-scroll-steps .scroll-steps__text > h3",
+      (el) => parseFloat(getComputedStyle(el).fontSize),
+    );
+    check(title >= 28, `marketing: a ScrollSteps title is body-sized (${title}px)`);
+    // ScrollSteps dim: false — a step that is not current keeps the text colour.
+    const dim = await r.$eval("#cat-scroll-steps-md", (el) => {
+      const [a, b] = [...el.querySelectorAll(".scroll-steps__step")];
+      return getComputedStyle(a).color === getComputedStyle(b).color;
+    });
+    check(dim, "marketing: ScrollSteps dim: false still mutes the steps that are not current");
+    await r.close();
+
+    // Carousel, Console v4's asks: side arrows, the stacked fallback, page scroll.
+    const c = await open("carousel", 1440, 900);
+    await c.$eval("#cat-carousel-sides", (el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await pause(300);
+    const sides = await c.evaluate(() => {
+      const root = document.getElementById("cat-carousel-sides")!;
+      const track = root.querySelector(".carousel__track")!.getBoundingClientRect();
+      const prev = root.querySelector(".carousel__side--prev")!.getBoundingClientRect();
+      const next = root.querySelector(".carousel__side--next")!.getBoundingClientRect();
+      const mid = track.top + track.height / 2;
+      return {
+        size: Math.round(prev.width),
+        centred: Math.abs(prev.top + prev.height / 2 - mid) <= 1 && Math.abs(next.top + next.height / 2 - mid) <= 1,
+        // Fully outside the slides where the viewport has the room (size +
+        // gap + edge), as far out as fits otherwise, never off screen.
+        outside: (track.left >= 64 ? prev.right <= track.left : prev.left >= 7) &&
+          (document.documentElement.clientWidth - track.right >= 64
+            ? next.left >= track.right
+            : next.right <= document.documentElement.clientWidth - 7),
+        grid: getComputedStyle(root.querySelector(".carousel__track")!).display,
+      };
+    });
+    await c.click("#cat-carousel-sides .carousel__side--next");
+    await pause(800);
+    const moved = await c.$eval(
+      "#cat-carousel-sides",
+      (el) => el.querySelector('[data-carousel-to][aria-current="true"]')?.getAttribute("data-carousel-to"),
+    );
+    check(
+      sides.size >= 44 && sides.centred && sides.outside && sides.grid !== "grid" && moved === "1",
+      `marketing: Carousel controls "sides" (${JSON.stringify({ sides, moved })})`,
+    );
+
+    // Page scroll: the track follows the page; each slide holds for 80% of
+    // its screen (40% each side), the outgoing slide fades while it moves;
+    // the band is the pin plus one screen per later slide; slides fill the
+    // frame; next and dot 1 (from above) scroll the page.
+    const page = await c.evaluate(async () => {
+      const root = document.getElementById("cat-carousel-page")!;
+      const track = root.querySelector<HTMLElement>(".carousel__track")!;
+      const slides = [...root.querySelectorAll<HTMLElement>("[data-carousel-slide]")];
+      const pin = root.querySelector<HTMLElement>("[data-carousel-pin]")!;
+      const frame = () => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
+      const top = parseFloat(getComputedStyle(pin).top);
+      const start = root.getBoundingClientRect().top + scrollY - top;
+      const length = root.offsetHeight - pin.offsetHeight;
+      const n = slides.length;
+      const seg = length / (n - 1);
+      const target = (i: number) =>
+        slides[i].offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingInlineStart);
+      const at = async (y: number) => {
+        scrollTo({ top: y, behavior: "instant" });
+        await frame();
+        return {
+          left: Math.round(track.scrollLeft),
+          dot: root.querySelector('[data-carousel-to][aria-current="true"]')?.getAttribute("data-carousel-to"),
+          pinTop: Math.round(pin.getBoundingClientRect().top),
+          fade: [slides[1].style.opacity, slides[2].style.opacity],
+        };
+      };
+      const one = await at(start + seg);
+      const hold = await at(start + seg * 1.35);
+      const mid = await at(start + seg * 1.5);
+      const next = await at(start + seg * 1.65);
+      const past = await at(start + length + 2);
+      const fill = Math.abs(
+        slides[0].offsetHeight - (track.clientHeight - parseFloat(getComputedStyle(track).paddingBlockStart) * 2),
+      ) <= 1;
+      return {
+        pinned: root.hasAttribute("data-carousel-pinned"),
+        band: Math.round(root.offsetHeight - (innerHeight - top) - (n - 1) * innerHeight),
+        one,
+        hold,
+        mid,
+        next,
+        past: past.pinTop < Math.round(top),
+        fill,
+        t1: Math.round(target(1)),
+        t2: Math.round(target(2)),
+        top: Math.round(top),
+        start: Math.round(start),
+      };
+    });
+    await c.evaluate(() =>
+      scrollTo({
+        top: document.getElementById("cat-carousel-page")!.getBoundingClientRect().top + scrollY - innerHeight * 2 + 1,
+        behavior: "instant",
+      })
+    );
+    await pause(100);
+    const y0 = await c.evaluate(() => scrollY);
+    await c.$eval("#cat-carousel-page .carousel__side--next", (el) => (el as HTMLElement).click());
+    await pause(1200);
+    const afterNext = await c.evaluate(() => ({ y: Math.round(scrollY) }));
+    await c.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+    await pause(100);
+    await c.$eval('#cat-carousel-page [data-carousel-to="0"]', (el) => (el as HTMLElement).click());
+    await pause(1500);
+    const dot1 = await c.evaluate(() => Math.round(scrollY));
+    check(
+      page.pinned && Math.abs(page.band) <= 1 && Math.abs(page.one.left - page.t1) <= 1 && page.one.dot === "1" &&
+        Math.abs(page.hold.left - page.t1) <= 1 && page.mid.left > page.t1 && page.mid.left < page.t2 &&
+        Math.abs(Number(page.mid.fade[0]) - 0.5) < 0.1 && page.mid.fade[1] === "" &&
+        Math.abs(page.next.left - page.t2) <= 1 && page.next.dot === "2" && page.one.pinTop === page.top &&
+        page.past && page.fill && afterNext.y > y0 + 100 && Math.abs(dot1 - page.start) <= 2,
+      `marketing: Carousel scroll "page" (${JSON.stringify({ page, y0, afterNext, dot1 })})`,
+    );
+    // Too short a screen for the tallest slide: a list, not a clipped pin.
+    await c.setViewport({ width: 1440, height: 520 });
+    await pause(400);
+    const unfit = await c.$eval("#cat-carousel-page", (el) => ({
+      pinned: el.hasAttribute("data-carousel-pinned"),
+      grid: getComputedStyle(el.querySelector(".carousel__track")!).display,
+    }));
+    await c.setViewport({ width: 1440, height: 900 });
+    await pause(400);
+    const refit = await c.$eval("#cat-carousel-page", (el) => el.hasAttribute("data-carousel-pinned"));
+    check(
+      !unfit.pinned && unfit.grid === "grid" && refit,
+      `marketing: Carousel scroll "page" pins a slide taller than the frame (${JSON.stringify({ unfit, refit })})`,
+    );
+    await c.close();
+
+    // Stacked: below 768, under reduced motion, and without the script.
+    const stackedAt = async (label: string, width: number, opts: { reduced?: boolean; js?: boolean }) => {
+      const sp = await browser.newPage();
+      await sp.setJavaScriptEnabled(opts.js !== false);
+      if (opts.reduced) await sp.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
+      await sp.setViewport({ width, height: 800 });
+      await sp.goto(`file://${root}/${fileOf("carousel")}`, { waitUntil: "networkidle0", timeout: 30000 });
+      const st = await sp.$eval("#cat-carousel-sides", (el) => ({
+        grid: getComputedStyle(el.querySelector(".carousel__track")!).display,
+        bar: getComputedStyle(el.querySelector(".carousel__bar")!).display,
+        arrow: el.querySelector(".carousel__side")!.getClientRects().length === 0 ? "none" : "shown",
+      }));
+      const pageMode = opts.js === false ? null : await sp.$eval(
+        "#cat-carousel-page",
+        (el) => el.hasAttribute("data-carousel-pinned"),
+      );
+      check(
+        st.grid === "grid" && st.bar === "none" && st.arrow === "none" && !pageMode,
+        `marketing: Carousel does not stack ${label} (${JSON.stringify({ st, pageMode })})`,
+      );
+      await sp.close();
+    };
+    await stackedAt("below 768", 375, {});
+    await stackedAt("under reduced motion", 1440, { reduced: true });
+    await stackedAt("without the script", 1440, { js: false });
+
+    for (const [width, height] of [[1440, 900], [375, 740]]) {
+      const h = await open("hero", width, height);
+      const fill = await h.evaluate(() => {
+        const hero = document.getElementById("cat-hero-fill")!;
+        const b = hero.getBoundingClientRect();
+        const foot = hero.querySelector(".hero__footer")!.getBoundingClientRect();
+        const offset = parseFloat(getComputedStyle(hero).getPropertyValue("--hero-fill-offset")) * 16;
+        return {
+          height: Math.round(b.height),
+          want: Math.round(innerHeight - offset),
+          footIn: foot.bottom <= b.bottom,
+        };
+      });
+      check(
+        Math.abs(fill.height - fill.want) <= 1 && fill.footIn,
+        `marketing: Hero fill is not the first screen at ${width} (${JSON.stringify(fill)})`,
+      );
+      await h.close();
+    }
+  }
+}
+
+/**
  * The pieces added for the Brevily console (2026-10-04): column and cell
  * attributes, per-row selection, select-all, POST row actions, the
  * confirmation dialog, an open-on-arrival modal, a Select that never
@@ -3077,6 +3483,8 @@ for (const group of catalogueGroups) {
   await consoleGaps(page, group.id);
   await outsmartFixes(page, group.id);
   await brevilyDesignFixes(group.id);
+  await designAsks(group.id);
+  await playbookAsks(group.id);
 }
 
 await browser.close();

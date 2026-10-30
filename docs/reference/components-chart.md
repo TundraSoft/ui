@@ -150,7 +150,7 @@ Each example as the rAPId call and the HTML it renders — the markup a plain pa
 
 ### A revenue area chart
 
-Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode.
+Add `ChartScript()` once per page (or pass `APEXCHARTS` to `createCoreTemplate({ scripts })`); the engine draws on the library's tokens and follows dark mode. The box is already the chart's height (`height`, default 240) before the engine draws, so nothing below it jumps.
 
 ```ts
 html`
@@ -165,7 +165,9 @@ html`
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@7.4.0/dist/apexcharts.min.js" integrity="sha384-fnhrfzODrKsQTTXTYoDIc5f/SIP1KuiO4hz6PmkcIBHYVaAj8QpSOtByqodkU2iO" crossorigin="anonymous" defer></script>
-<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;area&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Revenue&quot;,&quot;data&quot;:[12,19,14,22,28]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;]}}" data-chart-type="area" id="revenue"></div>
+<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;area&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Revenue&quot;,&quot;data&quot;:[12,19,14,22,28]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;]}}" data-chart-type="area" id="revenue">
+  <svg width="0" height="255" …>…</svg>
+</div>
 ```
 
 ### Money on the value axis
@@ -183,14 +185,16 @@ Chart({
 ```
 
 ```html
-<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;line&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Equity&quot;,&quot;data&quot;:[12000,12450.5,12210,12890]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;Q1&quot;,&quot;Q2&quot;,&quot;Q3&quot;,&quot;Q4&quot;]}}" data-chart-type="line" id="equity" data-chart-format="{&quot;value&quot;:&quot;currency:USD&quot;}"></div>
+<div class="chart" data-chart="{&quot;chart&quot;:{&quot;type&quot;:&quot;line&quot;,&quot;height&quot;:240,&quot;stacked&quot;:false,&quot;toolbar&quot;:{&quot;show&quot;:false},&quot;sparkline&quot;:{&quot;enabled&quot;:false}},&quot;series&quot;:[{&quot;name&quot;:&quot;Equity&quot;,&quot;data&quot;:[12000,12450.5,12210,12890]}],&quot;xaxis&quot;:{&quot;categories&quot;:[&quot;Q1&quot;,&quot;Q2&quot;,&quot;Q3&quot;,&quot;Q4&quot;]}}" data-chart-type="line" id="equity" data-chart-format="{&quot;value&quot;:&quot;currency:USD&quot;}">
+  <svg width="0" height="255" …>…</svg>
+</div>
 ```
 
 ## CSS hooks
 
 Classes defined by `components/chart/chart.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.apexcharts-menu`, `.apexcharts-menu-item`, `.apexcharts-tooltip`, `.apexcharts-tooltip-title`, `.apexcharts-xaxistooltip`, `.apexcharts-yaxistooltip`, `.chart`
+`.apexcharts-menu`, `.apexcharts-menu-item`, `.apexcharts-tooltip`, `.apexcharts-tooltip-title`, `.apexcharts-xaxistooltip`, `.apexcharts-yaxistooltip`, `.chart`, `.chart__reserve`
 
 ## Behaviour
 

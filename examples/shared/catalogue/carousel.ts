@@ -77,6 +77,36 @@ export function entry(_routes: DemoRoutes, _state: CatalogueState): CatalogueEnt
           controls: false,
         }),
       ),
+      caseOf(
+        'controls "sides" · stack md · stackReducedMotion · stackNoScript — arrows at the middle edges (outside the slides when the page has room), a plain list below 768, with reduced motion or without the script (#cat-carousel-sides)',
+        Carousel({
+          id: "cat-carousel-sides",
+          label: "Tour",
+          items: pictures.slice(0, 4),
+          controls: "sides",
+          stack: "md",
+          stackReducedMotion: true,
+          stackNoScript: true,
+        }),
+      ),
+      caseOf(
+        'scroll "page" — the slides move sideways as the page scrolls down: pinned under the header (slides fill the frame) in a band of that screen plus one per later slide, each slide holding 80% of its screen, the outgoing one fading through the move; arrows, dots and keys scroll the page; a slide taller than the frame stacks instead (#cat-carousel-page)',
+        Carousel({
+          id: "cat-carousel-page",
+          label: "How it works",
+          // The last slide holds an absolutely positioned .sr-only caption: it must stay inside its slide (and the
+          // track's clip), not widen the page.
+          items: [
+            ...pictures.slice(0, 3),
+            html`
+              <figure class="m-0">${pictures[3]}<figcaption class="sr-only">The fourth screen</figcaption></figure>
+            `,
+          ],
+          controls: "sides",
+          scroll: "page",
+          stack: "md",
+        }),
+      ),
     ],
   };
 }

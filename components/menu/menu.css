@@ -63,3 +63,20 @@
 .menu__link[aria-expanded="true"] .menu__caret {
   transform: rotate(90deg);
 }
+
+/* A count or status after the label, pushed to the row's end (before a
+   parent's caret). Outside `.menu__link-label`, so collapse-sidebar.js's
+   rail tooltip and flyout title read the label alone. */
+.menu__badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  margin-inline-start: auto;
+}
+
+.menu__badge + .menu__caret {
+  margin-inline-start: 0;
+}
+
+.menu__icon {
+  position: relative;
+}

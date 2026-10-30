@@ -49,6 +49,7 @@ unless `searchable: false`.
 | `required` | `boolean` |  |  |
 | `requiredMessage` | `string` |  | The message for a missing required value (`data-msg-required`). Shown on the visible field — by form.js in a `Form({ validate })`, and in a plain form too, where the browser cannot show its own bubble on a hidden native control. @default the browser's text |
 | `invalid` | `boolean` |  |  |
+| `size` | `InputSize` |  | Control height and type size, matching `Input({ size })`. @default "md" |
 | `searchable` | `boolean` |  | A search box at the top of the open list that filters the options as you type (and typing on the closed field starts a search). It is unnamed and belongs to no form, so it never submits and never stops Enter in a sibling field from submitting. @default true |
 | `searchPlaceholder` | `string` |  | Placeholder of the search box. @default "Search…" |
 | `searchLabel` | `string` |  | Accessible name of the search box. @default "Search options" |
@@ -59,6 +60,74 @@ unless `searchable: false`.
 ## Usage
 
 Each example as the rAPId call and the HTML it renders — the markup a plain page writes by hand. Icons are inline SVG in the real output; they are shortened to `<svg …>…</svg>` here.
+
+### A small select beside a small input
+
+`size` takes the same `sm` / `md` / `lg` as `Input`, so a filter row lines up.
+
+```ts
+html`
+  <div class="cluster">${Input({ name: "q", type: "search", size: "sm", placeholder: "Filter" })}${Select({
+    name: "status",
+    size: "sm",
+    attrs: { "aria-label": "Status" },
+    options: [{ value: "", label: "Any status" }, { value: "active", label: "Active" }],
+  })}</div>
+`
+```
+
+```html
+<div class="cluster">
+  <span class="input-clear" data-input-clear>
+    <input type="search" class="input input--sm" id="q" name="q" placeholder="Filter">
+    <button type="button" class="input-clear__button js-only" data-input-clear-button aria-controls="q" aria-label="Clear" hidden>&times;</button>
+  </span>
+  <div class="select select--sm" data-select data-validate-group>
+    <select class="select__native" aria-label="Status" id="select-status-native" name="status" data-validate-proxy="#select-status">
+      <option value="">Any status</option>
+      <option value="active">Active</option>
+    </select>
+    <div class="combobox select__ui" data-combobox data-select-ui>
+      <div class="combobox__anchor">
+        <div class="combobox__field">
+          <input type="hidden" value="" data-combobox-value>
+          <button type="button" class="combobox__input select__button" id="select-status" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="select-status-listbox" aria-label="Status">
+            <span class="select__text" data-select-text>Any status</span>
+          </button>
+          <span class="combobox__caret">
+            <svg width="15" height="15" width="2" …>…</svg>
+          </span>
+        </div>
+        <div class="combobox__list combobox__list--popup" id="select-status-list" hidden>
+          <div class="combobox__search">
+            <svg width="14" height="14" width="2" …>…</svg>
+            <input type="search" class="combobox__search-input" id="select-status-search" form="select-status-search-scope" placeholder="Search…" aria-label="Search options" aria-controls="select-status-listbox" autocomplete="off" spellcheck="false" data-combobox-search data-validate-skip>
+          </div>
+          <div class="combobox__options" id="select-status-listbox" role="listbox">
+            <div class="combobox__option" role="option" id="select-status-opt-0" aria-selected="false" data-value="">
+              <span class="combobox__option-label">Any status</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__option" role="option" id="select-status-opt-1" aria-selected="false" data-value="active">
+              <span class="combobox__option-label">Active</span>
+              <span class="combobox__check" aria-hidden="true">
+                <svg width="15" height="15" width="2" …>…</svg>
+              </span>
+            </div>
+            <div class="combobox__hints">
+              <span>&uarr;&darr; navigate</span>
+              <span>&crarr; select</span>
+              <span class="combobox__count">2 matches</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 ### A long list, searchable
 
@@ -298,7 +367,7 @@ Select({
 
 Classes defined by `components/select/select.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.combobox__field`, `.combobox__hints`, `.input-group`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select__button`, `.select__lead`, `.select__native`, `.select__text`, `.select__text--placeholder`, `.select__ui`
+`.combobox__field`, `.combobox__hints`, `.combobox__input`, `.input-group`, `.js`, `.select`, `.select--disabled`, `.select--invalid`, `.select--lg`, `.select--sm`, `.select__button`, `.select__lead`, `.select__native`, `.select__text`, `.select__text--placeholder`, `.select__ui`
 
 ## Behaviour
 

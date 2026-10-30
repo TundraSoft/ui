@@ -224,10 +224,34 @@ export function Chart(props: ChartProps): Html {
   if (props.options) warnFunctions(props.options, props.id);
   const formats = props.format || props.xFormat ? JSON.stringify({ value: props.format, x: props.xFormat }) : undefined;
   const attrs: Attrs = mergeAttrs(props.attrs, { id: props.id, "data-chart-format": formats });
+  const options = chartOptions(props);
+  const chart = options.chart as Obj | undefined;
+  const height = reserveHeight(chart?.height);
+  // ApexCharts gives the element `min-height: height + parentHeightOffset`
+  // (15 by default) when it mounts: reserve the same, or the box still grows.
+  const offset = typeof chart?.parentHeightOffset === "number" ? chart.parentHeightOffset : 15;
+  // The box holds the chart's height before the engine draws (no jump when
+  // it mounts, nothing to guess in a theme). A zero-width float carries it:
+  // an SVG's `height` attribute sizes it without a style attribute (§9),
+  // and `.chart` is a flow root, so the float sets its minimum height
+  // while the engine's own canvas flows over it.
+  const reserve = height === undefined
+    ? ""
+    : html`<svg class="chart__reserve" width="0" height="${
+      String(height + offset)
+    }" aria-hidden="true" focusable="false"></svg>`;
   return html`
-    <div class="chart" data-chart="${JSON.stringify(chartOptions(props))}" data-chart-type="${props
-      .type}" ${renderAttrs(attrs)}></div>
+    <div class="chart" data-chart="${JSON.stringify(options)}" data-chart-type="${props
+      .type}" ${renderAttrs(attrs)}>${reserve}</div>
   `;
+}
+
+/** The pixel height a chart's box reserves: a number, or a `px` string. A `%` (or any other unit) reserves nothing. */
+function reserveHeight(height: unknown): number | undefined {
+  if (typeof height === "number") return height > 0 ? height : undefined;
+  if (typeof height !== "string") return undefined;
+  const px = /^\s*(\d+(?:\.\d+)?)(?:px)?\s*$/.exec(height);
+  return px ? Number(px[1]) : undefined;
 }
 
 const warned = new Set<string>();

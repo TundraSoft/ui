@@ -50,7 +50,12 @@
   border-radius: var(--radius-md);
 }
 
+/* Each slide is the containing block of what it positions: an
+   absolutely placed child (an .sr-only caption) would otherwise sit
+   against .carousel, outside the track's overflow clip, and a slide far
+   along the row would widen the page. */
 .carousel__slide {
+  position: relative;
   flex: 0 0 calc(100% - var(--carousel-peek));
   min-width: 0;
   scroll-snap-align: start;
@@ -133,4 +138,182 @@ html:not(.js) .carousel__bar {
   .carousel--per-3 .carousel__slide {
     flex-basis: calc((100% - 2 * var(--carousel-gap) - var(--carousel-peek)) / 3);
   }
+}
+
+/* ------------------------------------------------- side buttons */
+/* `controls: "sides"`: one round button at each middle edge of the
+   frame around the track. Outside the slides when the page has room
+   beside the carousel, just inside the edge when it does not:
+   carousel.js measures the room on each side and writes
+   --carousel-side-outset-start / -end (CSSOM); until then, and with no
+   room, the buttons sit --space-2 inside the edges. (The buttons only
+   exist with the script.) */
+.carousel {
+  --carousel-side-size: 44px;
+}
+
+.carousel__frame {
+  position: relative;
+  min-width: 0;
+}
+
+.carousel__controls--sides {
+  display: contents;
+}
+
+.carousel__side {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  translate: 0 -50%;
+  width: var(--carousel-side-size);
+  height: var(--carousel-side-size);
+  min-width: var(--carousel-side-size);
+  padding: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.carousel__side--prev {
+  inset-inline-start: calc(-1 * var(--carousel-side-outset-start, -1 * var(--space-2)));
+}
+
+.carousel__side--next {
+  inset-inline-end: calc(-1 * var(--carousel-side-outset-end, -1 * var(--space-2)));
+}
+
+/* At an end the button has nowhere to go: it fades out of the way. */
+.carousel__side:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html:not(.js) .carousel__controls--sides {
+  display: none;
+}
+
+/* --------------------------------------------------- stacked */
+/* `stack`, `stackReducedMotion`, `stackNoScript`: the track becomes a
+   plain grid of the slides — no scrolling, no buttons, no dots, and a
+   page-scroll carousel stops pinning. `--carousel-stacked: 1` tells
+   carousel.js the page's own rules stacked it (an "unfit" stack is its
+   own decision, re-measured on resize). carousel.js reads the track's
+   `display` to know, and leaves a stacked carousel alone. */
+@define-mixin carousel-stacked {
+  & .carousel__track {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--carousel-stack-min, 18rem)), 1fr));
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  & .carousel__bar,
+  & .carousel__controls--sides {
+    display: none;
+  }
+
+  &.carousel--page {
+    height: auto;
+  }
+
+  & .carousel__pin {
+    position: static;
+  }
+}
+
+@media screen and (max-width: 575.98px) {
+  .carousel--stack-sm {
+    --carousel-stacked: 1;
+    @mixin carousel-stacked;
+  }
+}
+
+@media screen and (max-width: 767.98px) {
+  .carousel--stack-md {
+    --carousel-stacked: 1;
+    @mixin carousel-stacked;
+  }
+}
+
+@media screen and (max-width: 991.98px) {
+  .carousel--stack-lg {
+    --carousel-stacked: 1;
+    @mixin carousel-stacked;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel--stack-reduced {
+    --carousel-stacked: 1;
+    @mixin carousel-stacked;
+  }
+}
+
+html:not(.js) .carousel--stack-noscript {
+  --carousel-stacked: 1;
+  @mixin carousel-stacked;
+}
+
+/* ------------------------------------------------ page scroll */
+/* `scroll: "page"`: carousel.js sets data-carousel-pinned (and the slide
+   count as --carousel-page-count, through the CSSOM) when it drives the
+   track from the page's scroll. The pin (frame + bar) is one screen under
+   the header; the band is that pin plus one screen per slide after the
+   first, so the pin leaves the moment the last slide's place is passed.
+   Track and slides fill the frame, so a short slide is not a short box.
+   `top` is set on the pin outside the pinned rule too: carousel.js reads
+   it to know the header offset before it pins. */
+.carousel__pin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  top: var(--scroll-padding-top, 0px);
+}
+
+.carousel--page[data-carousel-pinned] {
+  height: calc(100vh - var(--scroll-padding-top, 0px) + (var(--carousel-page-count, 1) - 1) * 100vh);
+  height: calc(100svh - var(--scroll-padding-top, 0px) + (var(--carousel-page-count, 1) - 1) * 100svh);
+}
+
+.carousel--page[data-carousel-pinned] .carousel__pin {
+  position: sticky;
+  height: calc(100vh - var(--scroll-padding-top, 0px));
+  height: calc(100svh - var(--scroll-padding-top, 0px));
+}
+
+.carousel--page[data-carousel-pinned] .carousel__frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.carousel--page[data-carousel-pinned] .carousel__track {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  scroll-snap-type: none;
+}
+
+/* The tallest slide does not fit the frame (carousel.js measured it): a
+   list of the slides instead of a pin that would clip them. */
+.carousel--page[data-carousel-unfit] {
+  @mixin carousel-stacked;
+}
+
+/* carousel.js measures the slides' own height as a plain row under this
+   class (one layout, never painted) to decide whether the tallest fits. */
+.carousel--page.carousel--measuring .carousel__track {
+  flex: none;
+}
+
+.carousel--page.carousel--measuring[data-carousel-unfit] .carousel__track {
+  display: flex;
+  overflow: hidden;
+}
+
+.carousel--page.carousel--measuring .carousel__frame {
+  flex: none;
 }

@@ -111,10 +111,15 @@
   gap: var(--space-1);
 }
 
+/* The plan's name is the card's title: a step under the price, not body
+   size. `--pricing-name-size` retunes it. */
 .pricing__name {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-family: var(--font-family-display);
+  font-size: var(--pricing-name-size, var(--font-size-2xl));
   font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
 }
 
 .pricing__description {

@@ -1,5 +1,6 @@
 .sidebar {
   --sidebar-edge-toggle-size: 24px;
+  --sidebar-alert-dot-size: 7px;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -119,6 +120,7 @@
 
   .sidebar--collapsed .sidebar__brand-label,
   .sidebar--collapsed .menu__link-label,
+  .sidebar--collapsed .menu__badge,
   .sidebar--collapsed .menu__caret,
   .sidebar--collapsed .menu__sublist,
   .sidebar--collapsed .sidebar__collapse-label,
@@ -225,6 +227,28 @@
 
   .sidebar--collapsed .menu__sublist--flyout .menu__link-label {
     display: inline;
+  }
+
+  .sidebar--collapsed .menu__sublist--flyout .menu__badge {
+    display: inline-flex;
+  }
+
+  /* The badge is hidden on the rail; an alerting item keeps a dot on its
+     icon instead (MenuItem.alert, on by default for a danger badge). */
+  .sidebar--collapsed .menu__link--alert > .menu__icon::after {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(var(--sidebar-alert-dot-size) / -3);
+    inset-inline-end: calc(var(--sidebar-alert-dot-size) / -2);
+    width: var(--sidebar-alert-dot-size);
+    height: var(--sidebar-alert-dot-size);
+    border-radius: var(--radius-full);
+    background: var(--color-danger);
+    box-shadow: 0 0 0 2px var(--color-surface);
+  }
+
+  .sidebar--collapsed .menu__sublist--flyout .menu__link--alert > .menu__icon::after {
+    content: none;
   }
 
   .sidebar--collapsed .menu__sublist--flyout .menu__link {

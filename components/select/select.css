@@ -82,6 +82,45 @@ html:not(.js) .select__ui {
   color: var(--color-text-subtle);
 }
 
+/* Sizes match `.input--sm` / `.input--lg`, so a Select lines up with an
+   Input of the same size. Inside an InputGroup the group sets the height. */
+.select--sm .select__native,
+.select--sm .combobox__field {
+  height: var(--control-height-sm);
+  border-radius: var(--radius-sm);
+}
+
+.select--sm .select__native {
+  padding-inline-start: var(--space-2);
+}
+
+.select--sm .combobox__field {
+  padding-inline: var(--space-1) var(--space-2);
+}
+
+.select--sm .select__native,
+.select--sm .combobox__input {
+  font-size: var(--font-size-sm);
+}
+
+.select--lg .select__native,
+.select--lg .combobox__field {
+  height: var(--control-height-lg);
+}
+
+.select--lg .select__native {
+  padding-inline-start: var(--space-4);
+}
+
+.select--lg .combobox__field {
+  padding-inline: var(--space-3) var(--space-4);
+}
+
+.select--lg .select__native,
+.select--lg .combobox__input {
+  font-size: var(--font-size-lg);
+}
+
 .select--disabled .combobox__field {
   background: var(--color-surface-alt);
   color: var(--color-disabled-text);
