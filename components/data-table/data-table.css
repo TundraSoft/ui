@@ -387,6 +387,32 @@ td.data-table__cell--pinned {
   z-index: 7;
 }
 
+.data-table__table tr:has(.float-escaped) {
+  position: relative;
+  z-index: 7;
+}
+
+.data-table__table td:has(.float-escaped) {
+  z-index: 7;
+}
+
+/* A panel out of its scroll box: uiFloat.escape() (shared/js/float.js) places
+   it through the CSSOM. Doubled class, because each panel's own rule sets the
+   position, inset and translate this replaces. Its arrow no longer lines up. */
+.js .float-escaped.float-escaped {
+  position: fixed;
+  inset: auto;
+  translate: none;
+  margin: 0;
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-4));
+  z-index: var(--z-popover);
+}
+
+.float-escaped > .popover__arrow {
+  display: none;
+}
+
 .data-table__row-actions {
   position: absolute;
   inset-block: 0;

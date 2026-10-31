@@ -119,5 +119,43 @@
     panel.removeAttribute("data-side");
   }
 
-  globalThis.uiFloat = { fit, place, follow, clear };
+  /*
+   * `uiFloat.escape(anchor, panel, opts)` — for an absolutely positioned
+   * panel whose anchor sits in a scroll box (a table, or [data-dropdown-clip]),
+   * which would clip it: while open the panel is fixed and follows its anchor,
+   * and `onLeave` runs once the anchor scrolls out of the box. Does nothing
+   * anywhere else; returns whether it escaped. `restore(panel)` undoes it.
+   */
+  const CLIPPERS = ".data-table__scroll, [data-dropdown-clip]";
+  const escaped = new WeakMap();
+  function restore(panel) {
+    if (!panel || !escaped.has(panel)) return;
+    escaped.get(panel)();
+    escaped.delete(panel);
+    panel.classList.remove("float-escaped");
+    panel.style.removeProperty("min-width");
+    clear(panel);
+  }
+  function escape(anchor, panel, { side = "bottom", align = "start", offset = 4, onLeave } = {}) {
+    restore(panel);
+    const clip = anchor?.closest(CLIPPERS);
+    if (!clip) return false;
+    panel.classList.add("float-escaped");
+    panel.style.minWidth = `${anchor.offsetWidth}px`;
+    const stop = follow(anchor, panel, { side, align, offset });
+    const check = () => {
+      const c = clip.getBoundingClientRect();
+      const a = anchor.getBoundingClientRect();
+      if (!anchor.isConnected) restore(panel);
+      else if (a.bottom < c.top || a.top > c.bottom || a.right < c.left || a.left > c.right) onLeave?.();
+    };
+    addEventListener("scroll", check, { capture: true, passive: true });
+    escaped.set(panel, () => {
+      stop();
+      removeEventListener("scroll", check, { capture: true });
+    });
+    return true;
+  }
+
+  globalThis.uiFloat = { fit, place, follow, clear, escape, restore };
 })();

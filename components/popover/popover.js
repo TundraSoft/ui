@@ -13,6 +13,12 @@
       globalThis.uiMotion?.cancelExit(panel);
       pop.classList.remove("popover--above");
       panel.hidden = false;
+      const escaped = globalThis.uiFloat?.escape(trigger ?? pop, panel, {
+        align: "center",
+        offset: 8,
+        onLeave: () => setOpen(pop, false),
+      });
+      if (escaped) return;
       // Keep it on screen: shifted sideways into the viewport, flipped
       // above the trigger when the room below runs out (shared/js/float.js).
       const fit = globalThis.uiFloat?.fit(panel, { anchor: trigger ?? pop, flip: true });
@@ -21,6 +27,7 @@
     }
     const hide = () => {
       panel.hidden = true;
+      globalThis.uiFloat?.restore(panel);
       globalThis.uiFloat?.clear(panel);
       pop.classList.remove("popover--above");
     };
@@ -33,7 +40,7 @@
   // resize; a scroll is left alone (it is absolutely positioned, so it
   // moves with its trigger).
   function fitOpen() {
-    document.querySelectorAll("[data-popover] .popover__panel:not([hidden])").forEach((panel) => {
+    document.querySelectorAll("[data-popover] .popover__panel:not([hidden], .float-escaped)").forEach((panel) => {
       const pop = panel.closest("[data-popover]");
       const fit = globalThis.uiFloat?.fit(panel, {
         anchor: pop.querySelector("[data-popover-trigger]") ?? pop,

@@ -157,6 +157,7 @@
     });
     globalThis.uiMotion?.cancelExit(list);
     list.hidden = false;
+    globalThis.uiFloat?.escape(root, list, { onLeave: () => close(root, false) });
     root.classList.add("timepicker--open");
     toggle?.setAttribute("aria-expanded", "true");
     // The selected slot, else the first one at or after the typed time.
@@ -176,8 +177,12 @@
     if (isOpen(root) && globalThis.uiMotion) {
       globalThis.uiMotion.exit(list, () => {
         list.hidden = true;
+        globalThis.uiFloat?.restore(list);
       });
-    } else list.hidden = true;
+    } else {
+      list.hidden = true;
+      globalThis.uiFloat?.restore(list);
+    }
     root.classList.remove("timepicker--open");
     toggle?.setAttribute("aria-expanded", "false");
     setActive(root, null);
