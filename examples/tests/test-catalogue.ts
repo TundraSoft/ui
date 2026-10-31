@@ -897,6 +897,107 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       await pause(250);
     }
     await floats.close();
+    // Every other floating panel in a cell leaves the scroll box while open,
+    // follows its trigger, works, and goes back to its own rule when closed.
+    const cells = await open("data-table", 1280);
+    const panelParts: Record<string, [string, string]> = {
+      select: ["[role=combobox]", ".combobox__list"],
+      combobox: ["input[role=combobox]", ".combobox__list"],
+      datepicker: ["[data-datepicker-trigger]", ".datepicker__panel"],
+      timepicker: ["[data-timepicker-toggle]", ".timepicker__list"],
+      popover: ["[data-popover-trigger]", ".popover__panel"],
+    };
+    for (const [kind, [trigger, panel]] of Object.entries(panelParts)) {
+      const row = `#cat-dt-panels [data-row-key="${kind}"]`;
+      for (const where of ["middle", "bottom"] as const) {
+        await cells.$eval(`${row} > td:last-child`, (cell, at) => {
+          const r = cell.getBoundingClientRect();
+          scrollBy({
+            top: r.top - (at === "bottom" ? innerHeight - r.height - 4 : innerHeight / 2),
+            behavior: "instant",
+          });
+        }, where);
+        await pause(100);
+        await cells.click(`${row} ${trigger}`);
+        await pause(400);
+        const state = await cells.$eval(`${row} ${panel}`, (el) => {
+          const box = el as HTMLElement;
+          const r = box.getBoundingClientRect();
+          let inside = 0;
+          for (let i = 1; i < 6; i++) {
+            for (let j = 1; j < 6; j++) {
+              const hit = document.elementFromPoint(r.left + r.width * i / 6, r.top + r.height * j / 6);
+              if (hit && box.contains(hit)) inside++;
+            }
+          }
+          return {
+            hidden: box.hidden,
+            position: getComputedStyle(box).position,
+            shown: inside,
+            inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth,
+            top: r.top,
+          };
+        });
+        check(
+          !state.hidden && state.position === "fixed",
+          `data: ${kind} (${where}) did not leave the box (${JSON.stringify(state)})`,
+        );
+        check(state.shown === 25, `data: ${kind} (${where}) in a cell is covered or clipped (${state.shown}/25)`);
+        check(state.inView, `data: ${kind} (${where}) in a cell runs off the viewport`);
+        if (where === "middle") {
+          await cells.evaluate(() => scrollBy({ top: 40, behavior: "instant" }));
+          await pause(150);
+          const moved = await cells.$eval(`${row} ${panel}`, (el) => el.getBoundingClientRect().top);
+          check(Math.abs(state.top - moved - 40) <= 2, `data: ${kind} in a cell does not follow its trigger on scroll`);
+        }
+        await cells.keyboard.press("Escape");
+        if (kind === "popover" || kind === "datepicker") await cells.evaluate(() => document.body.click());
+        await pause(350);
+        const after = await cells.$eval(`${row} ${panel}`, (el) => ({
+          hidden: (el as HTMLElement).hidden,
+          escaped: el.classList.contains("float-escaped"),
+          top: (el as HTMLElement).style.top,
+        }));
+        check(
+          after.hidden && !after.escaped && !after.top,
+          `data: ${kind} in a cell kept its escape after closing (${JSON.stringify(after)})`,
+        );
+      }
+    }
+    // They still work from there: a Select pick and a day pick land.
+    await cells.$eval(
+      '#cat-dt-panels [data-row-key="select"]',
+      (el) => el.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await pause(100);
+    await cells.click('#cat-dt-panels [data-row-key="select"] [role=combobox]');
+    await pause(350);
+    await cells.evaluate(() => {
+      const options = document.querySelectorAll<HTMLElement>('#cat-dt-panels [data-row-key="select"] [role=option]');
+      options[2].click();
+    });
+    await pause(300);
+    const picked = await cells.$eval(
+      '#cat-dt-panels [data-row-key="select"] select',
+      (el) => (el as HTMLSelectElement).value,
+    );
+    check(picked === "Three", `data: a Select pick in a cell did not land (${picked})`);
+    await cells.close();
+    // The same panels outside a table are untouched.
+    const plainSelect = await open("select", 1280);
+    await plainSelect.$eval(
+      "[data-catalogue] [role=combobox]",
+      (el) => el.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await pause(100);
+    await plainSelect.click("[data-catalogue] [role=combobox]");
+    await pause(350);
+    const plainList = await plainSelect.$eval(
+      "[data-catalogue] .combobox__list:not([hidden])",
+      (el) => getComputedStyle(el).position,
+    );
+    check(plainList === "absolute", `data: a Select outside a table changed (${plainList})`);
+    await plainSelect.close();
     // A strip with more actions than fit: Close in view, fades only where there
     // is more, every action reachable by mouse and by Tab; a short strip unchanged.
     for (

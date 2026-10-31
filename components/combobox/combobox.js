@@ -158,12 +158,20 @@
       if (on) {
         globalThis.uiMotion?.cancelExit(list);
         list.hidden = false;
+        globalThis.uiFloat?.escape(root.querySelector(".combobox__anchor") ?? root, list, {
+          offset: 0,
+          onLeave: () => open(root, false),
+        });
       } else if (was && globalThis.uiMotion) {
         // Leave with the list's exit animation, then hide it.
         globalThis.uiMotion.exit(list, () => {
           list.hidden = true;
+          globalThis.uiFloat?.restore(list);
         });
-      } else list.hidden = true;
+      } else {
+        list.hidden = true;
+        globalThis.uiFloat?.restore(list);
+      }
     }
     if (input) input.setAttribute("aria-expanded", on ? "true" : "false");
     root.classList.toggle("combobox--open", !!on);

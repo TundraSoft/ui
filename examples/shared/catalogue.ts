@@ -461,6 +461,29 @@ const wideColumns: DataTableColumn<Row>[] = [
     render: () => `${label}: a value long enough to need room`,
   })),
 ];
+const panelOptions = ["One", "Two", "Three", "Four"].map((label) => ({ value: label, label }));
+function panelInCell(kind: string): Html {
+  const id = `cat-dt-panel-${kind}`;
+  switch (kind) {
+    case "select":
+      return Select({ id, name: id, options: panelOptions, attrs: { "aria-label": "A select in a cell" } });
+    case "combobox":
+      return Combobox({ id, name: id, options: panelOptions, ariaLabel: "A combobox in a cell" });
+    case "datepicker":
+      return DatePicker({ id, name: id, today: "2026-10-31" });
+    case "timepicker":
+      return TimePicker({ id, name: id, attrs: { "aria-label": "A time in a cell" } });
+    default:
+      return Popover({
+        id,
+        label: "A popover in a cell",
+        trigger: PopoverTrigger({ controls: id, label: "Details" }),
+        content: html`
+          <p>This panel leaves the table's scroll box while it is open.</p>
+        `,
+      });
+  }
+}
 const longStripActions: RowAction[] = [
   "Open",
   "Details",
@@ -1379,6 +1402,23 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                   `,
                 })}
               `,
+          }),
+        ),
+        c(
+          "A Select, Combobox, DatePicker, TimePicker and Popover in a table cell: each panel leaves the scroll box while open (#cat-dt-panels)",
+          DataTable<Row>({
+            id: "cat-dt-panels",
+            pinEnd: true,
+            columns: [{ key: "kind", label: "Panel", pinned: true }, ...wideColumns.slice(2, 5)],
+            rows: ["select", "combobox", "datepicker", "timepicker", "popover"].map((kind) => ({
+              id: kind,
+              kind,
+              name: kind,
+              status: "",
+              amount: "",
+            })),
+            rowKey: (r) => r.id,
+            rowActions: (r) => panelInCell(r.id),
           }),
         ),
         c(

@@ -1063,12 +1063,14 @@ as well as the box; `data-pin-fits` drops the pinned edge while the table fits, 
 escapes overflow but not its stacking context, and in a table there are two: a sticky cell, and every row, because
 data-table.js names rows for view transitions (`view-transition-name` makes a stacking context). So tooltip.js shows the
 bubble through the Popover API (`popover="manual"`, set by the script) and a `:has()` rule lifts the row and the cell
-holding an open Dropdown. Select, Combobox, DatePicker and Popover panels are absolute, so a table's scroll box clips
-them and nothing shows: still open. `RowActions` items scroll in `.data-table__row-actions-items` beside Close, which
-stays in view; data-table.js marks `data-more-start|end` on the view, which shows a fade with a chevron. A chevron is a
-`<span>`, `aria-hidden`, because Tab already walks the items and the console's phone sheet copies every `a, button` in
-the strip. It steps one control at a time, so no width skips an action, and focus scrolls a control clear of the fades.
-Under `MIN_STRIP` (240px) of free room the strip covers the sticky cells instead, capped to the row so a card holds it.
+holding an open Dropdown. Select, Combobox, DatePicker, TimePicker and Popover panels are absolute, so a scroll box
+clips them: `uiFloat.escape(anchor, panel, { onLeave })` (shared/js/float.js) makes one fixed and following its anchor
+while it is open, only inside `.data-table__scroll` / `[data-dropdown-clip]`, and closes it when the anchor scrolls out
+of the box. `RowActions` items scroll in `.data-table__row-actions-items` beside Close, which stays in view;
+data-table.js marks `data-more-start|end` on the view, which shows a fade with a chevron. A chevron is a `<span>`,
+`aria-hidden`, because Tab already walks the items and the console's phone sheet copies every `a, button` in the strip.
+It steps one control at a time, so no width skips an action, and focus scrolls a control clear of the fades. Under
+`MIN_STRIP` (240px) of free room the strip covers the sticky cells instead, capped to the row so a card holds it.
 
 **ScrollSteps focus, SiteFooter `tag` (2026-10-30).** A faded picture cannot hold focus, so `activate()` in reveal.js
 moves focus inside a stage picture to the control at the same place in the new one, or to the step (`tabindex="-1"`)

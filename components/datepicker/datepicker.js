@@ -52,11 +52,18 @@
       if (on) {
         globalThis.uiMotion?.cancelExit(panel);
         panel.hidden = false;
+        if (!dp.classList.contains("datepicker--inline")) {
+          globalThis.uiFloat?.escape(trigger ?? dp, panel, { onLeave: () => setOpen(dp, false) });
+        }
       } else if (was && globalThis.uiMotion && !dp.classList.contains("datepicker--inline")) {
         globalThis.uiMotion.exit(panel, () => {
           panel.hidden = true;
+          globalThis.uiFloat?.restore(panel);
         });
-      } else panel.hidden = true;
+      } else {
+        panel.hidden = true;
+        globalThis.uiFloat?.restore(panel);
+      }
     }
     dp.classList.toggle("datepicker--open", !!on);
     if (trigger) {
