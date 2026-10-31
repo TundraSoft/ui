@@ -128,9 +128,9 @@ export type DataTableProps<T> = {
   /**
    * From 768px, pin the last column (the row actions, or the last of
    * `columns` when there are none) and its header to the box's end while
-   * the rest scrolls sideways inside the box. The box is a tab stop while
-   * it overflows, so the keyboard can scroll it. Below 768px nothing is
-   * pinned, so a phone layout is untouched.
+   * the rest scrolls sideways inside the box. While it overflows, the box
+   * is a tab stop, so the keyboard can scroll it, and the pinned cell draws
+   * an edge. Below 768px nothing is pinned, so a phone layout is untouched.
    */
   pinEnd?: boolean;
   /** Accessible name of the scroll box with `pinEnd`. @default title, else "Table" */

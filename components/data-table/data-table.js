@@ -206,24 +206,36 @@
   }
 
   /* pinEnd: the scroll box is a tab stop only while there is something to
-     scroll, and focus scrolling keeps clear of the pinned cell's width. */
+     scroll, and focus scrolling keeps clear of the pinned cell's width.
+     Rows animating in can poke a few pixels past an uncapped box, so height
+     only counts on a capped one. data-pin-fits drops the pinned edge. */
   function fitPinned(box) {
-    const scrolls = box.scrollWidth > box.clientWidth + 1 || box.scrollHeight > box.clientHeight + 1;
-    if (scrolls) box.setAttribute("tabindex", "0");
+    const wide = box.scrollWidth > box.clientWidth + 1;
+    const capped = getComputedStyle(box).maxHeight !== "none";
+    if (wide || (capped && box.scrollHeight > box.clientHeight + 1)) box.setAttribute("tabindex", "0");
     else box.removeAttribute("tabindex");
+    box.toggleAttribute("data-pin-fits", !wide);
     const pin = box.querySelector("thead th:last-child");
     if (pin) box.style.setProperty("--data-table-pin-end-width", `${pin.offsetWidth}px`);
   }
+  const PIN_BOX = ".data-table--pin-end .data-table__scroll";
   const watched = new WeakSet();
   const pinObserver = "ResizeObserver" in window
-    ? new ResizeObserver((entries) => entries.forEach((entry) => fitPinned(entry.target)))
+    ? new ResizeObserver((entries) =>
+      entries.forEach((entry) => {
+        const box = entry.target.closest(PIN_BOX);
+        if (box) fitPinned(box);
+      })
+    )
     : null;
   function watchPinned() {
-    document.querySelectorAll(".data-table--pin-end .data-table__scroll").forEach((box) => {
+    document.querySelectorAll(PIN_BOX).forEach((box) => {
       fitPinned(box);
       if (!pinObserver || watched.has(box)) return;
       watched.add(box);
       pinObserver.observe(box);
+      const table = box.querySelector("table");
+      if (table) pinObserver.observe(table);
     });
   }
 

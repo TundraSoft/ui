@@ -99,7 +99,7 @@ numbers right-aligned, the checkbox and the actions at the corners.
 | `footer` | `Html` |  |  |
 | `rowActions` | `(row: T) => Html` |  |  |
 | `maxHeight` | `"sm" | "md" | "lg"` |  | Caps the scroll body (sm 240px / md 400px / lg 600px) so the sticky header has something to stick to. A step, not a length: it maps to `.data-table__scroll--*`, so no inline style is emitted (CSP). A theme can retune the steps via `--data-table-max-height` on that class. |
-| `pinEnd` | `boolean` |  | From 768px, pin the last column (the row actions, or the last of `columns` when there are none) and its header to the box's end while the rest scrolls sideways inside the box. The box is a tab stop while it overflows, so the keyboard can scroll it. Below 768px nothing is pinned, so a phone layout is untouched. |
+| `pinEnd` | `boolean` |  | From 768px, pin the last column (the row actions, or the last of `columns` when there are none) and its header to the box's end while the rest scrolls sideways inside the box. While it overflows, the box is a tab stop, so the keyboard can scroll it, and the pinned cell draws an edge. Below 768px nothing is pinned, so a phone layout is untouched. |
 | `scrollLabel` | `string` |  | Accessible name of the scroll box with `pinEnd`. @default title, else "Table" |
 | `empty` | `Html` |  | Shown instead of the body when `rows` is empty — an `Empty`, or anything. |
 | `emptyMessage` | `string` |  | Plain-text alternative to `empty`. @default "Nothing to show." |
@@ -548,6 +548,6 @@ Classes defined by `components/data-table/data-table.css` — structural, token-
 
 `components/data-table/data-table.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-table--pin-end`, `data-table-pin-end-width`, `data-total`.
+Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-pin-fits`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-table--pin-end`, `data-table-pin-end-width`, `data-total`.
 
 Events: `rapid:swapped`.

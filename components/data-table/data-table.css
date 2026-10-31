@@ -342,14 +342,19 @@ td.data-table__cell--pinned {
     position: sticky;
     inset-inline-end: 0;
     z-index: 4;
-    border-inline-start: var(--border-width) solid var(--color-border-strong);
   }
 
   .data-table--pin-end .data-table__row > td:last-child {
     position: sticky;
     inset-inline-end: 0;
-    border-inline-start: var(--border-width) solid var(--color-border-strong);
     background: var(--color-surface);
+  }
+
+  /* The edge marks what scrolls under the cell, so it goes while the table
+     fits (data-table.js decides; without the script it stays). */
+  .data-table--pin-end .data-table__scroll:not([data-pin-fits]) thead th:last-child,
+  .data-table--pin-end .data-table__scroll:not([data-pin-fits]) .data-table__row > td:last-child {
+    border-inline-start: var(--border-width) solid var(--color-border-strong);
   }
 
   .data-table--pin-end .data-table__row--selected > td:last-child {

@@ -775,7 +775,70 @@ async function brevilyDesignFixes(group: string): Promise<void> {
       others.plainTab === null && others.plainHead === "auto" && others.plainEdge === "0px",
       `data: a table without pinEnd changed (${JSON.stringify(others)})`,
     );
+    // A table that fits draws no edge; rows poking past an uncapped box are not
+    // a reason for a tab stop; growing wide brings both back; a capped box that
+    // overflows downwards is a tab stop with no edge.
+    const fit = await t.evaluate(async () => {
+      const box = document.querySelector<HTMLElement>("#cat-dt-pin-fits .data-table__scroll")!;
+      const edge = () =>
+        getComputedStyle(box.querySelector(".data-table__row > td:last-child")!).borderInlineStartWidth;
+      const head = () => getComputedStyle(box.querySelector("thead th:last-child")!).borderInlineStartWidth;
+      const settle = () => new Promise((res) => setTimeout(res, 100));
+      const state = () => ({ tab: box.getAttribute("tabindex"), edge: edge(), head: head() });
+      const fits = state();
+      const row = box.querySelector<HTMLElement>(".data-table__row:last-child")!;
+      row.style.transform = "translateY(12px)";
+      const poked = box.scrollHeight > box.clientHeight + 1;
+      document.dispatchEvent(new CustomEvent("rapid:swapped", { detail: { method: "get" } }));
+      await settle();
+      const rising = state();
+      row.style.transform = "";
+      const cell = box.querySelector<HTMLElement>(".data-table__row > td:first-child")!;
+      const text = cell.textContent;
+      cell.textContent = "wide ".repeat(400);
+      await settle();
+      const grown = state();
+      cell.textContent = text;
+      await settle();
+      const shrunk = state();
+      box.style.maxHeight = "40px";
+      await settle();
+      const capped = state();
+      box.style.maxHeight = "";
+      return { fits, poked, rising, grown, shrunk, capped };
+    });
+    check(
+      fit.fits.edge === "0px" && fit.fits.head === "0px",
+      `data: a pinEnd table that fits draws an edge (${JSON.stringify(fit.fits)})`,
+    );
+    check(
+      fit.poked && fit.rising.tab === null,
+      `data: rows rising in gave a fitting table a tab stop (${JSON.stringify(fit)})`,
+    );
+    check(
+      fit.grown.tab === "0" && fit.grown.edge !== "0px",
+      `data: a pinEnd table that grew wide has no stop or edge (${JSON.stringify(fit.grown)})`,
+    );
+    check(
+      fit.shrunk.tab === null && fit.shrunk.edge === "0px",
+      `data: a pinEnd table that shrank back kept its stop or edge (${JSON.stringify(fit.shrunk)})`,
+    );
+    check(
+      fit.capped.tab === "0" && fit.capped.edge === "0px",
+      `data: a capped pinEnd box is wrong (${JSON.stringify(fit.capped)})`,
+    );
     await t.close();
+    // Without the script nothing is measured: the edge stays, the box stays a stop.
+    const plainPage = await browser.newPage();
+    await plainPage.setJavaScriptEnabled(false);
+    await plainPage.setViewport({ width: 1280, height: 800 });
+    await plainPage.goto(`file://${root}/${fileOf("data-table")}`, { waitUntil: "load", timeout: 30000 });
+    const noScript = await plainPage.$eval(
+      "#cat-dt-pin-fits .data-table__row > td:last-child",
+      (cell) => getComputedStyle(cell).borderInlineStartWidth,
+    );
+    check(noScript !== "0px", "data: without the script a pinEnd table loses its edge");
+    await plainPage.close();
     // Below 768 the option does nothing: the same cards, and nothing pinned.
     const phone = await open("data-table", 375);
     const cards = await phone.evaluate(() => {
