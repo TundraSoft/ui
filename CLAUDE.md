@@ -1055,6 +1055,8 @@ so a phone layout, the kit's cards or an app's own through `cellAttrs`, never me
 hover and selected, and the body cell has no z-index, like `td.data-table__actions`. The box renders `tabindex="0"` and
 a name (`scrollLabel`); data-table.js `fitPinned` drops the tab stop while nothing overflows and writes
 `--data-table-pin-end-width` for `scroll-padding-inline-end`, so a link focused by Tab comes clear of the pinned cell.
+Height counts as overflow only on a capped box (rows animating in poke past an uncapped one) and the table is observed
+as well as the box; `data-pin-fits` drops the pinned edge while the table fits, and without the script the edge stays.
 `playbookAsks()` pins it, keyboard and axe included.
 
 **ScrollSteps focus, SiteFooter `tag` (2026-10-30).** A faded picture cannot hold focus, so `activate()` in reveal.js
