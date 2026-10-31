@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.31.1](https://github.com/TundraSoft/ui/compare/v0.31.0...v0.31.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* DataTable pinEnd drops the tab stop and edge on a table that fits ([#107](https://github.com/TundraSoft/ui/issues/107)) ([d2de9bb](https://github.com/TundraSoft/ui/commit/d2de9bb6853841d15200b2a9a34bd5a71dd5a3af))
+* Select, Combobox, DatePicker, TimePicker and Popover panels leave a table's scroll box while open ([#110](https://github.com/TundraSoft/ui/issues/110)) ([9c67a37](https://github.com/TundraSoft/ui/commit/9c67a378d0cfb953c8a919b207b7066689e18539))
+* tooltips show above a sticky header, long row strips keep Close in view, a Dropdown in a table cell paints on top ([#108](https://github.com/TundraSoft/ui/issues/108)) ([5d94b78](https://github.com/TundraSoft/ui/commit/5d94b789c699f05ddad3981892a4b71bcf00b1ec))
+
 ## [0.31.0](https://github.com/TundraSoft/ui/compare/v0.30.0...v0.31.0) (2026-10-30)
 
 
