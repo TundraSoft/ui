@@ -1059,6 +1059,17 @@ Height counts as overflow only on a capped box (rows animating in poke past an u
 as well as the box; `data-pin-fits` drops the pinned edge while the table fits, and without the script the edge stays.
 `playbookAsks()` pins it, keyboard and axe included.
 
+**Tooltip top layer, long row strips, Dropdown in a cell (2026-10-31, asked by the Brevily playbook).** A fixed element
+escapes overflow but not its stacking context, and in a table there are two: a sticky cell, and every row, because
+data-table.js names rows for view transitions (`view-transition-name` makes a stacking context). So tooltip.js shows the
+bubble through the Popover API (`popover="manual"`, set by the script) and a `:has()` rule lifts the row and the cell
+holding an open Dropdown. Select, Combobox, DatePicker and Popover panels are absolute, so a table's scroll box clips
+them and nothing shows: still open. `RowActions` items scroll in `.data-table__row-actions-items` beside Close, which
+stays in view; data-table.js marks `data-more-start|end` on the view, which shows a fade with a chevron. A chevron is a
+`<span>`, `aria-hidden`, because Tab already walks the items and the console's phone sheet copies every `a, button` in
+the strip. It steps one control at a time, so no width skips an action, and focus scrolls a control clear of the fades.
+Under `MIN_STRIP` (240px) of free room the strip covers the sticky cells instead, capped to the row so a card holds it.
+
 **ScrollSteps focus, SiteFooter `tag` (2026-10-30).** A faded picture cannot hold focus, so `activate()` in reveal.js
 moves focus inside a stage picture to the control at the same place in the new one, or to the step (`tabindex="-1"`)
 when that picture has no controls, always with `preventScroll`. The place is remembered while focus is being carried, so

@@ -50,6 +50,13 @@ html:not(.js) .tooltip:focus-within .tooltip__content {
   transition: none;
 }
 
+/* The Popover API's own defaults, which would clip the arrow. */
+.js .tooltip__content[popover] {
+  margin: 0;
+  border: 0;
+  overflow: visible;
+}
+
 .js .tooltip__content.is-open {
   display: block;
   animation: ui-fade-in var(--duration-fast) var(--ease-out);

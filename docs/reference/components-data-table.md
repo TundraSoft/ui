@@ -18,8 +18,10 @@ Row actions as an in-row strip instead of a floating menu: the kebab
 opens a row-height ink strip of labelled buttons anchored at the row's
 end (it covers the row's values while open, nothing moves, nothing
 floats), with a close button; Escape and an outside click close it and
-focus returns to the kebab. The same idiom as the bulk bar — one row
-gets a row strip, many rows get the header strip. Pass it as
+focus returns to the kebab. When the items do not fit, they scroll
+between edge fades with a chevron to click, and the close button stays
+in view. The same idiom as the bulk bar — one row gets a row strip, many
+rows get the header strip. Pass it as
 `DataTable.rowActions`. Items link (`href`), POST (`post`, optionally
 swapped with `target`) or are bare buttons; any may `confirm` first.
 
@@ -205,15 +207,25 @@ DataTable<Invoice>({
                 <span class="sr-only">Actions for Northwind Traders</span>
               </button>
               <div class="data-table__row-actions" id="members-INV-2048-strip" role="group" aria-label="Actions for Northwind Traders" hidden>
-                <form class="data-table__row-action-form" method="post" action="/members/INV-2048/resend" data-action="/members/INV-2048/resend" data-target="#members" data-swap="outer">
-                  <input type="hidden" name="_csrf" value="masked-token">
-                  <button type="submit" class="btn btn--sm">Resend invite</button>
-                </form>
-                <span class="data-table__row-actions-sep"></span>
-                <form class="data-table__row-action-form" method="post" action="/members/INV-2048/remove">
-                  <input type="hidden" name="_csrf" value="masked-token">
-                  <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Northwind Traders?">Remove</button>
-                </form>
+                <div class="data-table__row-actions-view">
+                  <div class="data-table__row-actions-items">
+                    <form class="data-table__row-action-form" method="post" action="/members/INV-2048/resend" data-action="/members/INV-2048/resend" data-target="#members" data-swap="outer">
+                      <input type="hidden" name="_csrf" value="masked-token">
+                      <button type="submit" class="btn btn--sm">Resend invite</button>
+                    </form>
+                    <span class="data-table__row-actions-sep"></span>
+                    <form class="data-table__row-action-form" method="post" action="/members/INV-2048/remove">
+                      <input type="hidden" name="_csrf" value="masked-token">
+                      <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Northwind Traders?">Remove</button>
+                    </form>
+                  </div>
+                  <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                  <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                </div>
                 <span class="data-table__row-actions-sep"></span>
                 <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                   <svg width="14" height="14" width="2" …>…</svg>
@@ -233,15 +245,25 @@ DataTable<Invoice>({
                 <span class="sr-only">Actions for Contoso Ltd</span>
               </button>
               <div class="data-table__row-actions" id="members-INV-2047-strip" role="group" aria-label="Actions for Contoso Ltd" hidden>
-                <form class="data-table__row-action-form" method="post" action="/members/INV-2047/resend" data-action="/members/INV-2047/resend" data-target="#members" data-swap="outer">
-                  <input type="hidden" name="_csrf" value="masked-token">
-                  <button type="submit" class="btn btn--sm">Resend invite</button>
-                </form>
-                <span class="data-table__row-actions-sep"></span>
-                <form class="data-table__row-action-form" method="post" action="/members/INV-2047/remove">
-                  <input type="hidden" name="_csrf" value="masked-token">
-                  <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Contoso Ltd?">Remove</button>
-                </form>
+                <div class="data-table__row-actions-view">
+                  <div class="data-table__row-actions-items">
+                    <form class="data-table__row-action-form" method="post" action="/members/INV-2047/resend" data-action="/members/INV-2047/resend" data-target="#members" data-swap="outer">
+                      <input type="hidden" name="_csrf" value="masked-token">
+                      <button type="submit" class="btn btn--sm">Resend invite</button>
+                    </form>
+                    <span class="data-table__row-actions-sep"></span>
+                    <form class="data-table__row-action-form" method="post" action="/members/INV-2047/remove">
+                      <input type="hidden" name="_csrf" value="masked-token">
+                      <button type="submit" class="btn btn--sm btn--danger" data-confirm="Remove Contoso Ltd?">Remove</button>
+                    </form>
+                  </div>
+                  <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                  <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                </div>
                 <span class="data-table__row-actions-sep"></span>
                 <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                   <svg width="14" height="14" width="2" …>…</svg>
@@ -309,7 +331,17 @@ DataTable<Invoice>({
               <span class="sr-only">Actions for Northwind Traders</span>
             </button>
             <div class="data-table__row-actions" id="ledger-INV-2048-strip" role="group" aria-label="Actions for Northwind Traders" hidden>
-              <a class="btn btn--sm" href="/invoices/INV-2048">Open</a>
+              <div class="data-table__row-actions-view">
+                <div class="data-table__row-actions-items">
+                  <a class="btn btn--sm" href="/invoices/INV-2048">Open</a>
+                </div>
+                <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </span>
+                <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </span>
+              </div>
               <span class="data-table__row-actions-sep"></span>
               <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                 <svg width="14" height="14" width="2" …>…</svg>
@@ -327,7 +359,17 @@ DataTable<Invoice>({
               <span class="sr-only">Actions for Contoso Ltd</span>
             </button>
             <div class="data-table__row-actions" id="ledger-INV-2047-strip" role="group" aria-label="Actions for Contoso Ltd" hidden>
-              <a class="btn btn--sm" href="/invoices/INV-2047">Open</a>
+              <div class="data-table__row-actions-view">
+                <div class="data-table__row-actions-items">
+                  <a class="btn btn--sm" href="/invoices/INV-2047">Open</a>
+                </div>
+                <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </span>
+                <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                  <svg width="14" height="14" width="2" …>…</svg>
+                </span>
+              </div>
               <span class="data-table__row-actions-sep"></span>
               <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                 <svg width="14" height="14" width="2" …>…</svg>
@@ -435,9 +477,19 @@ DataTable<Invoice>({
                 <span class="sr-only">Actions for INV-2048</span>
               </button>
               <div class="data-table__row-actions" id="inv-INV-2048-strip" role="group" aria-label="Actions for INV-2048" hidden>
-                <a class="btn btn--sm" href="/invoices/INV-2048">View</a>
-                <span class="data-table__row-actions-sep"></span>
-                <button type="button" class="btn btn--sm btn--danger" data-action="/invoices/INV-2048/archive" data-method="post" data-target="#invoices" data-swap="outer">Archive</button>
+                <div class="data-table__row-actions-view">
+                  <div class="data-table__row-actions-items">
+                    <a class="btn btn--sm" href="/invoices/INV-2048">View</a>
+                    <span class="data-table__row-actions-sep"></span>
+                    <button type="button" class="btn btn--sm btn--danger" data-action="/invoices/INV-2048/archive" data-method="post" data-target="#invoices" data-swap="outer">Archive</button>
+                  </div>
+                  <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                  <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                </div>
                 <span class="data-table__row-actions-sep"></span>
                 <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                   <svg width="14" height="14" width="2" …>…</svg>
@@ -458,9 +510,19 @@ DataTable<Invoice>({
                 <span class="sr-only">Actions for INV-2047</span>
               </button>
               <div class="data-table__row-actions" id="inv-INV-2047-strip" role="group" aria-label="Actions for INV-2047" hidden>
-                <a class="btn btn--sm" href="/invoices/INV-2047">View</a>
-                <span class="data-table__row-actions-sep"></span>
-                <button type="button" class="btn btn--sm btn--danger" data-action="/invoices/INV-2047/archive" data-method="post" data-target="#invoices" data-swap="outer">Archive</button>
+                <div class="data-table__row-actions-view">
+                  <div class="data-table__row-actions-items">
+                    <a class="btn btn--sm" href="/invoices/INV-2047">View</a>
+                    <span class="data-table__row-actions-sep"></span>
+                    <button type="button" class="btn btn--sm btn--danger" data-action="/invoices/INV-2047/archive" data-method="post" data-target="#invoices" data-swap="outer">Archive</button>
+                  </div>
+                  <span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                  <span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">
+                    <svg width="14" height="14" width="2" …>…</svg>
+                  </span>
+                </div>
                 <span class="data-table__row-actions-sep"></span>
                 <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">
                   <svg width="14" height="14" width="2" …>…</svg>
@@ -542,12 +604,12 @@ DataTable<Invoice>({
 
 Classes defined by `components/data-table/data-table.css` — structural, token-driven; override from an unlayered stylesheet (see [Theming](../UI-Theming.md)):
 
-`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table--cards`, `.data-table--pin-end`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-sep`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.empty`, `.table`
+`.btn`, `.btn--danger`, `.btn--icon`, `.data-table`, `.data-table--cards`, `.data-table--pin-end`, `.data-table__actions`, `.data-table__bulk`, `.data-table__bulk-all`, `.data-table__bulk-all-button`, `.data-table__bulk-count`, `.data-table__bulk-sep`, `.data-table__cell--pinned`, `.data-table__empty`, `.data-table__footer`, `.data-table__form`, `.data-table__group`, `.data-table__mono`, `.data-table__num`, `.data-table__row`, `.data-table__row--selected`, `.data-table__row-action-form`, `.data-table__row-actions`, `.data-table__row-actions-items`, `.data-table__row-actions-more`, `.data-table__row-actions-sep`, `.data-table__row-actions-view`, `.data-table__scroll`, `.data-table__scroll--lg`, `.data-table__scroll--md`, `.data-table__scroll--sm`, `.data-table__select`, `.data-table__sort`, `.data-table__table`, `.data-table__title`, `.data-table__toolbar`, `.dropdown__panel`, `.empty`, `.table`
 
 ## Behaviour
 
 `components/data-table/data-table.js` ships in `ui.js` (delegated on `document`, re-initialised after a rAPId swap).
 
-Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-one`, `data-other`, `data-pin-fits`, `data-row-actions`, `data-row-actions-close`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-table--pin-end`, `data-table-pin-end-width`, `data-total`.
+Attributes it reads or writes: `data-bulk-all`, `data-bulk-bar`, `data-bulk-clear`, `data-bulk-count`, `data-bulk-select-all`, `data-clear`, `data-label`, `data-more-end`, `data-more-start`, `data-one`, `data-other`, `data-pin-fits`, `data-row-actions`, `data-row-actions-close`, `data-row-actions-more`, `data-row-key`, `data-select-all`, `data-select-row`, `data-selected`, `data-table`, `data-table--pin-end`, `data-table-pin-end-width`, `data-total`.
 
 Events: `rapid:swapped`.

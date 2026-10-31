@@ -839,6 +839,200 @@ async function brevilyDesignFixes(group: string): Promise<void> {
     );
     check(noScript !== "0px", "data: without the script a pinEnd table loses its edge");
     await plainPage.close();
+    // Floating panels in a sticky cell paint above the header and the next rows.
+    const floats = await open("data-table", 1280);
+    const painted = (selector: string) =>
+      floats.$eval(selector, (el) => {
+        const panel = el as HTMLElement;
+        const prior = panel.style.pointerEvents;
+        panel.style.pointerEvents = "auto"; // a tooltip is pointer-events: none
+        const r = panel.getBoundingClientRect();
+        let inside = 0;
+        let total = 0;
+        for (let i = 1; i < 6; i++) {
+          for (let j = 1; j < 6; j++) {
+            total++;
+            const hit = document.elementFromPoint(r.left + r.width * i / 6, r.top + r.height * j / 6);
+            if (hit && panel.contains(hit)) inside++;
+          }
+        }
+        panel.style.pointerEvents = prior;
+        return `${inside}/${total}`;
+      });
+    const place = (key: string, where: "middle" | "bottom") =>
+      floats.$eval(`#cat-dt-float [data-row-key="${key}"] > td:last-child`, (cell, at) => {
+        const r = cell.getBoundingClientRect();
+        const target = at === "bottom" ? innerHeight - r.height - 4 : innerHeight / 2;
+        scrollBy({ top: r.top - target, behavior: "instant" });
+      }, where);
+    for (const key of ["1", "3"]) {
+      await place(key, "middle");
+      await pause(100);
+      await floats.hover(`#cat-dt-float [data-row-key="${key}"] .tooltip`);
+      await pause(400);
+      const bubble = `#cat-dt-float-tip-${key}`;
+      const tip = await painted(bubble);
+      check(tip === "25/25", `data: a table tooltip on row ${key} is painted over (${tip} of the bubble shows)`);
+      const arrow = await floats.$eval(bubble, (el) => getComputedStyle(el).overflow);
+      check(arrow === "visible", `data: the tooltip's popover default clips its arrow (overflow ${arrow})`);
+      await floats.mouse.move(0, 0);
+      await pause(300);
+      const gone = await floats.$eval(bubble, (el) => (el as HTMLElement).matches(":popover-open"));
+      check(!gone, `data: a table tooltip on row ${key} stayed in the top layer after it left`);
+    }
+    for (const [key, where] of [["1", "middle"], ["1", "bottom"], ["3", "middle"], ["3", "bottom"]] as const) {
+      await place(key, where);
+      await pause(100);
+      await floats.click(`#cat-dt-float [data-row-key="${key}"] [data-toggle]`);
+      await pause(350);
+      const menu = `#cat-dt-float-menu-${key} .dropdown__panel`;
+      const shown = await painted(menu);
+      check(shown === "25/25", `data: a Dropdown on row ${key} (${where}) is painted over (${shown})`);
+      const up = await floats.$eval(menu, (el, k) => {
+        const row = document.querySelector(`#cat-dt-float [data-row-key="${k}"]`)!;
+        return el.getBoundingClientRect().bottom <= row.getBoundingClientRect().top + 1;
+      }, key);
+      if (where === "bottom") check(up, `data: a Dropdown at the viewport's foot on row ${key} did not open upward`);
+      await floats.keyboard.press("Escape");
+      await pause(250);
+    }
+    await floats.close();
+    // A strip with more actions than fit: Close in view, fades only where there
+    // is more, every action reachable by mouse and by Tab; a short strip unchanged.
+    for (
+      const [width, table, kebab] of [
+        [1280, "cat-dt-strip", "cat-dt-strip-row-1"],
+        [900, "cat-dt-strip", "cat-dt-strip-row-1"],
+        [375, "cat-dt-strip", "cat-dt-strip-row-1"],
+        [375, "cat-dt-strip-cards", "cat-dt-strip-card-1"],
+      ] as const
+    ) {
+      const w = await open("data-table", width);
+      const stripId = `#${kebab}-strip`;
+      const where = `${table} at ${width}`;
+      await w.$eval(
+        `[data-row-actions="${stripId}"]`,
+        (el) => el.scrollIntoView({ block: "center", behavior: "instant" }),
+      );
+      await pause(100);
+      await w.click(`[data-row-actions="${stripId}"]`);
+      await pause(350);
+      const look = () =>
+        w.$eval(stripId, (strip) => {
+          const items = strip.querySelector<HTMLElement>(".data-table__row-actions-items")!;
+          const view = items.parentElement!;
+          const close = strip.querySelector<HTMLElement>("[data-row-actions-close]")!;
+          const box = strip.closest(".data-table__scroll")!.getBoundingClientRect();
+          const c = close.getBoundingClientRect();
+          const hit = document.elementFromPoint(c.left + c.width / 2, c.top + c.height / 2);
+          const fade = (end: string) =>
+            getComputedStyle(view.querySelector(`[data-row-actions-more="${end}"]`)!).display;
+          return {
+            start: fade("start"),
+            end: fade("end"),
+            at: items.scrollLeft,
+            room: items.scrollWidth - items.clientWidth,
+            closeInView: c.right <= box.right + 1 && c.left >= box.left - 1 && c.right <= innerWidth + 1 &&
+              !!hit && close.contains(hit),
+          };
+        });
+      const first = await look();
+      check(first.room > 0, `data: ${where}: the long strip's items do not overflow, so this checks nothing`);
+      check(first.closeInView, `data: ${where}: Close is out of view`);
+      const inRow = await w.$eval(stripId, (strip) => {
+        const r = strip.getBoundingClientRect();
+        const row = strip.closest("tr")!.getBoundingClientRect();
+        return r.left >= row.left - 1 && r.right <= row.right + 1;
+      });
+      check(inRow, `data: ${where}: the strip runs past its row`);
+      check(
+        first.start === "none" && first.end === "flex",
+        `data: ${where}: fades at the start ${JSON.stringify(first)}`,
+      );
+      // By mouse: chevrons alone bring every action under the pointer.
+      const labels = await w.$eval(
+        stripId,
+        (strip) =>
+          [...strip.querySelectorAll<HTMLElement>(".data-table__row-actions-items a")].map((a) =>
+            a.textContent!.trim()
+          ),
+      );
+      const reached = new Set<string>();
+      for (let step = 0; step < 14; step++) {
+        const clickable = await w.$eval(
+          stripId,
+          (strip) =>
+            [...strip.querySelectorAll<HTMLElement>(".data-table__row-actions-items a")].filter((a) => {
+              const r = a.getBoundingClientRect();
+              const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+              return !!hit && a.contains(hit);
+            }).map((a) => a.textContent!.trim()),
+        );
+        clickable.forEach((label) => reached.add(label));
+        if ((await look()).end === "none") break;
+        await w.click(`${stripId} [data-row-actions-more="end"]`);
+        await pause(350);
+      }
+      const missed = labels.filter((label) => !reached.has(label));
+      check(missed.length === 0, `data: ${where}: chevrons never bring ${missed} under the pointer`);
+      const last = await look();
+      check(
+        last.end === "none" && last.start === "flex",
+        `data: ${where}: fades at the far end ${JSON.stringify(last)}`,
+      );
+      check(last.closeInView, `data: ${where}: Close left the view at the far end`);
+      await w.click(`${stripId} [data-row-actions-more="start"]`);
+      await pause(350);
+      check((await look()).at < last.at, `data: ${where}: the start chevron does not scroll back`);
+      // By keyboard: Tab walks every action, each comes clear of the fades, then Close.
+      // (Blur first: focusing what already has focus fires nothing.)
+      await w.$eval(stripId, (strip) => {
+        (document.activeElement as HTMLElement).blur();
+        strip.querySelector<HTMLElement>(".data-table__row-actions-items a")!.focus();
+      });
+      await pause(250);
+      const walked: string[] = [];
+      for (let i = 0; i < labels.length + 2; i++) {
+        const at = await w.evaluate(() => {
+          const el = document.activeElement as HTMLElement;
+          const r = el.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return { text: el.textContent!.trim() || el.getAttribute("aria-label")!, clear: !!hit && el.contains(hit) };
+        });
+        walked.push(at.text);
+        check(at.clear, `data: ${where}: ${at.text} is covered when Tab reaches it`);
+        if (at.text === "Close actions") break;
+        await w.keyboard.press("Tab");
+        await pause(250);
+      }
+      check(
+        walked.join() === [...labels, "Close actions"].join(),
+        `data: ${where}: Tab walked ${walked}, not every action then Close`,
+      );
+      await w.close();
+    }
+    // A short strip neither scrolls nor fades.
+    const short = await open("data-table", 1280);
+    await short.$eval(
+      '[data-row-actions="#cat-dt-pin-row-1-strip"]',
+      (el) => el.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await short.evaluate(() =>
+      document.querySelector<HTMLElement>('[data-row-actions="#cat-dt-pin-row-1-strip"]')!.click()
+    );
+    await pause(350);
+    const fits = await short.$eval("#cat-dt-pin-row-1-strip", (strip) => {
+      const items = strip.querySelector<HTMLElement>(".data-table__row-actions-items")!;
+      return {
+        room: items.scrollWidth - items.clientWidth,
+        fades: [...strip.querySelectorAll("[data-row-actions-more]")].map((m) => getComputedStyle(m).display).join(),
+      };
+    });
+    check(
+      fits.room <= 1 && fits.fades === "none,none",
+      `data: a short strip scrolls or fades (${JSON.stringify(fits)})`,
+    );
+    await short.close();
     // Below 768 the option does nothing: the same cards, and nothing pinned.
     const phone = await open("data-table", 375);
     const cards = await phone.evaluate(() => {

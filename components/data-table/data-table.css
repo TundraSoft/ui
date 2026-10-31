@@ -7,6 +7,7 @@
 .data-table {
   --data-table-header-height: 34px;
   --data-table-select-width: 48px;
+  --data-table-strip-fade: 2rem;
   display: flex;
   flex-direction: column;
   border: var(--border-width) solid var(--color-border);
@@ -372,6 +373,20 @@ td.data-table__cell--pinned {
   outline-offset: calc(-1 * var(--ring-width));
 }
 
+/* A sticky cell is a stacking context, and so is a row (data-table.js names
+   it for view transitions), so a Dropdown's fixed panel inside one would paint
+   under the next rows and the header. Both rise while its panel is open. In
+   rules of their own: a browser without :has() drops them and keeps the old
+   order. */
+.data-table__table tr:has(.dropdown__panel.is-open) {
+  position: relative;
+  z-index: 7;
+}
+
+.data-table__table td:has(.dropdown__panel.is-open) {
+  z-index: 7;
+}
+
 .data-table__row-actions {
   position: absolute;
   inset-block: 0;
@@ -382,12 +397,83 @@ td.data-table__cell--pinned {
   gap: var(--space-2);
   width: max-content; /* data-table.js caps it to the scroll box */
   padding-inline: var(--space-3);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   white-space: nowrap;
   background: var(--color-surface-inverse);
   color: var(--color-text-inverse);
   font-size: var(--font-size-sm);
+}
+
+.data-table__row-actions > .btn,
+.data-table__row-actions > .data-table__row-actions-sep {
+  flex: none;
+}
+
+/* The items scroll here, so the close button beside them stays in view. A
+   control focused by Tab keeps clear of the fades. */
+.data-table__row-actions-view {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  align-self: stretch;
+  min-width: 0;
+}
+
+.data-table__row-actions-items {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-inline: var(--ring-width);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--data-table-strip-fade);
+}
+
+.data-table__row-actions-items::-webkit-scrollbar {
+  display: none;
+}
+
+/* Which ends hold more comes from data-table.js (data-more-start / -end on
+   the view). A fade in the strip's ink, and a chevron for a mouse with no
+   sideways wheel. Not a <button>: Tab already walks the items. */
+.data-table__row-actions-more {
+  position: absolute;
+  inset-block: 0;
+  display: none;
+  align-items: center;
+  width: var(--data-table-strip-fade);
+  cursor: pointer;
+}
+
+.data-table__row-actions-more[data-row-actions-more="start"] {
+  inset-inline-start: 0;
+  justify-content: flex-start;
+  background: linear-gradient(to right, var(--color-surface-inverse) 55%, transparent);
+}
+
+.data-table__row-actions-more[data-row-actions-more="end"] {
+  inset-inline-end: 0;
+  justify-content: flex-end;
+  background: linear-gradient(to left, var(--color-surface-inverse) 55%, transparent);
+}
+
+[dir="rtl"] .data-table__row-actions-more[data-row-actions-more="start"] {
+  background: linear-gradient(to left, var(--color-surface-inverse) 55%, transparent);
+}
+
+[dir="rtl"] .data-table__row-actions-more[data-row-actions-more="end"] {
+  background: linear-gradient(to right, var(--color-surface-inverse) 55%, transparent);
+}
+
+[dir="rtl"] .data-table__row-actions-more svg {
+  scale: -1 1;
+}
+
+.data-table__row-actions-view[data-more-start] > [data-row-actions-more="start"],
+.data-table__row-actions-view[data-more-end] > [data-row-actions-more="end"] {
+  display: flex;
 }
 
 /* A POST item is a one-button form; the button lays out like the rest. */
