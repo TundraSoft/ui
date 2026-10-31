@@ -5,7 +5,10 @@
  * no hover). While shown the bubble is position: fixed and placed by
  * shared/js/float.js on `data-tooltip-side` (top|bottom|start|end), flipped
  * when there is no room and re-placed on scroll/resize; it leaves through
- * the shared exit animation (uiMotion.exit). One tooltip at a time.
+ * the shared exit animation (uiMotion.exit). One tooltip at a time. Where the
+ * browser has the Popover API the bubble shows in the top layer, because a
+ * fixed element still paints inside its stacking context: under a sticky
+ * table header, say, when its trigger sits in a sticky cell.
  */
 (() => {
   const timers = new WeakMap();
@@ -13,6 +16,15 @@
   let current = null;
 
   const bubbleOf = (root) => root.querySelector(":scope > .tooltip__content");
+  const canRaise = typeof HTMLElement.prototype.showPopover === "function";
+  const raise = (bubble) => {
+    if (!canRaise) return;
+    bubble.setAttribute("popover", "manual");
+    if (!bubble.matches(":popover-open")) bubble.showPopover();
+  };
+  const lower = (bubble) => {
+    if (canRaise && bubble.matches("[popover]:popover-open")) bubble.hidePopover();
+  };
   const sideOf = (root) => {
     const s = root.getAttribute("data-tooltip-side") || "top";
     const rtl = getComputedStyle(root).direction === "rtl";
@@ -28,6 +40,7 @@
     clearTimeout(timers.get(root));
     globalThis.uiMotion?.cancelExit(bubble);
     bubble.classList.add("is-open");
+    raise(bubble);
     const anchor = root.firstElementChild === bubble ? root : root.firstElementChild ?? root;
     stops.get(root)?.();
     stops.set(root, globalThis.uiFloat.follow(anchor, bubble, { side: sideOf(root), align: "center", offset: 6 }));
@@ -39,6 +52,7 @@
     const bubble = bubbleOf(root);
     if (!bubble || !bubble.classList.contains("is-open")) return;
     const done = () => {
+      lower(bubble);
       bubble.classList.remove("is-open");
       stops.get(root)?.();
       stops.delete(root);

@@ -122,12 +122,70 @@
   /* Row action strips: one open at a time, Escape / close / outside click
      close it, focus returns to the kebab. */
   const strips = () => document.querySelectorAll(".data-table__row-actions:not([hidden])");
+  const MIN_STRIP = 240;
   const openerOf = (strip) => document.querySelector(`[data-row-actions="#${CSS.escape(strip.id)}"]`);
+
+  /* Long strips: the items scroll inside the view, and the view says which
+     ends hold more (RTL's scrollLeft runs negative, hence abs). */
+  function markStrip(items) {
+    const view = items.parentElement;
+    const room = items.scrollWidth - items.clientWidth;
+    const at = Math.abs(items.scrollLeft);
+    view.toggleAttribute("data-more-start", at > 1);
+    view.toggleAttribute("data-more-end", room - at > 1);
+  }
+  document.addEventListener("scroll", (event) => {
+    if (event.target.matches?.(".data-table__row-actions-items")) markStrip(event.target);
+  }, true);
+  addEventListener("resize", () => {
+    strips().forEach((strip) => {
+      const items = strip.querySelector(".data-table__row-actions-items");
+      if (items) markStrip(items);
+    });
+  });
+  /* How far to scroll so a control sits clear of the fades. In physical
+     pixels, which is what scrollBy takes in either direction. */
+  function clearance(items, control) {
+    const fade = parseFloat(getComputedStyle(items).scrollPaddingInlineStart) || 0;
+    const view = items.getBoundingClientRect();
+    const r = control.getBoundingClientRect();
+    if (r.left < view.left + fade) return r.left - view.left - fade;
+    if (r.right > view.right - fade) return Math.min(r.right - view.right + fade, r.left - view.left - fade);
+    return 0;
+  }
+  const controlsOf = (items) => [...items.querySelectorAll("a, button")];
+  // A chevron brings the next control that is not wholly clear into view, one
+  // at a time, so no width steps over an action.
+  function stepStrip(more) {
+    const items = more.parentElement.querySelector(".data-table__row-actions-items");
+    const atEnd = more.getAttribute("data-row-actions-more") === "end";
+    const rtl = getComputedStyle(items).direction === "rtl";
+    const forward = atEnd !== rtl; // towards the physical right
+    // Nearest first, walking from the side the items are moving away from.
+    const list = controlsOf(items).sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+    const next = (forward ? list : list.reverse()).find((control) =>
+      clearance(items, control) * (forward ? 1 : -1) > 1
+    );
+    if (!next) return;
+    const behavior = globalThis.uiMotion?.reduced() ? "auto" : "smooth";
+    items.scrollBy({ left: clearance(items, next), behavior });
+  }
+  // Tab: the focused control comes clear of the fades whatever the browser did.
+  document.addEventListener("focusin", (event) => {
+    const items = event.target.closest?.(".data-table__row-actions-items");
+    if (!items) return;
+    items.scrollBy({ left: clearance(items, event.target) });
+  });
+  // A press on a chevron must not take focus away from the item holding it.
+  document.addEventListener("mousedown", (event) => {
+    if (event.target.closest?.("[data-row-actions-more]")) event.preventDefault();
+  });
 
   function hideStrip(strip) {
     strip.classList.remove("is-closing");
     strip.hidden = true;
     strip.style.removeProperty("max-width");
+    strip.closest("td")?.style.removeProperty("z-index");
   }
 
   function closeStrip(strip, refocus) {
@@ -143,6 +201,11 @@
   }
 
   document.addEventListener("click", (event) => {
+    const more = event.target.closest?.("[data-row-actions-more]");
+    if (more) {
+      stepStrip(more);
+      return;
+    }
     const opener = event.target.closest?.("[data-row-actions]");
     const closer = event.target.closest?.("[data-row-actions-close]");
     if (closer) {
@@ -161,16 +224,25 @@
         // Never wider than the free part of the visible scroll box: the
         // sticky selection / pinned cells stay above the strip so the row
         // keeps its identity, so the strip stops where they end (CSSOM,
-        // not an attribute — CSP-clean). Longer strips scroll sideways.
+        // not an attribute — CSP-clean). Longer strips scroll sideways. When
+        // that leaves too little to use (a phone), the strip takes the whole
+        // box and covers those cells while it is open.
         const scroll = strip.closest(".data-table__scroll");
         if (scroll) {
           const left = scroll.getBoundingClientRect().left;
           const stuck = [...strip.closest("tr").querySelectorAll("td.data-table__select, td.data-table__cell--pinned")]
             .map((td) => td.getBoundingClientRect().right - left);
-          strip.style.maxWidth = `${scroll.clientWidth - Math.max(0, ...stuck)}px`;
+          const free = scroll.clientWidth - Math.max(0, ...stuck);
+          const cover = free < MIN_STRIP;
+          // A card is narrower than the box; a table row is at least as wide.
+          const whole = Math.min(scroll.clientWidth, strip.closest("tr").getBoundingClientRect().width);
+          strip.style.maxWidth = `${cover ? whole : Math.min(free, whole)}px`;
+          if (cover) strip.closest("td").style.zIndex = "3";
         }
         strip.hidden = false;
         opener.setAttribute("aria-expanded", "true");
+        const items = strip.querySelector(".data-table__row-actions-items");
+        if (items) markStrip(items);
         strip.querySelector("a, button")?.focus();
       }
       return;

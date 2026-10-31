@@ -242,8 +242,10 @@ function rowItem(i: RowAction, props: RowActionsProps): Html {
  * opens a row-height ink strip of labelled buttons anchored at the row's
  * end (it covers the row's values while open, nothing moves, nothing
  * floats), with a close button; Escape and an outside click close it and
- * focus returns to the kebab. The same idiom as the bulk bar — one row
- * gets a row strip, many rows get the header strip. Pass it as
+ * focus returns to the kebab. When the items do not fit, they scroll
+ * between edge fades with a chevron to click, and the close button stays
+ * in view. The same idiom as the bulk bar — one row gets a row strip, many
+ * rows get the header strip. Pass it as
  * `DataTable.rowActions`. Items link (`href`), POST (`post`, optionally
  * swapped with `target`) or are bare buttons; any may `confirm` first.
  */
@@ -255,13 +257,21 @@ export function RowActions(props: RowActionsProps): Html {
   return html`
     <button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions="#${stripId}" aria-expanded="false"
       aria-controls="${stripId}">${Icon("kebab", { size: 16 })}<span class="sr-only">${props.label}</span></button><div
-      class="data-table__row-actions" id="${stripId}" role="group" aria-label="${props.label}"
-      hidden>${plain.map(item)}${danger.length
-        ? html`<span class="data-table__row-actions-sep"></span>${danger.map(item)}`
-        : ""}<span class="data-table__row-actions-sep"></span><button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">${Icon(
-          "x",
-          { size: 14 },
-        )}</button></div>
+      class="data-table__row-actions" id="${stripId}" role="group" aria-label="${props.label}" hidden><div
+        class="data-table__row-actions-view"><div class="data-table__row-actions-items">${plain.map(
+          item,
+        )}${danger.length
+          ? html`<span class="data-table__row-actions-sep"></span>${danger.map(item)}`
+          : ""}</div><span class="data-table__row-actions-more" data-row-actions-more="start" aria-hidden="true">${Icon(
+            "chevronLeft",
+            { size: 14 },
+          )}</span><span class="data-table__row-actions-more" data-row-actions-more="end" aria-hidden="true">${Icon(
+            "chevronRight",
+            { size: 14 },
+          )}</span></div><span class="data-table__row-actions-sep"></span><button type="button" class="btn btn--ghost btn--sm btn--icon" data-row-actions-close aria-label="Close actions">${Icon(
+            "x",
+            { size: 14 },
+          )}</button></div>
   `;
 }
 

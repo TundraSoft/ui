@@ -21,7 +21,7 @@ import { Combobox, ComboboxList } from "../../components/combobox/combobox.ts";
 import { ConsentBanner } from "../../components/consent/consent.ts";
 import { Command, CommandList } from "../../components/command/command.ts";
 import { CardFields } from "../../components/card-fields/card-fields.ts";
-import { DataTable, type DataTableColumn, RowActions } from "../../components/data-table/data-table.ts";
+import { DataTable, type DataTableColumn, type RowAction, RowActions } from "../../components/data-table/data-table.ts";
 import { DatePicker, DatePickerPanel } from "../../components/datepicker/datepicker.ts";
 import { DateTimePicker, dateTimePresets } from "../../components/datetimepicker/datetimepicker.ts";
 import { Dropdown } from "../../components/dropdown/dropdown.ts";
@@ -461,6 +461,17 @@ const wideColumns: DataTableColumn<Row>[] = [
     render: () => `${label}: a value long enough to need room`,
   })),
 ];
+const longStripActions: RowAction[] = [
+  "Open",
+  "Details",
+  "QR code",
+  "Edit destination",
+  "Change expiry",
+  "Duplicate",
+  "Move",
+  "Disable",
+]
+  .map((label): RowAction => ({ label, href: "#" })).concat({ label: "Delete", href: "#", danger: true });
 const rows: Row[] = [
   { id: "1", name: "Northwind", status: "Active", amount: "$1,200" },
   { id: "2", name: "Contoso", status: "Paused", amount: "$840" },
@@ -1305,6 +1316,69 @@ function entries(routes: DemoRoutes, state: CatalogueState): Omit<CatalogueEntry
                 label: `Actions for ${r.name}`,
                 items: [{ label: "Edit", href: "#" }, { label: "Remove", href: "#", danger: true }],
               }),
+          }),
+        ),
+        c(
+          "RowActions with more actions than fit: edge fades + chevrons, Close stays in view (#cat-dt-strip)",
+          DataTable<Row>({
+            id: "cat-dt-strip",
+            pinEnd: true,
+            selectable: true,
+            columns: [{ key: "name", label: "Name", pinned: true }, ...wideColumns.slice(2, 5)],
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-strip-row-${r.id}`,
+                label: `Actions for ${r.name}`,
+                items: longStripActions,
+              }),
+          }),
+        ),
+        c(
+          "RowActions with more actions than fit, as a card below 768 (#cat-dt-strip-cards)",
+          DataTable<Row>({
+            id: "cat-dt-strip-cards",
+            responsive: "cards",
+            columns: [{ key: "name", label: "Name" }, { key: "status", label: "Status" }],
+            rows: rows.slice(0, 1),
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              RowActions({
+                id: `cat-dt-strip-card-${r.id}`,
+                label: `Actions for ${r.name}`,
+                items: longStripActions,
+              }),
+          }),
+        ),
+        c(
+          "A Tooltip and a Dropdown in the pinned cell: both paint above the sticky header and the next rows (#cat-dt-float)",
+          DataTable<Row>({
+            id: "cat-dt-float",
+            pinEnd: true,
+            columns: [{ key: "name", label: "Name", pinned: true }, ...wideColumns.slice(2, 5)],
+            rows,
+            rowKey: (r) => r.id,
+            rowActions: (r) =>
+              html`
+                ${Tooltip({
+                  id: `cat-dt-float-tip-${r.id}`,
+                  trigger: Button({ label: "Pause", size: "sm", variant: "ghost" }),
+                  content: "Pause this row",
+                })}${Dropdown({
+                  id: `cat-dt-float-menu-${r.id}`,
+                  trigger: "More",
+                  searchable: false,
+                  content: html`
+                    <ul class="stack">
+                      <li><a href="#${r.id}">First</a></li>
+                      <li><a href="#${r.id}">Second</a></li>
+                      <li><a href="#${r.id}">Third</a></li>
+                      <li><a href="#${r.id}">Fourth</a></li>
+                    </ul>
+                  `,
+                })}
+              `,
           }),
         ),
         c(
