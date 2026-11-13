@@ -1443,6 +1443,15 @@ checks the sprite holds every name.
   Screenshots upload on failure (`include-hidden-files: true`: `.test-output` is a dot-directory and upload-artifact v4
   skipped it, so no failed run had ever uploaded any). `deno task test` locally is still everything: build → demos →
   `test:suites` → `test:visual`.
+- **npm 12 and the JSR aliases (2026-11-13).** npm 12 (`allow-remote=none` by default) refuses a tarball whose host is
+  not the registry of the dependency's own scope (`EALLOWREMOTE`), and for an alias like
+  `"@tundralibs/rapid": "npm:@jsr/tundralibs__rapid@…"` that scope is `@tundralibs`, so `.npmrc` maps
+  `@tundralibs:registry` to npm.jsr.io as well as `@jsr`. A scope registry beats `publishConfig.registry`, which would
+  have sent `npm publish` to JSR: `package.json` `publishConfig` carries
+  `"@tundralibs:registry":
+  "https://registry.npmjs.org/"`, and `ci.yml` asserts `npm publish --dry-run` names
+  npmjs.org. Found by the weekly health run's `node-current` job (Node 27 alpha, npm 12), which failed three weeks
+  running without filing an issue because the `ci-health` label did not exist — the report step now creates it.
 - **Suites run pages side by side** (2026-10-29): `examples/tests/browser.ts` has `pool(items, fn, size)` and
   `isolatedPage(browser)` / `closeIsolated(page)`; `test-visual` (page × width renders), `test-all-pages` (every page),
   `test-layouts` (layout × band) and `test-catalogue`'s per-component render/axe/dark loop run `TEST_CONCURRENCY` lanes

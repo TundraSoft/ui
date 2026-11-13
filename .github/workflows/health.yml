@@ -226,6 +226,11 @@ jobs:
           **Failing job(s):**${failing}
           **Run:** ${RUN_URL}"
 
+          # The label has to exist before `--label` can use it: a repo
+          # without it made every report fail ("'ci-health' not found").
+          gh label create ci-health --color B60205 \
+            --description "Opened by the weekly health check or the rAPId bump" 2>/dev/null || true
+
           existing=$(gh issue list --label ci-health --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "Still failing —${failing}: ${RUN_URL}"

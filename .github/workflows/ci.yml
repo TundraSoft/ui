@@ -72,6 +72,14 @@ jobs:
           npm pack --dry-run 2>&1 | tee pack.log
           grep -q 'dist/ui.css' pack.log && grep -q 'dist/ui.js' pack.log
 
+      - name: npm publish targets npmjs.org
+        # .npmrc points the @tundralibs scope at JSR (for the aliased
+        # devDependencies), and a scope registry beats publishConfig.registry;
+        # publishConfig's "@tundralibs:registry" is what keeps the release on npm.
+        run: |
+          npm publish --dry-run 2>&1 | tee publish.log
+          grep -q 'Publishing to https://registry.npmjs.org/' publish.log
+
   audit:
     name: Dependency audit (high+)
     runs-on: ubuntu-latest

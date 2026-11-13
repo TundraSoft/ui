@@ -36,7 +36,8 @@
     "LICENSE"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "@tundralibs:registry": "https://registry.npmjs.org/"
   },
   "engines": {
     "node": ">=22"
