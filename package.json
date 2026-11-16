@@ -69,7 +69,7 @@
   },
   "devDependencies": {
     "@tundralibs/compat": "npm:@jsr/tundralibs__compat@^2.7.2",
-    "@tundralibs/rapid": "npm:@jsr/tundralibs__rapid@^0.14.0",
+    "@tundralibs/rapid": "npm:@jsr/tundralibs__rapid@^0.15.0",
     "axe-core": "4.10.2",
     "esbuild": "0.25.12",
     "postcss": "^8.5.0",
